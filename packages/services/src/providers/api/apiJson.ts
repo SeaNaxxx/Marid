@@ -1,4 +1,4 @@
-import { ApiError, type ApiClient, type ApiRequestInit } from "@zcode/shared";
+import { ApiError, type ApiClient, type ApiRequestInit } from "@marid/shared";
 
 const DIAGNOSTIC_RESPONSE_HEADER_NAMES = [
   "x-request-id",

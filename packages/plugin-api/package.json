@@ -1,12 +1,12 @@
 {
-  "name": "@zcode-dev/plugin-api",
-  "version": "1.4.0",
-  "description": "Type definitions for ZCode plugin extensions.",
+  "name": "@marid-dev/plugin-api",
+  "version": "0.1.0-marid",
+  "description": "Type definitions for Marid plugin extensions.",
   "keywords": [
     "extension",
     "plugin",
     "types",
-    "zcode"
+    "marid"
   ],
   "license": "Apache-2.0",
   "files": [

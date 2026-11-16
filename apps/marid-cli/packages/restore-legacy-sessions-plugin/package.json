@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "@marid/restore-legacy-sessions-plugin",
+  "version": "0.1.0-marid",
+  "private": true,
+  "license": "MIT",
+  "description": "Legacy Marid session restoration skills published as an official Marid plugin."
+}

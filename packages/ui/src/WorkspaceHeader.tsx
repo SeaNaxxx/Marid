@@ -1,14 +1,14 @@
 import type {
-  ZCodeProvider,
-  ZCodeTaskMeta,
-  ZCodeTaskChangeSummary,
+  MaridProvider,
+  MaridTaskMeta,
+  MaridTaskChangeSummary,
   EditorInfo,
   GitRepositorySummary,
   RemoteTarget,
   UserInfo,
-} from "@zcode/shared";
+} from "@marid/shared";
 import { useState } from "react";
-import { TID_WORKSPACE_HEADER } from "@zcode/shared/test-ids";
+import { TID_WORKSPACE_HEADER } from "@marid/shared/test-ids";
 import type { ConversationDropTargetController } from "@/v4/composer/conversationDropTarget.js";
 import { cn } from "@/components/lib/utils.js";
 import {
@@ -100,16 +100,16 @@ export function WorkspaceHeader({
   localWorkspacePath?: string;
   projectName: string;
   activeTaskTitle: string;
-  activeTaskChangeSummary?: ZCodeTaskChangeSummary | null;
+  activeTaskChangeSummary?: MaridTaskChangeSummary | null;
   hasUpdateReady: boolean;
   activeTaskId: string | null;
   user?: UserInfo | null;
   activeTraceId: string | null;
   activeSessionId: string | null;
-  activeTaskProvider: ZCodeProvider | null;
-  resolvedActiveTaskMeta?: ZCodeTaskMeta | null;
+  activeTaskProvider: MaridProvider | null;
+  resolvedActiveTaskMeta?: MaridTaskMeta | null;
   sessionLogPath: string | null;
-  nativeSessionLogProvider: ZCodeProvider | null;
+  nativeSessionLogProvider: MaridProvider | null;
   nativeSessionLogPath: string | null;
   nativeSessionLogExists: boolean;
   nativeSessionLogLoading: boolean;
@@ -137,7 +137,7 @@ export function WorkspaceHeader({
   toggleSidePaneShortcutLabel?: string;
   onReloadSession: (options?: {
     resumeTaskId?: string | null;
-    provider?: ZCodeProvider | null;
+    provider?: MaridProvider | null;
   }) => void | Promise<void>;
   reloadSessionDisabled?: boolean;
   reloadSessionPending?: boolean;

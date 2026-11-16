@@ -1,1 +1,1 @@
-export * from "@zcode/shared/conversation-telemetry/messageTelemetry";
+export * from "@marid/shared/conversation-telemetry/messageTelemetry";

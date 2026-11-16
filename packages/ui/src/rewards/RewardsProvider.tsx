@@ -7,10 +7,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { buildRewardsUrl, resolveRewardsOrigin, ZCODE_ENV } from "@zcode/shared";
+import { buildRewardsUrl, resolveRewardsOrigin, MARID_ENV } from "@marid/shared";
 import { usePlatform } from "@/hooks/usePlatform.js";
-import { useZCodeIntl } from "@/i18n/IntlProvider.js";
-import { useZCodeStore } from "@/store/StoreProvider.js";
+import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useMaridStore } from "@/store/StoreProvider.js";
 import { resolveTheme } from "@/useTheme.js";
 import { RewardsWebview } from "@/rewards/RewardsWebview.js";
 import { logger } from "@/logger.js";
@@ -26,11 +26,11 @@ export function RewardsProvider({
 }) {
   const [opened, setOpened] = useState(false);
   const platform = usePlatform();
-  const { locale } = useZCodeIntl();
-  const theme = useZCodeStore((s) => s.theme);
-  const user = useZCodeStore((s) => s.user);
-  const loginAttempt = useZCodeStore((s) => s.loginEntryAttempt);
-  const requestLogin = useZCodeStore((s) => s.requestLoginEntry);
+  const { locale } = useMaridIntl();
+  const theme = useMaridStore((s) => s.theme);
+  const user = useMaridStore((s) => s.user);
+  const loginAttempt = useMaridStore((s) => s.loginEntryAttempt);
+  const requestLogin = useMaridStore((s) => s.requestLoginEntry);
   // 登录后营销实例会重建；续接意图由窗口级 Provider 持有，不能挂在旧 controller 上。
   const pendingLogin = useRef<number | null>(null);
   const openPage = useCallback(async () => {
@@ -38,7 +38,7 @@ export function RewardsProvider({
     else
       await platform.openExternal(
         buildRewardsUrl(
-          resolveRewardsOrigin({ env: ZCODE_ENV }),
+          resolveRewardsOrigin({ env: MARID_ENV }),
           locale,
           resolveTheme(theme) === "dark" ? "zai-dark" : "zai-light",
         ),

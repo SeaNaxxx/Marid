@@ -1,13 +1,13 @@
-import type { HostQuitBlocker, HostRemoteConversationTelemetryResponse } from "@zcode/shared";
+import type { HostQuitBlocker, HostRemoteConversationTelemetryResponse } from "@marid/shared";
 import {
   createSystemCredentialCipher,
   executeCredentialCipherRequest,
-} from "@zcode/shared/credential-security";
-import { getAppConfigDir } from "@zcode/services/node";
+} from "@marid/shared/credential-security";
+import { getAppConfigDir } from "@marid/services/node";
 import { ingestToolExecResource } from "./desktopResourceTelemetry.js";
 import { bindAppControlNavigationHost } from "#src/app-control-navigation/main.js";
 import { ingestMcpResourceSamples } from "./processResourceMcpTelemetrySource.js";
-/* eslint-disable max-lines -- host process 统一处理 main↔host 生命周期、日志、ZCode Agent，拆分前先保持跨进程消息收口。 */
+/* eslint-disable max-lines -- host process 统一处理 main↔host 生命周期、日志、Marid Agent，拆分前先保持跨进程消息收口。 */
 import {
   type HostAgentProcessErrorResponse,
   type HostAgentProcessExceptionResponse,
@@ -23,21 +23,21 @@ import {
   type TaskRealtimeHostDeliveryKind,
   type WorkspacePurpose,
   CREDENTIAL_KEY_SHARE_UNAVAILABLE_ERROR_CODE,
-  formatZCodeHostProcessName,
+  formatMaridHostProcessName,
   HostMessageTypes,
   hostResponseMessageSchema,
   HostResponseTypes,
   InternalChannels,
   LAUNCH_MARKS_QUERY_KEY,
-  RUNTIME_ZCODE_DEBUG,
+  RUNTIME_MARID_DEBUG,
   serializeLaunchMarks,
-  ZCODE_DESKTOP_CONTEXT_PROMPT_ENABLED_ENV,
-} from "@zcode/shared";
+  MARID_DESKTOP_CONTEXT_PROMPT_ENABLED_ENV,
+} from "@marid/shared";
 import type {
   PluginSandboxHandle,
   PluginSandboxRegisterRequestPayload,
   PluginSandboxRegisterResultPayload,
-} from "@zcode/shared/mcp-apps";
+} from "@marid/shared/mcp-apps";
 import type { UtilityProcess as ElectronUtilityProcess, MessagePortMain } from "electron";
 import {
   app,
@@ -98,8 +98,8 @@ export interface HostInitMessage {
   }>;
   agentSpawnFallbackCwd?: string;
   remoteAssets?: RemoteAssetDirs;
-  /** Main 解析后的 ZCode Built-in Provider Config 路径；Host/Services 不感知 Electron 安装布局。 */
-  zcodeBuiltinProviderConfigFilePath: string;
+  /** Main 解析后的 Marid Built-in Provider Config 路径；Host/Services 不感知 Electron 安装布局。 */
+  maridBuiltinProviderConfigFilePath: string;
   /** Main 提前异步采集并过滤的本机 runtime 环境；只允许传给 InitLocal。 */
   runtimeProcessEnvPatch?: Record<string, string>;
 }
@@ -271,26 +271,26 @@ export function spawnHostProcess(
   });
   const glmBinaryPath = resolveBundledGlmBinaryPath();
   const execArgv = [
-    ...(RUNTIME_ZCODE_DEBUG ? [`--inspect-brk=${RUNTIME_ZCODE_DEBUG}`] : []),
+    ...(RUNTIME_MARID_DEBUG ? [`--inspect-brk=${RUNTIME_MARID_DEBUG}`] : []),
     "--no-warnings",
   ];
   const child = electronUtilityProcess.fork(hostModulePath, [], {
-    serviceName: formatZCodeHostProcessName(label),
+    serviceName: formatMaridHostProcessName(label),
     execArgv,
     env: {
       ...buildHostProcessEnv(dependencies.hostProcessLocalEnv),
       ...buildHostE2ECoverageEnv(),
-      ZCODE_PROCESS_LABEL: label,
+      MARID_PROCESS_LABEL: label,
       // macOS-only: the Computer Use Helper launcher runs inside this forked host utilityProcess, whose
-      // code-signing identity is a nested Electron helper (NOT dev.zcode.app). Publish THIS (main
-      // Electron) process's pid — which IS dev.zcode.app — so helperLauncher passes it as
+      // code-signing identity is a nested Electron helper (NOT dev.marid.app). Publish THIS (main
+      // Electron) process's pid — which IS dev.marid.app — so helperLauncher passes it as
       // `--launcher-pid` and the Helper's signature/peer verification succeeds instead of
       // health-timing out. Env-name mirror of services' LAUNCHER_PID_ENV. Not set on
       // Windows/Linux (CUA is macOS-only; nothing reads it there) to keep the host env pristine.
-      ...(process.platform === "darwin" ? { ZCODE_CUA_LAUNCHER_PID: String(process.pid) } : {}),
+      ...(process.platform === "darwin" ? { MARID_CUA_LAUNCHER_PID: String(process.pid) } : {}),
       ...(dependencies.desktopContextPromptEnabled
         ? {
-            [ZCODE_DESKTOP_CONTEXT_PROMPT_ENABLED_ENV]: dependencies.desktopContextPromptEnabled()
+            [MARID_DESKTOP_CONTEXT_PROMPT_ENABLED_ENV]: dependencies.desktopContextPromptEnabled()
               ? "1"
               : "0",
           }
@@ -353,7 +353,7 @@ export function spawnHostProcess(
       // 目标布局推导，密钥不离开 Main，也不开放对目标目录的加解密。
       const share = isAbsolute(targetBaseDir)
         ? credentialCipher.shareKeyWithCopiedCredentials(
-            join(targetBaseDir, ".zcode", "v2", "credentials.json"),
+            join(targetBaseDir, ".marid", "v2", "credentials.json"),
           )
         : Promise.reject(new Error("Data root must be absolute"));
       void share
@@ -813,7 +813,7 @@ export function disposeHostProcess(
   }
 
   // host 收到 Dispose 后需要等待 agent 进程树的 SIGTERM/SIGKILL 兜底完成。
-  // 如果 main 仍按 150/300ms 强杀 host，host 会先退出，zcode-cli/app-server 子进程就可能被 init 接管成孤儿。
+  // 如果 main 仍按 150/300ms 强杀 host，host 会先退出，marid-cli/app-server 子进程就可能被 init 接管成孤儿。
   const effectiveForceKillDelayMs = Math.max(forceKillDelayMs, 3_500);
   const killTimer = setTimeout(() => {
     disposingHostProcessTimers.delete(child);

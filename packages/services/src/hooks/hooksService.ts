@@ -7,11 +7,11 @@ import type {
   HookEvent,
   SettingsDirectoryLocation,
   SettingsDirectorySource,
-} from "@zcode/shared";
+} from "@marid/shared";
 import {
   resolveWorkspaceHookTrustIdentity,
   type WorkspaceHookTrustIdentityFs,
-} from "@zcode/shared/managed-worktree";
+} from "@marid/shared/managed-worktree";
 import {
   buildWorkspaceHookBundleSnapshot,
   createWorkspaceHookSourceInput,
@@ -21,8 +21,8 @@ import {
   type WorkspaceHookBundleSnapshotData,
   type WorkspaceHookSourceInput,
   type WorkspaceHooksConfig,
-} from "@zcode/shared/workspace-hook-discovery";
-import { parseWorkspaceHookTrustStoreContent } from "@zcode/shared/workspace-hook-trust-store-file";
+} from "@marid/shared/workspace-hook-discovery";
+import { parseWorkspaceHookTrustStoreContent } from "@marid/shared/workspace-hook-trust-store-file";
 import { createServiceLogger, type ServiceLogger } from "#src/logger/serviceLogger.js";
 import { getDataBaseDir } from "#src/paths.js";
 import type { IHooksService } from "./hooks.js";
@@ -30,9 +30,9 @@ import { updateJsonObjectFile } from "#src/fs/atomicFileUtils.js";
 import {
   fromLegacyHooksConfig,
   fromProjectSnapshot,
-  fromUserZCodeSource,
+  fromUserMaridSource,
   resolveNextRootEnabled,
-  toZCodeHooksEvents,
+  toMaridHooksEvents,
   type LegacyHooksConfig,
 } from "./workspaceHookSettingsModel.js";
 
@@ -47,7 +47,7 @@ const trustIdentityFs: WorkspaceHookTrustIdentityFs = {
 };
 
 const SETTINGS_FILE = "settings.json";
-const ZCODE_CONFIG_FILE = "config.json";
+const MARID_CONFIG_FILE = "config.json";
 const HOOK_EVENTS: readonly HookEvent[] = [
   "SessionStart",
   "UserPromptSubmit",
@@ -58,7 +58,7 @@ const HOOK_EVENTS: readonly HookEvent[] = [
   "Stop",
 ];
 
-interface ZCodeConfigFile {
+interface MaridConfigFile {
   hooks?: WorkspaceHooksConfig;
   [key: string]: unknown;
 }
@@ -70,8 +70,8 @@ function resolveUserHomeDir(): string {
 
 function getRootDir(source: SettingsDirectorySource, workspacePath?: string): string {
   const baseDir = workspacePath ?? resolveUserHomeDir();
-  if (source === "zcode") {
-    return workspacePath ? join(baseDir, ".zcode") : join(baseDir, ".zcode", "cli");
+  if (source === "marid") {
+    return workspacePath ? join(baseDir, ".marid") : join(baseDir, ".marid", "cli");
   }
   return join(baseDir, source === "agents" ? ".agents" : ".claude");
 }
@@ -79,7 +79,7 @@ function getRootDir(source: SettingsDirectorySource, workspacePath?: string): st
 function getConfigPath(source: SettingsDirectorySource, workspacePath?: string): string {
   return join(
     getRootDir(source, workspacePath),
-    source === "zcode" ? ZCODE_CONFIG_FILE : SETTINGS_FILE,
+    source === "marid" ? MARID_CONFIG_FILE : SETTINGS_FILE,
   );
 }
 
@@ -117,8 +117,8 @@ async function readJsonFile<T>(filePath: string): Promise<T | null> {
   }
 }
 
-async function readUserZCodeSource(): Promise<WorkspaceHookSourceInput | undefined> {
-  const path = getConfigPath("zcode");
+async function readUserMaridSource(): Promise<WorkspaceHookSourceInput | undefined> {
+  const path = getConfigPath("marid");
   const config = await readJsonFile<Record<string, unknown>>(path);
   const parsed = workspaceHooksConfigSchema.safeParse(config?.hooks);
   if (!parsed.success) return undefined;
@@ -170,7 +170,7 @@ async function readPersistentWorkspaceHookTrustDigests(
   workspaceIdentity: string,
   logger: ServiceLogger,
 ): Promise<{ digests: Set<string>; corrupt: boolean }> {
-  const userConfig = (await readJsonFile<Record<string, unknown>>(getConfigPath("zcode"))) ?? {};
+  const userConfig = (await readJsonFile<Record<string, unknown>>(getConfigPath("marid"))) ?? {};
   const storage = isRecord(userConfig.storage) ? userConfig.storage : {};
   const configured = typeof storage.dir === "string" ? storage.dir.trim() : "";
   const home = resolveUserHomeDir();
@@ -180,7 +180,7 @@ async function readPersistentWorkspaceHookTrustDigests(
       : isAbsolute(configured)
         ? resolve(configured)
         : resolve(home, configured)
-    : join(home, ".zcode");
+    : join(home, ".marid");
   const trustFilePath = join(storageRoot, "security", "workspace-hook-trust-v1.json");
 
   // 异步读取 + ENOENT 区分：不用 existsSync 预检——同步调用会阻塞服务
@@ -240,14 +240,14 @@ async function loadHooksImpl(
 }> {
   const workspacePath = resolve(params.workspacePath);
   if (params.scope === "user") {
-    const userSource = await readUserZCodeSource();
+    const userSource = await readUserMaridSource();
     const runtimeRoot = resolveWorkspaceHookRuntimeRoot([userSource?.hooks]);
     const hooks = [
-      ...fromUserZCodeSource({
+      ...fromUserMaridSource({
         source: userSource,
         runtimeRoot,
         workspacePath,
-        location: buildLocation("zcode"),
+        location: buildLocation("marid"),
       }),
       ...(await loadLegacyHooksFromLocation("agents")),
       ...(await loadLegacyHooksFromLocation("claude")),
@@ -264,7 +264,7 @@ async function loadHooksImpl(
   );
   const [{ sources: projectSources }, userSource] = await Promise.all([
     readWorkspaceHookProjectSources({ workingDirectory: workspacePath }),
-    readUserZCodeSource(),
+    readUserMaridSource(),
   ]);
   const runtimeRoot = resolveWorkspaceHookRuntimeRoot([
     userSource?.hooks,
@@ -288,11 +288,11 @@ async function loadHooksImpl(
     }),
     ...(await loadLegacyHooksFromLocation("agents", workspacePath)),
     ...(await loadLegacyHooksFromLocation("claude", workspacePath)),
-    ...fromUserZCodeSource({
+    ...fromUserMaridSource({
       source: userSource,
       runtimeRoot,
       workspacePath,
-      location: buildLocation("zcode"),
+      location: buildLocation("marid"),
     }),
     ...(await loadLegacyHooksFromLocation("agents")),
     ...(await loadLegacyHooksFromLocation("claude")),
@@ -310,19 +310,19 @@ async function loadHooksImpl(
  * config.json 里的 MCP、插件等其他配置会被冲掉。
  * 修法：改用 updateJsonObjectFile——文件损坏时报错不写，写前重读，只改 hooks 字段，原子替换。
  */
-async function writeZCodeHooksConfig(
+async function writeMaridHooksConfig(
   workspacePath: string | undefined,
   hooks: Hook[],
 ): Promise<void> {
-  await updateJsonObjectFile(getConfigPath("zcode", workspacePath), (current) => {
-    const existingConfig = current as ZCodeConfigFile;
+  await updateJsonObjectFile(getConfigPath("marid", workspacePath), (current) => {
+    const existingConfig = current as MaridConfigFile;
     const enabled = resolveNextRootEnabled(existingConfig.hooks?.enabled, hooks);
     return {
       ...existingConfig,
       hooks: {
         ...existingConfig.hooks,
         ...(enabled !== undefined ? { enabled } : {}),
-        events: toZCodeHooksEvents(hooks),
+        events: toMaridHooksEvents(hooks),
       },
     };
   });
@@ -334,23 +334,23 @@ async function saveHooksImpl(params: {
   scope?: "all" | "user";
   hooks: Hook[];
 }): Promise<void> {
-  const currentProjectConfigPath = resolve(params.workspacePath, ".zcode", "config.json");
+  const currentProjectConfigPath = resolve(params.workspacePath, ".marid", "config.json");
   const userHooks = params.hooks.filter(
     (hook) =>
       hook.editable !== false &&
-      (!hook.location || (hook.location.source === "zcode" && hook.location.scope === "user")),
+      (!hook.location || (hook.location.source === "marid" && hook.location.scope === "user")),
   );
   const projectHooks = params.hooks.filter(
     (hook) =>
       hook.editable !== false &&
-      hook.location?.source === "zcode" &&
+      hook.location?.source === "marid" &&
       hook.location.scope === "project" &&
       (!hook.configuredState ||
         resolve(hook.configuredState.sourcePath) === currentProjectConfigPath),
   );
-  await writeZCodeHooksConfig(undefined, userHooks);
+  await writeMaridHooksConfig(undefined, userHooks);
   if (params.scope !== "user") {
-    await writeZCodeHooksConfig(params.workspacePath, projectHooks);
+    await writeMaridHooksConfig(params.workspacePath, projectHooks);
   }
 }
 

@@ -3,11 +3,11 @@ import type {
   AppScope,
   AppSessionRef,
   AppTrustedContext,
-} from "@zcode/session-control/contracts";
-import type { ConversationInputSource } from "@zcode/shared/zcode-protocol-v4";
+} from "@marid/session-control/contracts";
+import type { ConversationInputSource } from "@marid/shared/marid-protocol-v4";
 import type { IProjectService, ProjectTree } from "#src/project/contract.js";
-import type { IZCodeTaskService } from "#src/index.js";
-import type { IZCodeAgentService, ZCodeAgentWorkspaceTarget } from "#src/zcode-agent/zcodeAgent.js";
+import type { IMaridTaskService } from "#src/index.js";
+import type { IMaridAgentService, MaridAgentWorkspaceTarget } from "#src/marid-agent/maridAgent.js";
 import type { IModelSelectionService } from "#src/model-provider/providerFacadeServices.js";
 import type { IWindowControllerService } from "#src/window-controller/windowController.js";
 
@@ -22,12 +22,12 @@ export interface AppControlCallerConnection {
 }
 
 /** 只由 Host 的活跃 CLI 连接构造；模型参数不能提供身份、权限或 bypass。 */
-export interface AppControlBinding extends ZCodeAgentWorkspaceTarget, AppControlCallerConnection {
+export interface AppControlBinding extends MaridAgentWorkspaceTarget, AppControlCallerConnection {
   callerSessionId: string;
   uiTarget?: string;
   turnId?: string;
   callId?: string;
-  trace?: import("@zcode/shared").ZCodeProtocolTrace;
+  trace?: import("@marid/shared").MaridProtocolTrace;
 }
 
 /**
@@ -86,7 +86,7 @@ export interface AppControlServiceDependencies {
   /** 只由所属 Source Server 注入 canonical 身份解析，不从路径推测远端身份。 */
   resolveWorkspaceIdentity?: (workspacePath: string) => Promise<string>;
   tasks: Pick<
-    IZCodeTaskService,
+    IMaridTaskService,
     | "getTaskMeta"
     | "listTaskList"
     | "renameTask"
@@ -94,7 +94,7 @@ export interface AppControlServiceDependencies {
     | "archiveTask"
     | "unarchiveTask"
   >;
-  agent: IZCodeAgentService;
+  agent: IMaridAgentService;
   models: Pick<IModelSelectionService, "getView">;
   controller?: Pick<IWindowControllerService, "getTaskMeta" | "listTaskList" | "mutateTask">;
   navigation?: AppControlNavigationPort;

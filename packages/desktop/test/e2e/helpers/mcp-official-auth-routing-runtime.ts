@@ -2,12 +2,12 @@ import assert from "node:assert/strict";
 import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { setTimeout as pause } from "node:timers/promises";
-import { createOfficialMcpTrustedOriginRegistry } from "@zcode/shared";
-import { createZCodeAgentService, getDataBaseDir, setDataBaseDir } from "@zcode/services/node";
+import { createOfficialMcpTrustedOriginRegistry } from "@marid/shared";
+import { createMaridAgentService, getDataBaseDir, setDataBaseDir } from "@marid/services/node";
 import {
   getTasksIndexDatabasePath,
   prepareTasksIndexStorage,
-} from "@zcode/services/storage-startup";
+} from "@marid/services/storage-startup";
 import { getE2EAppDataPaths } from "#e2e/helpers/desktop-app";
 import {
   OFFICIAL_AUTH_ROUTING_PLUGIN,
@@ -19,10 +19,10 @@ export async function runOfficialMcpRoutingRuntime(artifactDir: string): Promise
   const paths = getE2EAppDataPaths();
   const home = await mkdtemp(join(paths.homeDir, "mcp-auth-runtime-"));
   const previous = getDataBaseDir();
-  const origin = process.env.ZCODE_E2E_OFFICIAL_AUTH_ROUTING_URL;
+  const origin = process.env.MARID_E2E_OFFICIAL_AUTH_ROUTING_URL;
   assert(origin, "Missing controlled MCP origin");
   const evidenceFile = join(home, "rejected-requests.ndjson");
-  const cliRoot = join(home, ".zcode", "cli");
+  const cliRoot = join(home, ".marid", "cli");
   const workspaceA = join(home, "project-a");
   const workspaceB = join(home, "project-b");
   await Promise.all(
@@ -44,26 +44,26 @@ export async function runOfficialMcpRoutingRuntime(artifactDir: string): Promise
   const exited: number[] = [];
   try {
     await prepareTasksIndexStorage(getTasksIndexDatabasePath(), () => {});
-    const service = createZCodeAgentService({
+    const service = createMaridAgentService({
       mcpStatusIdleTimeoutMs: 1_000,
       commandResolver: ({ workspacePath }) => ({
         command: process.execPath,
         args: [
           resolve("test/e2e/fixtures/mcp/official-auth-routing-proxy.mjs"),
-          resolve("../../apps/zcode-cli/packages/cli/dist/zcode.cjs"),
+          resolve("../../apps/marid-cli/packages/cli/dist/marid.cjs"),
           evidenceFile,
           workspacePath.endsWith("plugin-workspace") ? "probe" : "passthrough",
         ],
         env: {
           HOME: home,
           USERPROFILE: home,
-          ZCODE_DATA_BASE_DIR: home,
-          ZCODE_OFFICIAL_MCP_DEV_TRUSTED_ORIGINS: origin,
+          MARID_DATA_BASE_DIR: home,
+          MARID_OFFICIAL_MCP_DEV_TRUSTED_ORIGINS: origin,
         },
       }),
       officialMcpTrustedOrigins: createOfficialMcpTrustedOriginRegistry({
         devTrustedOriginsRaw: origin,
-        resolveZCodeApiOrigin: () => "https://example.com",
+        resolveMaridApiOrigin: () => "https://example.com",
       }),
       officialMcpAuthHeadersResolver: {
         async resolveHeaders(request) {

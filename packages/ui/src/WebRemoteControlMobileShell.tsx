@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import { ArrowLeft, LoaderCircle } from "lucide-react";
-import { type WebRemoteControlMobileNavigationIntent } from "@zcode/shared";
+import { type WebRemoteControlMobileNavigationIntent } from "@marid/shared";
 import { Button } from "@/components/ui/button.js";
 import { WebRemoteControlThemeMenu } from "@/WebRemoteControlThemeMenu.js";
-import { useZCodeIntl } from "@/i18n/IntlProvider.js";
+import { useMaridIntl } from "@/i18n/IntlProvider.js";
 import { WebRemoteControlTaskViewReporter } from "@/web-remote-control/index.js";
 import type { WebRemoteControlTerminalTransportState } from "@/root/types.js";
 import type { WebRemoteControlWorkspaceSwitcherApi } from "@/root/types.js";
@@ -14,12 +14,12 @@ type WebRemoteControlMobilePage = "home" | "chat";
 function hasMobileHistoryPage(
   state: unknown,
   page: WebRemoteControlMobilePage,
-): state is { zcodeMobilePage: WebRemoteControlMobilePage } {
+): state is { maridMobilePage: WebRemoteControlMobilePage } {
   return (
     typeof state === "object" &&
     state !== null &&
-    "zcodeMobilePage" in state &&
-    state.zcodeMobilePage === page
+    "maridMobilePage" in state &&
+    state.maridMobilePage === page
   );
 }
 
@@ -34,9 +34,9 @@ function recordMobileChatHistory() {
   }
 
   if (hasMobileHistoryPage(state, "home")) {
-    window.history.replaceState({ ...state, zcodeMobilePage: "chat" }, "");
+    window.history.replaceState({ ...state, maridMobilePage: "chat" }, "");
   } else {
-    window.history.pushState({ zcodeMobilePage: "chat" }, "");
+    window.history.pushState({ maridMobilePage: "chat" }, "");
   }
 }
 
@@ -94,7 +94,7 @@ export function WebRemoteControlMobileShell({
   sidePaneContent?: ReactNode;
   webRemoteControlTerminalTransportState?: WebRemoteControlTerminalTransportState;
 }) {
-  const { intl } = useZCodeIntl();
+  const { intl } = useMaridIntl();
   const [currentPage, setCurrentPage] = useState<WebRemoteControlMobilePage>(() =>
     resolveInitialWebRemoteControlMobilePage(initialNavigationIntent),
   );
@@ -113,7 +113,7 @@ export function WebRemoteControlMobileShell({
     setCurrentPage("home");
     const state: unknown = window.history.state;
     if (hasMobileHistoryPage(state, "chat")) {
-      window.history.replaceState({ ...state, zcodeMobilePage: "home" }, "");
+      window.history.replaceState({ ...state, maridMobilePage: "home" }, "");
     }
   }, []);
 

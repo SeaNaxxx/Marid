@@ -1,5 +1,5 @@
 {
-  "name": "@zcode/model-option-map",
+  "name": "@marid/model-option-map",
   "private": true,
   "type": "module",
   "exports": {

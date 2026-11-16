@@ -1,6 +1,6 @@
 /* eslint-disable max-lines -- 测试桥只负责把统一的 19 个场景输入翻译成 V4 live fact，集中映射便于隐私审计。 */
-import type { IPlatformService } from "@zcode/shared";
-import type { ConversationTelemetryFact } from "@zcode/shared/zcode-protocol-v4";
+import type { IPlatformService } from "@marid/shared";
+import type { ConversationTelemetryFact } from "@marid/shared/marid-protocol-v4";
 import { reportAppTelemetryEvent } from "@/lib/appTelemetry.js";
 import {
   getConversationTelemetryParityScenario,
@@ -33,7 +33,7 @@ export interface ConversationTelemetryParityScenarioResult {
 
 declare global {
   interface Window {
-    __zcodeConversationTelemetryParityE2E?: {
+    __maridConversationTelemetryParityE2E?: {
       variant: "current" | "legacy";
       run(caseId: string): Promise<ConversationTelemetryParityScenarioResult>;
     };
@@ -52,10 +52,10 @@ export function installConversationTelemetryParityE2EBridge(input: {
     variant: "current" as const,
     run: (caseId: string) => runCurrentScenario(input.platform, caseId),
   };
-  window.__zcodeConversationTelemetryParityE2E = bridge;
+  window.__maridConversationTelemetryParityE2E = bridge;
   return () => {
-    if (window.__zcodeConversationTelemetryParityE2E === bridge) {
-      delete window.__zcodeConversationTelemetryParityE2E;
+    if (window.__maridConversationTelemetryParityE2E === bridge) {
+      delete window.__maridConversationTelemetryParityE2E;
     }
   };
 }

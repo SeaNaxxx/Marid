@@ -7,7 +7,7 @@ import {
   TID_SIDEBAR,
   TID_TASK_SETTINGS_BUTTON,
   testId,
-} from "@zcode/shared/test-ids";
+} from "@marid/shared/test-ids";
 import {
   DEFAULT_WORKSPACE,
   clearAppData,

@@ -1,9 +1,9 @@
-import { DesktopCommandIds } from "@zcode/shared";
-import type { UpdateStatePayload } from "@zcode/shared";
+import { DesktopCommandIds } from "@marid/shared";
+import type { UpdateStatePayload } from "@marid/shared";
 import { useCallback, useEffect, useState } from "react";
 import { useFeedbackStore } from "@/feedback/feedbackStore.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
-import { useZCodeIntl } from "@/i18n/IntlProvider.js";
+import { useMaridIntl } from "@/i18n/IntlProvider.js";
 import { createHelpMenuActionHandlers } from "@/lib/helpMenuActions.js";
 import { useShortcutCommandLabel } from "@/shortcuts/useShortcutBindings.js";
 import { logger } from "@/logger.js";
@@ -55,7 +55,7 @@ export function WindowsCaptionMenuButton({
   useWindowsCaptionSpacing?: boolean;
 }) {
   const platform = usePlatform();
-  const { intl, locale } = useZCodeIntl();
+  const { intl, locale } = useMaridIntl();
   const newTaskShortcutLabel = useShortcutCommandLabel("newTask");
   const openWorkspaceShortcutLabel = useShortcutCommandLabel("openWorkspace");
   const openFeedbackSubmit = useFeedbackStore((state) => state.openSubmit);
@@ -87,13 +87,13 @@ export function WindowsCaptionMenuButton({
   }, [platform]);
 
   const syncStdioTapDevState = useCallback(async () => {
-    if (!platform.getZCodeStdioTapDevState) {
+    if (!platform.getMaridStdioTapDevState) {
       setStdioTapDevState({ enabled: false, visible: false });
       return;
     }
 
     try {
-      const state = await platform.getZCodeStdioTapDevState();
+      const state = await platform.getMaridStdioTapDevState();
       setStdioTapDevState({ enabled: state.enabled, visible: state.visible });
     } catch (error) {
       logger.warn("[WindowsCaptionMenuButton] 同步 stdio tap 状态失败", { error });
@@ -159,7 +159,7 @@ export function WindowsCaptionMenuButton({
 
   const handleToggleStdioTapDevProxy = () => {
     void (async () => {
-      await platform.executeDesktopCommand(DesktopCommandIds.ToggleZCodeStdioTapDevProxy);
+      await platform.executeDesktopCommand(DesktopCommandIds.ToggleMaridStdioTapDevProxy);
       await syncStdioTapDevState();
     })();
   };
@@ -288,7 +288,7 @@ export function WindowsCaptionMenuButton({
               checked={stdioTapDevState.enabled}
               onCheckedChange={handleToggleStdioTapDevProxy}
             >
-              {intl.formatMessage({ id: "titleBar.menu.help.toggleZCodeStdioTap" })}
+              {intl.formatMessage({ id: "titleBar.menu.help.toggleMaridStdioTap" })}
             </DropdownMenuCheckboxItem>
             <DropdownMenuItem
               onSelect={() => handleExecuteDesktopCommand(DesktopCommandIds.ToggleDevTools)}

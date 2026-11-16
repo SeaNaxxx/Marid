@@ -1,7 +1,7 @@
 import {
   parseRemoteWorkspaceIdentity,
   type SourceServerWorkspaceHistoryEntry,
-} from "@zcode/shared";
+} from "@marid/shared";
 import type { WorkspaceTabState } from "@/store/tabStore.js";
 
 interface WorkspaceSourceResolutionOptions {

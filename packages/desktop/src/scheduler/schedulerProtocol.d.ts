@@ -1,4 +1,4 @@
-import type { ModelSelection } from "@zcode/shared";
+import type { ModelSelection } from "@marid/shared";
 /** scheduler → main */
 export type SchedulerToMainMessage =
   | {

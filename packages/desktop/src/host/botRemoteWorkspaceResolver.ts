@@ -3,8 +3,8 @@ import {
   buildServerRemoteWorkspaceIdentity,
   parseRemoteWorkspaceIdentity,
   type RemoteTarget,
-} from "@zcode/shared";
-import type { BotRemoteWorkspaceResolver } from "@zcode/services";
+} from "@marid/shared";
+import type { BotRemoteWorkspaceResolver } from "@marid/services";
 import type { SourceServerDirectory } from "./sourceServerDirectory.js";
 import type { WindowRemoteLogicalSessionSnapshot } from "./windowRemoteConnectionRegistry.js";
 

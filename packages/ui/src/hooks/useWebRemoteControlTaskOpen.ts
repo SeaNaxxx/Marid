@@ -1,8 +1,8 @@
 import type {
   WebRemoteControlMobileNavigationIntent,
   WebRemoteControlTaskTarget,
-} from "@zcode/shared";
-import { resolveWebRemoteControlWorkspaceKey } from "@zcode/shared";
+} from "@marid/shared";
+import { resolveWebRemoteControlWorkspaceKey } from "@marid/shared";
 import { logger } from "@/logger.js";
 import type { WebRemoteControlWorkspaceSwitcherApi } from "@/root/types.js";
 

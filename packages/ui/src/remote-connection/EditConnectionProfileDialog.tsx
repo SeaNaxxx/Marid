@@ -1,8 +1,8 @@
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { LoaderCircle } from "lucide-react";
-import type { ConnectionProfile, SourceServerRecord } from "@zcode/shared";
-import { DEFAULT_REMOTE_ASSET_INSTALL_MODE } from "@zcode/shared";
-import type { ISourceServerManagementService } from "@zcode/services";
+import type { ConnectionProfile, SourceServerRecord } from "@marid/shared";
+import { DEFAULT_REMOTE_ASSET_INSTALL_MODE } from "@marid/shared";
+import type { ISourceServerManagementService } from "@marid/services";
 import { Button } from "@/components/ui/button.js";
 import {
   Dialog,
@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog.js";
 import { Input } from "@/components/ui/input.js";
-import { useZCodeIntl } from "@/i18n/IntlProvider.js";
+import { useMaridIntl } from "@/i18n/IntlProvider.js";
 import { useRemoteConnectionForm } from "@/hooks/useRemoteConnectionForm.js";
 import { RemoteConnectionFields } from "@/RemoteConnectionFields.js";
 import { collectRemoteFormFieldErrors } from "@/lib/remoteConnectionWizard.js";
@@ -44,7 +44,7 @@ function EditConnectionProfileForm({
   onSaved,
   focusField,
 }: EditConnectionProfileDialogProps & { profile: ConnectionProfile }) {
-  const { intl } = useZCodeIntl();
+  const { intl } = useMaridIntl();
   const form = useRemoteConnectionForm({
     open,
     isWindowsDesktop: profile.transport === "wsl",

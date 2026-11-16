@@ -1,10 +1,10 @@
-import { IProjectService } from "@zcode/services";
+import { IProjectService } from "@marid/services";
 import {
   buildRemoteHostWorkspaceIdentity,
   buildServerRemoteWorkspaceIdentity,
   parseRemoteWorkspaceIdentity,
   remoteHostIdFromWorkspaceIdentity,
-} from "@zcode/shared";
+} from "@marid/shared";
 import type {
   AppControlDiscoverySource,
   AppControlDiscoverySourceResolverOptions,

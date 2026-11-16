@@ -2,8 +2,8 @@ import { readFile } from "node:fs/promises";
 import {
   TID_SETTINGS_DYNAMIC_WORKFLOW_MODE_ITEM,
   TID_WORKFLOWS_OPEN_SETTINGS,
-} from "@zcode/shared";
-import { TID_SETTINGS_SECTION_NAV, testId } from "@zcode/shared/test-ids";
+} from "@marid/shared";
+import { TID_SETTINGS_SECTION_NAV, testId } from "@marid/shared/test-ids";
 import {
   clearAppData,
   pinE2ELocale,

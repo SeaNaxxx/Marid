@@ -1,6 +1,6 @@
-import { buildRuntimeZCodeApiUrl, resolveZaiBusinessBaseUrl } from "@zcode/shared";
+import { buildRuntimeMaridApiUrl, resolveZaiBusinessBaseUrl } from "@marid/shared";
 
-export const ZCODE_CLIENT_SCENES_URL = buildRuntimeZCodeApiUrl(
+export const MARID_CLIENT_SCENES_URL = buildRuntimeMaridApiUrl(
   process.env,
   "/api/v1/client/scenes",
 );

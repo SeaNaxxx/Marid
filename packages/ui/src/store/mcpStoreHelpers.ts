@@ -3,16 +3,16 @@ import type {
   McpServerConfig,
   McpSource,
   NativeMcpServerRecord,
-  ZCodeMcpServer,
-} from "@zcode/shared";
+  MaridMcpServer,
+} from "@marid/shared";
 
-export const MCP_CONFIG_KEY = "zcode-mcp-config";
-export const MCP_ENABLED_STATES_KEY = "zcode-mcp-enabled-states";
-export const MCP_DELETED_PRELOAD_KEY = "zcode-mcp-deleted-preload";
+export const MCP_CONFIG_KEY = "marid-mcp-config";
+export const MCP_ENABLED_STATES_KEY = "marid-mcp-enabled-states";
+export const MCP_DELETED_PRELOAD_KEY = "marid-mcp-deleted-preload";
 
 export const DEFAULT_MCP_CONFIG: McpConfig = {
   mcp: { mcpServers: {} },
-  zcodeagentmcp: { mcpServers: {}, projects: {} },
+  maridagentmcp: { mcpServers: {}, projects: {} },
   claudeclimcp: { mcpServers: {}, projects: {} },
   geminiclimcp: { mcpServers: {}, projects: {} },
   codexclimcp: { mcpServers: {}, projects: {} },
@@ -88,7 +88,7 @@ function toIdKey(value: string): string {
 }
 
 export function makeServerId(source: McpSource, name: string, projectPath?: string, directorySource?: NonNullable<NativeMcpServerRecord["location"]>["source"]): string {
-  const sourceKey = source === "zcodeagentmcp" && directorySource && directorySource !== "zcode"
+  const sourceKey = source === "maridagentmcp" && directorySource && directorySource !== "marid"
     ? `${source}-${directorySource}`
     : source;
   return `${sourceKey}-${toIdKey(toScopeKey(projectPath))}-${toIdKey(name)}`;
@@ -99,8 +99,8 @@ export function buildServerList(
   nativeServers: NativeMcpServerRecord[],
   enabledStates: Record<string, boolean>,
   deletedPreload: Set<string>,
-  existingServers: ZCodeMcpServer[],
-): ZCodeMcpServer[] {
+  existingServers: MaridMcpServer[],
+): MaridMcpServer[] {
   const existingById = new Map(existingServers.map((s) => [s.id, s]));
 
   function makeServer(
@@ -108,12 +108,12 @@ export function buildServerList(
     name: string,
     serverConfig: McpServerConfig,
     source: McpSource,
-    scope: ZCodeMcpServer["scope"],
+    scope: MaridMcpServer["scope"],
     enabledBySource?: boolean,
     projectPath?: string,
-    file?: ZCodeMcpServer["file"],
-    location?: ZCodeMcpServer["location"],
-  ): ZCodeMcpServer {
+    file?: MaridMcpServer["file"],
+    location?: MaridMcpServer["location"],
+  ): MaridMcpServer {
     const prev = existingById.get(serverId);
     const configChanged = prev ? !isSameMcpServerConfig(prev.config, serverConfig) : true;
     return {
@@ -136,7 +136,7 @@ export function buildServerList(
     };
   }
 
-  const servers: ZCodeMcpServer[] = [];
+  const servers: MaridMcpServer[] = [];
 
   for (const server of nativeServers) {
     const serverId = makeServerId(server.source, server.name, server.projectPath, server.location?.source);
@@ -164,7 +164,7 @@ function isSameMcpServerConfig(left: McpServerConfig, right: McpServerConfig): b
   return JSON.stringify(left) === JSON.stringify(right);
 }
 
-export function getServerPriority(server: ZCodeMcpServer): number {
+export function getServerPriority(server: MaridMcpServer): number {
   if (server.scope === "workspace") return 2;
   if (server.scope === "user") return 1;
   return 0;

@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "@marid/superpowers-plugin",
+  "version": "0.1.0-marid",
+  "private": true,
+  "license": "MIT",
+  "description": "Superpowers skills and startup hooks published as an official Marid plugin."
+}

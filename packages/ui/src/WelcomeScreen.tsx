@@ -11,7 +11,7 @@ import {
   BIGMODEL_PROVIDER_ID,
   ZAI_PROVIDER_ID,
   ZAI_CN_PROVIDER_ID,
-} from "@zcode/shared";
+} from "@marid/shared";
 import {
   TID_LOGIN_REGION_SWITCH,
   TID_LOGIN_USE_API_KEY_BUTTON,
@@ -19,16 +19,16 @@ import {
   TID_OAUTH_COPY_LOGIN_LINK,
   TID_OAUTH_ERROR,
   TID_OAUTH_LOGIN_BUTTON,
-} from "@zcode/shared/test-ids";
+} from "@marid/shared/test-ids";
 import { Alert, AlertDescription } from "./components/ui/alert.js";
 import { Button } from "./components/ui/button.js";
-import { ZCodeAboutLogo } from "@/components/ui/ZCodeAboutLogo.js";
+import { MaridAboutLogo } from "@/components/ui/MaridAboutLogo.js";
 import { useOAuth } from "./hooks/useOAuth.js";
 import { usePlatform } from "./hooks/usePlatform.js";
-import { useZCodeIntl } from "./i18n/IntlProvider.js";
+import { useMaridIntl } from "./i18n/IntlProvider.js";
 import { LoginApiKeyForm } from "./login/LoginApiKeyForm.js";
 import { ThemeHeroVisual } from "./openWorkspacePageThemeHero.js";
-import { useZCodeStore } from "./store/StoreProvider.js";
+import { useMaridStore } from "./store/StoreProvider.js";
 import { DesktopOverlayWindowControls } from "@/DesktopOverlayWindowControls.js";
 import { toast } from "@/components/ui/toast.js";
 import type { useCredentialStoreRecovery } from "@/hooks/useCredentials.js";
@@ -47,7 +47,7 @@ export function CredentialStoreRecovery({
 }: {
   recovery: ReturnType<typeof useCredentialStoreRecovery>;
 }) {
-  const { intl } = useZCodeIntl();
+  const { intl } = useMaridIntl();
   const [confirming, setConfirming] = useState(false);
   const text = (id: Parameters<typeof intl.formatMessage>[0]["id"]) => intl.formatMessage({ id });
   return (
@@ -128,8 +128,8 @@ export function CredentialStoreRecovery({
   );
 }
 
-const LOGIN_TERMS_URL = "https://zcode.z.ai/terms";
-const LOGIN_PRIVACY_URL = "https://zcode.z.ai/privacy";
+const LOGIN_TERMS_URL = "https://marid.z.ai/terms";
+const LOGIN_PRIVACY_URL = "https://marid.z.ai/privacy";
 
 interface WelcomeScreenProps {
   onComplete: (reason: LoginCompleteReason) => void | Promise<void>;
@@ -146,7 +146,7 @@ export function resolveLoginRegionForLocale(locale: string): SingleLoginRegion {
 }
 
 export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
-  const { intl } = useZCodeIntl();
+  const { intl } = useMaridIntl();
   const platform = usePlatform();
   return (
     <main className="relative h-full min-h-dvh overflow-hidden bg-background text-foreground">
@@ -216,7 +216,7 @@ export function shouldCompleteLoginFromExistingUser(params: {
 }
 
 export function LoginPanel({ active, onComplete }: LoginPanelProps) {
-  const { intl, locale, setLocalePreference } = useZCodeIntl();
+  const { intl, locale, setLocalePreference } = useMaridIntl();
   const {
     startLogin,
     cancel,
@@ -229,14 +229,14 @@ export function LoginPanel({ active, onComplete }: LoginPanelProps) {
     authorizeUrl,
     refreshProviders,
   } = useOAuth();
-  const user = useZCodeStore((s) => s.user);
-  const oauthError = useZCodeStore((s) => s.oauthError);
-  const setOAuthError = useZCodeStore((s) => s.setOAuthError);
-  const oauthSuccessSeq = useZCodeStore((s) => s.oauthSuccessSeq);
-  const lastOAuthSuccessProvider = useZCodeStore((s) => s.lastOAuthSuccessProvider);
-  const loginEntryRequest = useZCodeStore((s) => s.loginEntryRequest);
-  const clearLoginEntryRequest = useZCodeStore((s) => s.clearLoginEntryRequest);
-  const markLoginEntryAttemptStatus = useZCodeStore((s) => s.markLoginEntryAttemptStatus);
+  const user = useMaridStore((s) => s.user);
+  const oauthError = useMaridStore((s) => s.oauthError);
+  const setOAuthError = useMaridStore((s) => s.setOAuthError);
+  const oauthSuccessSeq = useMaridStore((s) => s.oauthSuccessSeq);
+  const lastOAuthSuccessProvider = useMaridStore((s) => s.lastOAuthSuccessProvider);
+  const loginEntryRequest = useMaridStore((s) => s.loginEntryRequest);
+  const clearLoginEntryRequest = useMaridStore((s) => s.clearLoginEntryRequest);
+  const markLoginEntryAttemptStatus = useMaridStore((s) => s.markLoginEntryAttemptStatus);
   const [loginMode, setLoginMode] = useState<"providers" | "apiKey">("providers");
   const [loginRegion, setLoginRegion] = useState<SingleLoginRegion>(() =>
     resolveLoginRegionForLocale(locale),
@@ -682,10 +682,10 @@ function LoginPanelLogo() {
     // 登录 logo 壳是固定深色底，边框不能跟随浅色主题 token，否则浅色主题下边框过重。
     <div
       className="relative flex size-16 items-center justify-center rounded-2xl bg-[linear-gradient(180deg,#000000_0%,#151718_100%)] text-[#ffffff] shadow-lg/20 before:pointer-events-none before:absolute before:inset-0 before:rounded-2xl before:border before:border-[rgba(255,255,255,0.1)]"
-      aria-label="ZCode"
+      aria-label="Marid"
       role="img"
     >
-      <ZCodeAboutLogo className="h-auto w-10" />
+      <MaridAboutLogo className="h-auto w-10" />
     </div>
   );
 }

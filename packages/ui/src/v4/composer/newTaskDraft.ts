@@ -1,5 +1,5 @@
-import type { ComposerInitialConfig } from "@/store/zcodeSessionStoreTypes.js";
-import type { ModelSelectionView } from "@zcode/services";
+import type { ComposerInitialConfig } from "@/store/maridSessionStoreTypes.js";
+import type { ModelSelectionView } from "@marid/services";
 import { readComposerRecent, resolveDraftInitialModelSelection } from "@/lib/composerRecent.js";
 import {
   readV4ComposerDraft,

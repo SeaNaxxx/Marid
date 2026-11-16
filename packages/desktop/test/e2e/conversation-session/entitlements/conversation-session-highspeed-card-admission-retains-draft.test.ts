@@ -1,4 +1,4 @@
-import { TID_CHAT_ERROR_BANNER, TID_CHAT_MODEL_SELECT_TRIGGER } from "@zcode/shared/test-ids";
+import { TID_CHAT_ERROR_BANNER, TID_CHAT_MODEL_SELECT_TRIGGER } from "@marid/shared/test-ids";
 import { clearAppData } from "#e2e/helpers/desktop-app";
 import {
   prepareHighspeedDrawWorkspace,

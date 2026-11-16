@@ -1,9 +1,9 @@
 import { cn } from "../lib/utils.js";
 import { LoaderCircle } from "lucide-react";
-import { useZCodeIntl } from "@/i18n/IntlProvider.js";
+import { useMaridIntl } from "@/i18n/IntlProvider.js";
 
 function Spinner({ className, ...props }: React.ComponentProps<"svg">) {
-  const { intl } = useZCodeIntl();
+  const { intl } = useMaridIntl();
   return (
     <LoaderCircle
       role="status"

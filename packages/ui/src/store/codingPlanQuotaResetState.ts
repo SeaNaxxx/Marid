@@ -1,5 +1,5 @@
-import type { BroadcastClaimLease, BroadcastMessage, IBroadcastService } from "@zcode/services";
-import type { CodingPlanResetType } from "@zcode/shared";
+import type { BroadcastClaimLease, BroadcastMessage, IBroadcastService } from "@marid/services";
+import type { CodingPlanResetType } from "@marid/shared";
 import type {
   CodingPlanQuotaResetUiEntries,
   CodingPlanQuotaResetUiEntry,

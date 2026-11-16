@@ -1,5 +1,5 @@
-import type { Event } from "@zcode/rpc";
-import { ServiceChannels } from "@zcode/shared";
+import type { Event } from "@marid/rpc";
+import { ServiceChannels } from "@marid/shared";
 import type {
   ContributionMessage,
   ExecuteCommandInput,
@@ -12,7 +12,7 @@ import type {
   MentionItemsResult,
   ProvideMentionItemsInput,
   WorkbenchReport,
-} from "@zcode/shared/extension-host";
+} from "@marid/shared/extension-host";
 import { createServiceDescriptor } from "#src/descriptors.js";
 
 /**

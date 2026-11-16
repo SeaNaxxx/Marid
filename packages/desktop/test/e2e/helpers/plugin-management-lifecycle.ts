@@ -3,19 +3,19 @@ import { existsSync } from "node:fs";
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import {
-  type ZCodePluginsInstallResult,
-  type ZCodePluginsListResult,
-  type ZCodePluginsMarketplaceMutationResult,
-  type ZCodePluginsOverviewResult,
-  type ZCodePluginsReferenceCatalogResult,
-} from "@zcode/shared";
+  type MaridPluginsInstallResult,
+  type MaridPluginsListResult,
+  type MaridPluginsMarketplaceMutationResult,
+  type MaridPluginsOverviewResult,
+  type MaridPluginsReferenceCatalogResult,
+} from "@marid/shared";
 import {
   TID_PLUGIN_STORE_BROWSE,
   TID_SETTINGS_PAGE,
   TID_SETTINGS_SECTION_NAV,
   TID_TASK_SETTINGS_BUTTON,
   testId,
-} from "@zcode/shared/test-ids";
+} from "@marid/shared/test-ids";
 import {
   DEFAULT_WORKSPACE,
   clickTestIdByDom,
@@ -78,8 +78,8 @@ export function requirePluginManualReview(): void {
   const runningPendingSpec = process.argv.some((arg) =>
     arg.replaceAll("\\", "/").includes("/plugins/manual-review/"),
   );
-  if (runningPendingSpec && process.env.ZCODE_E2E_MANUAL_REVIEW !== "1") {
-    throw new Error("Plugin lifecycle pending specs require ZCODE_E2E_MANUAL_REVIEW=1");
+  if (runningPendingSpec && process.env.MARID_E2E_MANUAL_REVIEW !== "1") {
+    throw new Error("Plugin lifecycle pending specs require MARID_E2E_MANUAL_REVIEW=1");
   }
 }
 
@@ -179,7 +179,7 @@ export async function corruptLifecycleMarketplaceManifest(
 function lifecycleManagedPluginRoot(homeDir: string): string {
   return join(
     homeDir,
-    ".zcode",
+    ".marid",
     "cli",
     "plugins",
     "marketplaces",
@@ -193,7 +193,7 @@ export async function createInvalidOfficialCollisionFixture(): Promise<string> {
   const { homeDir } = getE2EAppDataPaths();
   const root = join(homeDir, "fixtures", "plugin-official-name-collision");
   await writeJson(join(root, ".claude-plugin", "marketplace.json"), {
-    name: "zcode-plugins-official",
+    name: "marid-plugins-official",
     plugins: [],
   });
   return root;
@@ -202,7 +202,7 @@ export async function createInvalidOfficialCollisionFixture(): Promise<string> {
 export async function seedInlineLifecyclePlugin(): Promise<string> {
   const { homeDir } = getE2EAppDataPaths();
   const root = join(homeDir, "fixtures", PLUGIN_INLINE_NAME);
-  await writeJson(join(root, ".zcode-plugin", "plugin.json"), {
+  await writeJson(join(root, ".marid-plugin", "plugin.json"), {
     name: PLUGIN_INLINE_NAME,
     version: "1.0.0",
     description: "E2E inline plugin lifecycle smoke fixture",
@@ -236,7 +236,7 @@ export async function seedInlineLifecyclePlugin(): Promise<string> {
     ].join("\n"),
   );
 
-  const configPath = join(homeDir, ".zcode", "cli", "config.json");
+  const configPath = join(homeDir, ".marid", "cli", "config.json");
   const config = await readJsonRecord(configPath);
   const plugins = isRecord(config.plugins) ? config.plugins : {};
   const enabledPlugins = isRecord(plugins.enabledPlugins) ? plugins.enabledPlugins : {};
@@ -352,7 +352,7 @@ export async function selectPluginSettingsScope(scope: "user" | "workspace"): Pr
           await browser.execute(() => {
             const tabStore = (
               window as typeof window & {
-                __zcodeTabStoreE2E?: {
+                __maridTabStoreE2E?: {
                   getState?: () => {
                     activeWorkspacePath?: string | null;
                     activeWorkspaceIdentity?: string | null;
@@ -360,7 +360,7 @@ export async function selectPluginSettingsScope(scope: "user" | "workspace"): Pr
                   };
                 };
               }
-            ).__zcodeTabStoreE2E;
+            ).__maridTabStoreE2E;
             const state = tabStore?.getState?.();
             return {
               activeWorkspacePath: state?.activeWorkspacePath ?? null,
@@ -887,7 +887,7 @@ export async function restartPluginLifecycleApp(): Promise<void> {
 export async function getPluginOverview(
   workspacePath = DEFAULT_WORKSPACE,
   configScope?: "user" | "workspace",
-): Promise<ZCodePluginsOverviewResult> {
+): Promise<MaridPluginsOverviewResult> {
   return callPluginTestAction("getPluginsOverview", {
     workspacePath,
     ...(configScope ? { configScope } : {}),
@@ -897,7 +897,7 @@ export async function getPluginOverview(
 export async function addMarketplaceSourceThroughAgent(
   source: string,
   workspacePath = DEFAULT_WORKSPACE,
-): Promise<ZCodePluginsMarketplaceMutationResult> {
+): Promise<MaridPluginsMarketplaceMutationResult> {
   return callPluginTestAction("addPluginMarketplace", {
     source,
     workspacePath,
@@ -907,7 +907,7 @@ export async function addMarketplaceSourceThroughAgent(
 export async function updateMarketplaceThroughAgent(
   marketplace: string,
   workspacePath = DEFAULT_WORKSPACE,
-): Promise<ZCodePluginsMarketplaceMutationResult> {
+): Promise<MaridPluginsMarketplaceMutationResult> {
   return callPluginTestAction("updatePluginMarketplace", {
     marketplace,
     workspacePath,
@@ -918,7 +918,7 @@ export async function installMarketplacePluginThroughAgent(
   pluginName: string,
   marketplace: string,
   workspacePath = DEFAULT_WORKSPACE,
-): Promise<ZCodePluginsInstallResult> {
+): Promise<MaridPluginsInstallResult> {
   return callPluginTestAction("installPlugin", {
     marketplace,
     pluginName,
@@ -931,7 +931,7 @@ export async function getPluginList(
   workspacePath = DEFAULT_WORKSPACE,
   workspaceIdentity?: string,
   configScope?: "user" | "workspace",
-): Promise<ZCodePluginsListResult> {
+): Promise<MaridPluginsListResult> {
   return callPluginTestAction("listPlugins", {
     workspacePath,
     ...(workspaceIdentity ? { workspaceIdentity } : {}),
@@ -945,7 +945,7 @@ export async function getPluginReferenceCatalog(
     workspaceIdentity?: string;
     workspacePath?: string;
   } = {},
-): Promise<ZCodePluginsReferenceCatalogResult> {
+): Promise<MaridPluginsReferenceCatalogResult> {
   return callPluginTestAction("getPluginReferenceCatalog", {
     workspacePath: options.workspacePath ?? DEFAULT_WORKSPACE,
     ...(options.workspaceIdentity ? { workspaceIdentity: options.workspaceIdentity } : {}),
@@ -954,7 +954,7 @@ export async function getPluginReferenceCatalog(
 }
 
 export async function waitUntilPluginOverview(
-  predicate: (overview: ZCodePluginsOverviewResult) => boolean,
+  predicate: (overview: MaridPluginsOverviewResult) => boolean,
   timeoutMsg: string,
   timeout = 30000,
 ): Promise<void> {
@@ -965,11 +965,11 @@ export async function waitUntilPluginOverview(
 }
 
 export async function waitUntilPluginList(
-  predicate: (list: ZCodePluginsListResult) => boolean,
+  predicate: (list: MaridPluginsListResult) => boolean,
   timeoutMsg: string,
   timeout = 30000,
 ): Promise<void> {
-  let latest: ZCodePluginsListResult | undefined;
+  let latest: MaridPluginsListResult | undefined;
   try {
     await browser.waitUntil(
       async () => {
@@ -991,7 +991,7 @@ export async function waitUntilPluginList(
 
 export async function readPluginConfigOptions(): Promise<Record<string, unknown>> {
   const config = await readJsonRecord(
-    join(getE2EAppDataPaths().homeDir, ".zcode", "cli", "config.json"),
+    join(getE2EAppDataPaths().homeDir, ".marid", "cli", "config.json"),
   );
   const plugins = isRecord(config.plugins) ? config.plugins : {};
   const options = isRecord(plugins.options) ? plugins.options : {};
@@ -999,7 +999,7 @@ export async function readPluginConfigOptions(): Promise<Record<string, unknown>
 }
 
 export function pluginStoragePath(...segments: string[]): string {
-  return join(getE2EAppDataPaths().homeDir, ".zcode", "cli", "plugins", ...segments);
+  return join(getE2EAppDataPaths().homeDir, ".marid", "cli", "plugins", ...segments);
 }
 
 export function pluginDataPath(pluginId: string): string {
@@ -1115,11 +1115,11 @@ async function writeLifecyclePlugin(
   version: string,
   withUi = false,
 ): Promise<void> {
-  await writeJson(join(pluginRoot, ".zcode-plugin", "plugin.json"), {
+  await writeJson(join(pluginRoot, ".marid-plugin", "plugin.json"), {
     name: PLUGIN_LIFECYCLE_NAME,
     version,
     description: `E2E plugin management lifecycle fixture ${version}`,
-    author: { name: "ZCode E2E" },
+    author: { name: "Marid E2E" },
     homepage: "https://example.com/e2e-plugin-lifecycle",
     commands: "commands",
     agents: "agents",
@@ -1129,7 +1129,7 @@ async function writeLifecyclePlugin(
       lifecycle: {
         type: "stdio",
         command: "node",
-        args: ["${ZCODE_PLUGIN_ROOT}/server.mjs", version],
+        args: ["${MARID_PLUGIN_ROOT}/server.mjs", version],
       },
     },
     ...(withUi
@@ -1201,7 +1201,7 @@ async function writeSimplePlugin(
   index: number,
   version = "1.0.0",
 ): Promise<void> {
-  await writeJson(join(pluginRoot, ".zcode-plugin", "plugin.json"), {
+  await writeJson(join(pluginRoot, ".marid-plugin", "plugin.json"), {
     name: `e2e-lifecycle-extra-${index}`,
     version,
     description: `E2E lifecycle category expansion plugin ${index}`,
@@ -1236,7 +1236,7 @@ async function writeMarketplaceManifest(marketplaceRoot: string, version: string
         description: `Deterministic plugin lifecycle fixture ${version}`,
         description_i18n: { "zh-CN": `确定性插件生命周期测试 ${version}` },
         category: "productivity",
-        author: { name: "ZCode E2E", url: "https://example.com" },
+        author: { name: "Marid E2E", url: "https://example.com" },
         homepage: "https://example.com/e2e-plugin-lifecycle",
         privacyPolicy: "https://example.com/privacy",
         termsOfService: "https://example.com/terms",
@@ -1250,7 +1250,7 @@ async function writeMarketplaceManifest(marketplaceRoot: string, version: string
 
 function buildDependencyFreeMcpServer(version: string, withUi = false): string {
   const html =
-    '<!doctype html><html><body><h1 id="market-ui-ready">Connecting</h1><script>window.zcode.ready().then(() => { document.getElementById("market-ui-ready").textContent = "PLUGIN_MARKET_UI_READY"; });</script></body></html>';
+    '<!doctype html><html><body><h1 id="market-ui-ready">Connecting</h1><script>window.marid.ready().then(() => { document.getElementById("market-ui-ready").textContent = "PLUGIN_MARKET_UI_READY"; });</script></body></html>';
   return `#!/usr/bin/env node
 import readline from "node:readline";
 const version = process.argv[2] || ${JSON.stringify(version)};

@@ -47,15 +47,15 @@ export async function installAndStartRemoteDaemon(
       "set -eu",
       ...(options.nodeOptions
         ? [
-            `"$HOME/.zcode/server/bin/zcode" stop --wait --server-root "$HOME/.zcode/server" --json >/dev/null`,
+            `"$HOME/.marid/server/bin/marid" stop --wait --server-root "$HOME/.marid/server" --json >/dev/null`,
           ]
         : []),
-      `${options.nodeOptions ? `NODE_OPTIONS='${options.nodeOptions}' ` : ""}ZCODE_SERVER_SKIP_SERVICE_REGISTRATION=1 "$HOME/.zcode/server/bin/zcode" serve --daemon --server-root "$HOME/.zcode/server" --json >/dev/null`,
+      `${options.nodeOptions ? `NODE_OPTIONS='${options.nodeOptions}' ` : ""}MARID_SERVER_SKIP_SERVICE_REGISTRATION=1 "$HOME/.marid/server/bin/marid" serve --daemon --server-root "$HOME/.marid/server" --json >/dev/null`,
     ].join("; "),
   );
 }
 
-/** 用 Desktop 将要安装的同一份 archive 安装到远端 `~/.zcode/server`，不启动 daemon。 */
+/** 用 Desktop 将要安装的同一份 archive 安装到远端 `~/.marid/server`，不启动 daemon。 */
 export async function installRemoteServerArchive(
   container: string,
   account: RemoteAccount,
@@ -67,9 +67,9 @@ export async function installRemoteServerArchive(
     options.desktopRoot,
     "mock-cdn/releases",
     options.appVersion,
-    `zcode-server-${target}.tar.gz`,
+    `marid-server-${target}.tar.gz`,
   );
-  const remoteArchive = `/tmp/e2e-zcode-server-${account.user}.tar.gz`;
+  const remoteArchive = `/tmp/e2e-marid-server-${account.user}.tar.gz`;
   await execFileAsync("docker", ["cp", archive, `${container}:${remoteArchive}`], {
     maxBuffer: 16 * 1024 * 1024,
   });
@@ -81,12 +81,12 @@ export async function installRemoteServerArchive(
     account,
     [
       "set -eu",
-      'b="$HOME/.zcode/server/.e2e-bootstrap"',
+      'b="$HOME/.marid/server/.e2e-bootstrap"',
       'rm -rf "$b"',
       'mkdir -p "$b"',
       `tar -xzf ${remoteArchive} -C "$b" --strip-components=1`,
       // WSL/Docker 的 daemon 不注册 OS service，与 Desktop 的 Docker transport 一致。
-      `ZCODE_SERVER_SKIP_SERVICE_REGISTRATION=1 "$b/bin/zcode" update --from-archive ${remoteArchive} --server-root "$HOME/.zcode/server" --json >/dev/null`,
+      `MARID_SERVER_SKIP_SERVICE_REGISTRATION=1 "$b/bin/marid" update --from-archive ${remoteArchive} --server-root "$HOME/.marid/server" --json >/dev/null`,
       `rm -rf "$b" ${remoteArchive}`,
     ].join("; "),
   );
@@ -99,7 +99,7 @@ export async function readRemoteDaemonFiles(
   const read = async (name: string): Promise<Record<string, unknown> | null> => {
     try {
       return JSON.parse(
-        await shAs(container, account, `cat "$HOME/.zcode/server/run/${name}"`),
+        await shAs(container, account, `cat "$HOME/.marid/server/run/${name}"`),
       ) as Record<string, unknown>;
     } catch {
       return null;
@@ -160,7 +160,7 @@ export async function pointStaleDaemonFilesAt(
   pids: { lockPid: number; statusPid: number; lockIdentity?: string },
 ): Promise<void> {
   const replacePid = (file: string, pid: number) =>
-    `sed -i -E '0,/"pid"[[:space:]]*:[[:space:]]*[0-9]+/s//"pid":${pid}/' "$HOME/.zcode/server/run/${file}"`;
+    `sed -i -E '0,/"pid"[[:space:]]*:[[:space:]]*[0-9]+/s//"pid":${pid}/' "$HOME/.marid/server/run/${file}"`;
   await shAs(
     container,
     account,
@@ -170,7 +170,7 @@ export async function pointStaleDaemonFilesAt(
       replacePid("status.json", pids.statusPid),
       ...(pids.lockIdentity
         ? [
-            `sed -i -E 's/"processIdentity":"[^"]*"/"processIdentity":"${pids.lockIdentity}"/' "$HOME/.zcode/server/run/server.lock"`,
+            `sed -i -E 's/"processIdentity":"[^"]*"/"processIdentity":"${pids.lockIdentity}"/' "$HOME/.marid/server/run/server.lock"`,
           ]
         : []),
     ].join("; "),

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { IProjectService, ProjectTree } from "../src/project/contract.js";
-import type { WindowHostControllerTaskRow } from "@zcode/shared/zcode-protocol-v4";
+import type { WindowHostControllerTaskRow } from "@marid/shared/marid-protocol-v4";
 import {
   buildPendingInteractionSignature,
   createWebRemoteProjectTreeActivityBridge,

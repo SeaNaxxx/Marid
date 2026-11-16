@@ -1,6 +1,6 @@
-import { BufferReader, BufferWriter, deserialize, serialize, VSBuffer } from "@zcode/rpc";
-import { ISourceServerManagementService } from "@zcode/services";
-import type { RemoteTarget } from "@zcode/shared";
+import { BufferReader, BufferWriter, deserialize, serialize, VSBuffer } from "@marid/rpc";
+import { ISourceServerManagementService } from "@marid/services";
+import type { RemoteTarget } from "@marid/shared";
 
 const OPERATION_LOGS_REQUEST = -8311;
 
@@ -56,9 +56,9 @@ export async function connectDuringNextSourceUpdate(input: {
         probe.updatingSeen = true;
         const bridge = (
           window as unknown as {
-            zcode: { connectRemote(target: unknown, requestId: string): Promise<unknown> };
+            marid: { connectRemote(target: unknown, requestId: string): Promise<unknown> };
           }
-        ).zcode;
+        ).marid;
         void bridge.connectRemote(target, `e2e-update-inflight-${Date.now()}`).then(
           (result) => {
             probe.connectResult = result;

@@ -1,4 +1,4 @@
-import { resolveWorkspaceStateKey } from "@/store/zcodeSessionStoreSelectors.js";
+import { resolveWorkspaceStateKey } from "@/store/maridSessionStoreSelectors.js";
 
 interface PendingModeSwitchGuard {
   taskId: string;

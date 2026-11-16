@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "@marid/skill-creator-plugin",
+  "version": "0.1.0-marid",
+  "private": true,
+  "license": "MIT",
+  "description": "Built-in skill-creator skills published as an official Marid plugin."
+}

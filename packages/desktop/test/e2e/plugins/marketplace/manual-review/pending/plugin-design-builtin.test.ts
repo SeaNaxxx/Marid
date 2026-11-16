@@ -4,7 +4,7 @@ import {
   TID_BROWSER_ELEMENT_PICKER_BUTTON,
   TID_CONFIRM_DIALOG_CONFIRM,
   TID_SIDE_PANE_TOGGLE,
-} from "@zcode/shared/test-ids";
+} from "@marid/shared/test-ids";
 import { clearAppData, clickTestIdByDom, DEFAULT_WORKSPACE } from "#e2e/helpers/desktop-app";
 import { startDraftFromProject } from "#e2e/helpers/project-sidebar";
 import { prepareV4ConversationE2E } from "#e2e/helpers/v4-conversation";
@@ -29,7 +29,7 @@ import {
   waitForPluginControl,
 } from "#e2e/helpers/plugin-management-lifecycle";
 
-const DESIGN_ID = "design@zcode-plugins-official";
+const DESIGN_ID = "design@marid-plugins-official";
 const DIALOG = '[data-testid="browser-design-plugin-required"]';
 let server: Server | null = null;
 let origin = "";
@@ -39,7 +39,7 @@ describe("PLM-DESIGN-001 Design 默认关闭与选择元素安装引导", () => 
     ({ server, origin } = await startFixtureServer((_request, response) => {
       response.setHeader("content-type", "text/html; charset=utf-8");
       response.end(
-        '<!doctype html><html data-zcode-design><title>E2E Design gate</title><body><button id="target">E2E_DESIGN_TARGET</button></body></html>',
+        '<!doctype html><html data-marid-design><title>E2E Design gate</title><body><button id="target">E2E_DESIGN_TARGET</button></body></html>',
       );
     }));
   });
@@ -109,7 +109,7 @@ describe("PLM-DESIGN-001 Design 默认关闭与选择元素安装引导", () => 
     await clickPluginControl("plugin-store-card", { pluginId: DESIGN_ID });
     await setPluginEnabledThroughUi(DESIGN_ID, false);
     await browser.waitUntil(
-      async () => (await guestEval(origin, "typeof window.__zcodeDesignRuntime")) === "undefined",
+      async () => (await guestEval(origin, "typeof window.__maridDesignRuntime")) === "undefined",
       { timeout: 10_000, timeoutMsg: "停用后原页面的设计运行时应卸下" },
     );
   });

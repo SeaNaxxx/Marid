@@ -10,13 +10,13 @@ import { ChatPromptActionMenu } from "@/prompt-editor/ChatPromptActionMenu.js";
 import type { LexicalChatInputHandle } from "@/LexicalChatInput.js";
 import { ServiceProvider } from "@/hooks/useServices.js";
 import { StoreContext } from "@/store/StoreProvider.js";
-import { createZCodeStore } from "@/store/index.js";
-import { ZCodeIntlProvider } from "@/i18n/IntlProvider.js";
+import { createMaridStore } from "@/store/index.js";
+import { MaridIntlProvider } from "@/i18n/IntlProvider.js";
 import { TooltipProvider } from "@/components/ui/tooltip.js";
-import type { IBroadcastService, IServiceAccessor } from "@zcode/services";
+import type { IBroadcastService, IServiceAccessor } from "@marid/services";
 import "@/styles.css";
 const params = new URLSearchParams(location.search);
-const store = createZCodeStore({
+const store = createMaridStore({
   send: async () => {},
   onMessage: () => ({ dispose() {} }),
 } as unknown as IBroadcastService);
@@ -30,7 +30,7 @@ const services = {
       return response.json();
     },
   },
-  zcodeAgentService: { onAgentRuntimeRestarted: () => ({ dispose() {} }) },
+  maridAgentService: { onAgentRuntimeRestarted: () => ({ dispose() {} }) },
   clientConfigService: {
     getSnapshot: async () => {
       const response = await fetch("/order");
@@ -82,7 +82,7 @@ function Fixture() {
             workspacePath="/fixture"
             workspaceIdentity="ssh:fixture"
             sessionId={sessionId}
-            provider="zcode"
+            provider="marid"
             container={container}
           />
         </LexicalComposer>
@@ -102,11 +102,11 @@ function Fixture() {
 createRoot(document.getElementById("root")!).render(
   <ServiceProvider services={services}>
     <StoreContext.Provider value={store}>
-      <ZCodeIntlProvider initialLocale={params.get("locale") === "zh-CN" ? "zh-CN" : "en-US"}>
+      <MaridIntlProvider initialLocale={params.get("locale") === "zh-CN" ? "zh-CN" : "en-US"}>
         <TooltipProvider>
           <Fixture />
         </TooltipProvider>
-      </ZCodeIntlProvider>
+      </MaridIntlProvider>
     </StoreContext.Provider>
   </ServiceProvider>,
 );

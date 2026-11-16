@@ -9,10 +9,10 @@ import type {
   ConversationShareRecord,
   ConversationShareTtlOptions,
   Locale,
-} from "@zcode/shared";
-import { ServiceChannels } from "@zcode/shared";
-import type { WireConversationRow } from "@zcode/shared/zcode-protocol-v4";
-import { Event as RpcEvent, type Event } from "@zcode/rpc";
+} from "@marid/shared";
+import { ServiceChannels } from "@marid/shared";
+import type { WireConversationRow } from "@marid/shared/marid-protocol-v4";
+import { Event as RpcEvent, type Event } from "@marid/rpc";
 
 import { createServiceDescriptor } from "../descriptors.js";
 import type { ConversationShareClientErrorKind } from "./conversationShareHttpClient.js";

@@ -1,7 +1,7 @@
 /* eslint-disable max-lines -- 网络指标采集/聚合/ARMS 上报 */
 import armsRum from "@arms/rum-electron";
-import { mapZCodeEnvToArmsRumEnv } from "@zcode/shared";
-import type { NetworkObservation } from "@zcode/rpc";
+import { mapMaridEnvToArmsRumEnv } from "@marid/shared";
+import type { NetworkObservation } from "@marid/rpc";
 import {
   flushInterfaceNetworkStats,
   ingestArmsApiEvent,
@@ -23,7 +23,7 @@ interface NetworkGlobalContext {
   deviceMid: string;
   platform: NodeJS.Platform;
   appVersion: string;
-  armsEnv: ReturnType<typeof mapZCodeEnvToArmsRumEnv>;
+  armsEnv: ReturnType<typeof mapMaridEnvToArmsRumEnv>;
 }
 
 let globalContext: NetworkGlobalContext | null = null;

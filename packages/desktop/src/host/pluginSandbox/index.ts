@@ -1,8 +1,8 @@
-import { HostResponseTypes } from "@zcode/shared";
+import { HostResponseTypes } from "@marid/shared";
 import type {
   PluginSandboxHandle,
   PluginSandboxRegisterRequestPayload,
-} from "@zcode/shared/mcp-apps";
+} from "@marid/shared/mcp-apps";
 import { randomUUID } from "node:crypto";
 import type { PluginSandboxRegistrationBridge } from "./contract.js";
 

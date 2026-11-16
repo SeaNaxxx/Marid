@@ -1,5 +1,5 @@
-import { MessagePortProtocol, ChannelClient } from "@zcode/rpc";
-import type { IServiceAccessor } from "@zcode/services";
+import { MessagePortProtocol, ChannelClient } from "@marid/rpc";
+import type { IServiceAccessor } from "@marid/services";
 import { RemoteServiceAccess } from "./remoteServiceAccess.js";
 import { isRendererProductionBuild } from "./rendererLoggingEnv.js";
 

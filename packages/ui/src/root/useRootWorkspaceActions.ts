@@ -8,9 +8,9 @@ import {
   type AppSettings,
   type IPlatformService,
   type UserInfo,
-  type ZCodeTaskClientMode,
-} from "@zcode/shared";
-import type { IServiceAccessor } from "@zcode/services";
+  type MaridTaskClientMode,
+} from "@marid/shared";
+import type { IServiceAccessor } from "@marid/services";
 import type {
   CreateTaskOptions,
   CreateTaskRequest,
@@ -34,8 +34,8 @@ import {
 } from "@/v4/composer/composerDraftStore.js";
 import { openFolderFromWorkspaceEntry } from "@/root/openWorkspaceFolderEntry.js";
 import { useConversationWorkspaceActions } from "@/root/useConversationWorkspaceActions.js";
-import { useZCodeSessionStore } from "@/store/zcodeSessionStore.js";
-import { notifyTaskNavigationCommitted } from "@/store/zcodeSessionStoreNavigation.js";
+import { useMaridSessionStore } from "@/store/maridSessionStore.js";
+import { notifyTaskNavigationCommitted } from "@/store/maridSessionStoreNavigation.js";
 import { type TabStore, type TabStoreState } from "@/store/tabStore.js";
 import type { RootProps } from "@/root/types.js";
 import {
@@ -108,7 +108,7 @@ export function useRootWorkspaceActions({
   openMobileProjectDraft,
   workbenchGroupClientMode = "desktop-continuous",
 }: {
-  intl: ReturnType<typeof import("@/i18n/IntlProvider.js").useZCodeIntl>["intl"];
+  intl: ReturnType<typeof import("@/i18n/IntlProvider.js").useMaridIntl>["intl"];
   platform: IPlatformService;
   services: IServiceAccessor;
   tabStoreApi: TabStore;
@@ -136,7 +136,7 @@ export function useRootWorkspaceActions({
     isCurrent?: () => boolean;
   }) => Promise<void>;
   openMobileProjectDraft?: (request: CreateTaskOptions) => Promise<void>;
-  workbenchGroupClientMode?: ZCodeTaskClientMode;
+  workbenchGroupClientMode?: MaridTaskClientMode;
 }) {
   const navigationSequence = useRef(0);
   const [workspaceActionError, setWorkspaceActionError] = useState<string | null>(null);
@@ -210,7 +210,7 @@ export function useRootWorkspaceActions({
         useWorkbenchGroupStore.getState().deactivateActiveGroup();
         usePaneLayoutStore.getState().resetToPrimaryPane();
       }
-      useZCodeSessionStore
+      useMaridSessionStore
         .getState()
         .startDraft(workspacePath, options?.provider, workspaceIdentity, {
           projectId,
@@ -220,7 +220,7 @@ export function useRootWorkspaceActions({
         stageV4ComposerDraftAttachments(
           workspacePath,
           workspaceIdentity,
-          useZCodeSessionStore.getState().getWorkspaceState(workspacePath, workspaceIdentity)
+          useMaridSessionStore.getState().getWorkspaceState(workspacePath, workspaceIdentity)
             .draftFocusVersion,
           options.initialComposerDraft,
         );
@@ -241,7 +241,7 @@ export function useRootWorkspaceActions({
           },
           scope,
         );
-        useZCodeSessionStore
+        useMaridSessionStore
           .getState()
           .requestComposerTextInsert(workspacePath, initialPrompt, workspaceIdentity, mention);
       }
@@ -255,7 +255,7 @@ export function useRootWorkspaceActions({
       const sequence = ++navigationSequence.current;
       const originTab = tabStoreApi.getState().activeTabId;
       const originWorkspace = activeWorkspacePath
-        ? useZCodeSessionStore
+        ? useMaridSessionStore
             .getState()
             .getWorkspaceState(activeWorkspacePath, activeWorkspaceIdentity ?? undefined)
         : null;
@@ -265,7 +265,7 @@ export function useRootWorkspaceActions({
         tabStoreApi.getState().activeTabId === originTab &&
         (!activeWorkspacePath ||
           (() => {
-            const state = useZCodeSessionStore
+            const state = useMaridSessionStore
               .getState()
               .getWorkspaceState(activeWorkspacePath, activeWorkspaceIdentity ?? undefined);
             return (
@@ -326,7 +326,7 @@ export function useRootWorkspaceActions({
               remoteHostIdFromWorkspaceIdentity(newTaskTarget.workspaceIdentity) ?? undefined;
             if (!hostId) throw new Error("project.host-identity-required");
           }
-          const workspace = useZCodeSessionStore
+          const workspace = useMaridSessionStore
             .getState()
             .getWorkspaceState(
               newTaskTarget.workspacePath,
@@ -554,7 +554,7 @@ export function useRootWorkspaceActions({
       const origin = tabStoreApi.getState();
       const readOriginDraft = () =>
         origin.activeWorkspacePath
-          ? useZCodeSessionStore
+          ? useMaridSessionStore
               .getState()
               .getWorkspaceState(
                 origin.activeWorkspacePath,
@@ -757,7 +757,7 @@ export function useRootWorkspaceActions({
         activeWorkspacePath,
         activeWorkspaceIdentity ? { workspaceIdentity: activeWorkspaceIdentity } : undefined,
       );
-    const taskId = useZCodeSessionStore
+    const taskId = useMaridSessionStore
       .getState()
       .getWorkspaceState(activeWorkspacePath, activeWorkspaceIdentity ?? undefined).activeTaskId;
     if (activated && taskId) {
@@ -787,7 +787,7 @@ export function useRootWorkspaceActions({
         toast(intl.formatMessage({ id: "automations.runs.openSessionFailed" }));
         return;
       }
-      useZCodeSessionStore
+      useMaridSessionStore
         .getState()
         .setActiveTaskId(target.workspacePath, target.taskId, target.workspaceIdentity);
       notifyTaskNavigationCommitted(target);

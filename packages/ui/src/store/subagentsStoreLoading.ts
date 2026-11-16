@@ -1,5 +1,5 @@
-import type { ISubagentsService } from "@zcode/services";
-import type { ZCodeProvider } from "@zcode/shared";
+import type { ISubagentsService } from "@marid/services";
+import type { MaridProvider } from "@marid/shared";
 import { getServiceAuthorityId } from "@/store/serviceAuthorityKey.js";
 
 const inFlightAgentLoads = new Map<string, ReturnType<ISubagentsService["list"]>>();
@@ -7,7 +7,7 @@ let latestAgentLoadRequestId = 0;
 
 function getAgentLoadKey(
   workspacePath: string,
-  provider: ZCodeProvider,
+  provider: MaridProvider,
   subagentsService: ISubagentsService,
   workspaceIdentity?: string,
 ): string {
@@ -18,7 +18,7 @@ function getAgentLoadKey(
 
 export function loadAgentsOnce(
   workspacePath: string,
-  provider: ZCodeProvider,
+  provider: MaridProvider,
   subagentsService: ISubagentsService,
   workspaceIdentity?: string,
   options: { bypassCache?: boolean } = {},

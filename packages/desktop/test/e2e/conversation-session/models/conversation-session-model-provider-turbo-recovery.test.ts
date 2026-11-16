@@ -1,6 +1,6 @@
 import { skipOccupationOnboardingIfPresent } from "#e2e/helpers/occupation-onboarding";
-import { ModelConfig, ProviderConfig } from "@zcode/provider";
-import { NodePersonalProviderConfigRepository } from "@zcode/provider-node";
+import { ModelConfig, ProviderConfig } from "@marid/provider";
+import { NodePersonalProviderConfigRepository } from "@marid/provider-node";
 import { clearAppData, getE2EAppDataPaths } from "#e2e/helpers/desktop-app";
 import { refreshSeededOpenAIProvidersThroughSettings } from "#e2e/helpers/custom-openai-provider";
 import {

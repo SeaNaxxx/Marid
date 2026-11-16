@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import {
   conversationSharePreviewDataSchema,
   createConversationShareSuccessEnvelopeSchema,
-} from "@zcode/shared";
+} from "@marid/shared";
 import {
   clearAppData,
   clickTestIdByDom,
@@ -51,7 +51,7 @@ async function readPublishState() {
 
 describe(`${CASE_MARKER}: Desktop SSH 产物分享`, () => {
   const config = readSSHRuntimeConfig(CASE_MARKER);
-  const workspacePath = `${config.workspacePaths[0]}/zcode-share-${Date.now()}`;
+  const workspacePath = `${config.workspacePaths[0]}/marid-share-${Date.now()}`;
   let tunnel: ReplayTunnel | null = null;
   const facts: Record<string, unknown> = {};
 
@@ -61,7 +61,7 @@ describe(`${CASE_MARKER}: Desktop SSH 产物分享`, () => {
   });
 
   after(async () => {
-    const artifactDir = process.env.ZCODE_E2E_ARTIFACT_DIR!;
+    const artifactDir = process.env.MARID_E2E_ARTIFACT_DIR!;
     await mkdir(artifactDir, { recursive: true });
     await writeFile(resolve(artifactDir, "share-ssh.json"), JSON.stringify(facts, null, 2));
     await runSSHCommand(config, `rm -rf -- '${workspacePath}'`).catch(() => undefined);
@@ -74,7 +74,7 @@ describe(`${CASE_MARKER}: Desktop SSH 产物分享`, () => {
     // 根因：API Key 登录没有 OAuth user；假 JWT 又会触发真实控制面的 401。
     // 沿用 live-team 的显式凭据导入，WDIO 为这个独立用例固定匹配的生产控制面。
     const imported = await importLiveBigModelCredentials(CASE_MARKER);
-    const defaultWorkspace = resolve(getE2EAppDataPaths().homeDir, "ZCodeProject");
+    const defaultWorkspace = resolve(getE2EAppDataPaths().homeDir, "MaridProject");
     await mkdir(defaultWorkspace, { recursive: true });
     await seedSettings({
       providerFamilyDomain: "bigmodel",
@@ -131,13 +131,13 @@ describe(`${CASE_MARKER}: Desktop SSH 产物分享`, () => {
     await browser.waitUntil(
       async () => {
         shareUrl = await browser.electron.execute((electron) => electron.clipboard.readText());
-        return /^https:\/\/zcode\.z\.ai\/(?:cn\/)?share\//u.test(shareUrl);
+        return /^https:\/\/marid\.z\.ai\/(?:cn\/)?share\//u.test(shareUrl);
       },
       { timeout: 10_000, timeoutMsg: "没有复制到已发布的分享链接" },
     );
     const shareCode = new URL(shareUrl).pathname.split("/").filter(Boolean).at(-1)!;
     const response = await fetch(
-      `https://zcode.z.ai/api/v1/shares/${encodeURIComponent(shareCode)}/preview`,
+      `https://marid.z.ai/api/v1/shares/${encodeURIComponent(shareCode)}/preview`,
       { signal: AbortSignal.timeout(30_000) },
     );
     expect(response.status).toBe(200);

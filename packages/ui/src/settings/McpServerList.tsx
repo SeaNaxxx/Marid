@@ -1,12 +1,12 @@
-import { type McpServerStatus, type ZCodeMcpServer } from "@zcode/shared";
+import { type McpServerStatus, type MaridMcpServer } from "@marid/shared";
 import {
   TID_MCP_OPEN_AUTHORIZATION_BUTTON,
   TID_MCP_SERVER_ROW,
   testId,
-} from "@zcode/shared/test-ids";
+} from "@marid/shared/test-ids";
 import { Button } from "@/components/ui/button.js";
 import { Switch } from "@/components/ui/switch.js";
-import { useZCodeIntl } from "@/i18n/IntlProvider.js";
+import { useMaridIntl } from "@/i18n/IntlProvider.js";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
 import { settingsResourceRowInteraction } from "@/settings/settingsResourceRowInteraction.js";
 import { SettingsScopeBadge } from "@/settings/SettingsScopeBadge.js";
@@ -68,18 +68,18 @@ function McpServerItem({
   onTrust,
   hideMetadata,
 }: {
-  server: ZCodeMcpServer;
-  onEdit: (server: ZCodeMcpServer) => void;
+  server: MaridMcpServer;
+  onEdit: (server: MaridMcpServer) => void;
   onToggle: (id: string, enabled: boolean) => void;
-  onOpenAuthorization?: (server: ZCodeMcpServer) => void;
-  onTrust?: (server: ZCodeMcpServer) => void;
+  onOpenAuthorization?: (server: MaridMcpServer) => void;
+  onTrust?: (server: MaridMcpServer) => void;
   hideMetadata: boolean;
 }) {
-  const { intl } = useZCodeIntl();
+  const { intl } = useMaridIntl();
   const typeLabel = server.config.command
     ? "stdio"
     : (server.config.type ?? (server.config.url ? "http" : "?"));
-  const canEdit = !server.location || server.location.source === "zcode";
+  const canEdit = !server.location || server.location.source === "marid";
   const canOpenAuthorization = Boolean(server.authorization?.authorizationUrl);
   const openAuthorizationLabel = intl.formatMessage({
     id: "settings.mcp.oauth.openAuthorization",
@@ -217,17 +217,17 @@ export function McpServerList({
   emptyDescription,
   hideMetadata = false,
 }: {
-  servers: ZCodeMcpServer[];
+  servers: MaridMcpServer[];
   onCreate: () => void;
-  onEdit: (server: ZCodeMcpServer) => void;
+  onEdit: (server: MaridMcpServer) => void;
   onToggle: (id: string, enabled: boolean) => void;
-  onOpenAuthorization?: (server: ZCodeMcpServer) => void;
-  onTrust?: (server: ZCodeMcpServer) => void;
+  onOpenAuthorization?: (server: MaridMcpServer) => void;
+  onTrust?: (server: MaridMcpServer) => void;
   emptyTitle: string;
   emptyDescription: string;
   hideMetadata?: boolean;
 }) {
-  const { intl } = useZCodeIntl();
+  const { intl } = useMaridIntl();
 
   if (servers.length === 0) {
     return (

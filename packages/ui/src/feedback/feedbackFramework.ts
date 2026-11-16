@@ -1,11 +1,11 @@
 import {
   DEFAULT_FEEDBACK_TICKET_FRAMEWORK,
-  type ZCodeProvider,
+  type MaridProvider,
   type FeedbackTicketFramework,
-} from "@zcode/shared";
+} from "@marid/shared";
 
 export function inferFeedbackFrameworkFromAgentProvider(
-  _provider: ZCodeProvider | null | undefined,
+  _provider: MaridProvider | null | undefined,
 ): FeedbackTicketFramework {
   return DEFAULT_FEEDBACK_TICKET_FRAMEWORK;
 }

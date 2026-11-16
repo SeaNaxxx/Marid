@@ -1,7 +1,7 @@
-import type { AppSettings, FileEntry, SystemInfo, ZCodeTaskMeta } from "@zcode/shared";
+import type { AppSettings, FileEntry, SystemInfo, MaridTaskMeta } from "@marid/shared";
 import { createHash } from "node:crypto";
 import { posix, win32 } from "node:path";
-import { remoteHostIdFromWorkspaceIdentity } from "@zcode/shared";
+import { remoteHostIdFromWorkspaceIdentity } from "@marid/shared";
 import type { IProjectService, VirtualProject, ProjectTask } from "#src/project/contract.js";
 import { LEGACY_SINGLE_ROOT_PROJECT_PREFIX } from "#src/project/contract.js";
 
@@ -15,7 +15,7 @@ interface LegacyProjectReadPort {
   readTasks(input: {
     workspacePath: string;
     kind: "active" | "pinned" | "archived";
-  }): Promise<ZCodeTaskMeta[]>;
+  }): Promise<MaridTaskMeta[]>;
   ensureConversation(): Promise<string>;
   readKnownWorkspaces?(): Promise<
     readonly { workspacePath: string; workspacePurpose?: "project" | "conversation" }[]

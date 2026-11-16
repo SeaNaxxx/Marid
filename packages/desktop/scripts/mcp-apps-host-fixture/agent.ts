@@ -3,8 +3,8 @@ import { createServer, type Socket } from "node:net";
 import { createInterface } from "node:readline";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { ZCodeProtocolClient } from "../../../services/src/zcode-agent/zcodeProtocolClient.js";
-import { ZCodeStdioTransport } from "../../../services/src/zcode-agent/zcodeStdioTransport.js";
+import { MaridProtocolClient } from "../../../services/src/marid-agent/maridProtocolClient.js";
+import { MaridStdioTransport } from "../../../services/src/marid-agent/maridStdioTransport.js";
 
 export class Events<T> {
   readonly history: T[] = [];
@@ -71,19 +71,19 @@ export async function startAgent(
       // 正式回归隔离用户配置，不能读取本机 MCP、认证或把日志写入真实用户目录。
       HOME: data,
       USERPROFILE: data,
-      ZCODE_LOG_DIR: join(data, "logs"),
-      ZCODE_DATA_BASE_DIR: data,
-      ZCODE_SESSION_DB: join(data, "session.sqlite"),
-      ZCODE_STORAGE_DIR: data,
+      MARID_LOG_DIR: join(data, "logs"),
+      MARID_DATA_BASE_DIR: data,
+      MARID_SESSION_DB: join(data, "session.sqlite"),
+      MARID_STORAGE_DIR: data,
       LANG: "en_US.UTF-8",
       ...providerEnv,
     },
     stdio: ["pipe", "pipe", "pipe"],
   });
-  const transport = new ZCodeStdioTransport(child, {
+  const transport = new MaridStdioTransport(child, {
     onStderrLine: (line) => process.stderr.write(line + "\n"),
   });
-  const client = new ZCodeProtocolClient(transport, {
+  const client = new MaridProtocolClient(transport, {
     requireStorageStartup: true,
     requestTimeoutMs: 15_000,
   });
@@ -172,9 +172,9 @@ export async function startAgent(
       demo?: { serverScript: string; resourceUri: string; surface: string },
     ) {
       const pluginRoot = join(workspacePath, "editor-plugin");
-      await mkdir(join(pluginRoot, ".zcode-plugin"), { recursive: true });
+      await mkdir(join(pluginRoot, ".marid-plugin"), { recursive: true });
       await writeFile(
-        join(pluginRoot, ".zcode-plugin", "plugin.json"),
+        join(pluginRoot, ".marid-plugin", "plugin.json"),
         JSON.stringify({
           name: "background-editor",
           mcpServers: {
@@ -188,7 +188,7 @@ export async function startAgent(
         }),
       );
       await writeFile(
-        join(workspacePath, "zcode.json"),
+        join(workspacePath, "marid.json"),
         JSON.stringify({ plugins: { dirs: [pluginRoot] } }),
       );
       const workspace = { workspacePath, workspaceKey: workspacePath };

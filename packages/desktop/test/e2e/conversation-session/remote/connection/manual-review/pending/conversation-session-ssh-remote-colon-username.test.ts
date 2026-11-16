@@ -1,6 +1,6 @@
-import { ServiceChannels } from "@zcode/shared";
-import { TID_SSH_PASSWORD_INPUT } from "@zcode/shared/test-ids";
-import type { RemoteProjectDirectory } from "@zcode/services";
+import { ServiceChannels } from "@marid/shared";
+import { TID_SSH_PASSWORD_INPUT } from "@marid/shared/test-ids";
+import type { RemoteProjectDirectory } from "@marid/services";
 import {
   clearAppData,
   setInputValueByTestIdDom,

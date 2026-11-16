@@ -6,13 +6,13 @@ import { pipeline } from "node:stream/promises";
 import { ZipFile } from "yazl";
 import {
   redactFeedbackText,
-  ZCODE_VERSION,
-  ZCODE_COMMIT,
+  MARID_VERSION,
+  MARID_COMMIT,
   CLI_MEMORY_FILE_PATTERN,
   CLI_MEMORY_MAX_FILE_BYTES,
   CLI_MEMORY_MAX_FILES,
   sanitizeCliMemoryDiagnostic,
-} from "@zcode/shared";
+} from "@marid/shared";
 
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
 const MAX_TOTAL_BYTES = 32 * 1024 * 1024;
@@ -186,7 +186,7 @@ export async function createFeedbackDiagnosticArchive(options: {
   const isToday = (mtimeMs: number) => mtimeMs >= dayStart && mtimeMs < dayEnd;
   await mkdir(options.outputRootDir, { recursive: true });
   const outputDir = await mkdtemp(join(options.outputRootDir, "archive-"));
-  const path = join(outputDir, "zcode-diagnostic-logs.zip");
+  const path = join(outputDir, "marid-diagnostic-logs.zip");
   const entries: Array<{ name: string; data: Buffer }> = [];
   const skippedLogFilesByReason: Record<string, number> = {};
   const skipLogFile = (reason: string) => {
@@ -333,10 +333,10 @@ export async function createFeedbackDiagnosticArchive(options: {
     zip.addBuffer(
       Buffer.from(
         [
-          "ZCode diagnostic logs",
+          "Marid diagnostic logs",
           `timestamp: ${now.toISOString()}`,
-          `appVersion: ${ZCODE_VERSION}`,
-          `commit: ${ZCODE_COMMIT}`,
+          `appVersion: ${MARID_VERSION}`,
+          `commit: ${MARID_COMMIT}`,
           `node: ${process.version}`,
           `os: ${platform()} ${release()} (${arch()})`,
           `includedLogFiles: ${entries.length}`,

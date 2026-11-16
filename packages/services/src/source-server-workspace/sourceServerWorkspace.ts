@@ -3,8 +3,8 @@ import type {
   SourceServerResolveWorkspaceResult,
   SourceServerMigrationPathAction,
   SourceServerMigrationReport,
-} from "@zcode/shared";
-import { ServiceChannels } from "@zcode/shared";
+} from "@marid/shared";
+import { ServiceChannels } from "@marid/shared";
 import { createServiceDescriptor } from "../descriptors.js";
 
 export interface ISourceServerWorkspaceService {

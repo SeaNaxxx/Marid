@@ -1,6 +1,6 @@
 import { resolvePluginIconSource } from "@/lib/pluginIconSource.js";
-import type { ZCodePluginReferenceCatalogEntry } from "@zcode/shared";
-import type { ConversationRowsPartition } from "@zcode/shared/zcode-protocol-v4";
+import type { MaridPluginReferenceCatalogEntry } from "@marid/shared";
+import type { ConversationRowsPartition } from "@marid/shared/marid-protocol-v4";
 import { memoizeByRows, type ConversationStoreStatus } from "@/v4/conversationProjectionStore.js";
 
 export function isSessionPluginCatalogReady(
@@ -44,7 +44,7 @@ export function hasPluginReferenceRowsInPartition(partition: ConversationRowsPar
  */
 export function buildSessionPluginIconMap(
   authority: "session" | "workspace" | null,
-  entries: readonly ZCodePluginReferenceCatalogEntry[],
+  entries: readonly MaridPluginReferenceCatalogEntry[],
 ): ReadonlyMap<string, string> {
   if (authority !== "session") {
     return new Map();

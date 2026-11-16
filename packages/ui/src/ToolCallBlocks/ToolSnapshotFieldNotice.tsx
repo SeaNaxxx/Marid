@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
-import type { ZCodeTaskSnapshotToolFieldRef } from "@zcode/shared";
+import type { MaridTaskSnapshotToolFieldRef } from "@marid/shared";
 import { Button } from "@/components/ui/button.js";
-import { useZCodeIntl } from "@/i18n/IntlProvider.js";
+import { useMaridIntl } from "@/i18n/IntlProvider.js";
 
 export function ToolSnapshotFieldNotice({
   refs,
   onLoadFullToolCallFields,
 }: {
-  refs: readonly ZCodeTaskSnapshotToolFieldRef[];
+  refs: readonly MaridTaskSnapshotToolFieldRef[];
   onLoadFullToolCallFields?: () => Promise<boolean | void> | boolean | void;
 }) {
-  const { intl, locale } = useZCodeIntl();
+  const { intl, locale } = useMaridIntl();
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
   if (refs.length === 0 || !onLoadFullToolCallFields) {

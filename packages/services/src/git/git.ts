@@ -25,8 +25,8 @@ import type {
   GitWorkspaceRepositoryInfo,
   GitFileChange,
   GitSwitchBranchRequest,
-} from "@zcode/shared";
-import { ServiceChannels } from "@zcode/shared";
+} from "@marid/shared";
+import { ServiceChannels } from "@marid/shared";
 import { createServiceDescriptor } from "../descriptors.js";
 
 export interface IGitService {

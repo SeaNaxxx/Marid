@@ -4,8 +4,8 @@ import {
   type FeedbackTicketSeverity,
   type FeedbackTicketType,
   type Locale,
-} from "@zcode/shared";
-import type { IFeedbackService } from "@zcode/services";
+} from "@marid/shared";
+import type { IFeedbackService } from "@marid/services";
 import { persistFeedbackContactPreference } from "@/feedback/feedbackContactPreference.js";
 import type { FeedbackSubmitDraft } from "@/feedback/feedbackStore.js";
 import type { ScreenshotAttachmentDraft } from "@/feedback/FeedbackScreenshotPicker.js";
@@ -20,7 +20,7 @@ import {
   type FeedbackSubmissionJob,
 } from "@/feedback/feedbackSubmissionJob.js";
 
-const FEEDBACK_ZCODE_AGENT_LABEL = "ZCode Agent";
+const FEEDBACK_MARID_AGENT_LABEL = "Marid Agent";
 
 export const DEFAULT_FEEDBACK_TYPE: FeedbackTicketType = "bug";
 export const DEFAULT_FEEDBACK_SEVERITY: FeedbackTicketSeverity = "P2-中";
@@ -95,7 +95,7 @@ export async function startSimplifiedFeedbackSubmission({
       framework,
       device: {
         ...device,
-        agentProvider: FEEDBACK_ZCODE_AGENT_LABEL,
+        agentProvider: FEEDBACK_MARID_AGENT_LABEL,
         agentFramework: framework,
         ...(modelContext.model ? { agentModel: modelContext.model } : {}),
         ...(modelContext.display ? { agentModelDisplay: modelContext.display } : {}),

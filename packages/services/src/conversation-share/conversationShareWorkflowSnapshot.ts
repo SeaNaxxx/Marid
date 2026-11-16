@@ -7,19 +7,19 @@ import {
   type ShareWorkflowPayload,
   type ShareWorkflowArtifact,
   type ConversationShareCapabilities,
-} from "@zcode/shared";
+} from "@marid/shared";
 import {
   reduceWorkflowRunsState,
   type WireConversationRow,
   type ArtifactRow,
   type WorkflowRunsState,
   type ToolCallCreateWorkflowCausalityGraph,
-} from "@zcode/shared/zcode-protocol-v4";
-import type { IZCodeAgentService } from "../zcode-agent/zcodeAgent.js";
+} from "@marid/shared/marid-protocol-v4";
+import type { IMaridAgentService } from "../marid-agent/maridAgent.js";
 import type { PublishTextConversationInput } from "./conversationShare.js";
 
 export type ShareWorkflowReader = Pick<
-  IZCodeAgentService,
+  IMaridAgentService,
   | "conversationWorkflowRunsV4"
   | "conversationWorkflowRunEventsV4"
   | "conversationWorkflowRunArtifactsV4"

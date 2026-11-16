@@ -3,7 +3,7 @@ import type {
   WebRemoteControlPlatformMethod,
   WebRemoteControlPlatformMethodArgsMap,
   WebRemoteControlPlatformMethodResultMap,
-} from "@zcode/shared";
+} from "@marid/shared";
 
 export interface WebRemoteControlPlatformProxy {
   reportTelemetryEvent?: (event: RendererTelemetryEventPayload) => void;

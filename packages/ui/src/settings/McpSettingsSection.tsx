@@ -3,35 +3,35 @@
  * MCP Settings Section
  *
  * Manages MCP server configuration in the settings page.
- * Supports the unified ZCode Agent MCP source backed by settings directories.
+ * Supports the unified Marid Agent MCP source backed by settings directories.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { convertToZCodeAgentMcpServer } from "@zcode/shared";
+import { convertToMaridAgentMcpServer } from "@marid/shared";
 import {
   TID_MCP_OPEN_AUTHORIZATION_BUTTON,
   TID_PLUGIN_MCP_SERVER_ROW,
   testId,
-} from "@zcode/shared/test-ids";
+} from "@marid/shared/test-ids";
 import type {
   RemoteTarget,
   WorkspaceMcpTrustDecision,
-  ZCodeWorkspaceMcpTrustResult,
-  ZCodeAvailablePluginSummary,
-  ZCodeAgentMcpServer,
-  ZCodeMcpListMode,
-  ZCodeMcpServer,
-  ZCodeMcpServerStatusSnapshot,
-  ZCodePluginInfo,
-} from "@zcode/shared";
+  MaridWorkspaceMcpTrustResult,
+  MaridAvailablePluginSummary,
+  MaridAgentMcpServer,
+  MaridMcpListMode,
+  MaridMcpServer,
+  MaridMcpServerStatusSnapshot,
+  MaridPluginInfo,
+} from "@marid/shared";
 import {
-  isZCodeAgentMcpStatusModeUnsupportedError,
+  isMaridAgentMcpStatusModeUnsupportedError,
   type IServiceAccessor,
   type IMcpSyncService,
-} from "@zcode/services";
+} from "@marid/services";
 import { Button } from "@/components/ui/button.js";
 import { toast } from "@/components/ui/toast.js";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
-import { useZCodeIntl } from "@/i18n/IntlProvider.js";
+import { useMaridIntl } from "@/i18n/IntlProvider.js";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog.js";
 import { logger } from "@/logger.js";
 import { McpServerForm } from "@/settings/McpServerForm.js";
@@ -81,7 +81,7 @@ import { ExternalLink, Import, Plus, UploadCloud } from "lucide-react";
 import { SettingsSegmentedTabs } from "@/settings/SettingsSegmentedTabs.js";
 import { selectPluginsForScope } from "@/settings/pluginCapabilityProjection.js";
 
-const DEFAULT_MCP_SOURCE: ServerScope = "zcodeagentmcp";
+const DEFAULT_MCP_SOURCE: ServerScope = "maridagentmcp";
 const MCP_OAUTH_AUTHORIZATION_STATUS_REFRESH_MS = 1_000;
 const MCP_OAUTH_AUTHORIZATION_STATUS_REFRESH_DURATION_MS = 5 * 60_000;
 const MCP_OAUTH_AUTHORIZATION_FOLLOWUP_REFRESH_ATTEMPTS = 10;
@@ -89,7 +89,7 @@ const MCP_OAUTH_AUTHORIZATION_FOLLOWUP_REFRESH_ATTEMPTS = 10;
 export async function applyWorkspaceMcpTrustDecision(
   request: WorkspaceMcpTrustDecision,
   isCurrentTarget: () => boolean,
-  decide: (request: WorkspaceMcpTrustDecision) => Promise<ZCodeWorkspaceMcpTrustResult>,
+  decide: (request: WorkspaceMcpTrustDecision) => Promise<MaridWorkspaceMcpTrustResult>,
 ): Promise<boolean> {
   if (!isCurrentTarget()) return false;
   const result = await decide(request);
@@ -127,24 +127,24 @@ export async function refreshMcpServerStatusList({
   workspacePath,
   mcpSyncService,
 }: {
-  beginServerStatusListRefresh: (mode?: ZCodeMcpListMode) => number;
+  beginServerStatusListRefresh: (mode?: MaridMcpListMode) => number;
   markServerStatusListRefreshFailed?: (
     error: string,
     requestEpoch: number,
-    mode?: ZCodeMcpListMode,
+    mode?: MaridMcpListMode,
   ) => void;
   mergeServerStatusSnapshots: (
-    statuses: Record<string, ZCodeMcpServerStatusSnapshot>,
+    statuses: Record<string, MaridMcpServerStatusSnapshot>,
     requestEpoch: number,
-    mode?: ZCodeMcpListMode,
+    mode?: MaridMcpListMode,
   ) => void;
   getCurrentWorkspaceKey: () => string;
-  mode?: ZCodeMcpListMode;
-  mcpServers?: ZCodeAgentMcpServer[];
+  mode?: MaridMcpListMode;
+  mcpServers?: MaridAgentMcpServer[];
   requestedWorkspaceKey: string;
   workspaceIdentity?: string;
   workspacePath: string;
-  // mcp/list 收敛到 IMcpSyncService——UI 不直接触达 zcodeAgentService。
+  // mcp/list 收敛到 IMcpSyncService——UI 不直接触达 maridAgentService。
   mcpSyncService: Pick<IMcpSyncService, "listWorkspaceMcpServerStatuses">;
 }): Promise<McpServerStatusListRefreshOutcome> {
   if (!requestedWorkspaceKey || getCurrentWorkspaceKey() !== requestedWorkspaceKey) {
@@ -168,7 +168,7 @@ export async function refreshMcpServerStatusList({
     if (getCurrentWorkspaceKey() !== requestedWorkspaceKey) {
       return "stale-workspace";
     }
-    if (refreshMode === "status" && isZCodeAgentMcpStatusModeUnsupportedError(error)) {
+    if (refreshMode === "status" && isMaridAgentMcpStatusModeUnsupportedError(error)) {
       return "status-mode-unsupported";
     }
     markServerStatusListRefreshFailed?.(
@@ -181,7 +181,7 @@ export async function refreshMcpServerStatusList({
 }
 
 export interface McpOAuthAuthorizationPendingRefresh {
-  mcpServers: ZCodeAgentMcpServer[];
+  mcpServers: MaridAgentMcpServer[];
   pendingKey: string;
   workspaceKey: string;
 }
@@ -202,7 +202,7 @@ export function transitionMcpAutoStatusListRefreshKey(
 }
 
 export interface McpOAuthAuthorizationFollowupRefresh {
-  mcpServers: ZCodeAgentMcpServer[];
+  mcpServers: MaridAgentMcpServer[];
   refreshKey: string;
   workspaceKey: string;
 }
@@ -217,7 +217,7 @@ export function transitionMcpOAuthAuthorizationPendingRefresh({
 }: {
   activeWorkspaceKey: string;
   existingFollowup?: McpOAuthAuthorizationFollowupRefresh | null;
-  mcpServers: ZCodeAgentMcpServer[];
+  mcpServers: MaridAgentMcpServer[];
   now?: () => number;
   pendingKey: string;
   previous: McpOAuthAuthorizationPendingRefresh | null;
@@ -334,19 +334,19 @@ export function createMcpStatusListRefreshQueue(): McpStatusListRefreshQueue {
 }
 
 export function buildMcpOAuthAuthorizationStatusRefreshServers(
-  servers: ZCodeMcpServer[],
-  statusSnapshots: Record<string, ZCodeMcpServerStatusSnapshot> = {},
-): ZCodeAgentMcpServer[] {
+  servers: MaridMcpServer[],
+  statusSnapshots: Record<string, MaridMcpServerStatusSnapshot> = {},
+): MaridAgentMcpServer[] {
   const pendingSnapshotNames = new Set(
     Object.entries(statusSnapshots)
       .filter(([, snapshot]) => Boolean(snapshot.authorization?.authorizationUrl))
       .map(([serverName]) => serverName),
   );
-  const result: ZCodeAgentMcpServer[] = [];
+  const result: MaridAgentMcpServer[] = [];
   const seenNames = new Set<string>();
 
   for (const server of servers) {
-    if (server.source !== "zcodeagentmcp" || !server.enabled) {
+    if (server.source !== "maridagentmcp" || !server.enabled) {
       continue;
     }
     const hasPendingAuthorization =
@@ -354,24 +354,24 @@ export function buildMcpOAuthAuthorizationStatusRefreshServers(
     if (!hasPendingAuthorization || seenNames.has(server.name)) {
       continue;
     }
-    const zcodeAgentServer = convertToZCodeAgentMcpServer(
+    const maridAgentServer = convertToMaridAgentMcpServer(
       server.name,
       server.config,
       server.scope === "workspace" ? "workspace" : "user",
     );
-    if (!zcodeAgentServer) {
+    if (!maridAgentServer) {
       continue;
     }
     seenNames.add(server.name);
-    result.push(zcodeAgentServer);
+    result.push(maridAgentServer);
   }
 
   return result;
 }
 
-export function buildMcpOAuthAuthorizationStatusRefreshOptions(mcpServers: ZCodeAgentMcpServer[]): {
+export function buildMcpOAuthAuthorizationStatusRefreshOptions(mcpServers: MaridAgentMcpServer[]): {
   mode: "status";
-  mcpServers: ZCodeAgentMcpServer[];
+  mcpServers: MaridAgentMcpServer[];
 } {
   return {
     // OAuth pending/follow-up/focus 刷新只读运行态，不能让 pending 子集进入 connect replace 路径。
@@ -380,9 +380,9 @@ export function buildMcpOAuthAuthorizationStatusRefreshOptions(mcpServers: ZCode
   };
 }
 
-export function buildMcpServerStatusListKey(servers: ZCodeMcpServer[]): string {
+export function buildMcpServerStatusListKey(servers: MaridMcpServer[]): string {
   return servers
-    .filter((server) => server.source === "zcodeagentmcp")
+    .filter((server) => server.source === "maridagentmcp")
     .map((server) => {
       const enabledKey = server.enabled ? "enabled" : "disabled";
       return `${server.id}:${enabledKey}:${JSON.stringify(server.config)}`;
@@ -390,7 +390,7 @@ export function buildMcpServerStatusListKey(servers: ZCodeMcpServer[]): string {
     .join("|");
 }
 
-export function buildPluginMcpServerStatusListKey(plugins: ZCodePluginInfo[]): string {
+export function buildPluginMcpServerStatusListKey(plugins: MaridPluginInfo[]): string {
   return plugins
     .map((plugin) => {
       const declaredNames = plugin.declaredMcpServerNames ?? [];
@@ -411,13 +411,13 @@ export function shouldShowPluginMcpServersInMcpSettings(isRemoteSyncContext: boo
 }
 
 export function buildPendingMcpOAuthAuthorizationRefreshKey(
-  servers: ZCodeMcpServer[],
-  statusSnapshots: Record<string, ZCodeMcpServerStatusSnapshot> = {},
+  servers: MaridMcpServer[],
+  statusSnapshots: Record<string, MaridMcpServerStatusSnapshot> = {},
 ): string {
   const localPendingKeys = servers
     .filter(
       (server) =>
-        server.source === "zcodeagentmcp" &&
+        server.source === "maridagentmcp" &&
         server.enabled &&
         Boolean(server.authorization?.authorizationUrl),
     )
@@ -434,10 +434,10 @@ function PluginMcpServerList({
   onOpenAuthorization,
 }: {
   items: PluginMcpServerItem[];
-  pluginListingById: ReadonlyMap<string, ZCodeAvailablePluginSummary["listing"]>;
+  pluginListingById: ReadonlyMap<string, MaridAvailablePluginSummary["listing"]>;
   onOpenAuthorization?: (item: PluginMcpServerItem) => void;
 }) {
-  const { intl } = useZCodeIntl();
+  const { intl } = useMaridIntl();
   const openAuthorizationLabel = intl.formatMessage({
     id: "settings.mcp.oauth.openAuthorization",
   });
@@ -584,7 +584,7 @@ export function McpSettingsSection({
   unscopedServices,
   cacheAuthorityKey,
 }: McpSettingsSectionProps) {
-  const { intl, locale } = useZCodeIntl();
+  const { intl, locale } = useMaridIntl();
   const confirmDialog = useConfirmDialog();
   const services = useWorkspaceServices(
     workspacePath,
@@ -635,7 +635,7 @@ export function McpSettingsSection({
 
   const [showForm, setShowForm] = useState(false);
   const [formScopeKey, setFormScopeKey] = useState(parentScopeKey);
-  const [editingServer, setEditingServer] = useState<ZCodeMcpServer | null>(null);
+  const [editingServer, setEditingServer] = useState<MaridMcpServer | null>(null);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const query = searchQuery;
   const [editorMode, setEditorMode] = useState<McpEditorMode>("form");
@@ -732,8 +732,8 @@ export function McpSettingsSection({
   const lastAutoStatusListRefreshKeyRef = useRef("");
   const requestMcpServerStatusList = useCallback(
     async (options?: {
-      mcpServers?: ZCodeAgentMcpServer[];
-      mode?: ZCodeMcpListMode;
+      mcpServers?: MaridAgentMcpServer[];
+      mode?: MaridMcpListMode;
       trigger?: McpStatusListRefreshTrigger;
     }) => {
       const trigger = options?.trigger ?? "auto";
@@ -772,7 +772,7 @@ export function McpSettingsSection({
       // skipReason 已经覆盖了这个分支，这里只为类型收窄。
       if (!requestedWorkspacePath) return;
       const requestedMcpServers =
-        options?.mcpServers ?? useMcpStore.getState().getEnabledMcpServersForZCode("zcode");
+        options?.mcpServers ?? useMcpStore.getState().getEnabledMcpServersForMarid("marid");
       await statusListRefreshQueueRef.current?.request(async () => {
         if (!isRequestCurrent()) {
           return;
@@ -1295,7 +1295,7 @@ export function McpSettingsSection({
     [activeWorkspaceKey, services.mcpSyncService],
   );
 
-  async function handleWorkspaceMcpTrust(server: ZCodeMcpServer) {
+  async function handleWorkspaceMcpTrust(server: MaridMcpServer) {
     const review = server.workspaceTrust;
     if (trustAbortRef.current) return;
     const controller = new AbortController();
@@ -1353,7 +1353,7 @@ export function McpSettingsSection({
     }
   }
 
-  async function handleSave(form: FormState, prev?: ZCodeMcpServer) {
+  async function handleSave(form: FormState, prev?: MaridMcpServer) {
     if (!activeWorkspacePath) {
       return;
     }
@@ -1385,7 +1385,7 @@ export function McpSettingsSection({
     onFormScopeKeyChange?.(null);
   }
 
-  async function handleDelete(server: ZCodeMcpServer) {
+  async function handleDelete(server: MaridMcpServer) {
     const confirmed = await confirmDialog({
       confirmVariant: "destructive",
       title: intl.formatMessage({ id: "settings.mcp.deleteConfirmTitle" }, { name: server.name }),
@@ -1409,7 +1409,7 @@ export function McpSettingsSection({
     onFormScopeKeyChange?.(null);
   }
 
-  function handleEdit(server: ZCodeMcpServer) {
+  function handleEdit(server: MaridMcpServer) {
     const ownerWorkspace = workspaceTabs.find((tab) => tab.workspacePath === server.projectPath);
     const ownedScopeKey =
       server.scope === "workspace"
@@ -1432,7 +1432,7 @@ export function McpSettingsSection({
     setShowForm(true);
   }
 
-  function handleOpenAuthorization(server: ZCodeMcpServer) {
+  function handleOpenAuthorization(server: MaridMcpServer) {
     const authorizationUrl = server.authorization?.authorizationUrl;
     if (!authorizationUrl) {
       return;

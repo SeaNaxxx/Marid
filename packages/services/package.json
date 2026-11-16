@@ -1,5 +1,5 @@
 {
-  "name": "@zcode/services",
+  "name": "@marid/services",
   "private": true,
   "type": "module",
   "imports": {
@@ -19,12 +19,12 @@
   "dependencies": {
     "@agentclientprotocol/sdk": "^0.21.1",
     "@larksuiteoapi/node-sdk": "1.64.0",
-    "@zcode/provider": "workspace:*",
-    "@zcode/provider-node": "workspace:*",
-    "@zcode/rpc": "workspace:*",
-    "@zcode/session-control": "workspace:*",
-    "@zcode/shared": "workspace:*",
-    "@zcode/zcode-cua": "workspace:*",
+    "@marid/provider": "workspace:*",
+    "@marid/provider-node": "workspace:*",
+    "@marid/rpc": "workspace:*",
+    "@marid/session-control": "workspace:*",
+    "@marid/shared": "workspace:*",
+    "@marid/marid-cua": "workspace:*",
     "chokidar": "4.0.3",
     "croner": "^10.0.1",
     "ignore": "^5.3.2",

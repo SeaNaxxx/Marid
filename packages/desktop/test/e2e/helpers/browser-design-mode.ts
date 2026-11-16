@@ -4,7 +4,7 @@ import {
   TID_BROWSER_ADDRESS_INPUT,
   TID_BROWSER_DESIGN_INSPECTOR,
   TID_BROWSER_ELEMENT_PICKER_BUTTON,
-} from "@zcode/shared/test-ids";
+} from "@marid/shared/test-ids";
 import { clickTestIdByDom, DEFAULT_WORKSPACE } from "#e2e/helpers/desktop-app";
 import {
   clickPluginControl,
@@ -18,7 +18,7 @@ import { startDraftFromProject } from "#e2e/helpers/project-sidebar";
 
 /** Design 默认关闭；设计交互用例必须像用户一样显式启用。 */
 export async function enableDesignPlugin(): Promise<void> {
-  const pluginId = "design@zcode-plugins-official";
+  const pluginId = "design@marid-plugins-official";
   if ((await getPluginList()).plugins.some((plugin) => plugin.id === pluginId && plugin.enabled))
     return;
   await openPluginSettings();

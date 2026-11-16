@@ -18,15 +18,15 @@
 [
   {
     "kind": "local",
-    "workspacePath": "/Users/dev/ZCodeProject/3DAutoSnake"
+    "workspacePath": "/Users/dev/MaridProject/3DAutoSnake"
   },
   {
     "kind": "remote",
     "workspacePath": "/home/ubuntu",
-    "workspaceIdentity": "remote:docker:zcode-ssh-container:/home/ubuntu",
+    "workspaceIdentity": "remote:docker:marid-ssh-container:/home/ubuntu",
     "target": {
       "kind": "docker",
-      "container": "zcode-ssh-container"
+      "container": "marid-ssh-container"
     },
     "lastOpenedAt": 1776220448653,
     "lastConnectionStatus": "failed",

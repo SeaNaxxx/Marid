@@ -1,0 +1,49 @@
+{
+  "name": "@marid/bootstrap",
+  "version": "0.1.0-marid",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./v4-replay": {
+      "types": "./dist/marid-protocol-v4/replay.d.ts",
+      "import": "./dist/marid-protocol-v4/replay.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "node ../../scripts/clean-dist.mjs",
+    "test": "vitest tests",
+    "test:fault-matrix": "MARID_FAULT_MATRIX=full vitest run tests/workflow-fault-matrix tests/fault-matrix-harness.test.ts tests/fake-provider-server.test.ts",
+    "coverage": "vitest run tests --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --write src"
+  },
+  "dependencies": {
+    "@marid/adapters": "workspace:*",
+    "@marid/contracts": "workspace:*",
+    "@marid/core": "workspace:*",
+    "@marid/dynamic-workflow": "workspace:*",
+    "@marid/dynamic-workflow-runtime": "workspace:*",
+    "@marid/i18n": "workspace:*",
+    "@marid/provider": "workspace:*",
+    "@marid/provider-node": "workspace:*",
+    "@marid/session-control": "workspace:*",
+    "@marid/shared": "workspace:*",
+    "@marid/telemetry": "workspace:*",
+    "diff": "^9.0.0",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/yazl": "^3.3.1",
+    "@marid/formal-proof": "workspace:*",
+    "yazl": "^3.3.1"
+  }
+}

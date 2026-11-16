@@ -1,18 +1,18 @@
 import {
-  DEFAULT_ZCODE_ENDPOINT_ORIGIN,
-  ZCODE_VERSION,
-  buildZCodeEndpointUrls,
+  DEFAULT_MARID_ENDPOINT_ORIGIN,
+  MARID_VERSION,
+  buildMaridEndpointUrls,
   getForceUpdateMinimalVersionFromConfig,
   resolveForceUpdateRequirement,
-  resolveOptionalZCodeAuthorization,
+  resolveOptionalMaridAuthorization,
   type ForceUpdateRequirement,
   type Locale,
-  type ZCodeJwtTokenResolver,
-} from "@zcode/shared";
+  type MaridJwtTokenResolver,
+} from "@marid/shared";
 import { requestForceAutoUpdate, type ForceAutoUpdateState } from "./autoUpdater.js";
 import { showForceUpdatePrompt } from "./forceUpdatePrompt.js";
 
-const ZCODE_CLIENT_CONFIG_API_PATH = "/api/v1/client/configs";
+const MARID_CLIENT_CONFIG_API_PATH = "/api/v1/client/configs";
 const FORCE_UPDATE_CONFIG_REQUEST_TIMEOUT_MS = 10_000;
 const FORCE_UPDATE_CONFIG_MAX_RESPONSE_BYTES = 1024 * 1024;
 
@@ -40,7 +40,7 @@ export interface ForceUpdateGuardOptions {
   logger: ForceUpdateGuardLogger;
   endpointOrigin?: string;
   fetchRemoteConfig?: () => Promise<unknown>;
-  resolveZcodeJwtToken?: ZCodeJwtTokenResolver;
+  resolveMaridJwtToken?: MaridJwtTokenResolver;
   requestAutoUpdate?: (
     onStateChange?: (state: ForceAutoUpdateState) => void,
   ) => (() => void) | void;
@@ -48,12 +48,12 @@ export interface ForceUpdateGuardOptions {
 }
 
 export function resolveForceUpdateClientConfigUrl(
-  endpointOrigin = DEFAULT_ZCODE_ENDPOINT_ORIGIN,
+  endpointOrigin = DEFAULT_MARID_ENDPOINT_ORIGIN,
 ): string {
   const url = new URL(
-    `${buildZCodeEndpointUrls(endpointOrigin).origin}${ZCODE_CLIENT_CONFIG_API_PATH}`,
+    `${buildMaridEndpointUrls(endpointOrigin).origin}${MARID_CLIENT_CONFIG_API_PATH}`,
   );
-  url.searchParams.set("app_version", ZCODE_VERSION);
+  url.searchParams.set("app_version", MARID_VERSION);
   url.searchParams.set("platform", `${process.platform}-${process.arch}`);
   return url.toString();
 }
@@ -71,7 +71,7 @@ function getForceUpdateMinimalVersionFromClientConfig(config: unknown): string |
   };
   if (typeof envelope.code === "number" && envelope.code !== 0) {
     // /client/configs 与服务层一样只有 code=0 才可信，避免错误 envelope 携带旧 data 时误触发启动强更。
-    throw new Error(`ZCode client config failed: ${envelope.code}`);
+    throw new Error(`Marid client config failed: ${envelope.code}`);
   }
   return getForceUpdateMinimalVersionFromConfig(envelope.data?.configs);
 }
@@ -79,14 +79,14 @@ function getForceUpdateMinimalVersionFromClientConfig(config: unknown): string |
 async function fetchRemoteForceUpdateConfig(
   endpointOrigin?: string,
   fetchRemoteConfig?: () => Promise<unknown>,
-  resolveZcodeJwtToken?: ZCodeJwtTokenResolver,
+  resolveMaridJwtToken?: MaridJwtTokenResolver,
 ): Promise<unknown> {
   if (fetchRemoteConfig) {
     return fetchRemoteConfig();
   }
 
   const { net } = await import("electron");
-  const authorization = await resolveOptionalZCodeAuthorization(resolveZcodeJwtToken);
+  const authorization = await resolveOptionalMaridAuthorization(resolveMaridJwtToken);
   return new Promise<unknown>((resolve, reject) => {
     let request: ReturnType<typeof net.request>;
     let timer: ReturnType<typeof setTimeout>;
@@ -162,11 +162,11 @@ export async function resolveDesktopForceUpdateRequirement(options: {
   logger: ForceUpdateGuardLogger;
   endpointOrigin?: string;
   fetchRemoteConfig?: () => Promise<unknown>;
-  resolveZcodeJwtToken?: ZCodeJwtTokenResolver;
+  resolveMaridJwtToken?: MaridJwtTokenResolver;
 }): Promise<ForceUpdateRequirement | null> {
   const resolveFromConfig = (config: unknown) =>
     resolveForceUpdateRequirement({
-      currentVersion: ZCODE_VERSION,
+      currentVersion: MARID_VERSION,
       forceUpdate: {
         minimalVersion:
           getForceUpdateMinimalVersionFromClientConfig(config) ??
@@ -179,7 +179,7 @@ export async function resolveDesktopForceUpdateRequirement(options: {
     const remoteConfig = await fetchRemoteForceUpdateConfig(
       options.endpointOrigin,
       options.fetchRemoteConfig,
-      options.resolveZcodeJwtToken,
+      options.resolveMaridJwtToken,
     );
     const remoteRequirement = resolveFromConfig(remoteConfig);
     if (remoteRequirement) {
@@ -196,9 +196,9 @@ export async function resolveDesktopForceUpdateRequirement(options: {
 
 export function resolveForceUpdateDownloadUrl(
   locale: Locale,
-  endpointOrigin = DEFAULT_ZCODE_ENDPOINT_ORIGIN,
+  endpointOrigin = DEFAULT_MARID_ENDPOINT_ORIGIN,
 ): string {
-  const origin = buildZCodeEndpointUrls(endpointOrigin).origin;
+  const origin = buildMaridEndpointUrls(endpointOrigin).origin;
   return locale === "zh-CN" ? `${origin}/cn` : `${origin}/en`;
 }
 
@@ -208,7 +208,7 @@ export function formatForceUpdateDialogText(
 ): ForceUpdateDialogText {
   if (locale === "zh-CN") {
     return {
-      title: "需要升级 ZCode",
+      title: "需要升级 Marid",
       message: "当前版本无法继续使用",
       detail: `当前版本：v${requirement.currentVersion}\n最低可用版本：v${requirement.minimalVersion}`,
       autoUpdateButton: "自动升级",
@@ -218,7 +218,7 @@ export function formatForceUpdateDialogText(
   }
 
   return {
-    title: "Update ZCode",
+    title: "Update Marid",
     message: "The current version can no longer be used",
     detail: `Current version: v${requirement.currentVersion}\nMinimum supported version: v${requirement.minimalVersion}`,
     autoUpdateButton: "Auto update",

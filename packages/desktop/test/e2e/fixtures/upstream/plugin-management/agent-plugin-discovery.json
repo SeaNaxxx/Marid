@@ -93,7 +93,7 @@
         "bodyIncludes": [
           "E2E_AGENT_PLUGIN_SKIP",
           "toolu_apd_skip_search",
-          "e2e-cdn-zip-plugin@zcode-plugins-official"
+          "e2e-cdn-zip-plugin@marid-plugins-official"
         ],
         "bodyExcludes": [
           "Generate a concise title",
@@ -108,7 +108,7 @@
           "id": "toolu_apd_skip_suggest",
           "name": "SuggestPluginInstall",
           "input": {
-            "pluginId": "e2e-cdn-zip-plugin@zcode-plugins-official",
+            "pluginId": "e2e-cdn-zip-plugin@marid-plugins-official",
             "reason": "这个官方插件可以协助处理你当前的 ZIP 归档任务。"
           }
         }
@@ -182,7 +182,7 @@
         "bodyIncludes": [
           "E2E_AGENT_PLUGIN_INSTALL",
           "toolu_apd_install_search",
-          "e2e-cdn-zip-plugin@zcode-plugins-official"
+          "e2e-cdn-zip-plugin@marid-plugins-official"
         ],
         "bodyExcludes": [
           "Generate a concise title",
@@ -197,7 +197,7 @@
           "id": "toolu_apd_install_suggest",
           "name": "SuggestPluginInstall",
           "input": {
-            "pluginId": "e2e-cdn-zip-plugin@zcode-plugins-official",
+            "pluginId": "e2e-cdn-zip-plugin@marid-plugins-official",
             "reason": "这个官方插件可以协助处理你当前的 ZIP 归档任务。"
           }
         }

@@ -1,4 +1,4 @@
-import type { IPlatformService } from "@zcode/shared";
+import type { IPlatformService } from "@marid/shared";
 
 type DesktopBrowserPlatformBridge = Pick<
   IPlatformService,
@@ -32,58 +32,58 @@ type DesktopBrowserPlatformBridge = Pick<
 // Rebase 集成：browser bridge 若继续内联在 renderer 入口，会让入口越过 max-lines 门禁。
 // 独立对象只做 preload 委托与旧 bridge 兼容兜底，不持有 Browser 业务状态。
 export const desktopBrowserPlatformBridge = {
-  getPathForFile: (file) => window.zcode.getPathForFile?.(file) ?? null,
+  getPathForFile: (file) => window.marid.getPathForFile?.(file) ?? null,
   saveFile: (payload) =>
-    window.zcode.saveFile?.(payload) ?? Promise.resolve({ success: false, error: "not_supported" }),
+    window.marid.saveFile?.(payload) ?? Promise.resolve({ success: false, error: "not_supported" }),
   // 条件定义而非兜底返回失败：UI 靠方法是否存在做能力检测，旧 preload 下必须保持 undefined
-  printPageToPdf: window.zcode.printPageToPdf ? () => window.zcode.printPageToPdf!() : undefined,
+  printPageToPdf: window.marid.printPageToPdf ? () => window.marid.printPageToPdf!() : undefined,
   // 与 printPageToPdf 一样按 preload 是否提供决定能力是否存在，UI 据此决定是否显示语音输入。
   microphone:
-    window.zcode.ensureMicrophoneAccess &&
-    window.zcode.resetMicrophoneAccess &&
-    window.zcode.openMicrophoneSettings
+    window.marid.ensureMicrophoneAccess &&
+    window.marid.resetMicrophoneAccess &&
+    window.marid.openMicrophoneSettings
       ? {
-          ensureAccess: () => window.zcode.ensureMicrophoneAccess!(),
-          resetAccess: () => window.zcode.resetMicrophoneAccess!(),
-          openSettings: (target) => window.zcode.openMicrophoneSettings!(target),
+          ensureAccess: () => window.marid.ensureMicrophoneAccess!(),
+          resetAccess: () => window.marid.resetMicrophoneAccess!(),
+          openSettings: (target) => window.marid.openMicrophoneSettings!(target),
         }
       : undefined,
   onBrowserViewDownloadStarted: (handler) =>
-    window.zcode.onBrowserViewDownloadStarted?.(handler) ?? (() => {}),
-  captureBrowserGuestPage: window.zcode.captureBrowserGuestPage
-    ? (payload) => window.zcode.captureBrowserGuestPage!(payload)
+    window.marid.onBrowserViewDownloadStarted?.(handler) ?? (() => {}),
+  captureBrowserGuestPage: window.marid.captureBrowserGuestPage
+    ? (payload) => window.marid.captureBrowserGuestPage!(payload)
     : undefined,
-  onBrowserViewReady: (handler) => window.zcode.onBrowserViewReady?.(handler) ?? (() => {}),
-  onBrowserViewOperation: (handler) => window.zcode.onBrowserViewOperation?.(handler) ?? (() => {}),
+  onBrowserViewReady: (handler) => window.marid.onBrowserViewReady?.(handler) ?? (() => {}),
+  onBrowserViewOperation: (handler) => window.marid.onBrowserViewOperation?.(handler) ?? (() => {}),
   onBrowserViewViewportChanged: (handler) =>
-    window.zcode.onBrowserViewViewportChanged?.(handler) ?? (() => {}),
+    window.marid.onBrowserViewViewportChanged?.(handler) ?? (() => {}),
   onBrowserViewVisibility: (handler) =>
-    window.zcode.onBrowserViewVisibility?.(handler) ?? (() => {}),
-  onBrowserViewCloseTab: (handler) => window.zcode.onBrowserViewCloseTab?.(handler) ?? (() => {}),
-  onBrowserViewSuspend: (handler) => window.zcode.onBrowserViewSuspend?.(handler) ?? (() => {}),
-  onBrowserViewRestore: (handler) => window.zcode.onBrowserViewRestore?.(handler) ?? (() => {}),
-  browserViewLoadUrl: (payload) => window.zcode.browserViewLoadUrl!(payload),
+    window.marid.onBrowserViewVisibility?.(handler) ?? (() => {}),
+  onBrowserViewCloseTab: (handler) => window.marid.onBrowserViewCloseTab?.(handler) ?? (() => {}),
+  onBrowserViewSuspend: (handler) => window.marid.onBrowserViewSuspend?.(handler) ?? (() => {}),
+  onBrowserViewRestore: (handler) => window.marid.onBrowserViewRestore?.(handler) ?? (() => {}),
+  browserViewLoadUrl: (payload) => window.marid.browserViewLoadUrl!(payload),
   browserViewAttachGuest: (payload) =>
-    window.zcode.browserViewAttachGuest?.(payload) ??
+    window.marid.browserViewAttachGuest?.(payload) ??
     Promise.resolve({ ok: false, reason: "not-found", recoveryRequested: false }),
   browserViewDetachGuest: (payload) =>
-    window.zcode.browserViewDetachGuest?.(payload) ?? Promise.resolve(false),
+    window.marid.browserViewDetachGuest?.(payload) ?? Promise.resolve(false),
   browserViewCloseTab: (payload) =>
-    window.zcode.browserViewCloseTab?.(payload) ?? Promise.resolve(),
+    window.marid.browserViewCloseTab?.(payload) ?? Promise.resolve(),
   browserViewReportResidency: (payload) =>
-    window.zcode.browserViewReportResidency?.(payload) ?? Promise.resolve(),
+    window.marid.browserViewReportResidency?.(payload) ?? Promise.resolve(),
   browserViewPromoteDraftTabs: (payload) =>
-    window.zcode.browserViewPromoteDraftTabs?.(payload) ?? Promise.resolve([]),
+    window.marid.browserViewPromoteDraftTabs?.(payload) ?? Promise.resolve([]),
   browserViewSuspendReady: (payload) =>
-    window.zcode.browserViewSuspendReady?.(payload) ?? Promise.resolve(),
+    window.marid.browserViewSuspendReady?.(payload) ?? Promise.resolve(),
   browserViewEnsureResident: (payload) =>
-    window.zcode.browserViewEnsureResident?.(payload) ?? Promise.resolve(),
+    window.marid.browserViewEnsureResident?.(payload) ?? Promise.resolve(),
   browserViewRestoreTabs: (payload) =>
-    window.zcode.browserViewRestoreTabs?.(payload) ?? Promise.resolve([]),
+    window.marid.browserViewRestoreTabs?.(payload) ?? Promise.resolve([]),
   browserViewUpdateViewport: (payload) =>
-    window.zcode.browserViewUpdateViewport?.(payload) ?? Promise.resolve(),
+    window.marid.browserViewUpdateViewport?.(payload) ?? Promise.resolve(),
   importChromeBrowserData: (options) =>
-    window.zcode.importChromeBrowserData?.(options) ??
+    window.marid.importChromeBrowserData?.(options) ??
     Promise.resolve({
       success: false,
       cookies: { imported: 0, skipped: 0, failed: 0 },
@@ -96,6 +96,6 @@ export const desktopBrowserPlatformBridge = {
       error: "unsupported",
     }),
   clearEmbeddedBrowserData: (mode) =>
-    window.zcode.clearEmbeddedBrowserData?.(mode) ??
+    window.marid.clearEmbeddedBrowserData?.(mode) ??
     Promise.resolve({ success: false, error: "unsupported" }),
 } satisfies DesktopBrowserPlatformBridge;

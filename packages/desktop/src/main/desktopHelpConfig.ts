@@ -1,12 +1,12 @@
 import { net } from "electron";
 import {
   buildHelpAppConfigUrl,
-  buildZCodeSourceHeadersFromContext,
+  buildMaridSourceHeadersFromContext,
   createHelpAppConfigReader,
-  resolveOptionalZCodeAuthorization,
-  type ZCodeJwtTokenResolver,
-  ZCODE_ENV,
-} from "@zcode/shared";
+  resolveOptionalMaridAuthorization,
+  type MaridJwtTokenResolver,
+  MARID_ENV,
+} from "@marid/shared";
 
 export function createDesktopHelpConfigReader(options: {
   resolveEndpointOrigin: () => Promise<string>;
@@ -14,14 +14,14 @@ export function createDesktopHelpConfigReader(options: {
   deviceMid: string;
   /** 当前界面语言；以前不传，X-Client-Language 固定为 unknown。 */
   getClientLanguage: () => string;
-  resolveZcodeJwtToken?: ZCodeJwtTokenResolver;
+  resolveMaridJwtToken?: MaridJwtTokenResolver;
 }) {
   const read = createHelpAppConfigReader({
     fetchImpl: (input, init) => net.fetch(input instanceof URL ? input.href : input, init),
   });
   return async () => {
     const endpointOrigin = await options.resolveEndpointOrigin();
-    const authorization = await resolveOptionalZCodeAuthorization(options.resolveZcodeJwtToken);
+    const authorization = await resolveOptionalMaridAuthorization(options.resolveMaridJwtToken);
     return read(
       buildHelpAppConfigUrl(
         endpointOrigin,
@@ -30,14 +30,14 @@ export function createDesktopHelpConfigReader(options: {
       ),
       {
         ...(authorization ? { Authorization: authorization } : {}),
-        ...buildZCodeSourceHeadersFromContext({
+        ...buildMaridSourceHeadersFromContext({
           endpointOrigin,
           appVersion: options.appVersion,
           clientLanguage: options.getClientLanguage(),
           deviceMid: options.deviceMid,
           platform: process.platform,
           arch: process.arch,
-          releaseChannel: ZCODE_ENV,
+          releaseChannel: MARID_ENV,
           sourceTitle: "electron",
         }),
       },

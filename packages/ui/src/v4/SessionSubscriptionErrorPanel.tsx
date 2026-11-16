@@ -1,9 +1,9 @@
 import { useCallback } from "react";
-import { TID_V4_RETRY_SUBSCRIBE } from "@zcode/shared/test-ids";
+import { TID_V4_RETRY_SUBSCRIBE } from "@marid/shared/test-ids";
 import { Button } from "@/components/ui/button.js";
 import { toast } from "@/components/ui/toast.js";
 import { useFeedbackStore } from "@/feedback/feedbackStore.js";
-import { useZCodeIntl } from "@/i18n/IntlProvider.js";
+import { useMaridIntl } from "@/i18n/IntlProvider.js";
 import { buildErrorFeedbackDescription } from "@/lib/errorFeedbackDraft.js";
 
 export interface SessionSubscriptionErrorPanelProps {
@@ -21,7 +21,7 @@ export function SessionSubscriptionErrorPanel({
   onReconnect,
   reconnectLabel,
 }: SessionSubscriptionErrorPanelProps) {
-  const { intl } = useZCodeIntl();
+  const { intl } = useMaridIntl();
   const openFeedbackSubmit = useFeedbackStore((state) => state.openSubmit);
   const handleOpenFeedback = useCallback(async () => {
     openFeedbackSubmit({

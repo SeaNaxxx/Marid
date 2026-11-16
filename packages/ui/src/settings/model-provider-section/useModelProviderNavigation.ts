@@ -6,15 +6,15 @@ import type {
   ProviderFamilyConnectionSelection,
   ProviderFamilyConnectionSelectionSettings,
   ProviderFamilyDomain,
-} from "@zcode/shared";
+} from "@marid/shared";
 import {
   BUILTIN_MODEL_PROVIDER_IDS,
   isStartPlanModelProviderId,
   resolveModelProviderFamilySpecByProviderId,
   resolveProviderFamilyDomainFromOAuthProvider,
   type OAuthProviderId,
-} from "@zcode/shared";
-import { useZCodeIntl } from "@/i18n/IntlProvider.js";
+} from "@marid/shared";
+import { useMaridIntl } from "@/i18n/IntlProvider.js";
 import {
   CODING_PLAN_PROVIDER_SPECS,
   type CodingPlanEntitlementState,
@@ -65,7 +65,7 @@ interface UseModelProviderNavigationOptions {
   showPurchasedTeamPlanFallback?: boolean;
   selectedNodeKey: string | null;
   setSelectedNodeKey: (key: string | null) => void;
-  intl: ReturnType<typeof useZCodeIntl>["intl"];
+  intl: ReturnType<typeof useMaridIntl>["intl"];
 }
 
 export function useModelProviderNavigation({

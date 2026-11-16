@@ -1,4 +1,4 @@
-export type SettingsDirectorySource = "zcode" | "agents" | "claude";
+export type SettingsDirectorySource = "marid" | "agents" | "claude";
 
 export type SettingsDirectoryScope = "user" | "project";
 

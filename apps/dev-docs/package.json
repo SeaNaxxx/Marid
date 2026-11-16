@@ -1,5 +1,5 @@
 {
-  "name": "@zcode/dev-docs",
+  "name": "@marid/dev-docs",
   "private": true,
   "type": "module",
   "scripts": {

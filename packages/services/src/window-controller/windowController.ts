@@ -1,10 +1,10 @@
 import type {
   V4SessionDeletionPreview,
   V4SessionDeletionResult,
-} from "@zcode/shared/zcode-protocol-v4";
-import type { Event } from "@zcode/rpc";
-import { ServiceChannels } from "@zcode/shared";
-import type { ZCodeTaskMeta } from "@zcode/shared";
+} from "@marid/shared/marid-protocol-v4";
+import type { Event } from "@marid/rpc";
+import { ServiceChannels } from "@marid/shared";
+import type { MaridTaskMeta } from "@marid/shared";
 import type {
   ControllerResyncParams,
   ControllerResyncResult,
@@ -15,14 +15,14 @@ import type {
   WindowHostControllerTaskRow,
   WindowHostControllerWorkspaceFrame,
   WindowHostTaskAddress,
-} from "@zcode/shared/zcode-protocol-v4";
+} from "@marid/shared/marid-protocol-v4";
 import { createServiceDescriptor } from "../descriptors.js";
-import type { ZCodeArchivedTaskDeletionResult } from "#src/session/zcodeTaskService.js";
+import type { MaridArchivedTaskDeletionResult } from "#src/session/maridTaskService.js";
 import type {
-  ZCodeTaskListItem,
-  ZCodeTaskListQuery,
-  ZCodeTaskListResult,
-} from "../session/zcodeTaskListTypes.js";
+  MaridTaskListItem,
+  MaridTaskListQuery,
+  MaridTaskListResult,
+} from "../session/maridTaskListTypes.js";
 
 export type WindowHostControllerMutation =
   | { kind: "rename"; title: string }
@@ -35,7 +35,7 @@ export type WindowHostControllerMutation =
   | { kind: "open" }
   | { kind: "resume" };
 
-export type WindowHostControllerTaskListItem = ZCodeTaskListItem & {
+export type WindowHostControllerTaskListItem = MaridTaskListItem & {
   sourceServerId?: string;
   serverDisplayName?: string;
   remoteSessionId?: string;
@@ -44,7 +44,7 @@ export type WindowHostControllerTaskListItem = ZCodeTaskListItem & {
   activity?: WindowHostControllerTaskRow["activity"];
 };
 
-export interface WindowHostControllerTaskListResult extends Omit<ZCodeTaskListResult, "items"> {
+export interface WindowHostControllerTaskListResult extends Omit<MaridTaskListResult, "items"> {
   items: WindowHostControllerTaskListItem[];
 }
 
@@ -85,14 +85,14 @@ export interface IWindowControllerService {
   deleteArchivedTasks(params: {
     address: WindowHostTaskAddress;
     taskIds: string[];
-  }): Promise<ZCodeArchivedTaskDeletionResult>;
-  listTaskList(params: ZCodeTaskListQuery): Promise<WindowHostControllerTaskListResult>;
+  }): Promise<MaridArchivedTaskDeletionResult>;
+  listTaskList(params: MaridTaskListQuery): Promise<WindowHostControllerTaskListResult>;
   /** 直接读取所属 owner 的轻量 meta；未读 CAS 不得使用可能降级为旧快照的列表投影。 */
-  getTaskMeta(params: { address: WindowHostTaskAddress }): Promise<ZCodeTaskMeta | null>;
+  getTaskMeta(params: { address: WindowHostTaskAddress }): Promise<MaridTaskMeta | null>;
   mutateTask(params: {
     address: WindowHostTaskAddress;
     mutation: WindowHostControllerMutation;
-  }): Promise<ZCodeTaskMeta | null>;
+  }): Promise<MaridTaskMeta | null>;
   subscribeControllerV4(params: ControllerSubscribeParams): Promise<ControllerSubscribeResult>;
   resyncControllerV4(params: ControllerResyncParams): Promise<ControllerResyncResult>;
   unsubscribeControllerV4(params: ControllerUnsubscribeParams): Promise<void>;
