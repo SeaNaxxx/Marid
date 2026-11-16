@@ -1,7 +1,5 @@
 package com.marid.app.ui
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -10,12 +8,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,12 +27,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -47,9 +39,12 @@ import androidx.compose.ui.unit.sp
  *   - packages/ui/src/WelcomeScreen.tsx          (main / centered login card / footer)
  *   - packages/ui/src/openWorkspacePageThemeHero.tsx (ThemeHeroVisual backdrop, "dark" palette —
  *     the .dark block of styles.css is the theme MaridTokens documents, dark-only app)
- *   - packages/ui/src/components/ui/MaridAboutLogo.tsx (brand SVG → MaridAboutLogo2e ImageVector)
- *   - packages/ui/src/i18n/locales/en-US.ts      (exact strings: login.title, login.description,
- *     login.agreement.*, login.copyright)
+ *   - BRAND MARK: the upstream Z.ai "Z" brand SVG (components/ui/MaridAboutLogo.tsx) is
+ *     REPLACED by the Marid "M" mark (MaridMarkM2e) — no Z.ai brand geometry remains.
+ *   - packages/ui/src/i18n/locales/en-US.ts      (exact strings: login.title, login.copyright;
+ *     login.description / login.agreement.* Z.AI login strings REMOVED per the no-Z.ai-login
+ *     directive — description replaced with the Marid product identity line, agreement links
+ *     dropped (they pointed at marid.z.ai).
  *
  * EXTRACTION NOTES (source class → Compose value; 1 spacing unit = 4dp)
  *   main "relative h-full min-h-dvh overflow-hidden bg-background text-foreground"
@@ -109,7 +104,6 @@ import androidx.compose.ui.unit.sp
  */
 @Composable
 fun WelcomeScreen(onNewChat: (() -> Unit)? = null, modifier: Modifier = Modifier) {
-    val context = LocalContext.current
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -157,7 +151,9 @@ fun WelcomeScreen(onNewChat: (() -> Unit)? = null, modifier: Modifier = Modifier
                                 textAlign = TextAlign.Center,
                             )
                             Text(
-                                text = "Log in to Z.AI to start using Marid", // login.description (en-US)
+                                // Z.AI login.description removed (no-Z.ai-login directive);
+                                // replaced with the Marid product identity line (README.md).
+                                text = "Personal Autonomous Android Agent",
                                 color = MaridTokens.ForegroundSubtle,
                                 fontSize = 14.sp, // text-ui-base
                                 lineHeight = 22.75f.sp, // /relaxed = 1.625 * 14sp
@@ -170,41 +166,12 @@ fun WelcomeScreen(onNewChat: (() -> Unit)? = null, modifier: Modifier = Modifier
             }
 
             // footer: "pointer-events-none flex shrink-0 flex-col items-center gap-2 text-center text-ui-xs text-foreground-subtle"
+            // login.agreement.* (marid.z.ai terms/privacy links) REMOVED per the
+            // no-Z.ai-login directive — only the copyright line remains.
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                val agreement = buildAnnotatedString {
-                    append("By signing in, you agree to our ") // login.agreement.prefix
-                    pushStringAnnotation(tag = "url", annotation = "https://marid.z.ai/terms")
-                    append("Terms of Service") // login.agreement.terms
-                    pop()
-                    append(" and ") // login.agreement.conjunction
-                    pushStringAnnotation(tag = "url", annotation = "https://marid.z.ai/privacy")
-                    append("Privacy Policy") // login.agreement.privacy
-                    pop()
-                }
-                ClickableText(
-                    text = agreement,
-                    style = TextStyle(
-                        color = MaridTokens.ForegroundSubtle,
-                        fontSize = 10.sp, // text-ui-xs
-                        textDecoration = TextDecoration.None, // hover:underline only — no hover on touch
-                        textAlign = TextAlign.Center,
-                    ),
-                    onClick = { offset ->
-                        agreement.getStringAnnotations("url", offset, offset)
-                            .firstOrNull()
-                            ?.let { annotation ->
-                                runCatching {
-                                    context.startActivity(
-                                        Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
-                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                                    )
-                                }
-                            }
-                    },
-                )
                 Text(
                     text = "© 2026 Marid All rights reserved.", // login.copyright (en-US)
                     color = MaridTokens.ForegroundSubtle,
@@ -241,11 +208,11 @@ private fun LoginPanelLogo2e() {
                 .matchParentSize()
                 .border(1.dp, Color(0x1AFFFFFF), RoundedCornerShape(16.dp)),
         )
-        // MaridAboutLogo "h-auto w-10" — viewBox 256x218 → height = 40 * 218/256
+        // MaridMarkM2e "h-auto w-10" — viewBox 0 0 100 73 → height = 40 * 73 / 100
         Icon(
-            imageVector = MaridAboutLogo2e,
+            imageVector = MaridMarkM2e,
             contentDescription = null, // source: aria-hidden="true" (tile carries role="img" aria-label="Marid")
-            modifier = Modifier.size(width = 40.dp, height = 34.0625.dp),
+            modifier = Modifier.size(width = 40.dp, height = 29.2.dp),
             tint = Color(0xFFFFFFFF), // text-[#ffffff]
         )
     }
@@ -345,43 +312,45 @@ private fun HeroBackdrop2e(modifier: Modifier = Modifier) {
 }
 
 /**
- * MaridAboutLogo (components/ui/MaridAboutLogo.tsx) — exact brand SVG geometry,
- * viewBox 0 0 256 218, fill currentColor (rendered as white inside the logo tile).
+ * Marid brand mark — geometric white "M" (same glyph as the launcher icon:
+ * white M on #161616). Replaces the upstream Z.ai "Z" brand SVG
+ * (components/ui/MaridAboutLogo.tsx) per the Marid rebrand directive.
+ * viewBox 0 0 100 73 (DejaVu Sans Bold M cap-height proportions), fill white.
  */
-private val MaridAboutLogo2e: ImageVector by lazy {
+private val MaridMarkM2e: ImageVector by lazy {
     ImageVector.Builder(
-        name = "Marid2e.AboutLogo",
+        name = "Marid2e.MarkM",
         defaultWidth = 40.dp,
-        defaultHeight = 34.0625.dp, // 40 * 218 / 256
-        viewportWidth = 256f,
-        viewportHeight = 218f,
+        defaultHeight = 29.2.dp, // 40 * 73 / 100
+        viewportWidth = 100f,
+        viewportHeight = 73f,
     ).apply {
-        path(fill = SolidColor(Color(0xFFFFFFFF))) { // text-current → tile uses text-[#ffffff]
-            // M134.4 0.130152L116.48 25.6022C113.665 29.5699 109.054 32.0019 104.064 32.0019H6.3999V0C6.3999 0.130149 134.4 0.130152 134.4 0.130152Z
-            moveTo(134.4f, 0.130152f)
-            lineTo(116.48f, 25.6022f)
-            curveTo(113.665f, 29.5699f, 109.054f, 32.0019f, 104.064f, 32.0019f)
-            lineTo(6.3999f, 32.0019f)
-            lineTo(6.3999f, 0f)
-            curveTo(6.3999f, 0.130149f, 134.4f, 0.130152f, 134.4f, 0.130152f)
+        path(fill = SolidColor(Color(0xFFFFFFFF))) { // left stem
+            moveTo(0f, 0f)
+            lineTo(20f, 0f)
+            lineTo(20f, 73f)
+            lineTo(0f, 73f)
             close()
         }
-        path(fill = SolidColor(Color(0xFFFFFFFF))) {
-            // M256 0.130127L102.401 217.732H0L153.599 0.130127H256Z
-            moveTo(256f, 0.130127f)
-            lineTo(102.401f, 217.732f)
-            lineTo(0f, 217.732f)
-            lineTo(153.599f, 0.130127f)
+        path(fill = SolidColor(Color(0xFFFFFFFF))) { // right stem
+            moveTo(80f, 0f)
+            lineTo(100f, 0f)
+            lineTo(100f, 73f)
+            lineTo(80f, 73f)
             close()
         }
-        path(fill = SolidColor(Color(0xFFFFFFFF))) {
-            // M121.601 217.732L139.65 192.134C142.465 188.166 147.076 185.734 152.067 185.734H249.604V217.736H121.601V217.732Z
-            moveTo(121.601f, 217.732f)
-            lineTo(139.65f, 192.134f)
-            curveTo(142.465f, 188.166f, 147.076f, 185.734f, 152.067f, 185.734f)
-            lineTo(249.604f, 185.734f)
-            lineTo(249.604f, 217.736f)
-            lineTo(121.601f, 217.736f)
+        path(fill = SolidColor(Color(0xFFFFFFFF))) { // left diagonal of the M
+            moveTo(20f, 0f)
+            lineTo(38f, 0f)
+            lineTo(50f, 28.4f)
+            lineTo(50f, 45f)
+            close()
+        }
+        path(fill = SolidColor(Color(0xFFFFFFFF))) { // right diagonal of the M
+            moveTo(80f, 0f)
+            lineTo(62f, 0f)
+            lineTo(50f, 28.4f)
+            lineTo(50f, 45f)
             close()
         }
     }.build()

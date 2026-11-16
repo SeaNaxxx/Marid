@@ -38,6 +38,9 @@ fun MaridRootScreen(vm: MaridAppViewModel) {
     var drawerOpen by rememberSaveable { mutableStateOf(false) }
     var screen by rememberSaveable { mutableStateOf(RootScreen.CHAT) }
     var terminalOpen by rememberSaveable { mutableStateOf(false) }
+    // Connect dialog (OAuth placeholders) — opened from the sidebar profile
+    // button ("Connect"); replaces the removed Z.ai login surface.
+    var connectOpen by rememberSaveable { mutableStateOf(false) }
 
     // Load the model catalog when the RPC becomes CONNECTED (same trigger as
     // the desktop composer; model-selection.getView channel).
@@ -55,6 +58,10 @@ fun MaridRootScreen(vm: MaridAppViewModel) {
                 onNewTask = { drawerOpen = false },
                 onSelectTask = { drawerOpen = false },
                 onOpenSettings = { screen = RootScreen.SETTINGS; drawerOpen = false },
+                onProfileClick = {
+                    drawerOpen = false
+                    connectOpen = true
+                },
             )
         },
         content = {
@@ -110,6 +117,10 @@ fun MaridRootScreen(vm: MaridAppViewModel) {
             }
         },
     )
+
+    if (connectOpen) {
+        MaridConnectDialog(onDismiss = { connectOpen = false })
+    }
 }
 
 private enum class RootScreen { CHAT, SETTINGS, MODEL_SETTINGS, TASKS }
