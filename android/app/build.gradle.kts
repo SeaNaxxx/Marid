@@ -63,9 +63,11 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
 
-    // Runtime provisioning: .deb extraction (ar + tar.xz) for the Termux
+    // Runtime provisioning: .deb extraction (ar + tar.xz|zst) for the Termux
     // Bionic closure and .tgz for the engine dist — both at runtime.
     implementation("org.apache.commons:commons-compress:1.27.1")
+    // commons-compress's zstd support requires the zstd-jni native AAR.
+    implementation("com.github.luben:zstd-jni:1.5.5-11@aar")
 
     // JVM unit tests: golden vectors from the real TypeScript serializer +
     // a full in-process ChannelClient <-> fake-ChannelServer round trip.
