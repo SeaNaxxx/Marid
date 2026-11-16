@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Marid</string>
-    <style name="Theme.Marid" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Compose-only app: dark, no action bar (matches zai-dark #161616). -->
+    <style name="Theme.Marid" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:statusBarColor">#161616</item>
+        <item name="android:navigationBarColor">#161616</item>
+    </style>
 </resources>

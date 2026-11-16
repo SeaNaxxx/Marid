@@ -43,4 +43,18 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.foundation:foundation")
+
+    // RPC to the on-device engine (ws://127.0.0.1:3030) — OkHttp WebSocket
+    // speaks the same binary framing as packages/client websocket.ts.
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // Coroutines + JSON payloads (RpcValue.Obj uses JsonElement trees).
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+
+    // JVM unit tests: golden vectors from the real TypeScript serializer +
+    // a full in-process ChannelClient <-> fake-ChannelServer round trip.
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+    testImplementation("org.json:json:20240303")
 }
