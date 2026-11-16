@@ -5,21 +5,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonObject
 
-/**
- * Marid RPC channel client — Kotlin port of `packages/rpc/src/channelClient.ts`.
- *
- * Handshake: the SERVER sends ResponseType.Initialize (200) right after the
- * WebSocket opens (ChannelServer constructor, channelServer.ts:29-31). Until
- * it arrives, all requests queue (`whenInitialized`).
- *
- * Outgoing request: serialize([requestType, id, channelName, command]) + serialize(arg)
- * Outgoing cancel: serialize([requestType, id]) + serialize(undefined)
- * Incoming response: deserialize header -> [type] or [type, id], then body.
- *
- * Response types (channels.shared.ts):
- *   Initialize=200, PromiseSuccess=201, PromiseError=202, PromiseErrorObj=203,
- *   EventFire=204, EventError=205.
- */
+// Server sends Initialize (200) right after socket open; requests queue until then (port of packages/rpc/src/channelClient.ts).
 object RpcRequestType {
     const val PROMISE = 100
     const val PROMISE_CANCEL = 101
@@ -60,10 +46,8 @@ class ChannelClient(
     private val mutex = Mutex()
     private val pending = HashMap<Int, PendingReply>()
     private val initWaiters = ArrayList<CompletableDeferred<Unit>>()
-    /** Event subscriptions that completed their first fire/dispose handshake. */
     private val establishedEvents = HashMap<Int, ChannelClient.EventSubscription>()
 
-    /** Feed one deserialized message payload (Regular frame body). */
     fun onMessage(payload: ByteArray) {
         val reader = ByteReader(payload)
         val header = RpcSerialization.deserializeValue(reader)
@@ -109,7 +93,6 @@ class ChannelClient(
         }
     }
 
-    /** Mirrors the TS event emitter: first fire marks the subscription ready. */
     private val firstFireWaiters = HashMap<Int, CompletableDeferred<Unit>>()
 
     private fun fireFirst(id: Int) {
@@ -135,7 +118,6 @@ class ChannelClient(
         waiter.await()
     }
 
-    /** Request/response over a channel command. Suspends until the reply. */
     suspend fun request(
         channelName: String,
         command: String,
@@ -164,11 +146,7 @@ class ChannelClient(
         }
     }
 
-    /**
-     * Subscribe to a channel event. The subscription is active until
-     * [EventSubscription.dispose] is called (sends EventDispose, mirroring
-     * `onDidRemoveLastListener` in channelClient.ts:166-170).
-     */
+    // Subscription stays active until dispose() (sends EventDispose).
     suspend fun listen(
         channelName: String,
         event: String,
@@ -196,9 +174,7 @@ class ChannelClient(
         send(RpcSerialization.serializeMessage(header, arg))
 
         val subscription = EventSubscription(id)
-        // Wait for first event fire or EventError so callers know the
-        // subscription is registered server-side. Mirrors Event.toPromise
-        // semantics used in requestEvent's onWillAddFirstListener flow.
+        // Wait for the first event fire or EventError so callers know the subscription is registered server-side.
         firstFire.await()
         synchronized(this) { establishedEvents[id] = subscription }
         return subscription

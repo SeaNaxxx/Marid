@@ -2,18 +2,7 @@ package com.marid.app.rpc
 
 import java.io.ByteArrayOutputStream
 
-/**
- * Marid RPC socket framing — Kotlin port of `packages/rpc/src/protocol.ts`.
- *
- * Message frame format (13-byte header):
- * ┌─────────┬──────────┬──────────┬──────────────┐
- * │ type(1) │  id(4)   │  ack(4)  │  length(4)   │
- * └─────────┴──────────┴──────────┴──────────────┘
- *
- * Only frames with type=Regular carry RPC payloads; Ack/Control/KeepAlive are
- * handled by PersistentProtocol upstream and are ignored by the basic
- * SocketProtocol used for the browser WebSocket client (and by us).
- */
+// 13-byte frame header [type(1) id(4) ack(4) length(4)]; only Regular frames carry payloads here (port of packages/rpc/src/protocol.ts).
 object SocketFraming {
     const val TYPE_NONE = 0
     const val TYPE_REGULAR = 1
@@ -27,7 +16,6 @@ object SocketFraming {
 
     const val HEADER_SIZE = 13 // 1 + 4 + 4 + 4
 
-    /** Wraps an RPC payload into a Regular frame (id=0, ack=0, like SocketProtocol.send). */
     fun frameRegular(payload: ByteArray): ByteArray {
         val out = ByteArray(HEADER_SIZE + payload.size)
         out[0] = TYPE_REGULAR.toByte()
@@ -39,11 +27,7 @@ object SocketFraming {
     }
 }
 
-/**
- * Reassembles fragmented stream bytes into framed messages — port of
- * ChunkStream: buffers incoming chunks, lets the protocol peek 13-byte
- * headers and only consume a frame once its full body has arrived.
- */
+// Reassembles fragmented stream bytes into framed messages (port of ChunkStream): a frame is consumed only once fully arrived.
 class ChunkStream {
     private val out = ByteArrayOutputStream()
     private var totalLength = 0
@@ -55,7 +39,6 @@ class ChunkStream {
         totalLength += chunk.size
     }
 
-    /** Returns true when a complete frame (header + body) is buffered. */
     fun hasCompleteFrame(): Boolean {
         if (totalLength < SocketFraming.HEADER_SIZE) return false
         val header = peek(SocketFraming.HEADER_SIZE) ?: return false
@@ -63,7 +46,6 @@ class ChunkStream {
         return totalLength >= SocketFraming.HEADER_SIZE + length
     }
 
-    /** Parsed header: [type, id, ack, bodyLength]. */
     fun peekHeader(): IntArray? {
         val header = peek(SocketFraming.HEADER_SIZE) ?: return null
         return intArrayOf(
@@ -95,7 +77,7 @@ class ChunkStream {
     }
 }
 
-/** unsigned 32-bit BE helpers (Long keeps the unsigned magnitude). */
+// Long keeps the unsigned magnitude.
 fun writeUInt32BE(target: ByteArray, offset: Int, value: Long) {
     target[offset] = ((value ushr 24) and 0xFF).toByte()
     target[offset + 1] = ((value ushr 16) and 0xFF).toByte()

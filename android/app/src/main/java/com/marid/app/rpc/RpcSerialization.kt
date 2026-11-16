@@ -13,20 +13,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.put
 
-/**
- * Marid RPC binary serialization — Kotlin port of
- * `packages/rpc/src/serialization.ts` (VS Code-derived protocol).
- *
- * Wire format per value: [1 byte type tag][VQL length if needed][data].
- * VQL: 7-bit variable-length quantity, high bit = continuation.
- *
- * Type tags (DataType enum in serialization.ts):
- *  Undefined=0, String=1, Buffer=2, VSBuffer=3, Array=4, Object=5 (JSON
- *  fallback), Int=6 (VQL-encoded int32).
- *
- * This layer is pure JVM (no Android imports) so it is unit-testable with
- * golden vectors produced by the real TypeScript serializer.
- */
+// VS Code-derived wire format: [1 type tag][VQL length][data]; pure JVM so golden vectors from the TS serializer can unit-test it.
 sealed class RpcValue {
     object Undefined : RpcValue()
     data class Str(val value: String) : RpcValue()
@@ -36,7 +23,6 @@ sealed class RpcValue {
     }
     data class IntValue(val value: Int) : RpcValue()
     data class Arr(val items: List<RpcValue>) : RpcValue()
-    /** Object tag — JSON fallback payload (JsonObject or JsonNull). */
     data class Obj(val json: JsonElement) : RpcValue()
 }
 
@@ -49,15 +35,10 @@ object RpcSerialization {
     const val TYPE_OBJECT = 5
     const val TYPE_INT = 6
 
-    /** Marker used by the TS encoder for Uint8Array nested inside objects. */
     const val NESTED_UINT8_MARKER = "__marid_rpc_nested_uint8array_v1"
     const val NESTED_UINT8_BASE64_KEY = "base64"
 
     private val json = Json
-
-    // ------------------------------------------------------------------
-    // Serialize
-    // ------------------------------------------------------------------
 
     fun serialize(value: RpcValue): ByteArray {
         val writer = ByteWriter()
@@ -99,7 +80,6 @@ object RpcSerialization {
         }
     }
 
-    /** Convenience: serialize a header array + body in one buffer. */
     fun serializeMessage(header: RpcValue, body: RpcValue): ByteArray {
         val writer = ByteWriter()
         serializeTo(writer, header)
@@ -111,7 +91,7 @@ object RpcSerialization {
         is JsonPrimitive -> element
         is JsonArray -> JsonArray(element.map { encodeNestedBinary(it) })
         is JsonObject -> {
-            // Shape check: {"__marid_rpc_nested_uint8array_v1": true, "base64": "..."} stays as-is.
+            // {"__marid_rpc_nested_uint8array_v1": true, "base64": "..."} stays as-is.
             if (isNestedBinaryMarker(element)) {
                 element
             } else {
@@ -127,10 +107,6 @@ object RpcSerialization {
         obj.size == 2 &&
             obj[NESTED_UINT8_MARKER] == JsonPrimitive(true) &&
             obj[NESTED_UINT8_BASE64_KEY] is JsonPrimitive
-
-    // ------------------------------------------------------------------
-    // Deserialize
-    // ------------------------------------------------------------------
 
     fun deserialize(bytes: ByteArray): RpcValue {
         val reader = ByteReader(bytes)
@@ -172,10 +148,6 @@ object RpcSerialization {
         else -> element
     }
 
-    // ------------------------------------------------------------------
-    // VQL (variable-length quantity)
-    // ------------------------------------------------------------------
-
     fun writeIntVql(writer: ByteWriter, value: Int) {
         if (value == 0) {
             writer.writeByte(0)
@@ -209,10 +181,6 @@ object RpcSerialization {
         }
     }
 }
-
-// ----------------------------------------------------------------------
-// Byte reader/writer helpers
-// ----------------------------------------------------------------------
 
 class ByteWriter {
     private val buffers = ArrayList<ByteArray>()

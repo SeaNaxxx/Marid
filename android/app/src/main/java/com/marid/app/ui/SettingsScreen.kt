@@ -37,17 +37,6 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/**
- * Settings page shell — ported from packages/ui/src/SettingsPage.tsx
- * (nav rows: exact paddings/sizes from the settings nav section classes)
- * for the phone's single-column layout. Sections exposed here are those
- * renderable on mobile from the source: Model Settings (the owner-required
- * providers page) and engine identity (version via RPC "setting" channel,
- * shown only when connected — never fabricated).
- *
- * Desktop-only sections (git pane, window controls, automations editor UI)
- * are intentionally absent on mobile (layout adaptation, documented).
- */
 @Composable
 fun SettingsScreen(
     onOpenModelSettings: () -> Unit,
@@ -75,7 +64,6 @@ fun SettingsScreen(
             .statusBarsPadding()
             .verticalScroll(rememberScrollState()),
     ) {
-        // Header row (SettingsPage back affordance; h-12, px-4, border-b).
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -93,30 +81,29 @@ fun SettingsScreen(
                     imageVector = MaridIcons.ChevronLeft,
                     contentDescription = "Back",
                     tint = MaridTokens.Foreground,
-                    modifier = Modifier.size(16.dp), // size-4
+                    modifier = Modifier.size(16.dp),
                 )
             }
             Text(
                 "Settings",
                 color = MaridTokens.Foreground,
-                fontSize = 14.sp, // text-ui-base
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
             )
         }
 
         Spacer(Modifier.height(12.dp))
 
-        // Section: Model Settings (owner-required).
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp), // gap-1
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text(
                 "General",
                 color = MaridTokens.ForegroundSubtlest,
-                fontSize = 12.sp, // text-ui-sm
+                fontSize = 12.sp,
             )
             SettingsNavRow(
                 label = "Model Settings",
@@ -144,7 +131,6 @@ fun SettingsScreen(
     }
 }
 
-/** SettingsPage nav row: "px-3 py-2 rounded-lg hover:bg-hover text-ui-base". */
 @Composable
 private fun SettingsNavRow(
     label: String,
@@ -156,17 +142,17 @@ private fun SettingsNavRow(
             .fillMaxWidth()
             .background(
                 MaridTokens.Surface,
-                RoundedCornerShape(8.dp), // rounded-lg
+                RoundedCornerShape(8.dp),
             )
             .clickable { onClick() }
-            .padding(horizontal = 12.dp, vertical = 8.dp), // px-3 py-2
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 label,
                 color = MaridTokens.Foreground,
-                fontSize = 14.sp, // text-ui-base
+                fontSize = 14.sp,
             )
             Text(
                 description,

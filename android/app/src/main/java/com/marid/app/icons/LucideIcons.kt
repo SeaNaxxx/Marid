@@ -10,14 +10,8 @@ import androidx.compose.ui.graphics.vector.PathBuilder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
-/**
- * The Marid icon set — exact Lucide geometry (lucide-static v1.73.0), so the
- * Android app renders the same glyphs as the React/Tailwind desktop UI.
- */
+/** Exact Lucide geometry so glyphs match the desktop UI. */
 object MaridIcons {
-    /**
-     * Lucide "menu" icon.
-     */
     public val Menu: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.Menu",
@@ -62,9 +56,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "help-circle" icon.
-     */
     public val CircleHelp: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.CircleHelp",
@@ -112,9 +103,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "square-terminal" icon.
-     */
     public val SquareTerminal: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.SquareTerminal",
@@ -168,9 +156,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "panel-right-open" icon.
-     */
     public val PanelRightOpen: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.PanelRightOpen",
@@ -224,9 +209,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "panel-right-close" icon.
-     */
     public val PanelRightClose: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.PanelRightClose",
@@ -280,9 +262,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "plus" icon.
-     */
     public val Plus: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.Plus",
@@ -316,9 +295,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "chevron-down" icon.
-     */
     public val ChevronDown: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.ChevronDown",
@@ -342,9 +318,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "chevron-right" icon.
-     */
     public val ChevronRight: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.ChevronRight",
@@ -368,9 +341,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "chevron-left" icon.
-     */
     public val ChevronLeft: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.ChevronLeft",
@@ -394,9 +364,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "hand" icon.
-     */
     public val Hand: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.Hand",
@@ -467,9 +434,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "package" icon.
-     */
     public val Package: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.Package",
@@ -537,9 +501,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "arrow-up" icon.
-     */
     public val ArrowUp: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.ArrowUp",
@@ -574,9 +535,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "message-circle-plus" icon.
-     */
     public val MessageCirclePlus: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.MessageCirclePlus",
@@ -626,9 +584,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "calendar-clock" icon.
-     */
     public val CalendarClock: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.CalendarClock",
@@ -715,9 +670,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "blocks" icon.
-     */
     public val Blocks: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.Blocks",
@@ -769,9 +721,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "search" icon.
-     */
     public val Search: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.Search",
@@ -807,9 +756,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "list-filter" icon.
-     */
     public val ListFilter: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.ListFilter",
@@ -854,9 +800,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "folder" icon.
-     */
     public val Folder: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.Folder",
@@ -890,9 +833,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "ellipsis" icon.
-     */
     public val Ellipsis: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.Ellipsis",
@@ -943,9 +883,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "undo-2" icon.
-     */
     public val Undo2: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.Undo2",
@@ -983,9 +920,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "check" icon.
-     */
     public val Check: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.Check",
@@ -1009,9 +943,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "settings" icon.
-     */
     public val Settings: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.Settings",
@@ -1058,9 +989,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "user" icon.
-     */
     public val User: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.User",
@@ -1100,9 +1028,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "smartphone" icon.
-     */
     public val Smartphone: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.Smartphone",
@@ -1144,9 +1069,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "x" icon.
-     */
     public val X: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.X",
@@ -1180,9 +1102,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "square" icon.
-     */
     public val Square: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.Square",
@@ -1213,9 +1132,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "brain" icon.
-     */
     public val Brain: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.Brain",
@@ -1318,9 +1234,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "pencil" icon.
-     */
     public val Pencil: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.Pencil",
@@ -1361,9 +1274,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "loader-circle" icon.
-     */
     public val LoaderCircle: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.LoaderCircle",
@@ -1386,9 +1296,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "file" icon.
-     */
     public val File: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.File",
@@ -1433,9 +1340,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "plug" icon.
-     */
     public val Plug: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.Plug",
@@ -1498,9 +1402,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "git-branch" icon.
-     */
     public val GitBranch: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.GitBranch",
@@ -1550,9 +1451,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "paperclip" icon.
-     */
     public val Paperclip: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.Paperclip",
@@ -1581,9 +1479,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "square-pen" icon.
-     */
     public val SquarePen: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.SquarePen",
@@ -1630,9 +1525,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "clock" icon.
-     */
     public val Clock: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.Clock",
@@ -1669,9 +1561,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "lightbulb" icon.
-     */
     public val Lightbulb: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.Lightbulb",
@@ -1720,9 +1609,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "shield-check" icon.
-     */
     public val ShieldCheck: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.ShieldCheck",
@@ -1766,9 +1652,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "shield-alert" icon.
-     */
     public val ShieldAlert: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.ShieldAlert",
@@ -1822,9 +1705,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "copy" icon.
-     */
     public val Copy: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.Copy",
@@ -1870,9 +1750,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "thumbs-up" icon.
-     */
     public val ThumbsUp: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.ThumbsUp",
@@ -1919,9 +1796,6 @@ object MaridIcons {
         }.build()
     }
 
-    /**
-     * Lucide "thumbs-down" icon.
-     */
     public val ThumbsDown: ImageVector by lazy {
         ImageVector.Builder(
             name = "Marid.ThumbsDown",

@@ -1,22 +1,6 @@
 #!/usr/bin/env node
-// Pack the @marid/server engine dist into the Android runtime bundle that
-// android/app/src/main/assets/runtime/ expects (see runtime/Provisioner.kt):
-//   marid-dist.tgz      { package.json ("marid-engine"), dist/, node_modules/ }
-//   marid-dist.sha256   bare sha256 hex of the tarball (Provisioner.verifySha256)
-//
-// node_modules is the RUNTIME DEPENDENCY CLOSURE derived from the literal
-// bare imports present in the BUILT dist (the esbuild external list plus any
-// dynamic requires that survived bundling — e.g. zod). Workspace packages
-// (@marid/*) are bundled INTO dist by tsup (noExternal) and are therefore not
-// copied. Packages are resolved Node-style against the hoisted workspace
-// root node_modules (package-local node_modules first, then root), so
-// nested/conflicting versions are copied at their actual resolution paths.
-//
-// Usage:
-//   node scripts/marid-android/pack-runtime-dist.mjs \
-//     --dist packages/server/dist \
-//     --node-modules node_modules \
-//     --out android/app/src/main/assets/runtime/marid-dist.tgz
+// node_modules mirrors the bare imports in the BUILT dist, not the manifest
+// closure — workspace packages are bundled into dist by tsup and never copied.
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { cp, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
@@ -54,14 +38,10 @@ if (!distDir || !nodeModulesRoot || !outFile) {
 }
 
 const BARE_SPECIFIER = [
-  // require("x") / import("x") with a literal argument (esbuild keeps these
-  // verbatim for external/dynamic deps)
+  // esbuild keeps literal-arg require/import verbatim for external/dynamic deps.
   /(?:require|import)\s*\(\s*["']([^"'\n]+)["']\s*\)/g,
-  // static import/export source: named imports are MULTILINE in tsup output
-  // (import {\n  A,\n  B\n} from "x"), so match the `from "..."` clause itself
-  // rather than the (brace-ful) clause head.
+  // tsup emits multiline named imports; match the from-clause, not the brace-ful head.
   /\bfrom\s*["']([^"'\n]+)["']/g,
-  // bare side-effect `import "x";`
   /(?:^|[^\w$.])import\s*["']([^"'\n]+)["']/g,
 ];
 
@@ -158,7 +138,6 @@ async function main() {
   while (queue.length > 0) {
     const { name, fromDir } = queue.pop();
     const candidates = [];
-    // nearest node_modules first (package-local), then ancestors up to root
     let current = fromDir;
     for (;;) {
       candidates.push(join(current, "node_modules", name));
@@ -171,10 +150,7 @@ async function main() {
       if (await isDirectory(candidate)) { srcDir = candidate; break; }
     }
     if (!srcDir) {
-      // Unresolvable imports are tolerated: dist contains try/catch guarded
-      // require() calls for OPTIONAL peers (ws -> bufferutil / utf-8-validate)
-      // that pnpm did not install. Ground truth for "required" is the server
-      // package manifest, verified after the closure walk.
+      // Optional peers (bufferutil / utf-8-validate) are try/catch-guarded in dist.
       console.warn(`[pack-runtime] WARN: ${name} not resolvable from ${fromDir} — skipped`);
       continue;
     }
@@ -191,13 +167,8 @@ async function main() {
 
   console.log(`[pack-runtime] bundled ${copied.size} package(s) into node_modules/`);
 
-  // Hard verification: every server dependency that dist ACTUALLY imports
-  // must be bundled. This intentionally does NOT include:
-  //   - @lydell/node-pty-* platform forks (declared in the manifest but never
-  //     imported — dist imports plain "node-pty"; the committed bundle also
-  //     ships without them), and
-  //   - try/catch-guarded optional peers (bufferutil / utf-8-validate), which
-  //     are dist imports but not manifest dependencies.
+  // Verifies only what dist actually imports: node-pty platform forks are
+  // manifest-only, optional peers are try/catch-guarded dist imports.
   const ownerManifestPath = resolve(distDir, "..", "package.json");
   const ownerManifest = JSON.parse(await readFile(ownerManifestPath, "utf8"));
   const serverNonWorkspaceDeps = new Set(

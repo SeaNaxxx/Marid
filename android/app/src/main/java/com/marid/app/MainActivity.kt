@@ -46,16 +46,7 @@ import com.marid.app.state.MaridAppViewModel
 import com.marid.app.ui.MaridRootScreen
 import com.marid.app.ui.MaridTokens
 
-/**
- * Entry point. Boot contract (owner spec — no buttons on the happy path):
- *
- *   open -> [provision if needed] -> [engine starts on a random loopback port]
- *        -> [RPC connects to ws://127.0.0.1:<port>/ws] -> Chat
- *
- * The three-dots screen covers provisioning AND engine startup. Failures are
- * the ONLY place a button appears (retry). No "Start" button, no
- * "Extracting..." text, no fake progress.
- */
+// Boot contract: provision -> engine on a random loopback port -> RPC connect; buttons appear only on failure (no fake progress).
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

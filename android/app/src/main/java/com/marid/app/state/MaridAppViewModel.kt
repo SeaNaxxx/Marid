@@ -27,11 +27,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.put
 import java.util.UUID
 
-/**
- * Boot + session orchestration. Owns: provision -> engine spawn -> RPC
- * connect. The UI renders RuntimeBus.phase; chat/session features call the
- * RPC client through this VM (channels per packages/shared/src/channels.ts).
- */
+// Boot orchestration: provision -> engine spawn -> RPC connect; the UI renders RuntimeBus.phase.
 class MaridAppViewModel(private val app: Application) : ViewModel() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -46,8 +42,7 @@ class MaridAppViewModel(private val app: Application) : ViewModel() {
     fun boot(ctx: Context) {
         val current = RuntimeBus.phase.value
         if (current is RuntimePhase.Failed || current is RuntimePhase.EngineReady) {
-            // retry() or already-booted process recreation: fall through only
-            // when idle, otherwise keep the owner-visible state untouched.
+            // Fall through only when idle; otherwise keep the owner-visible state untouched.
             if (current is RuntimePhase.EngineReady) return
         }
         if (EngineProcess.isRunning) {
@@ -67,8 +62,7 @@ class MaridAppViewModel(private val app: Application) : ViewModel() {
 
     fun startEngine(ctx: Context) {
         scope.launch {
-            // Adopt a healthy survivor first (killed app process, redelivered
-            // service) — never spawn a duplicate node on a served port.
+            // Adopt a healthy survivor from a killed app process — never spawn a duplicate node on a served port.
             val last = EngineProcess.readLastPort(ctx)
             if (last > 0 && EngineProcess.adoptIfHealthy(ctx, last)) {
                 connectRpc()
@@ -113,10 +107,6 @@ class MaridAppViewModel(private val app: Application) : ViewModel() {
         }
     }
 
-    // =====================================================================
-    // Chat + model orchestration (channels per packages/shared/src/channels.ts)
-    // =====================================================================
-
     val workspacePath: String get() = Provisioner.workspaceDir(app).absolutePath
 
     private val _turns = MutableStateFlow<List<ChatTurn>>(emptyList())
@@ -138,7 +128,6 @@ class MaridAppViewModel(private val app: Application) : ViewModel() {
     private var currentSessionId: String? = null
     private var sending = false
 
-    /** Loads the model catalog exactly like the desktop composer (model-selection.getView). */
     fun loadModels() {
         val client = rpc ?: return
         scope.launch {
@@ -157,12 +146,7 @@ class MaridAppViewModel(private val app: Application) : ViewModel() {
         _selectedModel.value = entry
     }
 
-    /**
-     * Send — the task-5 chat flow: sendText envelope over the marid-agent
-     * channel (sendConversationCommandV4), session events streamed back via
-     * onDynamicSessionEvent and rendered defensively (unknown shapes are
-     * logged, never crash the UI).
-     */
+    // sendText envelope over the marid-agent channel; unknown event shapes are logged, never crash the UI.
     fun sendText(text: String) {
         val trimmed = text.trim()
         if (trimmed.isEmpty() || sending) return
@@ -232,11 +216,7 @@ class MaridAppViewModel(private val app: Application) : ViewModel() {
         }
     }
 
-    /**
-     * Defensive mapping of engine session events to ChatTurns. Unknown event
-     * shapes are logged (logcat MaridRuntime) so on-device evidence reveals
-     * the exact contract without crashing the transcript.
-     */
+    // Defensive mapping: unknown event shapes go to logcat (MaridRuntime) as the on-device contract evidence.
     private fun handleSessionEvent(event: kotlinx.serialization.json.JsonElement?) {
         val obj = event.asObjectOrNull() ?: return
         val type = obj["type"].asStringOrNull() ?: obj["event"]?.asStringOrNull()

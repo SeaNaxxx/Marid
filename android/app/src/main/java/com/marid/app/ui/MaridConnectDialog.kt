@@ -27,20 +27,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.marid.app.icons.MaridIcons
 
-/**
- * Connect dialog — OAuth placeholder surface.
- *
- * Directive (owner, 2026-11-16): the sidebar profile button previously
- * presented a Z.ai login. Every Z.ai login trace is REMOVED; tapping
- * "Connect" now opens THIS dialog with two explicit provider placeholders —
- * "Connect to GitHub" / "Connect to Google". The real OAuth flows are NOT
- * implemented yet, so both rows render as disabled placeholders (muted, not
- * clickable — dead-tap buttons are forbidden) and the caption states it.
- *
- * Visual language = the ported design system (MaridTokens dark palette):
- * scrim black 50%, card bg-popover (neutral-800), 1dp border (white 10%),
- * 12dp card radius, 8dp row radius, 44dp touch rows, 14sp ui-base labels.
- */
+// Placeholders by design; no real OAuth flow.
 @Composable
 fun MaridConnectDialog(
     onDismiss: () -> Unit,
@@ -50,7 +37,6 @@ fun MaridConnectDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
-        // scrim "fixed inset-0 bg-black/50" + tap-to-dismiss
         Box(
             modifier = modifier
                 .fillMaxSize()
@@ -58,16 +44,15 @@ fun MaridConnectDialog(
                 .clickable(onClick = onDismiss, interactionSource = null, indication = null),
             contentAlignment = Alignment.Center,
         ) {
-            // card "w-full max-w-xs rounded-xl border border-border bg-popover p-5"
             Column(
                 modifier = Modifier
                     .widthIn(max = 320.dp)
                     .fillMaxWidth()
                     .clickable(interactionSource = null, indication = null) { /* swallow */ }
-                    .background(MaridTokens.Popover, RoundedCornerShape(12.dp)) // rounded-xl
+                    .background(MaridTokens.Popover, RoundedCornerShape(12.dp))
                     .border(1.dp, MaridTokens.Border, RoundedCornerShape(12.dp))
-                    .padding(20.dp), // p-5
-                verticalArrangement = Arrangement.spacedBy(16.dp), // gap-4
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -77,10 +62,9 @@ fun MaridConnectDialog(
                     Text(
                         text = "Connect",
                         color = MaridTokens.Foreground,
-                        fontSize = 16.sp, // text-ui-lg
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
                     )
-                    // close: ghost icon button, real interactive element
                     Icon(
                         imageVector = MaridIcons.X,
                         contentDescription = "Close",
@@ -94,7 +78,7 @@ fun MaridConnectDialog(
                 Text(
                     text = "OAuth providers are placeholders in this build.",
                     color = MaridTokens.ForegroundSubtle,
-                    fontSize = 12.sp, // text-ui-sm
+                    fontSize = 12.sp,
                 )
                 ConnectPlaceholderRow(
                     icon = MaridIcons.GitBranch,
@@ -109,33 +93,29 @@ fun MaridConnectDialog(
     }
 }
 
-/**
- * Placeholder provider row — rendered disabled (muted, non-clickable):
- * the OAuth flow behind it does not exist yet, and dead-tap buttons are
- * forbidden by the UI rules.
- */
+/** Disabled placeholder — the OAuth flow behind it does not exist yet. */
 @Composable
 private fun ConnectPlaceholderRow(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 44.dp) // touch target >= 44dp
-            .border(1.dp, MaridTokens.Border, RoundedCornerShape(8.dp)) // rounded-lg
-            .background(MaridTokens.Input) // bg-input
-            .padding(horizontal = 12.dp), // px-3
-        horizontalArrangement = Arrangement.spacedBy(8.dp), // gap-2
+            .border(1.dp, MaridTokens.Border, RoundedCornerShape(8.dp))
+            .background(MaridTokens.Input)
+            .padding(horizontal = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
             tint = MaridTokens.ForegroundSubtlest,
-            modifier = Modifier.size(16.dp), // size-4
+            modifier = Modifier.size(16.dp),
         )
         Text(
             text = label,
             color = MaridTokens.ForegroundSubtlest,
-            fontSize = 14.sp, // text-ui-base
+            fontSize = 14.sp,
         )
     }
 }

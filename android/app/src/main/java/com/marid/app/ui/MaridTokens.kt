@@ -2,23 +2,9 @@ package com.marid.app.ui
 
 import androidx.compose.ui.graphics.Color
 
-/**
- * Design tokens ported 1:1 from the ZCode desktop UI source of truth
- * (packages/ui/src/styles.css @theme + .dark block).
- *
- * The Tailwind v4 palette values below are the EXACT sRGB conversions of the
- * oklch definitions in tailwindcss/theme.css (computed via the standard
- * OKLab -> linear sRGB matrix, not approximated). Semantic mappings follow
- * the `.dark` block of styles.css, which is the theme the owner's screenshots
- * use. Alpha-mix tokens mirror `color-mix(in oklab, X n%, transparent)`.
- *
- * Typography scale (styles.css @theme):
- *   text-ui-xl 18sp, ui-lg 16sp, ui-base 14sp (default), ui-caption 13sp,
- *   ui-sm 12sp, ui-xs 10sp, ui-2xs 9sp; tracking-wf-label 0.09em.
- */
+/** Palette values are exact sRGB conversions of Tailwind v4's oklch palette — they intentionally differ from Tailwind v3 hex values. */
 object MaridTokens {
 
-    // ------------------------------------------------- Tailwind v4 palette
     val Neutral50 = Color(0xFFFAFAFA)
     val Neutral100 = Color(0xFFF5F5F5)
     val Neutral200 = Color(0xFFE5E5E5)
@@ -76,7 +62,6 @@ object MaridTokens {
     val Rose500 = Color(0xFFFF2056)
     val White = Color(0xFFFFFFFF)
 
-    // ---------------------------------------------- dark semantic surfaces
     val Background = Neutral900
     val Sidebar = Neutral950
     val Header = Neutral900
@@ -93,29 +78,19 @@ object MaridTokens {
     val TabActive = Neutral950
     val Tag = Neutral700
 
-    /** --color-surface: color-mix(white 5%, transparent) */
     val Surface = Color(0x0DFFFFFF)
-    /** --color-surface-hover / --color-hover / --color-selected: white 10% */
     val SurfaceHover = Color(0x1AFFFFFF)
     val Selected = Color(0x1AFFFFFF)
-    /** --color-user-message-bubble: white 8% */
     val UserMessageBubble = Color(0x14FFFFFF)
 
-    // -------------------------------------------------------------- border
-    /** --color-border: white 10% */
     val Border = Color(0x1AFFFFFF)
-    /** --color-border-hover: white 30% */
     val BorderHover = Color(0x4DFFFFFF)
 
-    // ------------------------------------------------------------ text
     val Foreground = Neutral200
-    /** color-mix(neutral-200 60%, transparent) */
     val ForegroundSubtle = Color(0x99E5E5E5)
-    /** color-mix(neutral-200 30%, transparent) */
     val ForegroundSubtlest = Color(0x4DE5E5E5)
     val ForegroundInverse = White
 
-    // ------------------------------------------------------------ accents
     val Brand = Sky500
     val Primary = Neutral50
     val PrimaryForeground = Neutral950
@@ -129,14 +104,12 @@ object MaridTokens {
     val TerminalBg = Neutral950
     val TerminalFg = Neutral50
 
-    // ------------------------------------------- trajectory / chat accents
     val TrajectoryUser = Color(0xFF60A5FA)
     val TrajectoryAssistant = Color(0xFF2DD4BF)
     val TrajectoryReasoning = Color(0xFFA78BFA)
     val TrajectoryToolCall = Color(0xFFF59E0B)
     val TrajectoryToolResult = Color(0xFF38BDF8)
 
-    // -------------------------------------------------------- git statuses
     val GitModified = Amber400
     val GitAdded = Teal400
     val GitDeleted = Red400
@@ -144,10 +117,7 @@ object MaridTokens {
     val DiffAdded = Green500
     val DiffRemoved = Red500
 
-    // ------------------------------------------------------------ metrics
-    // Tailwind spacing: 1 unit = 4dp (p-2 = 8dp, p-4 = 16dp ...).
     const val SPACING_UNIT = 4
-    // shadcn radius scale used by the desktop UI (rounded-md/lg/xl).
     const val RADIUS_MD = 6
     const val RADIUS_LG = 8
     const val RADIUS_XL = 12

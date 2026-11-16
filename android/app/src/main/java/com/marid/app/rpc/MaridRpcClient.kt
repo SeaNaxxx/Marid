@@ -25,15 +25,7 @@ import okio.ByteString.Companion.toByteString
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
-/**
- * Marid RPC client — connects to the on-device Marid engine
- * (`ws://127.0.0.1:3030/ws`) and speaks the ChannelClient protocol used by
- * the web/desktop UI (`packages/client/src/websocket.ts` + `packages/rpc`).
- *
- * Service channel names come from `packages/shared/src/channels.ts`
- * (ServiceChannels). Agent commands from `IMaridAgentService`
- * (packages/services/src/marid-agent/maridAgent.ts).
- */
+// Speaks the engine's ChannelClient protocol over ws://127.0.0.1:<port>/ws; channel names from packages/shared/src/channels.ts.
 object ServiceChannels {
     const val MARID_AGENT = "marid-agent"
     const val MARID_TASK = "marid-task"
@@ -45,7 +37,6 @@ object ServiceChannels {
     const val CLIENT_CONFIG = "client-config"
 }
 
-/** Connection state surfaced to the Compose UI. */
 enum class RpcConnectionState {
     DISCONNECTED,
     CONNECTING,
@@ -78,10 +69,6 @@ class MaridRpcClient(
     @Volatile
     var state: RpcConnectionState = RpcConnectionState.DISCONNECTED
         private set
-
-    // ------------------------------------------------------------------
-    // Connection lifecycle
-    // ------------------------------------------------------------------
 
     fun connect() {
         if (state == RpcConnectionState.CONNECTING || state == RpcConnectionState.CONNECTED) return
@@ -145,8 +132,7 @@ class MaridRpcClient(
                     }
                 }
             } else {
-                // Non-Regular frames (Ack/KeepAlive/...) are not used by the
-                // basic SocketProtocol path; drop them.
+                // Ack/KeepAlive/Control frames are not used by the basic SocketProtocol path; drop them.
                 chunkStream.skip(SocketFraming.HEADER_SIZE + bodyLength)
             }
         }
@@ -162,7 +148,6 @@ class MaridRpcClient(
         if (!reconnectEnabled.get()) return
         if (reconnectJob?.isActive == true) return
         reconnectJob = scope.launch {
-            // Exponential backoff capped at 10s: 1s, 2s, 4s, 8s, 10s...
             val delayMs = (1000L shl reconnectAttempt.coerceAtMost(3)).coerceAtMost(10_000L)
             reconnectAttempt++
             delay(delayMs)
@@ -187,12 +172,7 @@ class MaridRpcClient(
         scope.cancel()
     }
 
-    /**
-     * ChannelServer sends Initialize in its constructor on socket open —
-     * the ChannelClient is created lazily on the first socket open and kept
-     * across reconnects (a fresh ChannelServer is created per connection
-     * server-side, so a fresh client per socket is the matching shape).
-     */
+    // Server creates a fresh ChannelServer per connection, so a fresh client per socket is the matching shape.
     private fun ensureClient(): ChannelClient {
         if (channelClient == null) {
             val client = ChannelClient(
@@ -206,10 +186,6 @@ class MaridRpcClient(
         }
         return channelClient!!
     }
-
-    // ------------------------------------------------------------------
-    // Service facades
-    // ------------------------------------------------------------------
 
     suspend fun call(channel: String, command: String, arg: JsonObject? = null): JsonElement? {
         val client = ensureClient()
@@ -240,8 +216,6 @@ class MaridRpcClient(
         }
     }
 
-    // --- marid-agent (IMaridAgentService) ---
-
     suspend fun agentInitialize(workspacePath: String): JsonElement? = call(
         ServiceChannels.MARID_AGENT,
         "initialize",
@@ -262,17 +236,12 @@ class MaridRpcClient(
         return call(ServiceChannels.MARID_AGENT, "createSession", arg)
     }
 
-    /**
-     * sendConversationCommandV4 — sends a user message into the live session
-     * (maridAgent.ts:1064).
-     */
     suspend fun sendConversationCommandV4(params: JsonObject): JsonElement? =
         call(ServiceChannels.MARID_AGENT, "sendConversationCommandV4", params)
 
     suspend fun readSessionMessages(params: JsonObject): JsonElement? =
         call(ServiceChannels.MARID_AGENT, "readSessionMessages", params)
 
-    /** Session event stream (maridAgent.ts:1001 onDynamicSessionEvent). */
     suspend fun subscribeSessionEvents(
         params: JsonObject,
         onEvent: (JsonElement?) -> Unit,
@@ -283,12 +252,8 @@ class MaridRpcClient(
         onEvent,
     )
 
-    // --- model-selection (IModelSelectionService) ---
-
     suspend fun modelSelectionView(): JsonElement? =
         call(ServiceChannels.MODEL_SELECTION, "getView")
-
-    // --- terminal (ITerminalService) ---
 
     suspend fun terminalCreate(cols: Int, rows: Int): JsonElement? = call(
         ServiceChannels.TERMINAL,
@@ -323,10 +288,7 @@ class MaridRpcClient(
         )
 }
 
-// ----------------------------------------------------------------------
-// JsonElement helpers (engine payloads are read defensively — the shapes are
-// defined by the TS interfaces but must never crash the UI).
-// ----------------------------------------------------------------------
+// Engine payloads are read defensively — shapes follow the TS interfaces but must never crash the UI.
 
 fun JsonElement?.asStringOrNull(): String? = (this as? JsonPrimitive)?.takeIf { it !is JsonNull }?.content
 
@@ -339,7 +301,6 @@ fun JsonElement?.asArrayOrNull(): List<JsonElement>? = (this as? JsonArray)?.toL
 fun JsonElement?.asObjectOrNull(): JsonObject? = this as? JsonObject
 
 fun JsonObject.modelSelectionModelEntries(): List<Pair<String, String>> {
-    // ModelSelectionView { providers: [{ id/name, models: [...] }], preferredSelection }
     val result = mutableListOf<Pair<String, String>>()
     val providers = this["providers"].asArrayOrNull() ?: return result
     for (provider in providers) {

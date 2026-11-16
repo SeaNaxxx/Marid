@@ -8,17 +8,8 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 
-/**
- * Extracts a Termux .deb (Debian binary package) into the runtime root.
- *
- * A .deb is an `ar` archive whose members are:
- *   debian-binary   — version marker (skipped)
- *   control.tar.*   — package metadata (skipped)
- *   data.tar.xz|gz  — the payload; entries are re-rooted by [TarExtractor]
- *
- * Termux payloads are data.tar.xz (dpkg default); zst is refused loudly
- * rather than silently skipped.
- */
+// A .deb is an ar archive: debian-binary + control.tar.* (skipped) + data.tar.* payload, re-rooted by TarExtractor.
+// Termux payloads are data.tar.xz; zst is refused loudly rather than silently skipped.
 object DebExtractor {
 
     fun extract(deb: File, dest: File, report: TarExtractor.ExtractReport) {

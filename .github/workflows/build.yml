@@ -1,12 +1,3 @@
-# Build the Marid debug APK on every push to main (and on demand).
-# Pipeline: pnpm workspace install -> build @marid/server engine (+ workspace
-# deps) -> pack the engine runtime bundle into the Android assets
-# (runtime/marid-dist.tgz + sha256, consumed by runtime/Provisioner.kt) ->
-# JDK 21 + Android SDK -> ./gradlew :app:assembleDebug -> upload artifact.
-#
-# Storage discipline (standing FALSE-CLAIMS-LOG context): one concurrency
-# group cancels superseded runs, artifact retention is capped at 3 days —
-# download the Marid-APK artifact promptly after the run finishes.
 name: Build Marid APK
 
 on:
@@ -26,7 +17,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # pnpm version comes from package.json "packageManager": "pnpm@10.33.2"
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -55,8 +45,7 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      # ubuntu-latest runners ship the Android SDK at $ANDROID_HOME; licenses
-      # must be accepted before Gradle can resolve platforms/build-tools.
+      # sdkmanager exits non-zero even when licenses are already accepted.
       - name: Accept Android SDK licenses
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
 

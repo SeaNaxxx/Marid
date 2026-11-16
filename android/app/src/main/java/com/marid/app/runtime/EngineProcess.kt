@@ -11,16 +11,7 @@ import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.URL
 
-/**
- * Owns the on-device engine process: spawns the embedded Bionic node on
- * packages/server's HTTP entry with a random loopback port, waits for health,
- * and exposes the WS URL the RPC client connects to (ws://127.0.0.1:<port>/ws).
- *
- * Lifecycle contract (Zcode-Android lessons): the UI never spawns Node
- * directly — it asks this object; a healthy leftover from a killed app
- * process is adopted, never duplicated; explicit stop kills owned processes
- * plus same-uid leftovers via pidof.
- */
+// Engine lifecycle: adopt (never duplicate) a healthy survivor from a killed app process; explicit stop kills owned + same-uid leftovers via pidof.
 object EngineProcess {
 
     @Volatile private var process: Process? = null
@@ -31,7 +22,6 @@ object EngineProcess {
     fun httpUrl(): String = "http://127.0.0.1:$port"
     fun currentPort(): Int = port
 
-    /** Picks a free loopback port at random (owner spec: --port <random>). */
     fun pickFreePort(): Int =
         ServerSocket().use { s ->
             s.bind(InetSocketAddress("127.0.0.1", 0))
@@ -110,11 +100,7 @@ object EngineProcess {
         chosen
     }
 
-    /**
-     * True when the port answers HTTP at all. Without MARID_WEB_STATIC_ROOT
-     * the engine serves only /api plus /ws — the root path may 404, which is
-     * still proof the hono server is alive.
-     */
+    // Any HTTP answer proves the hono server is alive — without MARID_WEB_STATIC_ROOT the root path legitimately 404s.
     private fun httpAnswering(port: Int): Boolean = runCatching {
         val c = URL("http://127.0.0.1:$port/").openConnection() as HttpURLConnection
         c.connectTimeout = 1_500
@@ -124,7 +110,6 @@ object EngineProcess {
         ok
     }.getOrDefault(false)
 
-    /** Best-effort adoption of a runtime survivor we hold no handle for. */
     fun adoptIfHealthy(ctx: Context, wantedPort: Int): Boolean {
         if (process?.isAlive == true) return false
         if (!httpAnswering(wantedPort)) return false
@@ -155,7 +140,6 @@ object EngineProcess {
         RuntimeBus.append("engine stopped")
     }
 
-    /** The persisted marker carries the port of the last successful start. */
     fun readLastPort(ctx: Context): Int = runCatching {
         val marker = File(Provisioner.runtimeRoot(ctx), "engine-port.txt")
         if (marker.isFile) marker.readText().trim().toInt() else -1

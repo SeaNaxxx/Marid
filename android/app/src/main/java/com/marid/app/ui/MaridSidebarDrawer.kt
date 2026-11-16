@@ -1,5 +1,4 @@
 package com.marid.app.ui
-// marid-sync-1
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -64,105 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.marid.app.icons.MaridIcons
 
-/**
- * 1:1 Compose port of the ZCode desktop workspace sidebar as a MOBILE DRAWER
- * (dark theme tokens from [MaridTokens]; Tailwind spacing 1 unit = 4dp;
- * rounded-md 6dp, rounded-lg 8dp, rounded-xl 12dp, rounded-2xl 16dp).
- *
- * React files ported:
- *   - packages/ui/src/WorkspaceSidebar.tsx -> project-sidebar/index.tsx
- *     (aside flex h-full flex-col; h-12 top strip; navigation px-2 py-3 gap-1;
- *      task list region border-t border-border/50 pt-3; scroll column gap-3 pb-3;
- *      loading px-4 text-ui-sm text-foreground-subtle / error text-destructive)
- *   - packages/ui/src/NewTaskButtonGroup.tsx
- *     (h-8 32dp rounded-lg 8dp pl/pr 10dp, gap-2, hover:bg-surface-hover,
- *      MessageCirclePlus h-4 w-4 16dp, text-ui-base 14sp,
- *      shortcut text-ui-xs 10sp text-foreground-subtlest ml-auto)
- *   - packages/ui/src/project-sidebar/ProjectSidebarNavigation.tsx
- *     (Automations/Plugin Marketplace: Button ghost size lg h-8 32dp px-2.5 10dp
- *      gap-2 justify-start, CalendarClock / Blocks size-4 16dp, active bg-selected)
- *   - packages/ui/src/project-sidebar/ProjectSidebarListHeader.tsx
- *     (px-2 pb-2 gap-1; title px-2.5 text-ui-base font-medium text-foreground-subtle;
- *      Search/ListFilter ghost icon-sm 24dp, icon size-3.5 14dp text-foreground-subtle)
- *   - packages/ui/src/WorkspaceSidebar/WorkspacePurposeSection.tsx
- *     (section header ml-2 mr-1 h-7 28dp; title px-2.5 text-ui-base font-medium
- *      text-foreground-subtlest; chevron size-3.5 visible on touch;
- *      action buttons ghost icon-sm, Plus/ListChevrons* size-3.5)
- *   - packages/ui/src/project-sidebar/ProjectNode.tsx + ProjectNodeContent.tsx
- *     (section rounded-xl 12dp; row ml-2 h-8 32dp gap-1 rounded-lg pr-1
- *      hover:bg-surface-hover; title button h-8 gap-2 pl-2.5 pr-1 text-foreground;
- *      icon slot size-4 16dp ProjectFolderIcon text-foreground-subtle; name
- *      text-ui-base text-foreground-subtle truncate; device label text-ui-sm
- *      text-remote-foreground-muted max-w-24 96dp; unread dot size-1.5 6dp
- *      rounded-full bg-icon-blue; trailing ghost icon-sm buttons Ellipsis/ListTree/
- *      MessageCirclePlus size-3.5, always visible on touch;
- *      expanded tasks container pl-2 pt-1)
- *   - packages/ui/src/project-sidebar/ProjectFolderIcon.tsx
- *     (rootCount>1 -> Folders/FoldersOpen else Folder/FolderOpen; FoldersOpen
- *      geometry copied verbatim from the source)
- *   - packages/ui/src/TaskListItem.tsx + components/TaskTitleOverflowText.tsx
- *     (row gap-2 rounded-lg pl-2.5 pr-1 py-1, active bg-selected / hover bg-surface-hover;
- *      leading slot size-4: error dot h-1.5 w-1.5 bg-destructive, unread dot
- *      size-[7px] bg-icon-blue, LoaderCircle size-4 text-foreground-subtle animate-spin;
- *      title text-ui-base text-foreground with right 1.5rem fade mask;
- *      change summary +N text-diff-added / -N text-diff-removed;
- *      timeline second line text-ui-base text-foreground-subtle h-6;
- *      meta text-ui-sm text-foreground-subtle, Clock size-3.5;
- *      trailing actions gap-0.5 ghost icon-sm, visible on touch)
- *   - packages/ui/src/project-sidebar/ProjectTaskRows.tsx
- *     (pinned wrapper px-2; "Pinned" h3 px-2.5 py-1 text-ui-base font-medium
- *      text-foreground-subtlest; empty state px-8.5 py-2 text-foreground-subtlest;
- *      show-more ghost size sm ml-8.5 text-foreground-subtlest;
- *      timeline date headings px-2.5 pt-2 pb-1 text-foreground-subtle)
- *   - packages/ui/src/project-sidebar/ArchiveGroupCard.tsx
- *     (header row gap-2; toggle ghost default h-7 px-0 font-medium, Folder size-4
- *      text-foreground-subtle, ChevronRight size-3.5 rotate-90 when open;
- *      count text-ui-sm text-foreground-subtle; menu ghost icon-sm Ellipsis size-4;
- *      open content pt-3 card rounded-xl border border-border bg-surface px-4
- *      divide-y divide-border; rows py-3 gap-x-3; title text-ui-base font-medium;
- *      date text-ui-sm text-foreground-subtle; Trash2 ghost icon-sm text-foreground-subtle;
- *      unarchive secondary h-7 px-2 bg-secondary text-foreground rounded-md;
- *      show-more ghost my-2 w-full)
- *   - packages/ui/src/project-sidebar/HomeOnlyWorkspaceRows.tsx
- *     (section px-2; h3 px-2.5 py-1 text-foreground-subtlest; rows h-8 gap-2
- *      rounded-lg px-2.5 text-ui-base text-foreground-subtle hover:bg-surface-hover;
- *      status span text-ui-sm tone-colored)
- *   - packages/ui/src/project-sidebar/OfflineRemoteProjectRows.tsx
- *     (rows rounded-lg px-3 py-2 text-ui-sm hover:bg-surface-hover tone-colored)
- *   - packages/ui/src/WorkspaceSidebarFooter.tsx
- *     (+ WorkspaceSidebarFooterUsageSummary.tsx / WorkspaceSidebarFooterPlanBadgeHelpers.ts)
- *     (footer px-4 pt-2 pb-4 gap-2.5 + pr-3 -> left 16 / right 12 / top 8 / bottom 16,
- *      gap 10dp; profile button ghost lg h-8 flex-1 justify-start gap-2 rounded-tl-2xl
- *      rounded-bl-2xl 16dp border-0 pl-0; Avatar size-8 32dp rounded-full ring
- *      border-border, fallback bg-background text-foreground text-ui-base;
- *      name text-ui-base font-semibold text-foreground truncate; plan badge chip
- *      rounded-full border border-border bg-surface px-1 py-px text-ui-xs font-medium
- *      text-foreground-subtle max-w-20 80dp; settings ghost icon-lg 32dp Settings size-4)
- *
- * Exact extra colors (computed from styles.css .dark):
- *   --color-remote-foreground-muted: #B3B3B3
- *   --color-icon-blue: terminal-bright-blue -> sky-600 (#0084D1, MaridTokens.Sky600)
- *   --color-warning-surface: color-mix(in srgb, yellow-500 16%, transparent) -> 0x29F0B100
- *   --color-warning-surface-foreground: yellow-400 (MaridTokens.Yellow400)
- *   --color-progress-surface-foreground: blue-300 (MaridTokens.Blue300)
- *   --color-success-surface-foreground: green-300 (MaridTokens.Green300)
- *   --color-destructive-surface-foreground: red-300 (MaridTokens.Red300)
- *
- * Deviations (mobile adaptation):
- *   - The fixed-width desktop panel becomes a slide-in drawer: sheet width is the
- *     exact desktop sidebar width (WORKSPACE_SIDEBAR_DEFAULT_WIDTH_PX = 264px)
- *     when it fits (screen width - 64dp), else full width minus 64dp.
- *   - Row menu/context-menu/dropdown CONTENTS are not ported (separate overlay layer
- *     in React); their trigger buttons fire the provided callbacks.
- *   - Profile dropdown menu is not ported; its plan-badge chip is shown next to the
- *     profile name with the exact chip styles (the desktop menu is the only place
- *     the badge lives in the source).
- *   - ProjectNode "session drop target"/drag indicators and dnd-kit reorder
- *     affordances are desktop drag interactions and are not ported.
- */
 enum class MaridRemoteStatus { Online, Connecting, Offline, Pending, Failed }
-
-// ------------------------------------------------------------------ data models
 
 data class MaridSidebarTask(
     val key: String,
@@ -215,7 +116,6 @@ data class MaridHomeOnlyWorkspace(
     val statusLabel: String?,
 )
 
-/** English defaults extracted from packages/ui/src/i18n/locales/en-US.ts. */
 data class MaridSidebarStrings(
     val newTask: String = "New task", // taskList.newThread
     val automations: String = "Automations", // workspace.openScheduledSettings
@@ -248,37 +148,23 @@ data class MaridSidebarStrings(
     val archiveDeleteTask: (String) -> String = { title -> "Permanently delete \"$title\"" },
 )
 
-// ------------------------------------------------------------- exact dark colors
-
-/** --color-remote-foreground-muted (dark): #B3B3B3 */
 internal val MaridRemoteForegroundMuted = Color(0xFFB3B3B3)
 
-/** --color-icon-blue (dark): terminal-bright-blue -> sky-600 (MaridTokens.Sky600) */
 internal val MaridIconBlue = MaridTokens.Sky600
 
-/** --color-warning-surface (dark): color-mix(in srgb, yellow-500 16%, transparent) */
 internal val MaridWarningSurface = Color(0x29F0B100)
 
-/** --color-progress-surface-foreground (dark): blue-300 */
 internal val MaridProgressForeground = MaridTokens.Blue300
 
-/** --color-warning-surface-foreground (dark): yellow-400 */
 internal val MaridWarningForeground = MaridTokens.Yellow400
 
-/** --color-success-surface-foreground (dark): green-300 */
 internal val MaridSuccessForeground = MaridTokens.Green300
 
-/** --color-destructive-surface-foreground (dark): red-300 */
 internal val MaridDangerForeground = MaridTokens.Red300
 
-/** --color-border/50 (border-t border-border/50 -> border token at 50% alpha) */
 internal val MaridBorderHalf = MaridTokens.Border.copy(alpha = 0.5f)
 
-/**
- * RemoteConnectionPresentation TONES (lib/remoteConnectionPresentation.ts):
- * status -> foreground color class. `projectIcon` mirrors
- * RemoteConnectionStateIcon(project=true), where online uses the muted neutral.
- */
+// projectIcon=true: online intentionally renders the muted neutral instead of success green.
 internal fun maridRemoteStatusForeground(status: MaridRemoteStatus, projectIcon: Boolean): Color =
     when (status) {
         MaridRemoteStatus.Online ->
@@ -289,11 +175,7 @@ internal fun maridRemoteStatusForeground(status: MaridRemoteStatus, projectIcon:
         MaridRemoteStatus.Failed -> MaridDangerForeground
     }
 
-// ----------------------------------------------------------- lucide additions
-// lucide-static v1.73.0 geometry (same version as MaridIcons.kt): exact 24x24
-// paths, stroke-width 2, round caps/joins, fetched for icons missing from
-// com.marid.app.icons.MaridIcons.
-
+// Icons missing from MaridIcons, drawn with exact lucide geometry.
 internal object MaridIcons2a {
 
     private fun builder(name: String) = ImageVector.Builder(
@@ -314,39 +196,31 @@ internal object MaridIcons2a {
             pathFillType = PathFillType.NonZero,
         ) { block() }
 
-    /** lucide "cloud" v1.73.0: M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z */
     internal val Cloud: ImageVector by lazy {
         builder("Cloud").apply {
             stroke {
                 moveTo(17.5f, 19f)
                 lineTo(9f, 19f)
-                // a7 7 0 1 1 6.71 -9
                 arcTo(7f, 7f, 0f, true, true, 15.71f, 10f)
                 lineTo(17.5f, 10f)
-                // a4.5 4.5 0 1 1 0 9
                 arcTo(4.5f, 4.5f, 0f, true, true, 17.5f, 19f)
                 close()
             }
         }.build()
     }
 
-    /** lucide "cloud-off" v1.73.0 */
     internal val CloudOff: ImageVector by lazy {
         builder("CloudOff").apply {
             stroke {
                 moveTo(10.94f, 5.274f)
-                // a7 7 0 0 1 4.77 4.726
                 arcTo(7f, 7f, 0f, false, true, 15.71f, 10f)
                 lineTo(17.5f, 10f)
-                // a4.5 4.5 0 0 1 4.222 6.057
                 arcTo(4.5f, 4.5f, 0f, false, true, 21.722f, 16.057f)
             }
             stroke {
                 moveTo(18.796f, 18.81f)
-                // a4.5 4.5 0 0 1 -1.296 .19
                 arcTo(4.5f, 4.5f, 0f, false, true, 17.5f, 19f)
                 lineTo(9f, 19f)
-                // A7 7 0 0 1 5.79 5.78
                 arcTo(7f, 7f, 0f, false, true, 5.79f, 5.78f)
             }
             stroke {
@@ -356,10 +230,6 @@ internal object MaridIcons2a {
         }.build()
     }
 
-    /**
-     * lucide "cloud-alert" v1.73.0
-     * (M12 12v4 / M12 20h.01 / M8.128 16.949A7 7 0 1 1 15.71 8h1.79a1 1 0 0 1 0 9h-1.642)
-     */
     internal val CloudAlert: ImageVector by lazy {
         builder("CloudAlert").apply {
             stroke {
@@ -372,137 +242,100 @@ internal object MaridIcons2a {
             }
             stroke {
                 moveTo(8.128f, 16.949f)
-                // A7 7 0 1 1 15.71 8
                 arcTo(7f, 7f, 0f, true, true, 15.71f, 8f)
                 lineTo(17.5f, 8f)
-                // a1 1 0 0 1 0 9 — SVG scales radii up to a half-circle (r=4.5)
                 arcTo(4.5f, 4.5f, 0f, true, true, 17.5f, 17f)
                 lineTo(15.858f, 17f)
             }
         }.build()
     }
 
-    /** lucide "folder-open" v1.73.0 */
     internal val FolderOpen: ImageVector by lazy {
         builder("FolderOpen").apply {
             stroke {
                 moveTo(6f, 14f)
                 lineTo(7.5f, 11.1f)
-                // A2 2 0 0 1 9.24 10
                 arcTo(2f, 2f, 0f, false, true, 9.24f, 10f)
                 lineTo(20f, 10f)
-                // a2 2 0 0 1 1.94 2.5
                 arcTo(2f, 2f, 0f, false, true, 21.94f, 12.5f)
                 lineTo(20.4f, 18.5f)
-                // a2 2 0 0 1 -1.95 1.5
                 arcTo(2f, 2f, 0f, false, true, 18.45f, 20f)
                 lineTo(4f, 20f)
-                // a2 2 0 0 1 -2 -2
                 arcTo(2f, 2f, 0f, false, true, 2f, 18f)
                 lineTo(2f, 5f)
-                // a2 2 0 0 1 2 -2
                 arcTo(2f, 2f, 0f, false, true, 4f, 3f)
                 lineTo(7.9f, 3f)
-                // a2 2 0 0 1 1.69 .9
                 arcTo(2f, 2f, 0f, false, true, 9.59f, 3.9f)
                 lineTo(10.4f, 5.1f)
-                // a2 2 0 0 0 1.67 .9
                 arcTo(2f, 2f, 0f, false, false, 12.07f, 6f)
                 lineTo(18f, 6f)
-                // a2 2 0 0 1 2 2
                 arcTo(2f, 2f, 0f, false, true, 20f, 8f)
                 lineTo(20f, 10f)
             }
         }.build()
     }
 
-    /** lucide "folders" v1.73.0 (front + back outline) */
     internal val Folders: ImageVector by lazy {
         builder("Folders").apply {
             stroke {
                 moveTo(20f, 5f)
-                // a2 2 0 0 1 2 2
                 arcTo(2f, 2f, 0f, false, true, 22f, 7f)
                 lineTo(22f, 14f)
-                // a2 2 0 0 1 -2 2
                 arcTo(2f, 2f, 0f, false, true, 20f, 16f)
                 lineTo(9f, 16f)
-                // a2 2 0 0 1 -2 -2
                 arcTo(2f, 2f, 0f, false, true, 7f, 14f)
                 lineTo(7f, 5f)
-                // a2 2 0 0 1 2 -2
                 arcTo(2f, 2f, 0f, false, true, 9f, 3f)
                 lineTo(11.5f, 3f)
-                // a1.5 1.5 0 0 1 1.2 .6
                 arcTo(1.5f, 1.5f, 0f, false, true, 12.7f, 3.6f)
                 lineTo(13.3f, 4.4f)
-                // a1.5 1.5 0 0 0 1.2 .6
                 arcTo(1.5f, 1.5f, 0f, false, false, 14.5f, 5f)
                 close()
             }
             stroke {
                 moveTo(3f, 8.268f)
-                // a2 2 0 0 0 -1 1.738
                 arcTo(2f, 2f, 0f, false, false, 2f, 10.006f)
                 lineTo(2f, 19f)
-                // a2 2 0 0 0 2 2
                 arcTo(2f, 2f, 0f, false, false, 4f, 21f)
                 lineTo(15f, 21f)
-                // a2 2 0 0 0 1.732 -1
                 arcTo(2f, 2f, 0f, false, false, 16.732f, 20f)
             }
         }.build()
     }
 
-    /**
-     * FoldersOpen — copied VERBATIM from project-sidebar/ProjectFolderIcon.tsx
-     * ("folders-open" custom lucide icon): front open-flap folder + back outline.
-     */
     internal val FoldersOpen: ImageVector by lazy {
         builder("FoldersOpen").apply {
             stroke {
                 moveTo(10f, 12f)
                 lineTo(11.2f, 10f)
-                // a2 2 0 0 1 1.72 -1
                 arcTo(2f, 2f, 0f, false, true, 12.92f, 9f)
                 lineTo(21f, 9f)
-                // a1 1 0 0 1 .97 1.25
                 arcTo(1f, 1f, 0f, false, true, 21.97f, 10.25f)
                 lineTo(20.87f, 14.5f)
-                // A2 2 0 0 1 18.94 16
                 arcTo(2f, 2f, 0f, false, true, 18.94f, 16f)
                 lineTo(9f, 16f)
-                // a2 2 0 0 1 -2 -2
                 arcTo(2f, 2f, 0f, false, true, 7f, 14f)
                 lineTo(7f, 5f)
-                // a2 2 0 0 1 2 -2
                 arcTo(2f, 2f, 0f, false, true, 9f, 3f)
                 lineTo(11.5f, 3f)
-                // a1.5 1.5 0 0 1 1.2 .6
                 arcTo(1.5f, 1.5f, 0f, false, true, 12.7f, 3.6f)
                 lineTo(13.3f, 4.4f)
-                // a1.5 1.5 0 0 0 1.2 .6
                 arcTo(1.5f, 1.5f, 0f, false, false, 14.5f, 5f)
                 lineTo(20f, 5f)
-                // a2 2 0 0 1 2 2
                 arcTo(2f, 2f, 0f, false, true, 22f, 7f)
                 lineTo(22f, 9f)
             }
             stroke {
                 moveTo(3f, 8.268f)
-                // a2 2 0 0 0 -1 1.738
                 arcTo(2f, 2f, 0f, false, false, 2f, 10.006f)
                 lineTo(2f, 19f)
-                // a2 2 0 0 0 2 2
                 arcTo(2f, 2f, 0f, false, false, 4f, 21f)
                 lineTo(15f, 21f)
-                // a2 2 0 0 0 1.732 -1
                 arcTo(2f, 2f, 0f, false, false, 16.732f, 20f)
             }
         }.build()
     }
 
-    /** lucide "list-tree" v1.73.0 */
     internal val ListTree: ImageVector by lazy {
         builder("ListTree").apply {
             stroke {
@@ -519,21 +352,18 @@ internal object MaridIcons2a {
             }
             stroke {
                 moveTo(3f, 10f)
-                // a2 2 0 0 0 2 2
                 arcTo(2f, 2f, 0f, false, false, 5f, 12f)
                 lineTo(8f, 12f)
             }
             stroke {
                 moveTo(3f, 5f)
                 lineTo(3f, 17f)
-                // a2 2 0 0 0 2 2
                 arcTo(2f, 2f, 0f, false, false, 5f, 19f)
                 lineTo(8f, 19f)
             }
         }.build()
     }
 
-    /** lucide "list-chevrons-down-up" v1.73.0 */
     internal val ListChevronsDownUp: ImageVector by lazy {
         builder("ListChevronsDownUp").apply {
             stroke { moveTo(3f, 5f); lineTo(11f, 5f) }
@@ -552,7 +382,6 @@ internal object MaridIcons2a {
         }.build()
     }
 
-    /** lucide "list-chevrons-up-down" v1.73.0 */
     internal val ListChevronsUpDown: ImageVector by lazy {
         builder("ListChevronsUpDown").apply {
             stroke { moveTo(3f, 5f); lineTo(11f, 5f) }
@@ -571,7 +400,6 @@ internal object MaridIcons2a {
         }.build()
     }
 
-    /** lucide "pin" v1.73.0 */
     internal val Pin: ImageVector by lazy {
         builder("Pin").apply {
             stroke {
@@ -580,39 +408,28 @@ internal object MaridIcons2a {
             }
             stroke {
                 moveTo(9f, 10.76f)
-                // a2 2 0 0 1 -1.11 1.79
                 arcTo(2f, 2f, 0f, false, true, 7.89f, 12.55f)
                 lineTo(6.11f, 13.45f)
-                // A2 2 0 0 0 5 15.24
                 arcTo(2f, 2f, 0f, false, false, 5f, 15.24f)
                 lineTo(5f, 16f)
-                // a1 1 0 0 0 1 1
                 arcTo(1f, 1f, 0f, false, false, 6f, 17f)
                 lineTo(18f, 17f)
-                // a1 1 0 0 0 1 -1
                 arcTo(1f, 1f, 0f, false, false, 19f, 16f)
                 lineTo(19f, 15.24f)
-                // a2 2 0 0 0 -1.11 -1.79
                 arcTo(2f, 2f, 0f, false, false, 17.89f, 13.45f)
                 lineTo(16.11f, 12.55f)
-                // A2 2 0 0 1 15 10.76
                 arcTo(2f, 2f, 0f, false, true, 15f, 10.76f)
                 lineTo(15f, 7f)
-                // a1 1 0 0 1 1 -1
                 arcTo(1f, 1f, 0f, false, true, 16f, 6f)
-                // a2 2 0 0 0 0 -4
                 arcTo(2f, 2f, 0f, false, false, 16f, 2f)
                 lineTo(8f, 2f)
-                // a2 2 0 0 0 0 4
                 arcTo(2f, 2f, 0f, false, false, 8f, 6f)
-                // a1 1 0 0 1 1 1
                 arcTo(1f, 1f, 0f, false, true, 9f, 7f)
                 close()
             }
         }.build()
     }
 
-    /** lucide "trash-2" v1.73.0 */
     internal val Trash2: ImageVector by lazy {
         builder("Trash2").apply {
             stroke { moveTo(10f, 11f); lineTo(10f, 17f) }
@@ -620,10 +437,8 @@ internal object MaridIcons2a {
             stroke {
                 moveTo(19f, 6f)
                 lineTo(19f, 20f)
-                // a2 2 0 0 1 -2 2
                 arcTo(2f, 2f, 0f, false, true, 17f, 22f)
                 lineTo(7f, 22f)
-                // a2 2 0 0 1 -2 -2
                 arcTo(2f, 2f, 0f, false, true, 5f, 20f)
                 lineTo(5f, 6f)
             }
@@ -631,10 +446,8 @@ internal object MaridIcons2a {
             stroke {
                 moveTo(8f, 6f)
                 lineTo(8f, 4f)
-                // a2 2 0 0 1 2 -2
                 arcTo(2f, 2f, 0f, false, true, 10f, 2f)
                 lineTo(14f, 2f)
-                // a2 2 0 0 1 2 2
                 arcTo(2f, 2f, 0f, false, true, 16f, 4f)
                 lineTo(16f, 6f)
             }
@@ -642,13 +455,6 @@ internal object MaridIcons2a {
     }
 }
 
-// ------------------------------------------------------------ shared primitives
-
-/**
- * RemoteConnectionStateIcon (remote-connection/RemoteConnectionStateIcon.tsx):
- * 16dp slot; online -> Cloud, connecting -> LoaderCircle spin, offline -> CloudOff,
- * pending -> CloudAlert, failed -> Cloud + X overlay (size-3, -bottom-1 -right-1).
- */
 @Composable
 internal fun MaridRemoteStateIcon(
     status: MaridRemoteStatus,
@@ -669,7 +475,6 @@ internal fun MaridRemoteStateIcon(
                 Icon(MaridIcons2a.CloudAlert, null, Modifier.size(size), tint = tint)
             MaridRemoteStatus.Failed -> {
                 Icon(MaridIcons2a.Cloud, null, Modifier.size(size), tint = tint)
-                // cloud-x: <X className="absolute -bottom-1 -right-1 size-3 bg-inherit" />
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
@@ -685,7 +490,6 @@ internal fun MaridRemoteStateIcon(
     }
 }
 
-/** ProjectFolderIcon: rootCount > 1 -> Folders/FoldersOpen else Folder/FolderOpen. */
 @Composable
 private fun MaridProjectFolderIcon(rootCount: Int, open: Boolean, size: Dp, tint: Color) {
     val icon = when {
@@ -696,10 +500,6 @@ private fun MaridProjectFolderIcon(rootCount: Int, open: Boolean, size: Dp, tint
     Icon(icon, contentDescription = null, modifier = Modifier.size(size), tint = tint)
 }
 
-/**
- * Ghost `icon-sm` row button: size-6 (24dp), rounded-md (6dp), icon size-3.5 (14dp),
- * text-foreground-subtle, hover:text-foreground (pressed brightens the tint).
- */
 @Composable
 private fun MaridRowGhostIconButton(
     icon: ImageVector,
@@ -735,10 +535,6 @@ private fun MaridRowGhostIconButton(
     }
 }
 
-/**
- * TaskTitleOverflowText fade: [mask-image:linear-gradient(to_right, black
- * calc(100% - 1.5rem), transparent)] — 24dp right-edge fade instead of an ellipsis.
- */
 private fun Modifier.maridTitleRightFade(): Modifier =
     graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
         .drawWithContent {
@@ -756,14 +552,6 @@ private fun Modifier.maridTitleRightFade(): Modifier =
             }
         }
 
-// ------------------------------------------------------------------- drawer
-
-/**
- * Behavioral container: ModalNavigationDrawer (content fully custom-styled).
- * Sheet width = exact desktop sidebar width (264px,
- * WORKSPACE_SIDEBAR_DEFAULT_WIDTH_PX in app-shell/WorkspaceShellLayout.tsx)
- * when it fits on screen minus 64dp, else full width minus 64dp.
- */
 @Composable
 fun MaridSidebarDrawerHost(
     isOpen: Boolean,
@@ -804,10 +592,6 @@ fun MaridSidebarDrawerHost(
     )
 }
 
-/**
- * The sidebar sheet content (ProjectSidebar). Data comes in via params; every
- * interactive control fires a callback, nothing is wired to RPC here.
- */
 @Composable
 fun MaridSidebarDrawer(
     modifier: Modifier = Modifier,
@@ -857,9 +641,7 @@ fun MaridSidebarDrawer(
             .fillMaxSize()
             .background(MaridTokens.Sidebar),
     ) {
-        // h-12 drag strip above the task list region (desktop parity).
         Spacer(Modifier.height(48.dp))
-        // ProjectSidebarNavigation: flex flex-col gap-1 px-2 py-3
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -889,7 +671,6 @@ fun MaridSidebarDrawer(
                 )
             }
         }
-        // Task list region: border-t border-border/50 pt-3
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -902,7 +683,6 @@ fun MaridSidebarDrawer(
                     .background(MaridBorderHalf),
             )
             Spacer(Modifier.height(12.dp)) // pt-3
-            // ProjectSidebarListHeader: px-2 pb-2 gap-1
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -935,7 +715,6 @@ fun MaridSidebarDrawer(
                     iconSize = 14.dp, // ListFilter size-3.5
                 )
             }
-            // Scroll list: flex flex-col gap-3 pb-3
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -954,7 +733,6 @@ fun MaridSidebarDrawer(
                     )
                 } else {
                     if (pinnedTasks.isNotEmpty()) {
-                        // Pinned block: px-2 + h3 px-2.5 py-1
                         Column(
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
                         ) {
@@ -968,7 +746,6 @@ fun MaridSidebarDrawer(
                                     .padding(horizontal = 10.dp, vertical = 4.dp),
                             )
                             pinnedTasks.forEach { task ->
-                                // ProjectTaskRow wrapper: py-px
                                 Column(
                                     Modifier
                                         .fillMaxWidth()
@@ -998,7 +775,6 @@ fun MaridSidebarDrawer(
                             onTaskArchive = onTaskArchive,
                         )
                     }
-                    // Purpose sections (WorkspacePurposeSection): Projects + Tasks
                     MaridPurposeSection(
                         title = strings.projectsSection,
                         expanded = true,
@@ -1052,7 +828,6 @@ fun MaridSidebarDrawer(
                             )
                         },
                         content = {
-                            // 任务分区：pl-2 内缩
                             Column(Modifier.padding(start = 8.dp)) {
                                 if (looseTasks.isEmpty()) {
                                     Text(
@@ -1097,7 +872,6 @@ fun MaridSidebarDrawer(
                     )
                 }
                 if (loading && homeOnlyWorkspaces == null) {
-                    // p.px-4 text-ui-sm text-foreground-subtle
                     Text(
                         text = strings.loading,
                         color = MaridTokens.ForegroundSubtle,
@@ -1119,7 +893,6 @@ fun MaridSidebarDrawer(
                 }
             }
         }
-        // WorkspaceSidebarFooter className="pr-3": px-4 pt-2 pb-4 + pr-3
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1148,9 +921,6 @@ fun MaridSidebarDrawer(
     }
 }
 
-// --------------------------------------------------------------- nav rows
-
-/** NewTaskButtonGroup: h-8 rounded-lg pl/pr-2.5 gap-2 hover:bg-surface-hover. */
 @Composable
 private fun MaridNewTaskRow(
     label: String,
@@ -1196,7 +966,6 @@ private fun MaridNewTaskRow(
             )
         }
         if (shortcutLabel != null) {
-            // ml-auto text-ui-xs font-normal text-foreground-subtlest
             Text(
                 text = shortcutLabel,
                 color = MaridTokens.ForegroundSubtlest,
@@ -1207,10 +976,6 @@ private fun MaridNewTaskRow(
     }
 }
 
-/**
- * ProjectSidebarNavigation secondary rows: Button ghost size lg (h-8 px-2.5) with
- * "w-full justify-start gap-2", active -> bg-selected text-foreground.
- */
 @Composable
 private fun MaridNavRow(
     icon: ImageVector,
@@ -1252,14 +1017,6 @@ private fun MaridNavRow(
     }
 }
 
-// ------------------------------------------------------------ purpose section
-
-/**
- * WorkspacePurposeSection header: ml-2 mr-1 h-7; trigger px-2.5 gap-1 text-ui-base
- * font-medium text-foreground-subtlest hover:text-foreground; chevron size-3.5
- * visible on touch ([@media(hover:none)]:opacity-100); action buttons always
- * visible on touch.
- */
 @Composable
 private fun MaridPurposeSection(
     title: String,
@@ -1302,7 +1059,6 @@ private fun MaridPurposeSection(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false),
                 )
-                // chevron: size-3.5 shrink-0, visible on touch
                 Icon(
                     imageVector = if (expanded) MaridIcons.ChevronDown else MaridIcons.ChevronRight,
                     contentDescription = null,
@@ -1321,15 +1077,7 @@ private fun MaridPurposeSection(
     }
 }
 
-// ---------------------------------------------------------------- project row
-
-/**
- * ProjectNode + ProjectNodeContent.
- * Container: min-w-0 rounded-xl (12dp).
- * Row: ml-2 h-8 gap-1 rounded-lg pr-1 hover:bg-surface-hover.
- * Title button: h-8 gap-2 pl-2.5 pr-1 text-left text-foreground (hover bg stays
- * transparent; the ROW carries the hover surface).
- */
+// Title button hover bg stays transparent; the ROW carries the hover surface.
 @Composable
 private fun MaridProjectRow(
     project: MaridSidebarProject,
@@ -1377,7 +1125,6 @@ private fun MaridProjectRow(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp), // gap-2
             ) {
-                // Icon slot: flex size-4 items-center justify-center
                 Box(
                     modifier = Modifier.size(16.dp),
                     contentAlignment = Alignment.Center,
@@ -1394,7 +1141,6 @@ private fun MaridProjectRow(
                     }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // name: truncate text-ui-base text-foreground-subtle
                     Text(
                         text = project.name,
                         color = MaridTokens.ForegroundSubtle,
@@ -1405,7 +1151,6 @@ private fun MaridProjectRow(
                             .weight(1f, fill = false)
                             .alignByBaseline(),
                     )
-                    // device label: max-w-24 truncate text-ui-sm text-remote-foreground-muted
                     if (project.deviceLabel != null) {
                         Text(
                             text = project.deviceLabel,
@@ -1419,7 +1164,6 @@ private fun MaridProjectRow(
                         )
                     }
                 }
-                // unread dot: size-1.5 rounded-full bg-icon-blue (collapsed + online)
                 if (!project.expanded && project.online && project.hasUnread) {
                     Box(
                         modifier = Modifier
@@ -1428,7 +1172,6 @@ private fun MaridProjectRow(
                             .background(MaridIconBlue),
                     )
                 }
-                // status label (offline/unresolved): text-ui-sm tone-colored
                 if (!project.online && project.statusLabel != null) {
                     Text(
                         text = project.statusLabel,
@@ -1439,7 +1182,6 @@ private fun MaridProjectRow(
                     )
                 }
             }
-            // Actions: flex shrink-0 items-center gap-1, opacity-100 on touch
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -1464,7 +1206,6 @@ private fun MaridProjectRow(
             }
         }
         if (project.expanded) {
-            // CollapsibleContent: pl-2 pt-1
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1490,13 +1231,6 @@ private fun MaridProjectRow(
     }
 }
 
-// ------------------------------------------------------------------ task row
-
-/**
- * TaskListItem (default + timeline variants):
- * li: flex gap-2 rounded-lg pl-2.5 pr-1 py-1 items-center,
- * isActive -> bg-selected, hover -> bg-surface-hover.
- */
 @Composable
 private fun MaridTaskRow(
     task: MaridSidebarTask,
@@ -1522,7 +1256,6 @@ private fun MaridTaskRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp), // gap-2
     ) {
-        // Leading slot: relative flex size-4 items-center justify-center
         Box(
             modifier = Modifier.size(16.dp),
             contentAlignment = Alignment.Center,
@@ -1656,7 +1389,6 @@ private fun MaridTaskRow(
     }
 }
 
-/** changeSummaryNode: +N text-diff-added / -N text-diff-removed (text-ui-base). */
 @Composable
 private fun MaridChangeSummary(task: MaridSidebarTask) {
     if (task.addedLines > 0) {
@@ -1678,12 +1410,6 @@ private fun MaridChangeSummary(task: MaridSidebarTask) {
     }
 }
 
-// -------------------------------------------------------- offline/home rows
-
-/**
- * OfflineRemoteProjectRow: flex w-full items-center gap-2 rounded-lg px-3 py-2
- * text-left text-ui-sm hover:bg-surface-hover (tone-colored text).
- */
 @Composable
 private fun MaridOfflineWorkspaceRow(row: MaridOfflineWorkspaceRow, onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
@@ -1717,11 +1443,6 @@ private fun MaridOfflineWorkspaceRow(row: MaridOfflineWorkspaceRow, onClick: () 
     }
 }
 
-/**
- * HomeOnlyWorkspaceRows section: px-2; h3 px-2.5 py-1 text-foreground-subtlest;
- * rows h-8 w-full gap-2 rounded-lg px-2.5 text-ui-base text-foreground-subtle
- * hover:bg-surface-hover; remote status span text-ui-sm tone-colored.
- */
 @Composable
 private fun MaridHomeOnlySection(
     title: String,
@@ -1802,15 +1523,6 @@ private fun MaridHomeOnlySection(
     }
 }
 
-// ----------------------------------------------------------- archive card
-
-/**
- * ArchiveGroupCard: header gap-2; toggle ghost default (h-7 px-0) font-medium,
- * Folder size-4 text-foreground-subtle, ChevronRight size-3.5 rotate-90 open;
- * count text-ui-sm text-foreground-subtle; menu ghost icon-sm Ellipsis size-4.
- * Open content: pt-3; card rounded-xl border border-border bg-surface px-4,
- * rows divide-y divide-border py-3 gap-x-3.
- */
 @Composable
 private fun MaridArchiveGroupCard(
     group: MaridArchiveGroup,
@@ -1890,7 +1602,6 @@ private fun MaridArchiveGroupCard(
             ) {
                 group.tasks.forEachIndexed { index, task ->
                     if (index > 0) {
-                        // divide-y divide-border
                         Box(
                             Modifier
                                 .fillMaxWidth()
@@ -1927,7 +1638,6 @@ private fun MaridArchiveGroupCard(
                             onClick = { onDelete(task) },
                             iconSize = 16.dp, // Trash2 size-4 text-foreground-subtle
                         )
-                        // Unarchive: variant secondary size default (h-7 px-2) rounded-md
                         val unarchiveInteraction = remember { MutableInteractionSource() }
                         val unarchivePressed by unarchiveInteraction.collectIsPressedAsState()
                         Box(
@@ -1962,16 +1672,6 @@ private fun MaridArchiveGroupCard(
     }
 }
 
-// ------------------------------------------------------------------ footer
-
-/**
- * Footer profile trigger: Button ghost size lg with "min-w-0 flex-1 justify-start
- * gap-2 overflow-hidden rounded-tl-2xl rounded-bl-2xl border-0 pl-0".
- * Avatar size-8 (32dp) ring border-border; fallback bg-background text-foreground.
- * Name text-ui-base font-semibold text-foreground.
- * Plan badge (WorkspaceSidebarFooterPlanBadge): rounded-full border border-border
- * bg-surface px-1 py-px text-ui-xs font-medium text-foreground-subtle max-w-20.
- */
 @Composable
 private fun MaridFooterProfileButton(
     name: String,
@@ -2000,7 +1700,6 @@ private fun MaridFooterProfileButton(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp), // gap-2
     ) {
-        // Avatar: relative flex size-8 rounded-full + after:border-border ring
         Box(
             modifier = Modifier
                 .size(32.dp)
@@ -2057,7 +1756,6 @@ private fun MaridFooterProfileButton(
     }
 }
 
-/** Footer settings trigger: ghost icon-lg (size-8 32dp rounded-lg), Settings size-4. */
 @Composable
 private fun MaridFooterIconButton(
     icon: ImageVector,

@@ -9,24 +9,7 @@ import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 
-/**
- * Pure-JVM two-pass tar extraction for the embedded Bionic runtime and the
- * engine dist. Fresh Marid implementation inheriting the CONTRACT from
- * Zcode-Android's device failures (docs/architecture/OLD-ZCODE-RESEARCH.md §2.5):
- *
- * - TWO-PASS design: pass 1 extracts directories + regular files, pass 2
- *   creates symlinks/hardlinks once their targets exist. This removes the
- *   archive-ordering fragility of fallback copies entirely.
- * - Termux debs store paths as data/data/com.termux/files/usr/... — every
- *   entry is re-rooted at "files/" so usr/... lands under [dest].
- * - Devices may refuse link() (Zcode-Android: AccessDeniedException x135) and
- *   API 24/25 lack Files.createSymbolicLink: symlinks fall back to
- *   budget-capped copies of the resolved target instead of failing.
- * - App-API bugs must FAIL LOUDLY, never masquerade as device refusals
- *   (NoSuchMethodError on an API level that has the API = app defect).
- * - Path-traversal guard on every entry and every link resolution.
- * - Tar mode bits are applied (chmod) for regular files.
- */
+// Two-pass extraction (dirs/files, then links) so archive order can't break link targets; Termux entries re-root, absolute symlinks rewritten onto this runtime.
 class TarExtractor(
     private val dest: File,
     private val report: ExtractReport = ExtractReport(),
@@ -34,7 +17,7 @@ class TarExtractor(
     private val copyBudgetBytes: Long = DEFAULT_COPY_BUDGET_BYTES,
 ) {
 
-    /** Link primitives, injectable for JVM tests. */
+    /** Link primitives injectable for JVM tests. */
     interface LinkOps {
         fun createSymbolicLink(link: File, target: String)
         fun createLink(link: File, existing: File)
@@ -74,7 +57,6 @@ class TarExtractor(
     fun extract(raw: InputStream) {
         val entries = mutableListOf<TarArchiveEntry>()
         TarArchiveInputStream(raw.buffered(1 shl 16)).use { tis ->
-            // Pass 1: directories + regular files (streaming; bodies read in order).
             while (true) {
                 val entry = tis.nextTarEntry ?: break
                 val target = relabeled(entry)
@@ -98,7 +80,6 @@ class TarExtractor(
                 }
             }
         }
-        // Pass 2: links (targets now exist on disk).
         for (entry in entries) {
             val target = relabeled(entry) ?: continue
             if (entry.isSymbolicLink) extractSymlink(entry, target)
@@ -106,11 +87,7 @@ class TarExtractor(
         }
     }
 
-    /**
-     * Re-roots a Termux deb entry (./data/data/com.termux/files/usr/...) at
-     * [dest]. Entries without the marker (DEBIAN control files, debian-binary)
-     * return null and are skipped. Traversal outside [dest] is refused.
-     */
+    // Re-roots ./data/data/com.termux/files/usr/... under dest; entries without the marker (DEBIAN control files) are skipped; traversal refused.
     private fun relabeled(entry: TarArchiveEntry): File? {
         val name = entry.name.removePrefix("./")
         val marker = "files/"
@@ -123,8 +100,6 @@ class TarExtractor(
         }
         return target
     }
-
-    // ------------------------------------------------------------- symlinks
 
     private fun extractSymlink(entry: TarArchiveEntry, target: File) {
         target.parentFile?.mkdirs()
@@ -140,7 +115,7 @@ class TarExtractor(
                 report.firstError = "${e.javaClass.simpleName}: ${e.message}"
             }
         }
-        // Fallback: copy the resolved target (budget-capped).
+        // Devices may refuse link() and old APIs lack createSymbolicLink — fall back to budget-capped copies.
         val resolved = resolveLinkTarget(entry, rewritten)
         if (resolved == null || !resolved.exists()) {
             report.skippedEntries++
@@ -156,8 +131,6 @@ class TarExtractor(
         }
         report.skippedEntries++
     }
-
-    // ------------------------------------------------------------ hardlinks
 
     private fun extractHardlink(entry: TarArchiveEntry, target: File) {
         target.parentFile?.mkdirs()
@@ -188,11 +161,7 @@ class TarExtractor(
         report.skippedEntries++
     }
 
-    /**
-     * Termux debs may contain ABSOLUTE symlinks into the Termux prefix
-     * (/data/data/com.termux/files/...). Those are unreadable for this app,
-     * so they are rewritten onto THIS runtime's root before creation.
-     */
+    // Absolute symlinks into the Termux prefix are unreadable here; rewritten onto this runtime's root.
     private fun rewriteAbsoluteLink(linkName: String): String {
         val termuxPrefix = "/data/data/com.termux/files"
         if (linkName.startsWith(termuxPrefix)) {
@@ -201,12 +170,7 @@ class TarExtractor(
         return linkName
     }
 
-    /**
-     * Resolves a link target under [dest]. Accepts absolute (already
-     * rewritten) targets and tar-member / parent-relative ones; returns null
-     * when the resolution escapes the destination (never fabricate paths
-     * outside the runtime).
-     */
+    // Returns null when resolution escapes the destination — never fabricate paths outside the runtime.
     private fun resolveLinkTarget(entry: TarArchiveEntry, linkName: String): File? {
         if (linkName.isBlank()) return null
         if (linkName.startsWith("/")) {
@@ -259,7 +223,6 @@ class TarExtractor(
     }
 
     companion object {
-        /** Worst-case on-device copy fallback budget (failure-1/2 evidence). */
         const val DEFAULT_COPY_BUDGET_BYTES: Long = 200L * 1024 * 1024
     }
 }

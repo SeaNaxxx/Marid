@@ -4,11 +4,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import android.util.Log
 
-/**
- * Provisioning/runtime state machine surfaced to the UI. Every state is real:
- * nothing is faked. FAILED carries the exact stage + message so failures are
- * diagnosable on-device.
- */
+// Every state is real — FAILED carries the exact stage + message for on-device diagnosis.
 sealed interface RuntimePhase {
     data object Idle : RuntimePhase
     data class Provisioning(val step: String) : RuntimePhase
@@ -18,11 +14,7 @@ sealed interface RuntimePhase {
     data class Failed(val stage: String, val message: String) : RuntimePhase
 }
 
-/**
- * Single source of runtime state for the UI. Process-wide singleton object.
- * Log ring mirrors to logcat (tag MaridRuntime) so adb logcat is always a
- * full-evidence fallback for device debugging.
- */
+// Process-wide singleton; the log ring mirrors to logcat (MaridRuntime) as the debugging fallback.
 object RuntimeBus {
     const val TAG = "MaridRuntime"
     private const val LOG_LINES = 400

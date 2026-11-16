@@ -1,5 +1,4 @@
 package com.marid.app.ui
-// marid-sync-1
 
 import android.util.Log
 import androidx.compose.animation.AnimatedContent
@@ -98,181 +97,24 @@ import com.marid.app.rpc.asObjectOrNull
 import com.marid.app.rpc.asStringOrNull
 import kotlin.math.roundToInt
 
-/*
- * ============================================================================
- * MaridComposer — 1:1 port of the ZCode desktop conversation composer.
- * ============================================================================
- *
- * React files ported (source of truth packages/ui/src):
- *   - prompt-editor/ChatPromptEditor.tsx          composer shell + toolbar row + send button
- *   - LexicalChatInput.tsx (contenteditable part) editor field visuals (min-h-10/max-h-40,
- *                                                 text-ui-base leading-5, placeholder)
- *   - prompt-editor/ChatPromptActionMenu.tsx      "+" action affordance (trigger only)
- *   - v4/composer/V4ComposerModeControls.tsx      mode switch trigger + mode dropdown
- *   - chat-input-toolbar/ChatModeSwitchControl.tsx (trigger class reference)
- *   - chat-input-toolbar/RollingToolbarLabel.tsx  rolling label (0.75em slide, 200ms)
- *   - chat-input-toolbar/ThoughtLevelCycleControl.tsx  thought level trigger + select menu
- *   - chat-input-toolbar/composer-thought-slider.css   effort slider colors/keyframes
- *   - chat-input-toolbar/ComposerEffortHeading.tsx     effort heading
- *   - chat-input-toolbar/ComposerModelMenu.tsx    model menu body (provider/models/effort)
- *   - chat-input-toolbar/ComposerProviderMenu.tsx provider sub-menu
- *   - ModelConfigSelect.tsx                       model select trigger + dropdown chrome
- *   - components/ui/dropdown-menu.tsx, select.tsx, button.tsx (shadcn primitives the
- *     above compose with — exact paddings/radii/colors extracted from them)
- *
- * EXTRACTION TABLE (dark theme, packages/ui/src/styles.css `.dark` block) —
- * 1 Tailwind spacing unit = 4dp. rounded-md=6dp, lg=8dp, xl=12dp, 2xl=16dp, full=50%, sm=4dp.
- *
- *  TOKEN                          | TAILWIND / CSS SOURCE                       | VALUE
- *  -------------------------------|---------------------------------------------|------------------
- *  shell bg                       | bg-input                                    | #262626
- *  shell bg (focus-within)        | focus-within:bg-input-focused               | #0A0A0A
- *  shell border                   | border-[0.5px] border-input-border          | white 10% @0.5dp
- *  shell border (hover)           | hover:border-input-border-hover             | white 30%
- *  shell border (focus-within)    | focus-within:!border-input-border-focused   | #00A6F4 (brand)
- *  shell radius                   | rounded-2xl                                 | 16dp
- *  shell padding                  | p-3                                         | 12dp
- *  shell gap                      | gap-3                                       | 12dp
- *  shell shadow                   | shadow-(--shadow-composer-soft)             | `:root` = 0 0 #0000
- *                                 | (.dark does not override)                   | → none in dark
- *  editor min/max height          | min-h-10 max-h-40 overflow-y-auto           | 40dp / 160dp
- *  editor text                    | text-ui-base leading-5 text-foreground      | 14sp / 20sp #E5E5E5
- *  editor placeholder             | text-foreground-subtlest                    | #E5E5E5 @30%
- *  caret                          | contenteditable caret = currentColor        | #E5E5E5
- *  ghost hover                    | hover:bg-hover (= --color-surface-hover)    | white 10%
- *  toolbar row                    | flex items-end gap-3                        | gap 12dp, bottom-align
- *  leading group                  | flex shrink-0 items-center gap-1            | gap 4dp
- *  trailing group                 | ml-auto items-center gap-1.5                | gap 6dp
- *  model cluster                  | flex items-center gap-1                     | gap 4dp
- *  "+ action" trigger             | Button ghost size=icon-md + rounded-lg      | 28dp, r8, Plus 16dp
- *  mode trigger                   | h-7 gap-1 rounded-lg px-2 text-ui-base      | 28dp, r8, px8, gap4, 14sp
- *  mode trigger chevron           | size-3.5 (ChevronDown)                      | 14dp
- *  mode colors                    | modeTriggerColor: guarded=text-icon-blue    | #0084D1
- *                                 | yolo=text-warning                           | #F0B100
- *  mode menu                      | w-64, DropdownMenuContent chrome            | 256dp
- *  menu chrome (all popovers)     | rounded-lg border border-popover-border     | r8, border white 10%,
- *                                 | bg-menu p-1 gap-0.5 shadow-md               | #0A0A0A, p4, gap2
- *  menu item hover                | data-[highlighted]:bg-menu-hover            | #171717
- *  provider row hover/open        | data-[…]:bg-menu-hover/50                   | #171717 @50%
- *  mode item                      | min-h-13 items-start gap-3 py-2 pl-2 pr-8   | min52, gap12, py8 pl8 pr32
- *  mode item icon                 | size-4.5 mt-0.5                             | 18dp, top offset 2dp
- *  mode item desc                 | text-ui-sm text-foreground-subtle           | 12sp, #E5E5E5 @60%
- *  plan checkbox item             | DropdownMenuCheckboxItem min-h-13 …         | Lightbulb 18dp
- *  plan marker separator          | h-3 w-px bg-border                          | 12dp x 1dp white10%
- *  menu radio check               | CheckIcon size-4 text-foreground-subtle     | 16dp, right 8dp
- *  menu separator                 | h-px bg-border (composer: bg-border/50)     | 1dp white 5%
- *  menu label "Models"            | DropdownMenuLabel text-ui-sm text-…-subtle  | px8 py6, 12sp @60%
- *  model menu width               | w-72                                        | 288dp
- *  model list viewport            | ScrollFadeViewport max-h-60                 | max 240dp scroll
- *  model/provider item            | min-h-8 gap-2 pl-2 pr-8 text-ui-base        | min32, gap8, pl8 pr32
- *  provider logo                  | ProviderLogo size-4 rounded-sm (Package     | 16dp r4 fallback icon
- *                                 | fallback when no builtin asset)             |
- *  access badge                   | rounded-full bg-surface px-1 py-px          | r-full white5%,
- *                                 | text-ui-xs font-medium                      | 10sp medium, maxW 192
- *  model trigger                  | w-fit justify-between gap-1 rounded-lg      | 28dp r8, pl8 pr6, gap4
- *                                 | pl-2 pr-1.5 text-ui-base                    |
- *  model trigger chevron          | ChevronDownIcon size-3.5 text-…-subtle      | 14dp #E5E5E5@60%
- *  open-state trigger label       | data-composer-open-label inset-x-1.5        | centered 14sp @60%,
- *                                 | text-center text-foreground-subtle          | width max(prev,128dp)
- *  thought trigger                | gap-1 rounded-lg px-1.5 py-1.5 text-ui-base | 28dp r8 px6, Brain 16dp
- *  thought meter bar              | w-1 bg-current/10 rounded-full, fill        | 4dp wide, #E5E5E5@10%,
- *                                 | bg-success (bottom, height %, min-h-1)      | green #00C950
- *  effort slider container        | composer-thought-slider h-8                 | 32dp
- *  effort track                   | inset-x-0 top-1 h-6 rounded-full            | top4, h24, #E5E5E5@10%,
- *                                 | bg-foreground/10 + border border-…/10       | border #E5E5E5@10%
- *  effort fill                    | bg-success width 14px+(100%-28px)*p         | #00C950; at max:
- *                                 | ::before 270deg blue-500→success            | #316FF6→#00C950
- *  effort stops                   | inset-x-3.5 dots size-1 rounded-full        | 4dp dots at 14dp inset,
- *                                 | bg-foreground-subtlest / filled white .3    | #E5E5E5@30% / white@30%
- *  effort thumb                   | size-7 rounded-full shadow-sm               | 28dp white @top 2dp
- *  effort heading                 | mb-1 gap-2 text-ui-base; label text-ui-sm   | gap8, 12sp @60% label
- *  send button                    | size icon-md rounded-full bg-brand          | 28dp r-full #00A6F4,
- *                                 | text-foreground-inverse hover:bg-brand/80   | #FFFFFF icon 16dp,
- *                                 | disabled:opacity-50                         | hover #00A6F4@80%
- *  send icon                      | ArrowUpIcon size-4                          | 16dp
- *  rolling label                  | h-[1.3em] leading-[1.25] 0.2s ease          | 1.3em box, 200ms roll
- *  placeholder (en-US)            | chat.placeholder.newTask                    | "Ask Marid anything,
- *                                 |                                             | @ to add context, / for
- *                                 |                                             | commands or capabilities"
- *
- * RPC WIRING (verified against source):
- *   Desktop: modelSelectionService.getView() (packages/services/src/model-provider/
- *   providerFacadeServices.ts:221) → channel "model-selection", command "getView"
- *   (packages/shared/src/channels.ts:152; wire asserted in
- *   packages/desktop/test/e2e/.../conversation-session-v4-composer-toolbar.test.ts:1467).
- *   Response = ModelSelectionView (packages/provider/src/facades.ts:201):
- *     { revision, providers: [{ providerId, providerName?, templateId, config,
- *       models: [{ modelId, config }] }], preferredSelection?, effectiveSelection? }
- *   Group label derivation (packages/ui/src/lib/modelSelectionGroups.ts:59):
- *     label = providerName?.trim() || providerId; model display name = modelId.
- *   Android side: MaridRpcClient.modelSelectionView() already issues the identical
- *   call(ServiceChannels.MODEL_SELECTION, "getView"); fetchModelEntries() below parses
- *   the same response shape defensively (empty list + Log.w on any mismatch).
- *
- * DEVIATIONS (kept minimal; every one is forced by the fixed MaridComposer API or
- * platform, none is an invented visual value):
- *   1. Lexical rich editor → single styled BasicTextField with exact shell visuals
- *      (per task; no markdown/mention rendering).
- *   2. ChatPromptActionMenu: only the "+" trigger is ported; the MentionPanel needs
- *      the desktop mention/file/plugin providers which do not exist on Android.
- *   3. ChatContextUsage ring + VoiceInputButton + stop button are not rendered:
- *      MaridComposer's fixed signature carries no usage snapshot / voice / pending
- *      state. Send button always renders ArrowUp (no submitting spinner).
- *   4. Container-query collapse (@sm/@xl composer widths) not ported: the port
- *      always renders the desktop wide-layout state (labels visible, thought meter
- *      bar hidden, model Package icon hidden) — values for the collapsed states are
- *      in the extraction table where relevant.
- *   5. Thought-level catalog comes from model reasoning specs over RPC; the port
- *      uses internal defaults ["low","medium","high"] (current "medium") until that
- *      catalog is wired — labels/colors/states are the exact desktop ones.
- *   6. Mode = internal state ("build"); no onSwitchMode callback exists in the
- *      fixed signature. YOLO confirmation dialog not ported.
- *   7. shadow-md on menus approximated with a Compose elevation shadow
- *      (black 10%); shadow-composer-soft is a no-op in dark (0 0 #0000) → none.
- *   8. Menu open state keeps the shell in its focus-within visuals (desktop keeps
- *      :focus-within while the menu is open); text-field focus itself is lost to
- *      the focusable popup window on Android.
- *   9. Selection handle/highlight colors are Compose-required; brand-based values
- *      are used (not specified in source). Text selection itself unspecified.
- *  10. Radix scroll fades on the model list (ScrollFadeViewport) and stop-dot
- *      hover scaling are pointer-hover micro-interactions; not ported.
- */
-
-// ----------------------------------------------------------------------------
-// Extra palette values (exact hex; MaridTokens covers all semantic tokens).
-// ----------------------------------------------------------------------------
-
 private object Composer2cPalette {
-    /** --color-menu (dark) = neutral-950. */
     val MenuBg = Color(0xFF0A0A0A)
 
-    /** data-[highlighted]:bg-menu-hover/50 = neutral-900 @ 50%. */
     val MenuHover50 = Color(0x80171717)
 
-    /** bg-foreground/10 = neutral-200 (#E5E5E5) @ 10% (track, meter, borders). */
     val Foreground10 = Color(0x1AE5E5E5)
 
-    /** --color-icon-blue (dark) → terminal-bright-blue → sky-600. */
     val IconBlue = Color(0xFF0084D1)
 
-    /** hover:bg-brand/80 = #00A6F4 @ 80%. */
     val Brand80 = Color(0xCC00A6F4)
 
-    /** Tailwind v4 blue-500 — composer-thought-slider --composer-thought-max-accent. */
     val Blue500 = Color(0xFF316FF6)
 
-    /** shadow-md rgb(0 0 0 / 10%). */
     val ShadowBlack10 = Color(0x1A000000)
 
-    /** shadow-sm rgb(0 0 0 / 5%) (effort thumb). */
     val ShadowBlack5 = Color(0x0D000000)
 }
 
-// ----------------------------------------------------------------------------
-// RPC — model catalog (channel/command verified; see header).
-// ----------------------------------------------------------------------------
-
-/** One selectable model of the composer model menu (ModelSelectGroupItem). */
 data class ModelEntry2c(
     val providerId: String,
     val providerLabel: String,
@@ -281,12 +123,7 @@ data class ModelEntry2c(
 
 private const val TAG_2C = "MaridComposer"
 
-/**
- * Fetches the model catalog exactly like the desktop composer does:
- * channel "model-selection", command "getView" (providerFacadeServices.ts:221),
- * parsing ModelSelectionView { providers: [{ providerId, providerName?, models: [{ modelId }] }] }.
- * Defensive: any shape deviation → empty list + Log.w("MaridComposer").
- */
+// Parsed defensively: any shape deviation → empty list + Log.w.
 suspend fun fetchModelEntries(rpc: MaridRpcClient): List<ModelEntry2c> {
     return try {
         val view = rpc.modelSelectionView()?.asObjectOrNull()
@@ -305,7 +142,6 @@ suspend fun fetchModelEntries(rpc: MaridRpcClient): List<ModelEntry2c> {
             val providerId =
                 (provider["providerId"] ?: provider["id"] ?: provider["name"]).asStringOrNull()
                     ?: continue
-            // modelSelectionGroups.ts:59 — label = providerName?.trim() || providerId.
             val providerLabel = provider["providerName"].asStringOrNull()
                 ?.trim()?.takeIf { it.isNotEmpty() } ?: providerId
             val models = provider["models"].asArrayOrNull() ?: continue
@@ -323,10 +159,6 @@ suspend fun fetchModelEntries(rpc: MaridRpcClient): List<ModelEntry2c> {
     }
 }
 
-// ----------------------------------------------------------------------------
-// Entry point.
-// ----------------------------------------------------------------------------
-
 @Composable
 fun MaridComposer(
     text: String,
@@ -337,7 +169,6 @@ fun MaridComposer(
     onSend: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // Internal state (mode, menus) — per task, never hoisted.
     val shellInteraction = remember { MutableInteractionSource() }
     val fieldFocused by shellInteraction.collectIsFocusedAsState()
     val shellHovered by shellInteraction.collectIsHoveredAsState()
@@ -357,11 +188,10 @@ fun MaridComposer(
     val thoughtAnchor = remember { mutableStateOf(Anchor2c()) }
     val modelAnchor = remember { mutableStateOf(Anchor2c()) }
 
-    // focus-within stays true while a menu is open (desktop behavior, deviation 8).
+    // focus-within visuals stay on while any menu is open (Android popups steal field focus).
     val focusVisual = fieldFocused || modelMenuOpen || providerMenuOpen ||
         modeMenuOpen || thoughtMenuOpen
 
-    // transition-colors (150ms) on border + shell background.
     val borderColor by animateColorAsState(
         when {
             focusVisual -> MaridTokens.InputBorderFocused // focus-within:!border-input-border-focused
@@ -383,9 +213,7 @@ fun MaridComposer(
             rootOrigin.value = IntOffset(pos.x.roundToInt(), pos.y.roundToInt())
         },
     ) {
-        // ChatPromptEditor shell: flex flex-col gap-3 rounded-2xl border-[0.5px]
-        // border-input-border bg-input p-3 overflow-hidden (overflow visible here —
-        // popovers are separate windows and must escape the shell).
+        // No clip on the shell: popovers are separate windows and must escape it.
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -403,14 +231,11 @@ fun MaridComposer(
                 interactionSource = shellInteraction,
             )
 
-            // Toolbar row: "group/toolbar flex items-end gap-3".
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                // Leading: "flex min-w-0 flex-1 items-center" →
-                // inner "flex shrink-0 items-center gap-1".
                 Row(
                     modifier = Modifier.weight(1f),
                     verticalAlignment = Alignment.CenterVertically,
@@ -419,8 +244,6 @@ fun MaridComposer(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp), // gap-1
                     ) {
-                        // ChatPromptActionMenu trigger: Button ghost size="icon-md"
-                        // className "gap-1 rounded-lg text-ui-base" with PlusIcon size-4.
                         ActionMenuButton2c()
                         ModeSwitchControl2c(
                             mode = mode,
@@ -438,12 +261,10 @@ fun MaridComposer(
                     }
                 }
 
-                // Trailing: "ml-auto flex shrink-0 items-center justify-end gap-1.5".
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp), // gap-1.5
                 ) {
-                    // V4ComposerModelControls cluster: "flex min-w-0 shrink items-center gap-1".
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp), // gap-1
@@ -487,10 +308,6 @@ fun MaridComposer(
     }
 }
 
-// ----------------------------------------------------------------------------
-// Prompt field — LexicalChatInput contenteditable visuals.
-// ----------------------------------------------------------------------------
-
 @Composable
 private fun ComposerPromptField2c(
     text: String,
@@ -506,8 +323,6 @@ private fun ComposerPromptField2c(
     }
     Box(modifier = Modifier.fillMaxWidth()) {
         if (text.isEmpty()) {
-            // Placeholder: "pointer-events-none absolute left-0 top-0 …
-            // text-foreground-subtlest" (chat.placeholder.newTask).
             Text(
                 text = "Ask Marid anything, @ to add context, / for commands or capabilities",
                 style = TextStyle(
@@ -522,7 +337,6 @@ private fun ComposerPromptField2c(
             BasicTextField(
                 value = text,
                 onValueChange = onTextChange,
-                // min-h-10 max-h-40 overflow-y-auto text-ui-base leading-5 text-foreground
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 40.dp, max = 160.dp),
@@ -541,10 +355,6 @@ private fun ComposerPromptField2c(
         }
     }
 }
-
-// ----------------------------------------------------------------------------
-// Ghost trigger (Button variant="ghost": text-foreground hover:bg-hover).
-// ----------------------------------------------------------------------------
 
 @Composable
 private fun GhostTrigger2c(
@@ -577,7 +387,6 @@ private val LocalContentColor2c = compositionLocalOf { MaridTokens.Foreground }
 
 @Composable
 private fun ActionMenuButton2c() {
-    // ChatPromptActionMenu trigger: ghost icon-md (28dp, rounded-lg) + PlusIcon size-4.
     GhostTrigger2c(
         onClick = { /* MentionPanel requires desktop mention providers — deviation 2. */ },
         modifier = Modifier.size(28.dp), // icon-md size-7
@@ -592,10 +401,6 @@ private fun ActionMenuButton2c() {
     }
 }
 
-// ----------------------------------------------------------------------------
-// Mode switch — V4ComposerModeControls.tsx.
-// ----------------------------------------------------------------------------
-
 private data class ModeOption2c(
     val id: String,
     val label: String,   // mode.label.glm.*
@@ -603,7 +408,6 @@ private data class ModeOption2c(
     val highPermission: Boolean = false,
 )
 
-// MARID_AGENT_PROVIDER = "glm" (marid-agent-policy.ts:5) → glm i18n strings.
 private val MODE_PERMISSIONS_2C = listOf(
     ModeOption2c("build", "Ask before changes", "Ask before file changes."),
     ModeOption2c("guarded", "Autonomous mode", "Ask when there’s risk"),
@@ -613,7 +417,6 @@ private val MODE_PERMISSIONS_2C = listOf(
 private const val MODE_PLAN_LABEL_2C = "Plan mode" // mode.label.glm.plan
 private const val MODE_PLAN_DESCRIPTION_2C = "Plan before editing." // mode.description.glm.plan
 
-/** resolveModeOptionIcon (display.tsx:264). */
 private fun modeIcon2c(modeId: String) = when {
     modeId == "yolo" -> MaridIcons.ShieldAlert
     modeId == "guarded" -> MaridIcons.ShieldCheck
@@ -632,7 +435,6 @@ private fun ModeSwitchControl2c(
     rootOrigin: State<IntOffset>,
 ) {
     val selected = MODE_PERMISSIONS_2C.firstOrNull { it.id == mode } ?: MODE_PERMISSIONS_2C.first()
-    // modeTriggerColor (display-help.ts:26): guarded → icon-blue, yolo → warning.
     val triggerColor = when (selected.id) {
         "guarded" -> Composer2cPalette.IconBlue
         "yolo" -> MaridTokens.Warning
@@ -670,7 +472,6 @@ private fun ModeSwitchControl2c(
             onDismissRequest = { onOpenChange(false) },
         ) {
             MenuSurface2c(modifier = Modifier.width(256.dp)) { // w-64
-                // Plan: DropdownMenuCheckboxItem min-h-13 items-start gap-3 py-2.
                 ModeMenuItem2c(
                     icon = MaridIcons.Lightbulb,
                     title = MODE_PLAN_LABEL_2C,
@@ -780,7 +581,6 @@ private fun PlanMarker2c(onRemove: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            // Lightbulb swaps to X on hover (group-hover/plan).
             Icon(
                 imageVector = if (hovered) MaridIcons.X else MaridIcons.Lightbulb,
                 contentDescription = "Remove Plan from the next submission", // chat.plan.removeMarker
@@ -796,11 +596,6 @@ private fun PlanMarker2c(onRemove: () -> Unit) {
     }
 }
 
-// ----------------------------------------------------------------------------
-// Thought level — ThoughtLevelCycleControl.tsx (interactionMode = "select").
-// ----------------------------------------------------------------------------
-
-/** thoughtLevelLabels.ts — value → en-US label. */
 private fun thoughtLevelLabel2c(value: String): String = when (value.trim().lowercase()) {
     "disabled", "false", "no", "none", "nothink", "no-think", "no_think", "off" -> "Off"
     "enable", "enabled", "on", "true" -> "On"
@@ -838,9 +633,7 @@ private fun ThoughtLevelControl2c(
             modifier = Modifier.size(16.dp), // BrainIcon size-4
             tint = LocalContentColor2c.current,
         )
-        // Thought meter bar: "w-1 self-stretch bg-current/10 rounded-full" with
-        // bg-success fill — hidden at the desktop @xl/composer width (deviation 4);
-        // kept implemented for parity.
+        // Meter bar is hidden at the desktop width; implemented for parity.
         ThoughtMeterBar2c(levels = levels, value = value, visible = false)
         RollingLabel2c(
             label = thoughtLevelLabel2c(value),
@@ -950,10 +743,6 @@ private fun SelectItem2c(label: String, checked: Boolean, onClick: () -> Unit) {
     }
 }
 
-// ----------------------------------------------------------------------------
-// Model select — ModelConfigSelect.tsx + ComposerModelMenu/ComposerProviderMenu.
-// ----------------------------------------------------------------------------
-
 @Composable
 private fun ModelSelectControl2c(
     models: List<ModelEntry2c>,
@@ -999,8 +788,7 @@ private fun ModelSelectControl2c(
             .padding(start = 8.dp, end = 6.dp), // pl-2 pr-1.5
         contentColor = if (hasSelection) MaridTokens.Foreground else MaridTokens.ForegroundSubtle,
     ) {
-        // ComposerTriggerTransition frames — same 0.75em roll (deviation-free swap).
-        // No fillMaxWidth here: the trigger row must wrap its content when closed.
+        // No fillMaxWidth: the trigger row must wrap its content when closed.
         AnimatedContent(
             targetState = menuOpen && hasSelection,
             transitionSpec = {
@@ -1014,8 +802,6 @@ private fun ModelSelectControl2c(
             label = "modelTrigger2c",
         ) { openFrame ->
             if (openFrame) {
-                // data-composer-open-label: centered "Select model" (fills the locked
-                // trigger width from the modifier above).
                 Text(
                     text = "Select model", // chat.toolbar.combined.selectModel
                     style = TextStyle(fontSize = 14.sp, color = MaridTokens.ForegroundSubtle),
@@ -1034,7 +820,6 @@ private fun ModelSelectControl2c(
                         modifier = Modifier.widthIn(max = 220.dp),
                     )
                     if (hasSelection) {
-                        // ComposerThoughtIndicator label (meter hidden at desktop width).
                         Text(
                             text = thoughtLevelLabel2c("medium"),
                             style = TextStyle(
@@ -1065,8 +850,6 @@ private fun ModelSelectControl2c(
             onDismissRequest = { onMenuOpenChange(false) },
         ) {
             MenuSurface2c(modifier = Modifier.width(288.dp)) { // w-72
-                // ComposerProviderMenu sub-trigger: min-h-8 gap-3, highlighted/open
-                // bg-menu-hover/50.
                 val providerInteraction = remember { MutableInteractionSource() }
                 val providerHovered by providerInteraction.collectIsHoveredAsState()
                 Box(modifier = Modifier.padding(horizontal = 4.dp)) {
@@ -1122,7 +905,6 @@ private fun ModelSelectControl2c(
                 }
 
                 MenuSeparator2c(fullBleed = true, soft = true) // bg-border/50
-                // DropdownMenuLabel className "text-ui-sm text-foreground-subtle".
                 Box(modifier = Modifier.padding(horizontal = 4.dp)) {
                     Text(
                         text = "Models", // chat.toolbar.combined.models
@@ -1137,7 +919,6 @@ private fun ModelSelectControl2c(
                     )
                 }
 
-                // ScrollFadeViewport max-h-60 — model radio items.
                 Column(
                     modifier = Modifier
                         .padding(horizontal = 4.dp)
@@ -1154,8 +935,7 @@ private fun ModelSelectControl2c(
                             checked = model.modelId == selectedModel?.modelId &&
                                 model.providerId == selectedModel?.providerId,
                             onClick = {
-                                // Composer menu keeps the menu open after model select
-                                // (onSelect preventDefault) so effort can be adjusted.
+                                // Menu stays open after model select so effort can be adjusted.
                                 onModelSelect(model)
                                 browseKey.value = null
                             },
@@ -1163,7 +943,6 @@ private fun ModelSelectControl2c(
                     }
                 }
 
-                // Effort section (ComposerModelMenu showEffort): separator + block.
                 MenuSeparator2c(fullBleed = true, soft = true)
                 EffortBlock2c(
                     levels = thoughtLevels,
@@ -1173,8 +952,7 @@ private fun ModelSelectControl2c(
                 )
             }
 
-            // Provider sub-menu — DropdownMenuSubContent: opens flush to the menu's
-            // right edge, top-aligned with the menu frame (ComposerProviderMenu offset).
+            // Sub-menu opens flush to the menu's right edge, top-aligned with the menu frame.
             if (providerMenuOpen) {
                 val density2 = LocalDensity.current
                 Popup(
@@ -1191,8 +969,7 @@ private fun ModelSelectControl2c(
                                     checked = providerId == (browseKey.value ?: currentProviderId),
                                     onClick = {
                                         browseKey.value = providerId
-                                        // Desktop: keep current selection if it belongs to
-                                        // the browsed provider, else select its first model.
+                                        // Keep the selection if it belongs to the browsed provider; else pick that provider's first model.
                                         if (selectedModel?.providerId != providerId) {
                                             models.firstOrNull { it.providerId == providerId }
                                                 ?.let(onModelSelect)
@@ -1237,7 +1014,7 @@ private fun ModelItem2c(name: String, checked: Boolean, onClick: () -> Unit) {
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
-            // badgeLabel / vision badge: no catalog data in the port API — omitted.
+            // Access/vision badge omitted — no catalog data in the port API.
         }
         if (checked) {
             Icon(
@@ -1301,10 +1078,6 @@ private fun ProviderItem2c(label: String, checked: Boolean, onClick: () -> Unit)
         }
     }
 }
-
-// ----------------------------------------------------------------------------
-// Effort slider — ComposerModelMenu + composer-thought-slider.css.
-// ----------------------------------------------------------------------------
 
 @Composable
 private fun EffortBlock2c(
@@ -1388,8 +1161,6 @@ private fun ThoughtSlider2c(
         }
         val isMax = currentIndex == levels.size - 1
 
-        // Track: absolute inset-x-0 top-1 h-6 rounded-full bg-foreground/10
-        // + inner border border-foreground/10.
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1400,7 +1171,6 @@ private fun ThoughtSlider2c(
                 .border(1.dp, Composer2cPalette.Foreground10, RoundedCornerShape(12.dp)),
         )
 
-        // Fill: absolute inset-y-0 left-0 rounded-full; width 14px + (100%-28px)*p.
         val targetFill = with(density) {
             (insetPx + (containerPx - thumbPx) * progress).toDp()
         }
@@ -1417,7 +1187,6 @@ private fun ThoughtSlider2c(
                 .clip(RoundedCornerShape(12.dp))
                 .background(
                     if (isMax) {
-                        // data-max=true: 270deg blue-500 → success (left green, right blue).
                         Brush.horizontalGradient(
                             listOf(MaridTokens.Success, Composer2cPalette.Blue500),
                         )
@@ -1434,7 +1203,6 @@ private fun ThoughtSlider2c(
         }
         }
 
-        // Stops: inset-x-3.5 size-1 rounded-full, subtle → filled white @ 30%.
         Row(
             modifier = Modifier
                 .matchParentSize()
@@ -1458,7 +1226,6 @@ private fun ThoughtSlider2c(
             }
         }
 
-        // Thumb: composer-thought-slider-thumb size-7 white shadow-sm, top-0.5.
         val targetThumbX = with(density) {
             ((containerPx - thumbPx) * progress).toDp()
         }
@@ -1483,7 +1250,7 @@ private fun ThoughtSlider2c(
     }
 }
 
-/** EFFORT_BUBBLES (ComposerModelMenu.tsx:16) — top/size/duration/delay, fixed seed. */
+/** Fixed seed of bubble top/size/duration/delay values. */
 private data class EffortBubble2c(
     val topPx: Int,
     val sizeDp: Int,
@@ -1505,7 +1272,7 @@ private val EFFORT_BUBBLES_2C = listOf(
     EffortBubble2c(15, 3, 3300, -1200),
 )
 
-/** composer-thought-bubble-flow keyframes: x 104% → -4%, opacity 0/.4/.4/0. */
+/** Bubble sweep: x runs 104% → -4% of the fill width; opacity 0 → .4 → .4 → 0. */
 @Composable
 private fun EffortBubbles2c(fillWidthPx: Int, heightPx: Int) {
     for (bubble in EFFORT_BUBBLES_2C) {
@@ -1541,10 +1308,6 @@ private fun EffortBubbles2c(fillWidthPx: Int, heightPx: Int) {
     // heightPx intentionally unused beyond documentation: tops are px within the 24px fill.
 }
 
-// ----------------------------------------------------------------------------
-// Send — ChatPromptEditor submit button.
-// ----------------------------------------------------------------------------
-
 @Composable
 private fun SendButton2c(enabled: Boolean, onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
@@ -1577,10 +1340,6 @@ private fun SendButton2c(enabled: Boolean, onClick: () -> Unit) {
         )
     }
 }
-
-// ----------------------------------------------------------------------------
-// RollingToolbarLabel.
-// ----------------------------------------------------------------------------
 
 @Composable
 private fun RollingLabel2c(
@@ -1619,16 +1378,11 @@ private fun RollingLabel2c(
     }
 }
 
-// ----------------------------------------------------------------------------
-// Menu chrome — DropdownMenuContent / SelectContent / DropdownMenuSubContent:
-// "rounded-lg border border-popover-border bg-menu p-1 gap-0.5 shadow-md".
-// ----------------------------------------------------------------------------
-
 @Composable
 private fun MenuSurface2c(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     val shape = RoundedCornerShape(8.dp) // rounded-lg
     Box(modifier = modifier) {
-        // shadow-md (deviation 7): elevation shadow, black 10%.
+        // shadow-md approximated with a Compose elevation shadow.
         Box(
             modifier = Modifier
                 .matchParentSize()
@@ -1651,10 +1405,7 @@ private fun MenuSurface2c(modifier: Modifier = Modifier, content: @Composable Co
     }
 }
 
-/**
- * DropdownMenuSeparator "-mx-1 my-1 h-px bg-border" — full-bleed by living outside
- * the item inset; `soft` renders the composer override bg-border/50 (white 5%).
- */
+// fullBleed escapes the item inset; soft renders the 50% border override.
 @Composable
 private fun MenuSeparator2c(fullBleed: Boolean, soft: Boolean = false) {
     Box(
@@ -1666,11 +1417,6 @@ private fun MenuSeparator2c(fullBleed: Boolean, soft: Boolean = false) {
     )
 }
 
-// ----------------------------------------------------------------------------
-// Popup plumbing.
-// ----------------------------------------------------------------------------
-
-/** Trigger bounds relative to the composer root. */
 private class Anchor2c(
     val offset: IntOffset = IntOffset.Zero,
     val size: IntSize = IntSize.Zero,
@@ -1691,7 +1437,6 @@ private fun Modifier.captureAnchor2c(
     )
 }
 
-/** Radix side="top" popper: sideOffset gap, align start/center, collision padding. */
 private class TopMenuPositionProvider2c(
     private val anchor: Anchor2c,
     private val alignCenter: Boolean,
@@ -1717,7 +1462,7 @@ private class TopMenuPositionProvider2c(
         val y = if (aboveY >= collisionPadPx) {
             aboveY
         } else {
-            // Radix flip: not enough space above → open below the trigger.
+            // Flip: not enough space above → open below the trigger.
             (trigger.y + anchor.size.height + sideOffsetPx)
                 .coerceAtMost((windowSize.height - collisionPadPx - popupContentSize.height).coerceAtLeast(0))
         }
@@ -1750,5 +1495,3 @@ private fun MenuPopup2c(
         content = content,
     )
 }
-
-

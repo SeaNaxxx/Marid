@@ -32,106 +32,33 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/**
- * 1:1 port of packages/ui/src/WelcomeScreen.tsx (login entry) — dark theme only.
- *
- * FILES PORTED
- *   - packages/ui/src/WelcomeScreen.tsx          (main / centered login card / footer)
- *   - packages/ui/src/openWorkspacePageThemeHero.tsx (ThemeHeroVisual backdrop, "dark" palette —
- *     the .dark block of styles.css is the theme MaridTokens documents, dark-only app)
- *   - BRAND MARK: the upstream Z.ai "Z" brand SVG (components/ui/MaridAboutLogo.tsx) is
- *     REPLACED by the Marid "M" mark (MaridMarkM2e) — no Z.ai brand geometry remains.
- *   - packages/ui/src/i18n/locales/en-US.ts      (exact strings: login.title, login.copyright;
- *     login.description / login.agreement.* Z.AI login strings REMOVED per the no-Z.ai-login
- *     directive — description replaced with the Marid product identity line, agreement links
- *     dropped (they pointed at marid.z.ai).
- *
- * EXTRACTION NOTES (source class → Compose value; 1 spacing unit = 4dp)
- *   main "relative h-full min-h-dvh overflow-hidden bg-background text-foreground"
- *        → fillMaxSize + MaridTokens.Background (neutral-950? no: --color-background = neutral-900)
- *          + clipToBounds (= overflow-hidden).
- *   ThemeHeroVisual "absolute inset-0" (dark palette):
- *     panel linear-gradient(180deg,#060816 0%,#0b1333 38%,#12245a 72%,#173474 100%)
- *     before: radial-gradient(circle at 16% 20%, rgba(165,243,252,0.14), transparent 22%),
- *             radial-gradient(circle at 82% 14%, rgba(96,165,250,0.18), transparent 24%),
- *             radial-gradient(circle at 68% 84%, rgba(56,189,248,0.14), transparent 28%),
- *             linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0))
- *     glowPrimary  "left-[-12%] top-[18%] h-[42rem] w-[42rem] rounded-full blur-3xl bg-cyan-300/22 mix-blend-screen"
- *     glowSecondary "right-[-18%] bottom-[-14%] h-[36rem] w-[36rem] rounded-full blur-3xl bg-blue-400/18 mix-blend-screen"
- *        → drawn in one drawBehind pass; CSS `circle` default ending shape (farthest-corner) is
- *          reproduced by measuring the farthest-corner distance per radial center; the two glow
- *          discs use BlendMode.Screen (= mix-blend-screen).
- *   content column "relative z-10 flex h-dvh flex-col items-center overflow-y-auto px-4 pb-6 pt-14"
- *        → Column, padding(horizontal 16dp, top 56dp, bottom 24dp); sm:px-6 is the >=640px
- *          desktop breakpoint, phone form factor keeps px-4.
- *   centered section "flex w-full max-w-sm shrink-0 flex-col gap-7 rounded-2xl bg-background
- *                     p-8 text-ui-base/relaxed shadow-md sm:p-10"
- *        → fillMaxWidth().widthIn(max = 384dp [max-w-sm]), RoundedCornerShape(16dp) [rounded-2xl],
- *          MaridTokens.Background, padding 32dp [p-8; sm:p-10 = desktop breakpoint, not used],
- *          shadow-md → elevation 4dp (approximation, see deviations).
- *   LoginPanelHeader "flex flex-col items-center gap-4 text-center"
- *        → Column(spacedBy 16dp).
- *   LoginPanelLogo "relative flex size-16 items-center justify-center rounded-2xl
- *                   bg-[linear-gradient(180deg,#000000_0%,#151718_100%)] text-[#ffffff]
- *                   shadow-lg/20 before:...border-[rgba(255,255,255,0.1)]"
- *        → 64dp Box, radius 16dp, vertical gradient #000000→#151718, white 10% 1dp border overlay,
- *          logo width 40dp [w-10] height 40*218/256dp (SVG viewBox 0 0 256 218, h-auto).
- *   h1 "text-ui-xl font-semibold tracking-tight" → 18sp [text-ui-xl = 14px+4px], SemiBold(600),
- *      letterSpacing -0.025em * 18sp = -0.45sp [tracking-tight].
- *   p "text-ui-base/relaxed text-foreground-subtle" → 14sp, line-height 1.625 → 22.75sp
- *      [/relaxed], MaridTokens.ForegroundSubtle.
- *   footer "flex shrink-0 flex-col items-center gap-2 text-center text-ui-xs text-foreground-subtle"
- *        → Column(spacedBy 8dp), 10sp [text-ui-xs = 14px-4px], MaridTokens.ForegroundSubtle.
- *   terms/privacy buttons "hover:text-foreground hover:underline underline-offset-2" → plain
- *      clickable spans (no hover on touch); real links (source opens LOGIN_TERMS_URL /
- *      LOGIN_PRIVACY_URL externally) via ACTION_VIEW.
- *
- * DEVIATIONS (all documented, none invented):
- *   1. The source idle-state action stack (OAuth "Login with Browser" / "Use API key" /
- *      region switch, container "min-h-36 space-y-6") is NOT ported: it is driven by
- *      useOAuth/OAuth providers which do not exist on Android; rendering it would produce
- *      dead buttons (forbidden). Only the logo/hero/headline typography + footer (the visual
- *      shell the task mandates) is ported; no prompt suggestions exist in the source.
- *   2. shadow-md / shadow-lg/20 → Compose elevation (4dp / 8dp). Tailwind shadows are
- *      two-layer colored box-shadows; Compose elevation is an approximation.
- *   3. `blur-3xl` (64px) glow discs are rendered as radial-gradient falloff discs of the same
- *      diameter/position/color (true gaussian blur is not available pre-API31).
- *   4. Font: Tailwind system-ui stack → platform default sans; en-US strings are hardcoded
- *      (no i18n runtime on Android yet), exactly as extracted from en-US.ts.
- *   5. DesktopOverlayWindowControls + native drag strip are desktop window chrome — not ported.
- *   6. `onNewChat` is kept per the mandated API; the source surface has no new-chat
- *      affordance to bind it to, so no visual element invokes it (nothing invented).
- */
+// onNewChat is unused here — kept for caller API symmetry; this screen has no new-chat affordance.
 @Composable
 fun WelcomeScreen(onNewChat: (() -> Unit)? = null, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaridTokens.Background) // bg-background
-            .clipToBounds(), // overflow-hidden
+            .background(MaridTokens.Background)
+            .clipToBounds(),
     ) {
         HeroBackdrop2e(modifier = Modifier.matchParentSize())
 
-        // "relative z-10 flex h-dvh flex-col items-center overflow-y-auto px-4 pb-6 pt-14"
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(start = 16.dp, end = 16.dp, top = 56.dp, bottom = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // "flex w-full flex-1 shrink-0 items-center justify-center py-6"
             Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
-                // "section flex w-full max-w-sm shrink-0 flex-col gap-7 rounded-2xl bg-background p-8 ... shadow-md"
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .widthIn(max = 384.dp) // max-w-sm = 24rem
+                        .widthIn(max = 384.dp)
                         .shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp), clip = false)
                         .background(MaridTokens.Background, RoundedCornerShape(16.dp))
-                        .padding(32.dp), // p-8
+                        .padding(32.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    // LoginPanelHeader: "flex flex-col items-center gap-4 text-center"
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -139,43 +66,36 @@ fun WelcomeScreen(onNewChat: (() -> Unit)? = null, modifier: Modifier = Modifier
                         LoginPanelLogo2e()
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            // "flex flex-col items-center gap-1 text-center"
                             verticalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             Text(
-                                text = "Welcome to Marid", // login.title (en-US)
+                                text = "Welcome to Marid",
                                 color = MaridTokens.Foreground,
-                                fontSize = 18.sp, // text-ui-xl
-                                fontWeight = FontWeight.SemiBold, // font-semibold
-                                letterSpacing = (-0.45f).sp, // tracking-tight = -0.025em * 18sp
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                letterSpacing = (-0.45f).sp,
                                 textAlign = TextAlign.Center,
                             )
                             Text(
-                                // Z.AI login.description removed (no-Z.ai-login directive);
-                                // replaced with the Marid product identity line (README.md).
                                 text = "Personal Autonomous Android Agent",
                                 color = MaridTokens.ForegroundSubtle,
-                                fontSize = 14.sp, // text-ui-base
-                                lineHeight = 22.75f.sp, // /relaxed = 1.625 * 14sp
+                                fontSize = 14.sp,
+                                lineHeight = 22.75f.sp,
                                 textAlign = TextAlign.Center,
                             )
                         }
                     }
-                    // DEVIATION 1: OAuth/API-key action stack ("min-h-36 space-y-6") not ported.
                 }
             }
 
-            // footer: "pointer-events-none flex shrink-0 flex-col items-center gap-2 text-center text-ui-xs text-foreground-subtle"
-            // login.agreement.* (marid.z.ai terms/privacy links) REMOVED per the
-            // no-Z.ai-login directive — only the copyright line remains.
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
-                    text = "© 2026 Marid All rights reserved.", // login.copyright (en-US)
+                    text = "© 2026 Marid All rights reserved.",
                     color = MaridTokens.ForegroundSubtle,
-                    fontSize = 10.sp, // text-ui-xs
+                    fontSize = 10.sp,
                     textAlign = TextAlign.Center,
                 )
             }
@@ -183,51 +103,37 @@ fun WelcomeScreen(onNewChat: (() -> Unit)? = null, modifier: Modifier = Modifier
     }
 }
 
-/**
- * LoginPanelLogo (WelcomeScreen.tsx):
- * "relative flex size-16 items-center justify-center rounded-2xl
- *  bg-[linear-gradient(180deg,#000000_0%,#151718_100%)] text-[#ffffff] shadow-lg/20
- *  before:absolute before:inset-0 before:rounded-2xl before:border
- *  before:border-[rgba(255,255,255,0.1)]"
- */
 @Composable
 private fun LoginPanelLogo2e() {
     Box(
         modifier = Modifier
-            .size(64.dp) // size-16
-            .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp), clip = false) // shadow-lg/20 approx
+            .size(64.dp)
+            .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp), clip = false)
             .background(
                 brush = Brush.verticalGradient(listOf(Color(0xFF000000), Color(0xFF151718))),
-                shape = RoundedCornerShape(16.dp), // rounded-2xl
+                shape = RoundedCornerShape(16.dp),
             ),
         contentAlignment = Alignment.Center,
     ) {
-        // before: inset-0 border rgba(255,255,255,0.1), same 16dp radius
         Box(
             modifier = Modifier
                 .matchParentSize()
                 .border(1.dp, Color(0x1AFFFFFF), RoundedCornerShape(16.dp)),
         )
-        // MaridMarkM2e "h-auto w-10" — viewBox 0 0 100 73 → height = 40 * 73 / 100
         Icon(
             imageVector = MaridMarkM2e,
-            contentDescription = null, // source: aria-hidden="true" (tile carries role="img" aria-label="Marid")
+            contentDescription = null, // decorative; the tile carries the accessible label
             modifier = Modifier.size(width = 40.dp, height = 29.2.dp),
-            tint = Color(0xFFFFFFFF), // text-[#ffffff]
+            tint = Color(0xFFFFFFFF),
         )
     }
 }
 
-/**
- * ThemeHeroVisual (openWorkspacePageThemeHero.tsx), "dark" palette, drawn in one pass:
- *   panel linear-gradient + before: 3 radial gradients + white top fade
- *   + glowPrimary (cyan-300/22, screen) + glowSecondary (blue-400/18, screen).
- */
+/** Glow discs approximate blur-3xl with radial-gradient falloff (no gaussian blur pre-API31). */
 @Composable
 private fun HeroBackdrop2e(modifier: Modifier = Modifier) {
     Spacer(
         modifier = modifier.drawBehind {
-            // panel: bg-[linear-gradient(180deg,#060816_0%,#0b1333_38%,#12245a_72%,#173474_100%)]
             drawRect(
                 Brush.verticalGradient(
                     colorStops = arrayOf(
@@ -239,9 +145,7 @@ private fun HeroBackdrop2e(modifier: Modifier = Modifier) {
                 ),
             )
 
-            // before: radial-gradient(circle at X% Y%, COLOR, transparent S%) — CSS `circle`
-            // defaults to the farthest-corner ending shape, so the stop percentage scales
-            // against the distance from the center to the farthest box corner.
+            // CSS radial `circle` ends at the farthest corner, so radius = distance to farthest corner * stop.
             fun farthestCorner(center: Offset): Float {
                 val corners = listOf(
                     Offset(0f, 0f), Offset(size.width, 0f),
@@ -261,23 +165,20 @@ private fun HeroBackdrop2e(modifier: Modifier = Modifier) {
             drawRadialStop(
                 center = Offset(size.width * 0.16f, size.height * 0.20f),
                 stop = 0.22f,
-                color = Color(0xFFA5F3FC).copy(alpha = 0.14f), // rgba(165,243,252,0.14)
+                color = Color(0xFFA5F3FC).copy(alpha = 0.14f),
             )
             drawRadialStop(
                 center = Offset(size.width * 0.82f, size.height * 0.14f),
                 stop = 0.24f,
-                color = Color(0xFF60A5FA).copy(alpha = 0.18f), // rgba(96,165,250,0.18)
+                color = Color(0xFF60A5FA).copy(alpha = 0.18f),
             )
             drawRadialStop(
                 center = Offset(size.width * 0.68f, size.height * 0.84f),
                 stop = 0.28f,
-                color = Color(0xFF38BDF8).copy(alpha = 0.14f), // rgba(56,189,248,0.14)
+                color = Color(0xFF38BDF8).copy(alpha = 0.14f),
             )
-            // before: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0))
             drawRect(Brush.verticalGradient(listOf(Color(0x0AFFFFFF), Color(0x00FFFFFF))))
 
-            // glowPrimary: "left-[-12%] top-[18%] h-[42rem] w-[42rem] rounded-full blur-3xl
-            //               bg-cyan-300/22 mix-blend-screen" (42rem = 672dp, radius 336dp)
             val radius1 = 336.dp.toPx()
             val center1 = Offset(
                 size.width * -0.12f + radius1,
@@ -289,11 +190,9 @@ private fun HeroBackdrop2e(modifier: Modifier = Modifier) {
                     center = center1,
                     radius = radius1,
                 ),
-                blendMode = BlendMode.Screen, // mix-blend-screen
+                blendMode = BlendMode.Screen,
             )
 
-            // glowSecondary: "right-[-18%] bottom-[-14%] h-[36rem] w-[36rem] rounded-full
-            //                 blur-3xl bg-blue-400/18 mix-blend-screen" (36rem = 576dp)
             val radius2 = 288.dp.toPx()
             val center2 = Offset(
                 size.width * 1.18f - radius2,
@@ -311,42 +210,36 @@ private fun HeroBackdrop2e(modifier: Modifier = Modifier) {
     )
 }
 
-/**
- * Marid brand mark — geometric white "M" (same glyph as the launcher icon:
- * white M on #161616). Replaces the upstream Z.ai "Z" brand SVG
- * (components/ui/MaridAboutLogo.tsx) per the Marid rebrand directive.
- * viewBox 0 0 100 73 (DejaVu Sans Bold M cap-height proportions), fill white.
- */
 private val MaridMarkM2e: ImageVector by lazy {
     ImageVector.Builder(
         name = "Marid2e.MarkM",
         defaultWidth = 40.dp,
-        defaultHeight = 29.2.dp, // 40 * 73 / 100
+        defaultHeight = 29.2.dp,
         viewportWidth = 100f,
         viewportHeight = 73f,
     ).apply {
-        path(fill = SolidColor(Color(0xFFFFFFFF))) { // left stem
+        path(fill = SolidColor(Color(0xFFFFFFFF))) {
             moveTo(0f, 0f)
             lineTo(20f, 0f)
             lineTo(20f, 73f)
             lineTo(0f, 73f)
             close()
         }
-        path(fill = SolidColor(Color(0xFFFFFFFF))) { // right stem
+        path(fill = SolidColor(Color(0xFFFFFFFF))) {
             moveTo(80f, 0f)
             lineTo(100f, 0f)
             lineTo(100f, 73f)
             lineTo(80f, 73f)
             close()
         }
-        path(fill = SolidColor(Color(0xFFFFFFFF))) { // left diagonal of the M
+        path(fill = SolidColor(Color(0xFFFFFFFF))) {
             moveTo(20f, 0f)
             lineTo(38f, 0f)
             lineTo(50f, 28.4f)
             lineTo(50f, 45f)
             close()
         }
-        path(fill = SolidColor(Color(0xFFFFFFFF))) { // right diagonal of the M
+        path(fill = SolidColor(Color(0xFFFFFFFF))) {
             moveTo(80f, 0f)
             lineTo(62f, 0f)
             lineTo(50f, 28.4f)

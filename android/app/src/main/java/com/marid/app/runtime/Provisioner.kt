@@ -9,29 +9,7 @@ import java.io.FileInputStream
 import java.io.IOException
 import java.security.MessageDigest
 
-/**
- * Provisions the embedded Linux userland + engine dist from APK assets into
- * app-private storage. Fully OFFLINE (must succeed in airplane mode).
- *
- * Assets layout (embedded at build time by android/scripts/fetch-termux-debs.py
- * and the engine build step):
- *   runtime/termux-debs/<package>.deb   Termux Bionic deb closure (index
- *                                       SHA256-verified at fetch time)
- *   runtime/termux-debs/manifest.txt    "name<TAB>version<TAB>sha256" lines
- *   runtime/marid-dist.tgz              @marid/server engine dist + prod deps
- *   runtime/marid-dist.sha256           dist tarball sha256
- *
- * Runtime layout produced here:
- *   <filesDir>/runtime/usr/    Bionic prefix (node, bash, libs, TLS store)
- *   <filesDir>/runtime/dist/   engine dist (entry-http.js + node_modules)
- *   <filesDir>/runtime/home/   HOME for the engine (tmp/ inside)
- *   <filesDir>/runtime/workspace/   agent workspace root
- *   <filesDir>/runtime/provision-complete.json
- *
- * Inherited device-failure contracts (see BionicEnv / TarExtractor):
- * per-deb sha256 (G4), sonames as real files + relative/rewritten symlinks
- * (G1/G2), usr/etc/tls/{openssl.cnf,cert.pem} wired via env (G3).
- */
+// Fully offline provision from APK assets — must succeed in airplane mode; usr/ + dist/ land under filesDir/runtime.
 object Provisioner {
 
     const val DEB_DIR_ASSET = "runtime/termux-debs"
@@ -46,14 +24,7 @@ object Provisioner {
         File(ctx.filesDir, "workspace").apply { mkdirs() }
     fun nodeBin(ctx: Context): File = File(usrDir(ctx), "bin/node")
     fun bashBin(ctx: Context): File = File(usrDir(ctx), "bin/bash")
-    /**
-     * Engine credential secret (MARID_CREDENTIAL_SECRET_FILE contract,
-     * discovered by the sandbox engine boot test): 32-4096 bytes, mode 600.
-     * The server's file-based credential cipher requires it when no OS
-     * credential store exists (always the case on Android). Persisted once;
-     * NEVER regenerated on re-provision — existing encrypted credentials
-     * require their original key.
-     */
+    // Engine credential contract: 32-4096 bytes, mode 600, persisted once — existing encrypted credentials require their original key.
     fun credentialSecret(ctx: Context): File =
         File(runtimeRoot(ctx), "credential-secret")
     fun markerFile(ctx: Context): File =
@@ -65,7 +36,6 @@ object Provisioner {
             distEntry(ctx).isFile
     }.getOrDefault(false)
 
-    /** Engine entry: dist/entry-http.js (tsup output of @marid/server). */
     fun distEntry(ctx: Context): File = File(distDir(ctx), "entry-http.js")
 
     suspend fun provision(ctx: Context): Unit = withContext(Dispatchers.IO) {
@@ -78,7 +48,6 @@ object Provisioner {
             rt.mkdirs()
             File(homeDir(app), "tmp").mkdirs()
 
-            // 1. Termux Bionic deb closure --------------------------------
             RuntimeBus.setPhase(RuntimePhase.Provisioning("extracting Bionic runtime"))
             val manifest = readAssetText(app, "$DEB_DIR_ASSET/manifest.txt")
             val debNames = app.assets.list(DEB_DIR_ASSET)
@@ -119,7 +88,6 @@ object Provisioner {
                         "— ${report.skippedEntries} entries skipped, first: ${report.firstError}",
                 )
             }
-            // chmod: bins + shared libs executable (device-proven policy).
             File(usrDir(app), "bin").listFiles()?.forEach { f ->
                 if (f.isFile && !TarExtractor.DefaultLinkOps.isSymbolicLink(f)) {
                     f.setExecutable(true, false)
@@ -133,8 +101,7 @@ object Provisioner {
                     }
                 }
             }
-            // OpenSSL config must be present + readable INSIDE the runtime
-            // (compiled-in Termux OPENSSLDIR is EACCES and fatal at startup).
+            // Compiled-in Termux OPENSSLDIR is EACCES here; the runtime's own openssl.cnf/cert.pem are fatal-if-missing.
             val cnf = BionicEnv.ensureOpenSslConfig(rt)
             if (!cnf.isFile || !cnf.canRead()) {
                 throw IOException("openssl.cnf unreadable at ${cnf.absolutePath}")
@@ -145,7 +112,6 @@ object Provisioner {
                     "ossl-modules=${File(rt, BionicEnv.OSSL_MODULES_REL).isDirectory}",
             )
 
-            // 2. Engine dist -----------------------------------------------
             RuntimeBus.setPhase(RuntimePhase.Provisioning("extracting engine"))
             val distSha = readAssetText(app, DIST_SHA_ASSET).trim()
             val distTar = File(rt, "downloads/marid-dist.tgz")
@@ -163,7 +129,6 @@ object Provisioner {
                 )
             }
 
-            // 3. Credential secret (engine contract; generate ONCE) ---------
             val secret = credentialSecret(app)
             if (!secret.isFile) {
                 secret.parentFile?.mkdirs()
@@ -177,12 +142,11 @@ object Provisioner {
                 RuntimeBus.append("credential secret generated (48B, 0600)")
             }
 
-            // 4. On-device gate: the embedded node must run HERE -----------
+            // ARM64/Bionic compatibility gate before provisioning is declared complete.
             RuntimeBus.setPhase(RuntimePhase.Provisioning("checking Node.js on this device"))
             val probe = runNodeProbe(app)
             RuntimeBus.append("device-side node probe: $probe")
 
-            // 4. Marker ------------------------------------------------------
             markerFile(app).writeText(
                 """{"node":"$probe","debs":$debs,""" +
                     """"distSha256":"$distSha","provisionedAt":${System.currentTimeMillis()}}""",
@@ -200,12 +164,7 @@ object Provisioner {
         }
     }
 
-    /**
-     * Runs the embedded node ON THIS DEVICE — the ARM64/Bionic compatibility
-     * gate. Failure classification follows the proven taxonomy:
-     * CANNOT LINK → linker closure defect; OpenSSL configuration error →
-     * env defect; com.termux in output → env leaked a Termux path.
-     */
+    // Failure classification: CANNOT LINK = linker closure defect; OpenSSL configuration error = env defect; com.termux in output = env leak.
     fun runNodeProbe(ctx: Context): String {
         val pb = ProcessBuilder(
             nodeBin(ctx).absolutePath, "-e",

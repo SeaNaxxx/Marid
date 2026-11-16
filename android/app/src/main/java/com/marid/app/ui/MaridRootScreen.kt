@@ -15,18 +15,7 @@ import androidx.compose.ui.Modifier
 import com.marid.app.rpc.RpcConnectionState
 import com.marid.app.state.MaridAppViewModel
 
-/**
- * Root product composition — the desktop layout adapted to phone:
- * HeaderBar on top, Sidebar as a slide-in drawer (MaridSidebarDrawerHost),
- * ChatArea + Composer filling the body. Screen switching (Model Settings /
- * Settings / Task list / Terminal) is a tiny state machine, mirroring the
- * desktop surfaces without a navigation dependency.
- *
- * Sources: App.tsx / WorkspaceHeader.tsx / WorkspaceSidebar.tsx /
- * ToolCallBlocks / prompt-editor / settings pages. Deviation: sidebar is a
- * drawer on phone (desktop fixed panel); settings becomes Model Settings
- * entry (mobile single-column adaptation).
- */
+// Screen switching is a tiny state machine — no navigation dependency.
 @Composable
 fun MaridRootScreen(vm: MaridAppViewModel) {
     val rpcState by vm.rpcState.collectAsState()
@@ -38,12 +27,8 @@ fun MaridRootScreen(vm: MaridAppViewModel) {
     var drawerOpen by rememberSaveable { mutableStateOf(false) }
     var screen by rememberSaveable { mutableStateOf(RootScreen.CHAT) }
     var terminalOpen by rememberSaveable { mutableStateOf(false) }
-    // Connect dialog (OAuth placeholders) — opened from the sidebar profile
-    // button ("Connect"); replaces the removed Z.ai login surface.
     var connectOpen by rememberSaveable { mutableStateOf(false) }
 
-    // Load the model catalog when the RPC becomes CONNECTED (same trigger as
-    // the desktop composer; model-selection.getView channel).
     LaunchedEffect(rpcState) {
         if (rpcState == RpcConnectionState.CONNECTED) vm.loadModels()
     }
