@@ -1,5 +1,6 @@
 package com.marid.app.runtime
 
+import com.marid.app.utils.FileLogger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import android.util.Log
@@ -29,6 +30,8 @@ object RuntimeBus {
 
     fun append(line: String) {
         Log.i(TAG, line)
+        // Mirrored to boot.log so engine stdout/stderr and phase transitions survive without ADB.
+        FileLogger.append("Runtime", line)
         val ts = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.US)
             .format(java.util.Date())
         log.update { (it + "[$ts] $line").takeLast(LOG_LINES) }

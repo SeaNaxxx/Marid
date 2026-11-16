@@ -1,6 +1,7 @@
 package com.marid.app.runtime
 
 import android.content.Context
+import com.marid.app.utils.FileLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
@@ -41,6 +42,7 @@ object Provisioner {
     suspend fun provision(ctx: Context): Unit = withContext(Dispatchers.IO) {
         val app = ctx.applicationContext
         try {
+            FileLogger.append("Provisioner", "provision started")
             val rt = runtimeRoot(app)
             RuntimeBus.setPhase(RuntimePhase.Provisioning("preparing directories"))
             usrDir(app).deleteRecursively()
@@ -88,6 +90,11 @@ object Provisioner {
                         "— ${report.skippedEntries} entries skipped, first: ${report.firstError}",
                 )
             }
+            FileLogger.append(
+                "Provisioner",
+                "bionic extracted: $debs debs, ${report.regularFiles} files, " +
+                    "${report.symlinksCreated} symlinks, ${report.skippedEntries} skipped",
+            )
             File(usrDir(app), "bin").listFiles()?.forEach { f ->
                 if (f.isFile && !TarExtractor.DefaultLinkOps.isSymbolicLink(f)) {
                     f.setExecutable(true, false)
@@ -128,6 +135,7 @@ object Provisioner {
                     "engine dist layout unexpected (dist/entry-http.js missing)",
                 )
             }
+            FileLogger.append("Provisioner", "engine dist extracted (sha256 verified)")
 
             val secret = credentialSecret(app)
             if (!secret.isFile) {
@@ -140,12 +148,14 @@ object Provisioner {
                 secret.setReadable(true, true) // owner-only
                 secret.setWritable(true, true)
                 RuntimeBus.append("credential secret generated (48B, 0600)")
+                FileLogger.append("Provisioner", "credential secret generated (48B, 0600)")
             }
 
             // ARM64/Bionic compatibility gate before provisioning is declared complete.
             RuntimeBus.setPhase(RuntimePhase.Provisioning("checking Node.js on this device"))
             val probe = runNodeProbe(app)
             RuntimeBus.append("device-side node probe: $probe")
+            FileLogger.append("Provisioner", "node probe passed: $probe")
 
             markerFile(app).writeText(
                 """{"node":"$probe","debs":$debs,""" +
@@ -153,7 +163,9 @@ object Provisioner {
             )
             File(rt, "downloads").deleteRecursively()
             RuntimeBus.setPhase(RuntimePhase.Provisioned)
+            FileLogger.append("Provisioner", "provision complete")
         } catch (t: Throwable) {
+            FileLogger.append("Provisioner", "provision failed: ${t.message ?: t.javaClass.simpleName}")
             RuntimeBus.append("provisioning failed: ${t.javaClass.simpleName}: ${t.message}")
             RuntimeBus.setPhase(
                 RuntimePhase.Failed(

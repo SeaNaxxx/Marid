@@ -1,6 +1,7 @@
 package com.marid.app.runtime
 
 import android.content.Context
+import com.marid.app.utils.FileLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
@@ -52,21 +53,23 @@ object EngineProcess {
         val proc = pb.start()
         process = proc
         port = chosen
+        FileLogger.append("EngineProcess", "engine spawn: node ${command[1]} on port $chosen")
 
         Thread {
             try {
                 proc.inputStream.bufferedReader().use { r: BufferedReader ->
                     while (true) {
                         val line = r.readLine() ?: break
+                        // redirectErrorStream(true) merges real stderr into stdout; RuntimeBus mirrors every line to boot.log.
                         RuntimeBus.append("engine| $line")
                     }
                 }
             } catch (_: Exception) {
             }
             if (proc === process) {
-                RuntimeBus.append(
-                    "engine process exited (code=${runCatching { proc.exitValue() }.getOrDefault(-1)})",
-                )
+                val code = runCatching { proc.exitValue() }.getOrDefault(-1)
+                FileLogger.append("EngineProcess", "engine process exited (code=$code)")
+                RuntimeBus.append("engine process exited (code=$code)")
             }
         }.apply { isDaemon = true }.start()
 
@@ -92,10 +95,12 @@ object EngineProcess {
             } else {
                 "engine exited during startup — see MaridRuntime logcat"
             }
+            FileLogger.append("EngineProcess", "engine start failed: $msg")
             RuntimeBus.setPhase(RuntimePhase.Failed("engine", msg))
             throw IOException(msg)
         }
         RuntimeBus.append("engine healthy on :$chosen — WS at ${wsUrl()}")
+        FileLogger.append("EngineProcess", "engine healthy on port $chosen")
         RuntimeBus.setPhase(RuntimePhase.EngineReady(chosen))
         chosen
     }
@@ -118,6 +123,7 @@ object EngineProcess {
             "adopt: port $wantedPort already answering — reusing the existing engine " +
                 "(no duplicate node spawned)",
         )
+        FileLogger.append("EngineProcess", "adopted engine on port $wantedPort")
         RuntimeBus.setPhase(RuntimePhase.EngineReady(wantedPort))
         return true
     }
@@ -138,6 +144,7 @@ object EngineProcess {
             }
         }
         RuntimeBus.append("engine stopped")
+        FileLogger.append("EngineProcess", "engine stopped")
     }
 
     fun readLastPort(ctx: Context): Int = runCatching {

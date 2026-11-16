@@ -45,12 +45,15 @@ import com.marid.app.runtime.RuntimePhase
 import com.marid.app.state.MaridAppViewModel
 import com.marid.app.ui.MaridRootScreen
 import com.marid.app.ui.MaridTokens
+import com.marid.app.utils.FileLogger
 
 // Boot contract: provision -> engine on a random loopback port -> RPC connect; buttons appear only on failure (no fake progress).
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        FileLogger.init(applicationContext)
+        FileLogger.append("MainActivity", "onCreate: provisioned=${Provisioner.isProvisioned(applicationContext)}")
         setContent {
             val vm: MaridAppViewModel = ViewModelProvider(this, MaridAppViewModel.factory(applicationContext as android.app.Application))[MaridAppViewModel::class.java]
             val phase by RuntimeBus.phase.collectAsState()
@@ -108,7 +111,10 @@ private fun ErrorScreen(phase: RuntimePhase.Failed, vm: MaridAppViewModel) {
         )
         Spacer(Modifier.height(16.dp))
         Button(
-            onClick = { vm.retry() },
+            onClick = {
+                FileLogger.append("MainActivity", "retry requested by user")
+                vm.retry()
+            },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF2B2B2B),
                 contentColor = Color(0xFFE7E7E7),
