@@ -17,7 +17,6 @@ export type {
   MaridAppOptions,
   MaridModelOption,
 } from "./app/types.js";
-export * from "./auth-login.js";
 export {
   inspectMaridCustomCommand,
   listMaridCustomCommands,

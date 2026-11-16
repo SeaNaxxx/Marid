@@ -20,10 +20,6 @@ import type {
   inspectMaridCustomCommand,
   InspectMaridCustomCommandOptions,
   InspectMaridSkillOptions,
-  loginMaridCli,
-  loginBigmodelCodingPlan,
-  LoginBigmodelCodingPlanOptions,
-  LoginMaridCliOptions,
   listMaridCustomCommands,
   ListMaridCustomCommandsOptions,
   loadMaridCustomCommand,
@@ -31,8 +27,6 @@ import type {
   listMaridSkills,
   ListMaridSessionsOptions,
   ListMaridSkillsOptions,
-  logoutMaridCli,
-  LogoutMaridCliOptions,
   resolveLatestSession,
   ResolveLatestSessionOptions,
   RunMaridProtocolAgentOptions,
@@ -80,10 +74,6 @@ export interface RunDependencies extends PluginsCommandOverrides {
   inspectCustomCommand?: (
     options: InspectMaridCustomCommandOptions,
   ) => ReturnType<typeof inspectMaridCustomCommand>;
-  loginMaridCli?: (options?: LoginMaridCliOptions) => ReturnType<typeof loginMaridCli>;
-  loginBigmodelCodingPlan?: (
-    options?: LoginBigmodelCodingPlanOptions,
-  ) => ReturnType<typeof loginBigmodelCodingPlan>;
   configureCodingPlanApiKey?: (
     options: ConfigureCodingPlanApiKeyOptions,
   ) => ReturnType<typeof configureCodingPlanApiKey>;
@@ -108,7 +98,6 @@ export interface RunDependencies extends PluginsCommandOverrides {
     options: ResolveLatestSessionOptions,
   ) => ReturnType<typeof resolveLatestSession>;
   resolveWorkspaceGitBranch?: typeof resolveWorkspaceGitBranch;
-  logoutMaridCli?: (options?: LogoutMaridCliOptions) => ReturnType<typeof logoutMaridCli>;
   runMaridProtocolAgent?: (options?: RunMaridProtocolAgentOptions) => Promise<void>;
   runTui?: typeof import("@marid/tui").runTui;
   skipUserConfig?: boolean;

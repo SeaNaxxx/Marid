@@ -53,12 +53,7 @@ export type SlashCommand =
       rawName: string;
       type: "known";
     }
-  | {
-      args: string;
-      name: "logout";
-      rawName: string;
-      type: "known";
-    }
+
   | {
       args: string;
       name: "mcp";
