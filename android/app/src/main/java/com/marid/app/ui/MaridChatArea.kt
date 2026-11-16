@@ -968,19 +968,6 @@ private fun DiffCounts(added: Int, removed: Int) {
     )
 }
 
-object ChatAreaPalette {
-    val MutedBg15 = Color(0x26FFFFFF)
-
-    val Surface40 = Color(0x66FFFFFF)
-
-    val DestructiveBg10 = Color(0x1AFB2C36)
-
-    val Background50 = Color(0x80171717)
-
-    /** White 8% bubble composited over #171717. */
-    val BubbleFadeBase = Color(0xFF2A2A2A)
-}
-
 // CSS gradient-flow is a 4s cycle held half the time; only the 2s sweep is animated here.
 @Composable
 internal fun rememberGradientFlowBrush(): Brush {
