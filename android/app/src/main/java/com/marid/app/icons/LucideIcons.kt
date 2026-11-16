@@ -369,6 +369,32 @@ object MaridIcons {
     }
 
     /**
+     * Lucide "chevron-left" icon.
+     */
+    public val ChevronLeft: ImageVector by lazy {
+        ImageVector.Builder(
+            name = "Marid.ChevronLeft",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 24f,
+            viewportHeight = 24f,
+        ).apply {
+        path(
+            fill = null,
+            stroke = SolidColor(Color(0xFF000000)),
+            strokeLineWidth = 2f,
+            strokeLineCap = StrokeCap.Round,
+            strokeLineJoin = StrokeJoin.Round,
+            pathFillType = PathFillType.NonZero,
+        ) {
+            moveTo(9.0f, 18.0f)
+            lineTo(15.0f, 12.0f)
+            lineTo(9.0f, 6.0f)
+        }
+        }.build()
+    }
+
+    /**
      * Lucide "hand" icon.
      */
     public val Hand: ImageVector by lazy {

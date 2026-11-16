@@ -10,8 +10,12 @@ android {
 
     defaultConfig {
         applicationId = "com.marid.app"
-        minSdk = 26
-        targetSdk = 34
+        // minSdk 24 / targetSdk 28 are deliberate (Zcode-Android device-proven):
+        // Android 10+ W^X policy blocks exec() of binaries in app-writable
+        // storage for apps targeting >= 29; targeting 28 keeps the embedded
+        // Bionic node executable on Android 10+ (Termux/proot-distro precedent).
+        minSdk = 24
+        targetSdk = 28
         versionCode = 1
         versionName = "0.1.0-marid"
     }
@@ -34,6 +38,13 @@ android {
     buildFeatures {
         compose = true
     }
+
+    androidResources {
+        // AAPT2 otherwise decompresses/re-compresses these at build time and
+        // AssetManager.open() then yields re-compressed bytes; runtime
+        // extraction streams raw tar/deb bytes and must not pay that cost.
+        noCompress += listOf("tgz", "gz", "deb", "xz")
+    }
 }
 
 dependencies {
@@ -51,6 +62,10 @@ dependencies {
     // Coroutines + JSON payloads (RpcValue.Obj uses JsonElement trees).
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+
+    // Runtime provisioning: .deb extraction (ar + tar.xz) for the Termux
+    // Bionic closure and .tgz for the engine dist — both at runtime.
+    implementation("org.apache.commons:commons-compress:1.27.1")
 
     // JVM unit tests: golden vectors from the real TypeScript serializer +
     // a full in-process ChannelClient <-> fake-ChannelServer round trip.
