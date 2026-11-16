@@ -24,7 +24,7 @@
     "@qodex/model-option-map": "workspace:*",
     "@qodex/provider": "workspace:*",
     "@qodex/provider-node": "workspace:*",
-    "zod": "4.6.5"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
