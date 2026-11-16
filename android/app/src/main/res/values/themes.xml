@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Marid</string>
+    <style name="Theme.Marid" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>

@@ -12,16 +12,16 @@ overrides:
 
 patchedDependencies:
   '@ai-sdk/anthropic@3.0.81':
-    hash: d3a7c381eba7f5157f765a0528003af17cf84544911dfb7412c7800168e01c18
+    hash: a9180fb1bb577717a71d9c8f244d4a546360259533fd8677e9bd750a1129c9ae
     path: patches/@ai-sdk__anthropic@3.0.81.patch
   '@ai-sdk/openai-compatible@2.0.60':
-    hash: 9632fe9d821b3dc20939ae509cc35b968d90d018bbd1d812390718898182a38b
+    hash: f30950bd9726f8f890b3f86b5609ed030ade52f65e520d51507c6ed5740012b3
     path: patches/@ai-sdk__openai-compatible@2.0.60.patch
   '@aiden0z/pptx-renderer@1.2.4':
     hash: e1a90a724324c45a2cc90cf84d1ae1f35755b8fc9438a208d610960bd0d5f65a
     path: patches/@aiden0z__pptx-renderer@1.2.4.patch
   '@arms/rum-electron@0.0.3':
-    hash: 36855354851ea495bc47a03340b0484ff62836b739cad56904b8a69f18e2ae97
+    hash: dc8f81eeb0e53b37c974cfffb6da6274bc9f2fa8d433fd0c4566f6a87ddd1ef5
     path: patches/@arms__rum-electron@0.0.3.patch
   '@extend-ai/react-xlsx@0.16.0':
     hash: b2fc5fcfa1aab1271d20fd539d2a367f06aac08a191425885cf8f1125b7c6bc8
@@ -56,6 +56,9 @@ importers:
       '@jridgewell/trace-mapping':
         specifier: 0.3.31
         version: 0.3.31
+      '@marid/marid-cua':
+        specifier: workspace:*
+        version: link:packages/marid-cua
       '@release-it/conventional-changelog':
         specifier: ^10.0.6
         version: 10.0.6(conventional-commits-filter@5.0.0)(conventional-commits-parser@6.4.0)(release-it@19.2.4(@types/node@25.6.0)(magicast@0.5.5))
@@ -65,9 +68,6 @@ importers:
       '@types/node':
         specifier: ^25.5.0
         version: 25.6.0
-      '@marid/marid-cua':
-        specifier: workspace:*
-        version: link:packages/marid-cua
       concurrently:
         specifier: ^9.1.2
         version: 9.2.1
@@ -216,22 +216,22 @@ importers:
     dependencies:
       '@ai-sdk/anthropic':
         specifier: 3.0.81
-        version: 3.0.81(patch_hash=d3a7c381eba7f5157f765a0528003af17cf84544911dfb7412c7800168e01c18)(zod@4.6.5)
+        version: 3.0.81(patch_hash=a9180fb1bb577717a71d9c8f244d4a546360259533fd8677e9bd750a1129c9ae)(zod@4.6.5)
       '@ai-sdk/openai':
         specifier: ^3.0.58
         version: 3.0.65(zod@4.6.5)
       '@ai-sdk/openai-compatible':
         specifier: ^2.0.58
-        version: 2.0.60(patch_hash=9632fe9d821b3dc20939ae509cc35b968d90d018bbd1d812390718898182a38b)(zod@4.6.5)
-      '@modelcontextprotocol/client':
-        specifier: 2.0.0
-        version: 2.0.0
+        version: 2.0.60(patch_hash=f30950bd9726f8f890b3f86b5609ed030ade52f65e520d51507c6ed5740012b3)(zod@4.6.5)
       '@marid/contracts':
         specifier: workspace:*
         version: link:../contracts
       '@marid/dynamic-workflow':
         specifier: workspace:*
         version: link:../dynamic-workflow
+      '@marid/marid-cua':
+        specifier: workspace:*
+        version: link:../../../../packages/marid-cua
       '@marid/model-option-map':
         specifier: workspace:*
         version: link:../../../../packages/model-option-map
@@ -241,9 +241,9 @@ importers:
       '@marid/shared':
         specifier: workspace:*
         version: link:../../../../packages/shared
-      '@marid/marid-cua':
-        specifier: workspace:*
-        version: link:../../../../packages/marid-cua
+      '@modelcontextprotocol/client':
+        specifier: 2.0.0
+        version: 2.0.0
       ai:
         specifier: 6.0.193
         version: 6.0.193(zod@4.6.5)
@@ -358,24 +358,21 @@ importers:
         specifier: 4.6.5
         version: 4.6.5
     devDependencies:
+      '@marid/formal-proof':
+        specifier: workspace:*
+        version: link:../../../../packages/formal-proof
       '@types/node':
         specifier: ^24.0.0
         version: 24.12.2
       '@types/yazl':
         specifier: ^3.3.1
         version: 3.3.1
-      '@marid/formal-proof':
-        specifier: workspace:*
-        version: link:../../../../packages/formal-proof
       yazl:
         specifier: ^3.3.1
         version: 3.3.1
 
   apps/marid-cli/packages/browser-use-plugin:
     dependencies:
-      '@modelcontextprotocol/server':
-        specifier: 2.0.0
-        version: 2.0.0
       '@marid/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -388,22 +385,25 @@ importers:
       '@marid/shared':
         specifier: workspace:*
         version: link:../../../../packages/shared
+      '@modelcontextprotocol/server':
+        specifier: 2.0.0
+        version: 2.0.0
       zod:
         specifier: 4.6.5
         version: 4.6.5
     devDependencies:
-      '@modelcontextprotocol/client':
-        specifier: 2.0.0
-        version: 2.0.0
-      '@types/node':
-        specifier: ^24.0.0
-        version: 24.12.2
       '@marid/adapters':
         specifier: workspace:*
         version: link:../adapters
       '@marid/bootstrap':
         specifier: workspace:*
         version: link:../bootstrap
+      '@modelcontextprotocol/client':
+        specifier: 2.0.0
+        version: 2.0.0
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.12.2
       esbuild:
         specifier: ^0.25.0
         version: 0.25.12
@@ -419,9 +419,6 @@ importers:
 
   apps/marid-cli/packages/cli:
     dependencies:
-      '@napi-rs/keyring':
-        specifier: 2.1.2
-        version: 2.1.2
       '@marid/adapters':
         specifier: workspace:*
         version: link:../adapters
@@ -452,6 +449,9 @@ importers:
       '@marid/tui':
         specifier: workspace:*
         version: link:../tui
+      '@napi-rs/keyring':
+        specifier: 2.1.2
+        version: 2.1.2
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
@@ -486,6 +486,9 @@ importers:
       '@marid/dynamic-workflow':
         specifier: workspace:*
         version: link:../dynamic-workflow
+      '@marid/marid-cua':
+        specifier: workspace:*
+        version: link:../../../../packages/marid-cua
       '@marid/session-control':
         specifier: workspace:*
         version: link:../../../../packages/session-control
@@ -495,9 +498,6 @@ importers:
       '@marid/shared-types':
         specifier: workspace:*
         version: link:../shared-types
-      '@marid/marid-cua':
-        specifier: workspace:*
-        version: link:../../../../packages/marid-cua
       cheerio:
         specifier: ^1.0.0
         version: 1.2.0
@@ -657,23 +657,86 @@ importers:
         specifier: ^4.1.5
         version: 4.1.7(patch_hash=11fdb66aa985e1d77e68752deeb7c1130ae33c9a4e2968f23aae8adaf8bc9ba0)(@opentelemetry/api@1.9.1)(@types/node@24.12.2)(@vitest/coverage-v8@4.1.7)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.13.3(@types/node@24.12.2)(typescript@5.9.3))(vite@8.0.8(@types/node@24.12.2)(esbuild@0.25.12)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))
 
-  apps/marid-cli/packages/node-repl-host:
+  apps/marid-cli/packages/marid-cua-plugin:
     dependencies:
-      '@modelcontextprotocol/server':
+      '@marid/marid-cua':
+        specifier: workspace:*
+        version: link:../../../../packages/marid-cua
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.12.2
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
+
+  apps/marid-cli/packages/marid-guide-plugin: {}
+
+  apps/marid-cli/packages/marid-site-plugin:
+    devDependencies:
+      '@marid/shared':
+        specifier: workspace:*
+        version: link:../../../../packages/shared
+      '@modelcontextprotocol/client':
         specifier: 2.0.0
         version: 2.0.0
+      '@modelcontextprotocol/core':
+        specifier: 2.0.0
+        version: 2.0.0
+      '@modelcontextprotocol/ext-apps':
+        specifier: 2.0.0
+        version: 2.0.0(@modelcontextprotocol/client@2.0.0)(@modelcontextprotocol/core@2.0.0)(@modelcontextprotocol/server@2.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(zod@4.6.5)
+      '@modelcontextprotocol/sdk':
+        specifier: 1.29.0
+        version: 1.29.0(zod@4.6.5)
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.12.2
+      '@types/react':
+        specifier: ^19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.14)
+      esbuild:
+        specifier: ^0.25.0
+        version: 0.25.12
+      lucide-react:
+        specifier: ^1.17.0
+        version: 1.17.0(react@19.2.7)
+      react:
+        specifier: 19.2.7
+        version: 19.2.7
+      react-dom:
+        specifier: 19.2.7
+        version: 19.2.7(react@19.2.7)
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+      vitest:
+        specifier: ^4.1.5
+        version: 4.1.7(patch_hash=11fdb66aa985e1d77e68752deeb7c1130ae33c9a4e2968f23aae8adaf8bc9ba0)(@opentelemetry/api@1.9.1)(@types/node@24.12.2)(@vitest/coverage-v8@4.1.7)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.13.3(@types/node@24.12.2)(typescript@6.0.2))(vite@8.0.8(@types/node@24.12.2)(esbuild@0.25.12)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))
+      zod:
+        specifier: 4.6.5
+        version: 4.6.5
+
+  apps/marid-cli/packages/node-repl-host:
+    dependencies:
       '@marid/contracts':
         specifier: workspace:*
         version: link:../contracts
       '@marid/core':
         specifier: workspace:*
         version: link:../core
-      '@marid/shared':
-        specifier: workspace:*
-        version: link:../../../../packages/shared
       '@marid/marid-cua':
         specifier: workspace:*
         version: link:../../../../packages/marid-cua
+      '@marid/shared':
+        specifier: workspace:*
+        version: link:../../../../packages/shared
+      '@modelcontextprotocol/server':
+        specifier: 2.0.0
+        version: 2.0.0
       zod:
         specifier: ^4.4.3
         version: 4.6.5
@@ -800,6 +863,9 @@ importers:
 
   apps/marid-cli/packages/telemetry:
     dependencies:
+      '@marid/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@opentelemetry/api':
         specifier: ^1.9.0
         version: 1.9.1
@@ -824,9 +890,6 @@ importers:
       '@opentelemetry/sdk-trace-base':
         specifier: 2.6.1
         version: 2.6.1(@opentelemetry/api@1.9.1)
-      '@marid/contracts':
-        specifier: workspace:*
-        version: link:../contracts
     devDependencies:
       '@types/node':
         specifier: ^24.0.0
@@ -837,12 +900,6 @@ importers:
 
   apps/marid-cli/packages/tui:
     dependencies:
-      '@mbears/opentui-core':
-        specifier: 0.2.15
-        version: 0.2.15(typescript@6.0.2)(web-tree-sitter@0.25.10)
-      '@mbears/opentui-react':
-        specifier: 0.2.15
-        version: 0.2.15(react-devtools-core@7.0.1)(react@19.2.7)(typescript@6.0.2)(web-tree-sitter@0.25.10)(ws@8.18.0)
       '@marid/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -852,6 +909,12 @@ importers:
       '@marid/shared':
         specifier: workspace:*
         version: link:../../../../packages/shared
+      '@mbears/opentui-core':
+        specifier: 0.2.15
+        version: 0.2.15(typescript@6.0.2)(web-tree-sitter@0.25.10)
+      '@mbears/opentui-react':
+        specifier: 0.2.15
+        version: 0.2.15(react-devtools-core@7.0.1)(react@19.2.7)(typescript@6.0.2)(web-tree-sitter@0.25.10)(ws@8.18.0)
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -876,69 +939,6 @@ importers:
         version: 4.21.0
 
   apps/marid-cli/packages/visualize-plugin: {}
-
-  apps/marid-cli/packages/marid-cua-plugin:
-    dependencies:
-      '@marid/marid-cua':
-        specifier: workspace:*
-        version: link:../../../../packages/marid-cua
-    devDependencies:
-      '@types/node':
-        specifier: ^24.0.0
-        version: 24.12.2
-      typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
-
-  apps/marid-cli/packages/marid-guide-plugin: {}
-
-  apps/marid-cli/packages/marid-site-plugin:
-    devDependencies:
-      '@modelcontextprotocol/client':
-        specifier: 2.0.0
-        version: 2.0.0
-      '@modelcontextprotocol/core':
-        specifier: 2.0.0
-        version: 2.0.0
-      '@modelcontextprotocol/ext-apps':
-        specifier: 2.0.0
-        version: 2.0.0(@modelcontextprotocol/client@2.0.0)(@modelcontextprotocol/core@2.0.0)(@modelcontextprotocol/server@2.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(zod@4.6.5)
-      '@modelcontextprotocol/sdk':
-        specifier: 1.29.0
-        version: 1.29.0(zod@4.6.5)
-      '@types/node':
-        specifier: ^24.0.0
-        version: 24.12.2
-      '@types/react':
-        specifier: ^19.2.14
-        version: 19.2.14
-      '@types/react-dom':
-        specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.14)
-      '@marid/shared':
-        specifier: workspace:*
-        version: link:../../../../packages/shared
-      esbuild:
-        specifier: ^0.25.0
-        version: 0.25.12
-      lucide-react:
-        specifier: ^1.17.0
-        version: 1.17.0(react@19.2.7)
-      react:
-        specifier: 19.2.7
-        version: 19.2.7
-      react-dom:
-        specifier: 19.2.7
-        version: 19.2.7(react@19.2.7)
-      typescript:
-        specifier: ^6.0.2
-        version: 6.0.2
-      vitest:
-        specifier: ^4.1.5
-        version: 4.1.7(patch_hash=11fdb66aa985e1d77e68752deeb7c1130ae33c9a4e2968f23aae8adaf8bc9ba0)(@opentelemetry/api@1.9.1)(@types/node@24.12.2)(@vitest/coverage-v8@4.1.7)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.13.3(@types/node@24.12.2)(typescript@6.0.2))(vite@8.0.8(@types/node@24.12.2)(esbuild@0.25.12)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))
-      zod:
-        specifier: 4.6.5
-        version: 4.6.5
 
   apps/marid-cli/tools/prompt-trajectory:
     devDependencies:
@@ -1024,7 +1024,7 @@ importers:
     dependencies:
       '@arms/rum-electron':
         specifier: ^0.0.3
-        version: 0.0.3(patch_hash=36855354851ea495bc47a03340b0484ff62836b739cad56904b8a69f18e2ae97)(@babel/runtime@7.29.7)(electron@44.7.0)
+        version: 0.0.3(patch_hash=dc8f81eeb0e53b37c974cfffb6da6274bc9f2fa8d433fd0c4566f6a87ddd1ef5)(@babel/runtime@7.29.7)(electron@44.7.0)
       '@babel/runtime':
         specifier: ^7.24.5
         version: 7.29.7
@@ -1040,6 +1040,36 @@ importers:
       '@lydell/node-pty-linux-x64':
         specifier: 1.2.0-beta.10
         version: 1.2.0-beta.10
+      '@marid/client':
+        specifier: workspace:*
+        version: link:../client
+      '@marid/e2e-report':
+        specifier: workspace:*
+        version: link:../e2e-report
+      '@marid/marid-cua':
+        specifier: workspace:*
+        version: link:../marid-cua
+      '@marid/provider':
+        specifier: workspace:*
+        version: link:../provider
+      '@marid/provider-node':
+        specifier: workspace:*
+        version: link:../provider-node
+      '@marid/rpc':
+        specifier: workspace:*
+        version: link:../rpc
+      '@marid/server':
+        specifier: workspace:*
+        version: link:../server
+      '@marid/services':
+        specifier: workspace:*
+        version: link:../services
+      '@marid/shared':
+        specifier: workspace:*
+        version: link:../shared
+      '@marid/ui':
+        specifier: workspace:*
+        version: link:../ui
       '@modelcontextprotocol/client':
         specifier: 2.0.0
         version: 2.0.0
@@ -1073,36 +1103,6 @@ importers:
       '@opentelemetry/sdk-trace-base':
         specifier: 2.6.1
         version: 2.6.1(@opentelemetry/api@1.9.1)
-      '@marid/client':
-        specifier: workspace:*
-        version: link:../client
-      '@marid/e2e-report':
-        specifier: workspace:*
-        version: link:../e2e-report
-      '@marid/provider':
-        specifier: workspace:*
-        version: link:../provider
-      '@marid/provider-node':
-        specifier: workspace:*
-        version: link:../provider-node
-      '@marid/rpc':
-        specifier: workspace:*
-        version: link:../rpc
-      '@marid/server':
-        specifier: workspace:*
-        version: link:../server
-      '@marid/services':
-        specifier: workspace:*
-        version: link:../services
-      '@marid/shared':
-        specifier: workspace:*
-        version: link:../shared
-      '@marid/ui':
-        specifier: workspace:*
-        version: link:../ui
-      '@marid/marid-cua':
-        specifier: workspace:*
-        version: link:../marid-cua
       electron-updater:
         specifier: 6.8.10
         version: 6.8.10
@@ -1308,6 +1308,64 @@ importers:
         specifier: ^8.0.2
         version: 8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0)
 
+  packages/marid-cua:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.27.1
+        version: 1.29.0(zod@4.6.5)
+
+  packages/marid-server-cli:
+    dependencies:
+      '@hono/node-server':
+        specifier: ^1.19.11
+        version: 1.19.14(hono@4.12.12)
+      '@hono/node-ws':
+        specifier: ^1.3.0
+        version: 1.3.0(@hono/node-server@1.19.14(hono@4.12.12))(hono@4.12.12)
+      '@marid/rpc':
+        specifier: workspace:*
+        version: link:../rpc
+      '@marid/services':
+        specifier: workspace:*
+        version: link:../services
+      '@marid/shared':
+        specifier: workspace:*
+        version: link:../shared
+      '@napi-rs/keyring':
+        specifier: 2.1.2
+        version: 2.1.2
+      hono:
+        specifier: ^4.12.9
+        version: 4.12.12
+      ws:
+        specifier: ^8.20.0
+        version: 8.20.0
+      yauzl:
+        specifier: ^3.3.0
+        version: 3.3.0
+      zod:
+        specifier: 4.6.5
+        version: 4.6.5
+    devDependencies:
+      '@types/node':
+        specifier: ^25.5.0
+        version: 25.6.0
+      '@types/ws':
+        specifier: ^8.18.1
+        version: 8.18.1
+      '@types/yauzl':
+        specifier: ^2.10.3
+        version: 2.10.3
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.9)(tsx@4.21.0)(typescript@6.0.2)(yaml@2.9.0)
+      tsx:
+        specifier: ^4.19.4
+        version: 4.21.0
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   packages/model-option-map:
     devDependencies:
       typescript:
@@ -1355,12 +1413,12 @@ importers:
         specifier: 4.6.5
         version: 4.6.5
     devDependencies:
-      '@types/node':
-        specifier: ^25.5.0
-        version: 25.6.0
       '@marid/model-option-map':
         specifier: workspace:*
         version: link:../model-option-map
+      '@types/node':
+        specifier: ^25.5.0
+        version: 25.6.0
       typescript:
         specifier: ^6.0.2
         version: 6.0.2
@@ -1394,9 +1452,6 @@ importers:
       '@lydell/node-pty-linux-x64':
         specifier: 1.2.0-beta.10
         version: 1.2.0-beta.10
-      '@napi-rs/keyring':
-        specifier: 2.1.2
-        version: 2.1.2
       '@marid/client':
         specifier: workspace:*
         version: link:../client
@@ -1409,6 +1464,9 @@ importers:
       '@marid/shared':
         specifier: workspace:*
         version: link:../shared
+      '@napi-rs/keyring':
+        specifier: 2.1.2
+        version: 2.1.2
       axios:
         specifier: ^1.13.6
         version: 1.13.6
@@ -1482,6 +1540,9 @@ importers:
       '@larksuiteoapi/node-sdk':
         specifier: 1.64.0
         version: 1.64.0
+      '@marid/marid-cua':
+        specifier: workspace:*
+        version: link:../marid-cua
       '@marid/provider':
         specifier: workspace:*
         version: link:../provider
@@ -1497,9 +1558,6 @@ importers:
       '@marid/shared':
         specifier: workspace:*
         version: link:../shared
-      '@marid/marid-cua':
-        specifier: workspace:*
-        version: link:../marid-cua
       chokidar:
         specifier: 4.0.3
         version: 4.0.3
@@ -1595,6 +1653,9 @@ importers:
       '@lexical/react':
         specifier: ^0.42.0
         version: 0.42.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(yjs@13.6.30)
+      '@marid/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@pierre/diffs':
         specifier: ^1.1.22
         version: 1.1.22(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -1637,9 +1698,6 @@ importers:
       '@xyflow/react':
         specifier: ^12.10.1
         version: 12.10.2(@types/react@19.2.14)(immer@11.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      '@marid/shared':
-        specifier: workspace:*
-        version: link:../shared
       ai:
         specifier: ^6.0.138
         version: 6.0.159(zod@4.6.5)
@@ -1758,15 +1816,15 @@ importers:
 
   packages/shared:
     dependencies:
-      '@napi-rs/keyring':
-        specifier: 2.1.2
-        version: 2.1.2
       '@marid/model-option-map':
         specifier: workspace:*
         version: link:../model-option-map
       '@marid/session-control':
         specifier: workspace:*
         version: link:../session-control
+      '@napi-rs/keyring':
+        specifier: 2.1.2
+        version: 2.1.2
       zod:
         specifier: 4.6.5
         version: 4.6.5
@@ -1853,6 +1911,21 @@ importers:
       '@lexical/react':
         specifier: ^0.42.0
         version: 0.42.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(yjs@13.6.30)
+      '@marid/design-runtime':
+        specifier: workspace:*
+        version: link:../design-runtime
+      '@marid/provider':
+        specifier: workspace:*
+        version: link:../provider
+      '@marid/rpc':
+        specifier: workspace:*
+        version: link:../rpc
+      '@marid/services':
+        specifier: workspace:*
+        version: link:../services
+      '@marid/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@modelcontextprotocol/client':
         specifier: 2.0.0
         version: 2.0.0
@@ -1907,21 +1980,6 @@ importers:
       '@xyflow/react':
         specifier: ^12.10.1
         version: 12.10.2(@types/react@19.2.14)(immer@11.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      '@marid/design-runtime':
-        specifier: workspace:*
-        version: link:../design-runtime
-      '@marid/provider':
-        specifier: workspace:*
-        version: link:../provider
-      '@marid/rpc':
-        specifier: workspace:*
-        version: link:../rpc
-      '@marid/services':
-        specifier: workspace:*
-        version: link:../services
-      '@marid/shared':
-        specifier: workspace:*
-        version: link:../shared
       ai:
         specifier: ^6.0.138
         version: 6.0.159(zod@4.6.5)
@@ -2147,64 +2205,6 @@ importers:
       vite:
         specifier: ^8.0.2
         version: 8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0)
-
-  packages/marid-cua:
-    dependencies:
-      '@modelcontextprotocol/sdk':
-        specifier: ^1.27.1
-        version: 1.29.0(zod@4.6.5)
-
-  packages/marid-server-cli:
-    dependencies:
-      '@hono/node-server':
-        specifier: ^1.19.11
-        version: 1.19.14(hono@4.12.12)
-      '@hono/node-ws':
-        specifier: ^1.3.0
-        version: 1.3.0(@hono/node-server@1.19.14(hono@4.12.12))(hono@4.12.12)
-      '@napi-rs/keyring':
-        specifier: 2.1.2
-        version: 2.1.2
-      '@marid/rpc':
-        specifier: workspace:*
-        version: link:../rpc
-      '@marid/services':
-        specifier: workspace:*
-        version: link:../services
-      '@marid/shared':
-        specifier: workspace:*
-        version: link:../shared
-      hono:
-        specifier: ^4.12.9
-        version: 4.12.12
-      ws:
-        specifier: ^8.20.0
-        version: 8.20.0
-      yauzl:
-        specifier: ^3.3.0
-        version: 3.3.0
-      zod:
-        specifier: 4.6.5
-        version: 4.6.5
-    devDependencies:
-      '@types/node':
-        specifier: ^25.5.0
-        version: 25.6.0
-      '@types/ws':
-        specifier: ^8.18.1
-        version: 8.18.1
-      '@types/yauzl':
-        specifier: ^2.10.3
-        version: 2.10.3
-      tsup:
-        specifier: ^8.4.0
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.9)(tsx@4.21.0)(typescript@6.0.2)(yaml@2.9.0)
-      tsx:
-        specifier: ^4.19.4
-        version: 4.21.0
-      typescript:
-        specifier: ^6.0.2
-        version: 6.0.2
 
 packages:
 
@@ -4050,6 +4050,7 @@ packages:
   '@opentelemetry/sdk-trace-base@2.6.1':
     resolution: {integrity: sha512-r86ut4T1e8vNwB35CqCcKd45yzqH6/6Wzvpk2/cZB8PsPLlZFTvrh8yfOS3CYZYcUmAx4hHTZJ8AO8Dj8nrdhw==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.3.0 <1.10.0'
 
@@ -10971,8 +10972,8 @@ packages:
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
 
-  oxlint-plugin-react-doctor@0.9.22:
-    resolution: {integrity: sha512-kf9MwCpK3YlAWYUyX5Zx7XYrdIbA/4lQD2QREIqC8DvmNb2I+wP8zyjL4NeGl2FO2EC1sLuYvW8ir4Ooq1Xd2A==}
+  oxlint-plugin-react-doctor@0.9.23:
+    resolution: {integrity: sha512-AWC9/Jiki6s7e8b8xqTs0T/Hph8ISEDmoMUDwPkEzTrE0996ZWjwg7Ifaz5vPJQnefnOI9SDQQ/EvwvaZt4Tvg==}
     engines: {node: ^20.19.0 || >=22.13.0}
 
   oxlint@1.60.0:
@@ -11527,8 +11528,8 @@ packages:
   react-devtools-core@7.0.1:
     resolution: {integrity: sha512-C3yNvRHaizlpiASzy7b9vbnBGLrhvdhl1CbdU6EnZgxPNbai60szdLtl+VL76UNOt5bOoVTOz5rNWZxgGt+Gsw==}
 
-  react-doctor@0.9.22:
-    resolution: {integrity: sha512-SyZOIl61VMCZ3sN7v7Vr2zCsPlyy7nNnBshtIrl0B/X+uY+rL9MGfyNhTmp/FLXfuDKEv61Y6xMguya7vn1Ulg==}
+  react-doctor@0.9.23:
+    resolution: {integrity: sha512-mKFbd0fYaiR8CS5PHyydJ//Bcs+TmdYhLVoiArdIvGNsUsG576GstUP69c7KFNMJheheZz7z2ww0byrmkizQLA==}
     engines: {node: ^20.19.0 || >=22.13.0}
     hasBin: true
 
@@ -13591,7 +13592,7 @@ snapshots:
     dependencies:
       zod: 4.6.5
 
-  '@ai-sdk/anthropic@3.0.81(patch_hash=d3a7c381eba7f5157f765a0528003af17cf84544911dfb7412c7800168e01c18)(zod@4.6.5)':
+  '@ai-sdk/anthropic@3.0.81(patch_hash=a9180fb1bb577717a71d9c8f244d4a546360259533fd8677e9bd750a1129c9ae)(zod@4.6.5)':
     dependencies:
       '@ai-sdk/provider': 3.0.10
       '@ai-sdk/provider-utils': 4.0.27(zod@4.6.5)
@@ -13611,7 +13612,7 @@ snapshots:
       '@vercel/oidc': 3.1.0
       zod: 4.6.5
 
-  '@ai-sdk/openai-compatible@2.0.60(patch_hash=9632fe9d821b3dc20939ae509cc35b968d90d018bbd1d812390718898182a38b)(zod@4.6.5)':
+  '@ai-sdk/openai-compatible@2.0.60(patch_hash=f30950bd9726f8f890b3f86b5609ed030ade52f65e520d51507c6ed5740012b3)(zod@4.6.5)':
     dependencies:
       '@ai-sdk/provider': 3.0.14
       '@ai-sdk/provider-utils': 4.0.39(zod@4.6.5)
@@ -13679,7 +13680,7 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.29.7
 
-  '@arms/rum-electron@0.0.3(patch_hash=36855354851ea495bc47a03340b0484ff62836b739cad56904b8a69f18e2ae97)(@babel/runtime@7.29.7)(electron@44.7.0)':
+  '@arms/rum-electron@0.0.3(patch_hash=dc8f81eeb0e53b37c974cfffb6da6274bc9f2fa8d433fd0c4566f6a87ddd1ef5)(@babel/runtime@7.29.7)(electron@44.7.0)':
     dependencies:
       '@arms/rum-browser': 0.1.8(@babel/runtime@7.29.7)
       '@arms/rum-core': 0.1.4(@babel/runtime@7.29.7)
@@ -23270,7 +23271,7 @@ snapshots:
       '@oxfmt/binding-win32-ia32-msvc': 0.47.0
       '@oxfmt/binding-win32-x64-msvc': 0.47.0
 
-  oxlint-plugin-react-doctor@0.9.22:
+  oxlint-plugin-react-doctor@0.9.23:
     dependencies:
       '@shaderfrog/glsl-parser': 7.0.1
       '@typescript-eslint/types': 8.72.0
@@ -23918,7 +23919,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  react-doctor@0.9.22(@opentelemetry/core@2.12.0(@opentelemetry/api@1.9.1))(eslint@10.13.0(jiti@2.7.0))(react@19.2.7):
+  react-doctor@0.9.23(@opentelemetry/core@2.12.0(@opentelemetry/api@1.9.1))(eslint@10.13.0(jiti@2.7.0))(react@19.2.7):
     dependencies:
       '@astrojs/compiler': 4.0.0
       '@sentry/node': 10.76.2(@opentelemetry/core@2.12.0(@opentelemetry/api@1.9.1))
@@ -23933,7 +23934,7 @@ snapshots:
       oxc-parser: 0.148.0
       oxc-resolver: 11.24.2
       oxlint: 1.81.0
-      oxlint-plugin-react-doctor: 0.9.22
+      oxlint-plugin-react-doctor: 0.9.23
       playwright-core: 1.64.1
       prompts: 2.4.2
       typescript: 5.9.3
@@ -24045,7 +24046,7 @@ snapshots:
       preact: 10.29.8
       prompts: 2.4.2
       react: 19.2.7
-      react-doctor: 0.9.22(@opentelemetry/core@2.12.0(@opentelemetry/api@1.9.1))(eslint@10.13.0(jiti@2.7.0))(react@19.2.7)
+      react-doctor: 0.9.23(@opentelemetry/core@2.12.0(@opentelemetry/api@1.9.1))(eslint@10.13.0(jiti@2.7.0))(react@19.2.7)
       react-dom: 19.2.7(react@19.2.7)
       react-grab: 0.2.0(react@19.2.7)
     optionalDependencies:
