@@ -66,6 +66,8 @@ dependencies {
     // Runtime provisioning: .deb extraction (ar + tar.xz|zst) for the Termux
     // Bionic closure and .tgz for the engine dist — both at runtime.
     implementation("org.apache.commons:commons-compress:1.27.1")
+    // commons-compress's XZCompressorInputStream resolves org.tukaani.xz classes at runtime; without this jar data.tar.xz throws NoClassDefFoundError.
+    implementation("org.tukaani:xz:1.9")
     // commons-compress's zstd support requires the zstd-jni native AAR.
     implementation("com.github.luben:zstd-jni:1.5.5-11@aar")
 
