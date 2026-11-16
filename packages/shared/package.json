@@ -48,7 +48,7 @@
     "@napi-rs/keyring": "2.1.2",
     "@qodex/model-option-map": "workspace:*",
     "@qodex/session-control": "workspace:*",
-    "zod": "4.6.5"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@modelcontextprotocol/ext-apps": "2.0.0",
