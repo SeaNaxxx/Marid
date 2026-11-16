@@ -1,7 +1,6 @@
 package com.marid.app.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -109,22 +108,14 @@ private fun LoginPanelLogo2e() {
         modifier = Modifier
             .size(64.dp)
             .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp), clip = false)
-            .background(
-                brush = Brush.verticalGradient(listOf(Color(0xFF000000), Color(0xFF151718))),
-                shape = RoundedCornerShape(16.dp),
-            ),
+            .background(Color(0xFFFFFFFF), RoundedCornerShape(16.dp)),
         contentAlignment = Alignment.Center,
     ) {
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .border(1.dp, Color(0x1AFFFFFF), RoundedCornerShape(16.dp)),
-        )
         Icon(
-            imageVector = MaridMarkM2e,
+            imageVector = MaridBarsMark2e,
             contentDescription = null, // decorative; the tile carries the accessible label
-            modifier = Modifier.size(width = 40.dp, height = 29.2.dp),
-            tint = Color(0xFFFFFFFF),
+            modifier = Modifier.size(width = 15.dp, height = 20.dp),
+            tint = Color(0xFF121316),
         )
     }
 }
@@ -210,40 +201,26 @@ private fun HeroBackdrop2e(modifier: Modifier = Modifier) {
     )
 }
 
-private val MaridMarkM2e: ImageVector by lazy {
+private val MaridBarsMark2e: ImageVector by lazy {
     ImageVector.Builder(
-        name = "Marid2e.MarkM",
-        defaultWidth = 40.dp,
-        defaultHeight = 29.2.dp,
-        viewportWidth = 100f,
-        viewportHeight = 73f,
+        name = "Marid2e.MarkBars",
+        defaultWidth = 15.dp,
+        defaultHeight = 20.dp,
+        viewportWidth = 75f,
+        viewportHeight = 100f,
     ).apply {
-        path(fill = SolidColor(Color(0xFFFFFFFF))) {
-            moveTo(0f, 0f)
-            lineTo(20f, 0f)
-            lineTo(20f, 73f)
-            lineTo(0f, 73f)
+        path(fill = SolidColor(Color(0xFF121316))) {
+            moveTo(0f, 6.5f)
+            arcTo(6.5f, 6.5f, 0f, false, true, 13f, 6.5f)
+            lineTo(13f, 93.5f)
+            arcTo(6.5f, 6.5f, 0f, false, true, 0f, 93.5f)
             close()
         }
-        path(fill = SolidColor(Color(0xFFFFFFFF))) {
-            moveTo(80f, 0f)
-            lineTo(100f, 0f)
-            lineTo(100f, 73f)
-            lineTo(80f, 73f)
-            close()
-        }
-        path(fill = SolidColor(Color(0xFFFFFFFF))) {
-            moveTo(20f, 0f)
-            lineTo(38f, 0f)
-            lineTo(50f, 28.4f)
-            lineTo(50f, 45f)
-            close()
-        }
-        path(fill = SolidColor(Color(0xFFFFFFFF))) {
-            moveTo(80f, 0f)
-            lineTo(62f, 0f)
-            lineTo(50f, 28.4f)
-            lineTo(50f, 45f)
+        path(fill = SolidColor(Color(0xFF121316))) {
+            moveTo(62f, 6.5f)
+            arcTo(6.5f, 6.5f, 0f, false, true, 75f, 6.5f)
+            lineTo(75f, 93.5f)
+            arcTo(6.5f, 6.5f, 0f, false, true, 62f, 93.5f)
             close()
         }
     }.build()

@@ -1027,6 +1027,32 @@ body {
   }
 }
 
+/* ChatLoading 的 Marid 标记：双柱按镜像相位呼吸，读作眨眼而非同步闪烁。 */
+.marid-loader-bar {
+  animation: marid-loader-breathe 1.6s ease-in-out infinite;
+}
+
+.marid-loader-bar-offset {
+  animation-delay: -0.8s;
+}
+
+@keyframes marid-loader-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marid-loader-bar {
+    animation: none;
+  }
+}
+
 @keyframes marid-turn-navigator-enter {
   from {
     opacity: 0;

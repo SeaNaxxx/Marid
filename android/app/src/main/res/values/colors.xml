@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Marid launcher background: marid-zai-dark app background token #161616. -->
-    <color name="ic_launcher_background">#161616</color>
+    <!-- Launcher background layer: the Marid mark is dark bars on white. -->
+    <color name="ic_launcher_background">#FFFFFF</color>
 </resources>
