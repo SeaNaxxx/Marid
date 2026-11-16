@@ -1,15 +1,15 @@
 import { useSetInterfaceModeWithTelemetry } from "@/lib/appTelemetry.js";
 import { SidebarNativeTooltip, ControlHintTooltip } from "@/ControlHintTooltip.js";
 /* oxlint-disable eslint(max-lines) -- footer 聚合账户、主题、模式和快捷键菜单。 */
-import type { Locale, UserInfo } from "@marid/shared";
+import type { Locale, UserInfo } from "@qodex/shared";
 import { memo, useCallback, useEffect, useState, type ReactNode } from "react";
-import { DesktopCommandIds, LOCALE_NATIVE_NAMES, SUPPORTED_LOCALES } from "@marid/shared";
+import { DesktopCommandIds, LOCALE_NATIVE_NAMES, SUPPORTED_LOCALES } from "@qodex/shared";
 import {
   TID_LOGIN_MENU_ITEM,
   TID_LOGIN_TRIGGER,
   TID_LOGOUT_BUTTON,
   TID_TASK_SETTINGS_BUTTON,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.js";
 import { cn } from "@/components/lib/utils.js";
 import { Button } from "@/components/ui/button.js";
@@ -45,9 +45,9 @@ import {
 } from "lucide-react";
 import { usePlatform } from "@/hooks/usePlatform.js";
 import { useOpenRewards } from "@/rewards/RewardsProvider.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { useShortcutCommandLabel } from "@/shortcuts/useShortcutBindings.js";
-import { useMaridStore } from "@/store/StoreProvider.js";
+import { useQodexStore } from "@/store/StoreProvider.js";
 import { normalizeInterfaceMode } from "@/lib/interfaceMode.js";
 import type { Theme } from "@/useTheme.js";
 import { WorkspaceWebRemoteControlTrigger } from "@/WorkspaceWebRemoteControlTrigger.js";
@@ -71,12 +71,12 @@ function getSidebarProfileName(user?: UserInfo | null): string {
     return username;
   }
 
-  return "Marid";
+  return "Qodex";
 }
 
 function getSidebarProfileBadge(
   user: UserInfo | null | undefined,
-  formatMessage: ReturnType<typeof useMaridIntl>["intl"]["formatMessage"],
+  formatMessage: ReturnType<typeof useQodexIntl>["intl"]["formatMessage"],
 ): string {
   if (user) {
     return getSidebarProfileName(user);
@@ -131,15 +131,15 @@ export const WorkspaceSidebarFooter = memo(function WorkspaceSidebarFooterCompon
   banner?: ReactNode;
   className?: string;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const platform = usePlatform();
   const openRewards = useOpenRewards();
-  const interfaceMode = useMaridStore((state) => state.interfaceMode);
+  const interfaceMode = useQodexStore((state) => state.interfaceMode);
   const setInterfaceMode = useSetInterfaceModeWithTelemetry(platform, "app.profile");
   const zoomInShortcutLabel = useShortcutCommandLabel("zoomIn");
   const zoomOutShortcutLabel = useShortcutCommandLabel("zoomOut");
   const resetZoomShortcutLabel = useShortcutCommandLabel("resetZoom");
-  const isRestoringOAuthSession = useMaridStore((state) => state.isRestoringOAuthSession);
+  const isRestoringOAuthSession = useQodexStore((state) => state.isRestoringOAuthSession);
   const profileBadge = getSidebarProfileBadge(user, intl.formatMessage);
   const avatarFallbackText = getAvatarFallbackText(user);
   const avatarKey = user?.avatarUrl ?? user?.id ?? "guest";

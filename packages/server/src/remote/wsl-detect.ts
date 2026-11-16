@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
-import type { WSLDistro } from "@marid/shared";
-export type { WSLDistro } from "@marid/shared";
+import type { WSLDistro } from "@qodex/shared";
+export type { WSLDistro } from "@qodex/shared";
 
 const WSL_COMMAND = "wsl.exe";
 const WSL_EXEC_MAX_BUFFER = 8 * 1024 * 1024;

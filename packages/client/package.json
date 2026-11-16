@@ -1,5 +1,5 @@
 {
-  "name": "@marid/client",
+  "name": "@qodex/client",
   "private": true,
   "type": "module",
   "exports": {
@@ -11,9 +11,9 @@
     "lint:fix": "oxlint --fix"
   },
   "dependencies": {
-    "@marid/rpc": "workspace:*",
-    "@marid/services": "workspace:*",
-    "@marid/shared": "workspace:*"
+    "@qodex/rpc": "workspace:*",
+    "@qodex/services": "workspace:*",
+    "@qodex/shared": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^6.0.2"

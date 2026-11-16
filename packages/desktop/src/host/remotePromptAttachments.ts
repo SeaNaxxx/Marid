@@ -1,21 +1,21 @@
-import type { IRemoteBackend, RemoteUploadOptions } from "@marid/server/remote";
-import { quotePosixPathArg } from "@marid/server/remote/posixShell.js";
-import type { TraceId, MaridPromptAttachment } from "@marid/shared";
+import type { IRemoteBackend, RemoteUploadOptions } from "@qodex/server/remote";
+import { quotePosixPathArg } from "@qodex/server/remote/posixShell.js";
+import type { TraceId, QodexPromptAttachment } from "@qodex/shared";
 import { randomUUID } from "node:crypto";
 
-export const REMOTE_PROMPT_ATTACHMENT_ROOT = "~/.marid/tmp/prompt-attachments";
-const REMOTE_PROMPT_ATTACHMENT_RELATIVE_ROOT = ".marid/tmp/prompt-attachments";
+export const REMOTE_PROMPT_ATTACHMENT_ROOT = "~/.qodex/tmp/prompt-attachments";
+const REMOTE_PROMPT_ATTACHMENT_RELATIVE_ROOT = ".qodex/tmp/prompt-attachments";
 
 export interface RemotePromptAttachmentMaterializeInput {
   taskId?: string;
   content: string;
   traceId: TraceId | string;
-  attachments?: MaridPromptAttachment[];
+  attachments?: QodexPromptAttachment[];
 }
 
 export interface RemotePromptAttachmentMaterializeResult {
   content: string;
-  attachments?: MaridPromptAttachment[];
+  attachments?: QodexPromptAttachment[];
   uploadedCount: number;
 }
 
@@ -32,7 +32,7 @@ export async function materializeRemotePromptAttachments(
   }
 
   const replacements = new Map<string, string>();
-  const nextAttachments: MaridPromptAttachment[] = [];
+  const nextAttachments: QodexPromptAttachment[] = [];
   let remoteRootPromise: Promise<string> | undefined;
   let uploadedCount = 0;
   let changed = false;
@@ -88,7 +88,7 @@ export async function materializeRemotePromptAttachments(
     nextAttachments.push({
       ...attachment,
       localPath: remotePath,
-    } as MaridPromptAttachment);
+    } as QodexPromptAttachment);
     replacements.set(localPath, remotePath);
     uploadedCount += 1;
     changed = true;
@@ -222,7 +222,7 @@ async function waitForRemoteCommand(
   });
 }
 
-function getAttachmentLocalPath(attachment: MaridPromptAttachment): string | undefined {
+function getAttachmentLocalPath(attachment: QodexPromptAttachment): string | undefined {
   const localPath = attachment.localPath?.trim();
   return localPath ? attachment.localPath : undefined;
 }

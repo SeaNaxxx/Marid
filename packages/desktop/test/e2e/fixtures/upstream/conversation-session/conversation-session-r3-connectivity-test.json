@@ -16,7 +16,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": ["You are Marid connectivity probe."]
+        "bodyIncludes": ["You are Qodex connectivity probe."]
       },
       "response": {
         "statusCode": 200,

@@ -1,11 +1,11 @@
-import type { TaskNotificationPayload } from "@marid/shared";
+import type { TaskNotificationPayload } from "@qodex/shared";
 import type {
   ConversationSnapshot,
   PendingInteraction,
   SessionPhase,
   SessionSummary,
   UserInputRequestPayload,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 import type { IntlInstance } from "@/i18n/index.js";
 
 type FormatMessage = IntlInstance["formatMessage"];

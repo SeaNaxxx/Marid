@@ -3,7 +3,7 @@ import type {
   CodingPlanToolData,
   CodingPlanUsageDetailMetric,
   CodingPlanUsageDetailSubject,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 type CodingPlanLineChartSeries = Array<{
   name: string;

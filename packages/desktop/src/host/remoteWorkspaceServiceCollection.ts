@@ -11,9 +11,9 @@ import {
   IOnboardingRecordService,
   ICredentialService,
   IBroadcastService,
-  IMaridTaskService,
-  IMaridAgentService,
-  IMaridSessionService,
+  IQodexTaskService,
+  IQodexAgentService,
+  IQodexSessionService,
   IConversationShareService,
   createUnsupportedConversationShareService,
   IBotsService,
@@ -45,7 +45,7 @@ import {
   IPromptAttachmentTransferService,
   type ServiceDescriptor,
   type IServiceAccessor,
-} from "@marid/services";
+} from "@qodex/services";
 import {
   REMOTE_WORKSPACE_RPC_CHANNELS,
   assertRemoteWorkspaceRpcContract,
@@ -54,12 +54,12 @@ import {
   createServiceLogger,
   createLegacySingleRootProjectService,
   createRemoteProjectService,
-} from "@marid/services/node";
+} from "@qodex/services/node";
 import {
   buildServerRemoteWorkspaceIdentity,
   remoteHostIdFromWorkspaceIdentity,
-} from "@marid/shared";
-import type { RemoteTarget } from "@marid/shared";
+} from "@qodex/shared";
+import type { RemoteTarget } from "@qodex/shared";
 import {
   createRemoteProviderProvisioningExecutorFromWorkspace,
   registerRemoteProviderProvisioningExecutor,
@@ -77,9 +77,9 @@ export const REMOTE_WORKSPACE_RPC_REGISTRATIONS = [
   ["onboardingRecordService", IOnboardingRecordService],
   ["credentialService", ICredentialService],
   ["broadcastService", IBroadcastService],
-  ["maridTaskService", IMaridTaskService],
-  ["maridAgentService", IMaridAgentService],
-  ["maridSessionService", IMaridSessionService],
+  ["qodexTaskService", IQodexTaskService],
+  ["qodexAgentService", IQodexAgentService],
+  ["qodexSessionService", IQodexSessionService],
   ["conversationShareService", IConversationShareService],
   ["botsService", IBotsService],
   ["fileWatcherService", IFileWatcherService],
@@ -162,7 +162,7 @@ export function resolveServerProjectService(params: {
         );
     },
     readTasks: ({ workspacePath, kind }) => {
-      const tasks = params.connectionServices.maridTaskService;
+      const tasks = params.connectionServices.qodexTaskService;
       const scope = { workspacePath };
       return kind === "pinned"
         ? tasks.listPinnedTasks(scope)
@@ -185,7 +185,7 @@ export function createServerRemoteWorkspaceServiceCollection(params: {
   sourceServices?: ServiceCollection;
 }): ServiceCollection {
   assertRemoteWorkspaceRpcContract(params.connectionServices);
-  // Server remote 连接的是一个已经运行的完整 Marid server。
+  // Server remote 连接的是一个已经运行的完整 Qodex server。
   // Host 只做 RPC 转接，不替 server 决定 workspace/runtime/provider 归属；
   // Provider 配置只经 Host 私有的 Provisioning executor 从本机单向下发到远端。
   const remoteProviderProvisioningExecutor =
@@ -206,9 +206,9 @@ export function createServerRemoteWorkspaceServiceCollection(params: {
     .register(IOnboardingRecordService, params.connectionServices.onboardingRecordService)
     .register(ICredentialService, params.connectionServices.credentialService)
     .register(IBroadcastService, params.connectionServices.broadcastService)
-    .register(IMaridTaskService, params.connectionServices.maridTaskService)
-    .register(IMaridAgentService, params.connectionServices.maridAgentService)
-    .register(IMaridSessionService, params.connectionServices.maridSessionService)
+    .register(IQodexTaskService, params.connectionServices.qodexTaskService)
+    .register(IQodexAgentService, params.connectionServices.qodexAgentService)
+    .register(IQodexSessionService, params.connectionServices.qodexSessionService)
     // R3 的分享属于目标 Environment；不能恢复旧 SSH 的本机 JWT 混装。
     .register(
       IConversationShareService,

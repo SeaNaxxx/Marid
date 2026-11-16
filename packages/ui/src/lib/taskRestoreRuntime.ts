@@ -1,4 +1,4 @@
-import type { MaridTaskPersistStatus, MaridTaskRuntimeStatus } from "@marid/shared";
+import type { QodexTaskPersistStatus, QodexTaskRuntimeStatus } from "@qodex/shared";
 
 interface TaskRestoreTimestampedMessageLike {
   role: "user" | "assistant";
@@ -6,7 +6,7 @@ interface TaskRestoreTimestampedMessageLike {
 }
 
 interface ResolveTaskRuntimeStatusAfterRestoreOptions {
-  persistedStatus?: MaridTaskPersistStatus;
+  persistedStatus?: QodexTaskPersistStatus;
   persistedUpdatedAt?: number;
   latestUserMessageTimestamp?: number | null;
   runtimeMainActive?: boolean;
@@ -18,7 +18,7 @@ interface ShouldShowTaskConfigLoadingOnSwitchParams {
 }
 
 export function shouldKeepTaskStreamingDuringRestore(
-  taskStatus: MaridTaskRuntimeStatus,
+  taskStatus: QodexTaskRuntimeStatus,
 ): boolean {
   // Bugfix: 任务切到后台后再切回来时，如果这条 task 其实还在持续输出，
   // 恢复链路不能把它先打回 restoring/ready。
@@ -55,7 +55,7 @@ export function getLatestTaskUserMessageTimestamp(
   return latestTimestamp;
 }
 
-function toTerminalRuntimeStatus(status: MaridTaskPersistStatus): MaridTaskRuntimeStatus {
+function toTerminalRuntimeStatus(status: QodexTaskPersistStatus): QodexTaskRuntimeStatus {
   if (status === "running") {
     return "streaming";
   }
@@ -63,10 +63,10 @@ function toTerminalRuntimeStatus(status: MaridTaskPersistStatus): MaridTaskRunti
 }
 
 export function resolveTaskRuntimeStatusAfterRestore(
-  taskStatus: MaridTaskRuntimeStatus,
+  taskStatus: QodexTaskRuntimeStatus,
   hasRestoredSession: boolean,
   options?: ResolveTaskRuntimeStatusAfterRestoreOptions,
-): MaridTaskRuntimeStatus {
+): QodexTaskRuntimeStatus {
   if (!hasRestoredSession) {
     return "notReady";
   }

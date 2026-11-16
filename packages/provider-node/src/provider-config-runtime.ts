@@ -2,49 +2,49 @@ import {
   ProviderConfigService,
   type ProviderConfigLayerSnapshot,
   type ProviderConfigLayerUpdate,
-} from "@marid/provider";
-import { NodeMaridBuiltinProviderConfigSource } from "./marid-builtin-provider-config-source.js";
+} from "@qodex/provider";
+import { NodeQodexBuiltinProviderConfigSource } from "./qodex-builtin-provider-config-source.js";
 import {
-  EndpointScopedMaridBuiltinSource,
-  type EndpointScopedMaridBuiltinSourceOptions,
-} from "./endpoint-scoped-marid-builtin-source.js";
+  EndpointScopedQodexBuiltinSource,
+  type EndpointScopedQodexBuiltinSourceOptions,
+} from "./endpoint-scoped-qodex-builtin-source.js";
 import {
-  MaridBuiltinRemoteSynchronizer,
-  type MaridBuiltinRemoteSynchronizerOptions,
-  type MaridBuiltinRefreshResult,
-} from "./marid-builtin-remote-synchronizer.js";
+  QodexBuiltinRemoteSynchronizer,
+  type QodexBuiltinRemoteSynchronizerOptions,
+  type QodexBuiltinRefreshResult,
+} from "./qodex-builtin-remote-synchronizer.js";
 import {
   NodePersonalProviderConfigRepository,
   type PersonalProviderConfigRecoveryEvent,
 } from "./personal-provider-config-repository.js";
 
 export interface NodeProviderConfigRuntimeOptions {
-  readonly maridBuiltinFilePath: string;
-  readonly maridBuiltinActiveFilePath?: string;
-  readonly maridBuiltinRemote?: Omit<MaridBuiltinRemoteSynchronizerOptions, "source">;
-  readonly maridBuiltinEnvironment?: Omit<
-    EndpointScopedMaridBuiltinSourceOptions,
+  readonly qodexBuiltinFilePath: string;
+  readonly qodexBuiltinActiveFilePath?: string;
+  readonly qodexBuiltinRemote?: Omit<QodexBuiltinRemoteSynchronizerOptions, "source">;
+  readonly qodexBuiltinEnvironment?: Omit<
+    EndpointScopedQodexBuiltinSourceOptions,
     "bundledFilePath"
   >;
-  readonly onMaridBuiltinRefreshError?: (error: unknown) => void;
+  readonly onQodexBuiltinRefreshError?: (error: unknown) => void;
   readonly onPersonalConfigRecovery?: (event: PersonalProviderConfigRecoveryEvent) => void;
   readonly onPersonalConfigPollingError?: (error: unknown) => void;
   readonly personalFilePath: string;
   readonly personalPollingIntervalMs?: number | false;
   readonly importLegacy?: (
-    maridBuiltin: ProviderConfigLayerSnapshot,
+    qodexBuiltin: ProviderConfigLayerSnapshot,
   ) => Promise<ProviderConfigLayerUpdate | null>;
   readonly watch?: boolean;
 }
 
-/** 组装一个 Node.js 进程内共享的 Marid Built-in/Personal Config 运行边界。 */
+/** 组装一个 Node.js 进程内共享的 Qodex Built-in/Personal Config 运行边界。 */
 export class NodeProviderConfigRuntime {
   readonly configService: ProviderConfigService;
-  readonly #maridBuiltinSource:
-    | NodeMaridBuiltinProviderConfigSource
-    | EndpointScopedMaridBuiltinSource;
+  readonly #qodexBuiltinSource:
+    | NodeQodexBuiltinProviderConfigSource
+    | EndpointScopedQodexBuiltinSource;
   readonly #personalRepository: NodePersonalProviderConfigRepository;
-  readonly #remoteSynchronizer?: MaridBuiltinRemoteSynchronizer;
+  readonly #remoteSynchronizer?: QodexBuiltinRemoteSynchronizer;
   readonly #onRemoteRefreshError?: (error: unknown) => void;
   #startPromise: Promise<void> | null = null;
   #disposed = false;
@@ -53,25 +53,25 @@ export class NodeProviderConfigRuntime {
   #checkInFlight: Promise<void> | null = null;
 
   constructor(options: NodeProviderConfigRuntimeOptions) {
-    this.#maridBuiltinSource = options.maridBuiltinEnvironment
-      ? new EndpointScopedMaridBuiltinSource({
-          bundledFilePath: options.maridBuiltinFilePath,
-          ...options.maridBuiltinEnvironment,
+    this.#qodexBuiltinSource = options.qodexBuiltinEnvironment
+      ? new EndpointScopedQodexBuiltinSource({
+          bundledFilePath: options.qodexBuiltinFilePath,
+          ...options.qodexBuiltinEnvironment,
         })
-      : new NodeMaridBuiltinProviderConfigSource({
-          bundledFilePath: options.maridBuiltinFilePath,
-          activeFilePath: options.maridBuiltinActiveFilePath,
+      : new NodeQodexBuiltinProviderConfigSource({
+          bundledFilePath: options.qodexBuiltinFilePath,
+          activeFilePath: options.qodexBuiltinActiveFilePath,
           watch: options.watch,
         });
     this.#remoteSynchronizer =
-      options.maridBuiltinRemote &&
-      this.#maridBuiltinSource instanceof NodeMaridBuiltinProviderConfigSource
-        ? new MaridBuiltinRemoteSynchronizer({
-            source: this.#maridBuiltinSource,
-            ...options.maridBuiltinRemote,
+      options.qodexBuiltinRemote &&
+      this.#qodexBuiltinSource instanceof NodeQodexBuiltinProviderConfigSource
+        ? new QodexBuiltinRemoteSynchronizer({
+            source: this.#qodexBuiltinSource,
+            ...options.qodexBuiltinRemote,
           })
         : undefined;
-    this.#onRemoteRefreshError = options.onMaridBuiltinRefreshError;
+    this.#onRemoteRefreshError = options.onQodexBuiltinRefreshError;
     this.#personalRepository = new NodePersonalProviderConfigRepository({
       filePath: options.personalFilePath,
       onRecovery: options.onPersonalConfigRecovery,
@@ -79,28 +79,28 @@ export class NodeProviderConfigRuntime {
       pollingIntervalMs: options.personalPollingIntervalMs,
       ...(options.importLegacy
         ? {
-            importLegacy: async () => options.importLegacy!(await this.#maridBuiltinSource.read()),
+            importLegacy: async () => options.importLegacy!(await this.#qodexBuiltinSource.read()),
           }
         : {}),
     });
     this.configService = new ProviderConfigService({
-      maridBuiltinSource: this.#maridBuiltinSource,
+      qodexBuiltinSource: this.#qodexBuiltinSource,
       personalRepository: this.#personalRepository,
     });
   }
 
-  resolveMaridBuiltinActiveFilePath(): Promise<string> {
-    return this.#maridBuiltinSource instanceof NodeMaridBuiltinProviderConfigSource
-      ? Promise.resolve(this.#maridBuiltinSource.activeFilePath)
-      : this.#maridBuiltinSource.resolveActiveFilePath();
+  resolveQodexBuiltinActiveFilePath(): Promise<string> {
+    return this.#qodexBuiltinSource instanceof NodeQodexBuiltinProviderConfigSource
+      ? Promise.resolve(this.#qodexBuiltinSource.activeFilePath)
+      : this.#qodexBuiltinSource.resolveActiveFilePath();
   }
 
-  get personalRepository(): import("@marid/provider").PersonalProviderConfigRepository {
+  get personalRepository(): import("@qodex/provider").PersonalProviderConfigRepository {
     return this.#personalRepository;
   }
 
   /** Environment 同一周期检查中恢复未对齐依赖，不被下载 TTL 或失败挡住。 */
-  onDidCheckMaridBuiltin(listener: () => Promise<void>): () => void {
+  onDidCheckQodexBuiltin(listener: () => Promise<void>): () => void {
     this.#checkListeners.add(listener);
     return () => this.#checkListeners.delete(listener);
   }
@@ -114,7 +114,7 @@ export class NodeProviderConfigRuntime {
       // Managed Worker 无下载配置也无恢复 owner，不建立周期任务。
       if (
         this.#remoteSynchronizer ||
-        this.#maridBuiltinSource instanceof EndpointScopedMaridBuiltinSource ||
+        this.#qodexBuiltinSource instanceof EndpointScopedQodexBuiltinSource ||
         this.#checkListeners.size > 0
       ) {
         this.#checkTimer = setInterval(() => {
@@ -130,10 +130,10 @@ export class NodeProviderConfigRuntime {
     return startPromise;
   }
 
-  refreshMaridBuiltin(options?: { readonly force?: boolean }): Promise<MaridBuiltinRefreshResult> {
+  refreshQodexBuiltin(options?: { readonly force?: boolean }): Promise<QodexBuiltinRefreshResult> {
     if (this.#disposed) return Promise.resolve("disposed");
-    if (this.#maridBuiltinSource instanceof EndpointScopedMaridBuiltinSource) {
-      return this.#maridBuiltinSource.refresh(options);
+    if (this.#qodexBuiltinSource instanceof EndpointScopedQodexBuiltinSource) {
+      return this.#qodexBuiltinSource.refresh(options);
     }
     return this.#remoteSynchronizer?.refresh(options) ?? Promise.resolve("skipped");
   }
@@ -142,7 +142,7 @@ export class NodeProviderConfigRuntime {
     if (this.#disposed) return Promise.resolve();
     if (this.#checkInFlight) return this.#checkInFlight;
     const check = Promise.allSettled([
-      this.refreshMaridBuiltin(),
+      this.refreshQodexBuiltin(),
       ...[...this.#checkListeners].map((listener) => Promise.resolve().then(listener)),
     ])
       .then((results) => {
@@ -166,7 +166,7 @@ export class NodeProviderConfigRuntime {
     this.#remoteSynchronizer?.dispose();
     this.configService.dispose();
     this.#personalRepository.dispose();
-    this.#maridBuiltinSource.dispose();
+    this.#qodexBuiltinSource.dispose();
   }
 }
 

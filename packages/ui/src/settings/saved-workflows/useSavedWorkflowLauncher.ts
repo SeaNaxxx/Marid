@@ -9,7 +9,7 @@ import {
   savedWorkflowStartRejectionReasonSchema,
   type CommandAck,
   type SavedWorkflowStartRejectionReason,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 import { createCommandEnvelope } from "@/v4/commandFactory.js";
 import {
   acquireWorkspaceConnection,

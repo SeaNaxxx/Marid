@@ -1,7 +1,7 @@
 Unicode true
-Name "Marid installer.nsh smoke"
+Name "Qodex installer.nsh smoke"
 OutFile "${OUTPUT_FILE}"
-InstallDir "$TEMP\marid-installer-nsh-smoke"
+InstallDir "$TEMP\qodex-installer-nsh-smoke"
 RequestExecutionLevel user
 SilentInstall silent
 
@@ -14,21 +14,21 @@ SilentInstall silent
   !include "StrContains.nsh"
 !endif
 
-!define APP_DESCRIPTION "Marid NSIS smoke fixture"
-!define APP_FILENAME "Marid"
-!define APP_ID "dev.marid.installer-nsh-smoke"
-!define UNINSTALL_REGISTRY_KEY "Software\\MaridInstallerSmoke\\{7C2A992D-72BB-4F8C-8DF0-0EA8A7B1F1C3}"
+!define APP_DESCRIPTION "Qodex NSIS smoke fixture"
+!define APP_FILENAME "Qodex"
+!define APP_ID "dev.qodex.installer-nsh-smoke"
+!define UNINSTALL_REGISTRY_KEY "Software\\QodexInstallerSmoke\\{7C2A992D-72BB-4F8C-8DF0-0EA8A7B1F1C3}"
 ; This fixture invokes the cleanup macro from a normal section; electron-builder's real uninstaller uses un.*.
 !ifdef BUILD_UNINSTALLER
-  !define MARID_UNINSTALLER_FUNCTION_PREFIX ""
+  !define QODEX_UNINSTALLER_FUNCTION_PREFIX ""
 !endif
 ; Simulate a manually launched overwrite installer without --updated.
 !define isUpdated `1 == 0`
 !define allowToChangeInstallationDirectory
-!define MARID_INSTALLER_DEFAULT_LOG_PATH "${DEFAULT_LOG_PATH}"
-!define MARID_INSTALLER_ELEVATED_LOG_PATH "${ELEVATED_LOG_PATH}"
+!define QODEX_INSTALLER_DEFAULT_LOG_PATH "${DEFAULT_LOG_PATH}"
+!define QODEX_INSTALLER_ELEVATED_LOG_PATH "${ELEVATED_LOG_PATH}"
 !ifdef FORCE_ELEVATED_INNER
-  !define MARID_INSTALLER_IS_ELEVATED_INNER `1 == 1`
+  !define QODEX_INSTALLER_IS_ELEVATED_INNER `1 == 1`
 !endif
 
 Var appExe
@@ -37,7 +37,7 @@ Var newStartMenuLink
 Var newDesktopLink
 Var keepShortcuts
 
-!include "${MARID_INSTALLER_NSH}"
+!include "${QODEX_INSTALLER_NSH}"
 ; 与正式构建保持顺序：common.nsh 的常量在自定义 include 之后才可用。
 !define UNINSTALL_FILENAME "uninstaller.exe"
 ; 回归原因：electron-builder 异步生成 header 时，自定义 include 可能先于插件目录注册。
@@ -57,8 +57,8 @@ Var keepShortcuts
 
 Section
   SetOutPath "$INSTDIR"
-  File /oname=Marid.exe "${FIXTURE_EXE}"
-  StrCpy $appExe "$INSTDIR\Marid.exe"
+  File /oname=Qodex.exe "${FIXTURE_EXE}"
+  StrCpy $appExe "$INSTDIR\Qodex.exe"
   StrCpy $launchLink "$INSTDIR\stale-target.exe"
   StrCpy $newStartMenuLink "$INSTDIR\start-menu.lnk"
   StrCpy $newDesktopLink "$INSTDIR\desktop.lnk"
@@ -75,7 +75,7 @@ Section
 
     !ifndef BUILD_UNINSTALLER
       Push "$newStartMenuLink"
-      Call MaridReadShortcutTarget
+      Call QodexReadShortcutTarget
       Pop $R8
       FileOpen $0 "$INSTDIR\read-shortcut-target.txt" w
       FileWrite $0 "$R8"
@@ -108,6 +108,6 @@ Section
 
   ; customInstall 会向夹具专属注册表键写入 InstallLocation，运行后必须清理，
   ; 不能在测试机上留下残留（spec：夹具不得写入真实注册表）。
-  DeleteRegKey HKCU "Software\MaridInstallerSmoke"
+  DeleteRegKey HKCU "Software\QodexInstallerSmoke"
 
 SectionEnd

@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import type { ConversationShareCapabilities } from "@marid/shared";
-import type { WireConversationRow } from "@marid/shared/marid-protocol-v4";
+import type { ConversationShareCapabilities } from "@qodex/shared";
+import type { WireConversationRow } from "@qodex/shared/qodex-protocol-v4";
 import type { ConversationShareFailureIssue } from "./conversationShare.js";
 
 /** 内嵌图片转为既有 artifact；预检和发布使用同一份确定性转换，不新增文件读取通道。 */

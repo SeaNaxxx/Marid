@@ -1,6 +1,6 @@
-import type { Hook, MaridWorkspaceHookTrustGrantResult } from "@marid/shared";
-import type { WorkspaceHookBundleSnapshotData } from "@marid/shared/workspace-hook-discovery";
-import { ServiceChannels } from "@marid/shared";
+import type { Hook, QodexWorkspaceHookTrustGrantResult } from "@qodex/shared";
+import type { WorkspaceHookBundleSnapshotData } from "@qodex/shared/workspace-hook-discovery";
+import { ServiceChannels } from "@qodex/shared";
 import { createServiceDescriptor } from "../descriptors.js";
 
 export interface IHooksService {
@@ -39,7 +39,7 @@ export interface IHooksService {
     workspacePath: string;
     bundleDigest: string;
     hookDeclarationDigest: string;
-  }): Promise<MaridWorkspaceHookTrustGrantResult>;
+  }): Promise<QodexWorkspaceHookTrustGrantResult>;
 }
 
 export const IHooksService = createServiceDescriptor<IHooksService>(ServiceChannels.Hooks);

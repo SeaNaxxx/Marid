@@ -1,4 +1,4 @@
-import type { IPlatformService, SaveFileResult } from "@marid/shared";
+import type { IPlatformService, SaveFileResult } from "@qodex/shared";
 import { getPathLeaf } from "@/lib/path.js";
 
 export const MAX_FILE_COPY_BYTES = 50 * 1024 * 1024;

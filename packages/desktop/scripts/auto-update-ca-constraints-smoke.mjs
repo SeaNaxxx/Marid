@@ -12,7 +12,7 @@ const require = createRequire(import.meta.url);
 await mkdir(resolve(desktop, ".e2e-artifacts"), { recursive: true });
 const artifact = await mkdtemp(resolve(desktop, ".e2e-artifacts/ca-constraints-"));
 const home = resolve(artifact, "home");
-await mkdir(resolve(home, ".marid/v2"), { recursive: true });
+await mkdir(resolve(home, ".qodex/v2"), { recursive: true });
 const keys = Array.from({ length: 3 }, () => forge.pki.rsa.generateKeyPair(2048));
 let serial = 2000;
 const pem = forge.pki.certificateToPem;
@@ -293,7 +293,7 @@ for (const definition of [
 }
 await writeFile(caPath, directAnchors.join("\n"));
 await writeFile(
-  resolve(home, ".marid/v2/setting.json"),
+  resolve(home, ".qodex/v2/setting.json"),
   JSON.stringify({
     locale: "en-US",
     httpProxyCaCertPath: caPath,
@@ -348,11 +348,11 @@ if (appArg < 0) {
 const env = {
   ...process.env,
   HOME: home,
-  MARID_DATA_BASE_DIR: home,
-  MARID_DESKTOP_HOME_DIR: home,
-  MARID_DESKTOP_USER_DATA_DIR: resolve(artifact, "user-data"),
-  MARID_DESKTOP_SESSION_DATA_DIR: resolve(artifact, "session"),
-  MARID_DESKTOP_APPLICATION_NAME: "Marid CA Constraints Acceptance",
+  QODEX_DATA_BASE_DIR: home,
+  QODEX_DESKTOP_HOME_DIR: home,
+  QODEX_DESKTOP_USER_DATA_DIR: resolve(artifact, "user-data"),
+  QODEX_DESKTOP_SESSION_DATA_DIR: resolve(artifact, "session"),
+  QODEX_DESKTOP_APPLICATION_NAME: "Qodex CA Constraints Acceptance",
 };
 delete env.ELECTRON_RUN_AS_NODE;
 let application;

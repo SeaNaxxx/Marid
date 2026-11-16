@@ -6,11 +6,11 @@ import {
 } from "node:fs";
 import { dirname, join } from "node:path";
 
-import { createUuid } from "@marid/shared";
-import { getAppConfigDir } from "@marid/services/node";
+import { createUuid } from "@qodex/shared";
+import { getAppConfigDir } from "@qodex/services/node";
 
 export interface EnsureDesktopDeviceMidSyncOptions {
-  /** state 文件所在目录，默认 getAppConfigDir()（即 ~/.marid/v2）。仅测试注入 */
+  /** state 文件所在目录，默认 getAppConfigDir()（即 ~/.qodex/v2）。仅测试注入 */
   configDir?: string;
   /** UUID 生成器，默认 createUuid。仅测试注入 */
   createId?: () => string;

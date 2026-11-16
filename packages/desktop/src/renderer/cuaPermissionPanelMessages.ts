@@ -1,5 +1,5 @@
-import type { CuaPermissionKind, Locale } from "@marid/shared";
-import { toZhOrEnLocale } from "@marid/shared";
+import type { CuaPermissionKind, Locale } from "@qodex/shared";
+import { toZhOrEnLocale } from "@qodex/shared";
 
 export interface CuaPermissionPanelMessages {
   documentTitle: string;
@@ -15,7 +15,7 @@ const MESSAGES: Record<
   Omit<CuaPermissionPanelMessages, "permissionLabel"> & Record<CuaPermissionKind, string>
 > = {
   "zh-CN": {
-    documentTitle: "Marid Computer Use 权限",
+    documentTitle: "Qodex Computer Use 权限",
     dragTitle: "拖动我到上面的权限列表",
     hintPrefix: "把左边的图标拖进上方的",
     hintSuffix: "列表",
@@ -24,7 +24,7 @@ const MESSAGES: Record<
     screen_recording: "屏幕录制",
   },
   "en-US": {
-    documentTitle: "Marid Computer Use Permissions",
+    documentTitle: "Qodex Computer Use Permissions",
     dragTitle: "Drag me to the permission list above",
     hintPrefix: "Drag the icon on the left into the ",
     hintSuffix: " list above",

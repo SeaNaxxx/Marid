@@ -7,8 +7,8 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
-import { useMaridStore } from "@/store/StoreProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
+import { useQodexStore } from "@/store/StoreProvider.js";
 import type { Theme } from "@/useTheme.js";
 
 const MOBILE_THEME_OPTIONS: Theme[] = [
@@ -18,9 +18,9 @@ const MOBILE_THEME_OPTIONS: Theme[] = [
 ];
 
 export function WebRemoteControlThemeMenu() {
-  const { intl } = useMaridIntl();
-  const theme = useMaridStore((state) => state.theme);
-  const setTheme = useMaridStore((state) => state.setTheme);
+  const { intl } = useQodexIntl();
+  const theme = useQodexStore((state) => state.theme);
+  const setTheme = useQodexStore((state) => state.setTheme);
 
   return (
     <DropdownMenu>

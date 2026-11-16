@@ -7,14 +7,14 @@
 import { BrowserWindow, ipcMain, shell, type IpcMainInvokeEvent, type WebContents } from "electron";
 import { homedir } from "node:os";
 import { isAbsolute, relative, resolve } from "node:path";
-import { PlatformChannels, type StorageCleanRequest, type StorageRootSpec } from "@marid/shared";
+import { PlatformChannels, type StorageCleanRequest, type StorageRootSpec } from "@qodex/shared";
 import {
   createFsStorageCleaner,
   createStorageRootsResolver,
   createStorageService,
   getDataBaseDir,
   type IStorageService,
-} from "@marid/services/node";
+} from "@qodex/services/node";
 import { logger } from "./logger.js";
 import { createStorageScanWorkerRunner } from "./storageScanWorkerClient.js";
 

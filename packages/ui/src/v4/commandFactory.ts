@@ -7,11 +7,11 @@ import {
   type CommandEnvelope,
   type CommandPayloadMap,
   type CommandType,
-} from "@marid/shared/marid-protocol-v4";
-import { uuidv7 } from "@marid/shared";
-export { uuidv7 } from "@marid/shared";
+} from "@qodex/shared/qodex-protocol-v4";
+import { uuidv7 } from "@qodex/shared";
+export { uuidv7 } from "@qodex/shared";
 
-const CLIENT_ID_STORAGE_KEY = "marid-v4-client-id:v1";
+const CLIENT_ID_STORAGE_KEY = "qodex-v4-client-id:v1";
 let cachedClientId: string | null = null;
 
 /**
@@ -38,7 +38,7 @@ export function getV4ClientId(): string {
   return clientId;
 }
 
-const EDITOR_ID_STORAGE_KEY = "marid-v4-editor-id:v1";
+const EDITOR_ID_STORAGE_KEY = "qodex-v4-editor-id:v1";
 let cachedEditorId: string | null = null;
 
 /**

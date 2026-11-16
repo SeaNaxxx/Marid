@@ -36,7 +36,7 @@
 
 ```text
 [图标] 工作区 / worktree 标签            [设备徽标]
-       ~/.marid/worktrees/787b/z-code
+       ~/.qodex/worktrees/787b/z-code
 ──────────────────────────────────────
 最近活动 1 分钟前
 分支 main / 游离 HEAD

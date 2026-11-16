@@ -1,5 +1,5 @@
 {
-  "builtinFile": "../marid-builtin.json",
+  "builtinFile": "../qodex-builtin.json",
   "providerRules": [
     {
       "providerId": "test-openai-api",

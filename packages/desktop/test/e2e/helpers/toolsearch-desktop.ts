@@ -1,5 +1,5 @@
-import { BUILTIN_MODEL_PROVIDER_IDS } from "@marid/shared";
-import { TID_V4_COMPOSER_INPUT } from "@marid/shared/test-ids";
+import { BUILTIN_MODEL_PROVIDER_IDS } from "@qodex/shared";
+import { TID_V4_COMPOSER_INPUT } from "@qodex/shared/test-ids";
 import { getE2EAppDataPaths, setInputValueByTestIdDom } from "./desktop-app.js";
 import {
   restartIntoWorkspace,

@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
-import type { ConversationSharePreflightResult } from "@marid/services";
+import type { ConversationSharePreflightResult } from "@qodex/services";
 export type {
   ConversationSharePreflightResult,
   ConversationShareTurnPreflightResult,
   ConversationShareFailureIssue,
-} from "@marid/services";
+} from "@qodex/services";
 
 /** UI 状态只用于展示，预检结果与缓存的唯一 owner 是 SessionPane。 */
 export type ConversationSharePreflightState =

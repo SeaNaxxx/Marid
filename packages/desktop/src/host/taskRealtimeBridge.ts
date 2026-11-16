@@ -1,4 +1,4 @@
-import type { SessionRealtimePort } from "@marid/services";
+import type { SessionRealtimePort } from "@qodex/services";
 import {
   type TaskRealtimeHostDeliveryKind,
   createUuid,
@@ -10,7 +10,7 @@ import {
   HostMessageTypes,
   HostResponseTypes,
   hostIncomingMessageSchema,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 interface ParentPortLike {
   postMessage(message: unknown): void;

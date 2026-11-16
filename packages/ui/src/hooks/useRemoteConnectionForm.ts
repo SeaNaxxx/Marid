@@ -5,8 +5,8 @@ import type {
   RemoteTarget,
   SSHConfigAliasOption,
   WSLDistro,
-} from "@marid/shared";
-import { DEFAULT_REMOTE_ASSET_INSTALL_MODE } from "@marid/shared";
+} from "@qodex/shared";
+import { DEFAULT_REMOTE_ASSET_INSTALL_MODE } from "@qodex/shared";
 import { usePlatform } from "@/hooks/usePlatform.js";
 import {
   loadRemoteConnectionDockerOptions,

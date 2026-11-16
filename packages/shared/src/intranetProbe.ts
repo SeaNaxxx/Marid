@@ -17,7 +17,7 @@ export interface IntranetProbeServiceTarget {
   url: string;
   /** 期望服务返回 marker（可选） */
   expectedMarker?: string;
-  /** 简单 token（可选）；会放在 x-marid-intranet-token 请求头 */
+  /** 简单 token（可选）；会放在 x-qodex-intranet-token 请求头 */
   token?: string;
   /** 单次探测超时，默认 800ms */
   timeoutMs?: number;

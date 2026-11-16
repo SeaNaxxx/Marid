@@ -22,8 +22,8 @@ import type {
   UsageQuotaLimit,
   UsageStatsRequest,
   UsageStatsSnapshot,
-  MaridAccountAccess,
-} from "@marid/shared";
+  QodexAccountAccess,
+} from "@qodex/shared";
 import {
   ApiError,
   BUILTIN_MODEL_PROVIDER_IDS,
@@ -32,9 +32,9 @@ import {
   isZaiCodingPlanProviderId,
   buildBigModelApiUrl,
   buildRuntimeZaiBusinessUrl,
-  buildRuntimeMaridApiUrl,
-} from "@marid/shared";
-import type { ProviderFamilyDomain } from "@marid/shared";
+  buildRuntimeQodexApiUrl,
+} from "@qodex/shared";
+import type { ProviderFamilyDomain } from "@qodex/shared";
 import { createServiceLogger } from "#src/logger/serviceLogger.js";
 import type { IAccountRequestAuthService } from "../../model-provider/accountRequestAuthService.js";
 import { readApiJson } from "../../providers/api/apiJson.js";
@@ -69,7 +69,7 @@ import { fetchBigModelSubscriptionSummary } from "./bigmodelSubscriptionProvider
 import {
   fetchMcpQuotaSnapshot,
   type OfficialMcpCredentialSource,
-} from "./maridMcpQuotaProvider.js";
+} from "./qodexMcpQuotaProvider.js";
 import type { BigModelUsageQuotaEnvelope } from "./bigmodelUsageQuotaMapper.js";
 import { normalizeLimits, pickPrimaryLimit } from "./bigmodelUsageQuotaMapper.js";
 
@@ -161,7 +161,7 @@ interface TeamPlanContext {
 }
 
 interface CodingPlanResetAuthorization {
-  maridAuthorization: string;
+  qodexAuthorization: string;
   codingPlanAuthorization: string;
   teamContext: TeamPlanContext | null;
 }
@@ -320,7 +320,7 @@ export class BigModelUsageQuotaProvider {
 
   private async resolveRequestAccountAccess(
     accountAccess: UsageEntitlementRequest["accountAccess"],
-  ): Promise<MaridAccountAccess | undefined> {
+  ): Promise<QodexAccountAccess | undefined> {
     if (!accountAccess) return undefined;
     if (!("mode" in accountAccess)) return accountAccess;
     return (await this.accountRequestAuthService.resolveAccessCurrent(accountAccess)) ?? undefined;
@@ -328,12 +328,12 @@ export class BigModelUsageQuotaProvider {
 
   private async assertUnchangedRequestAccess(
     requested: UsageEntitlementRequest["accountAccess"],
-    expected: MaridAccountAccess,
+    expected: QodexAccountAccess,
   ): Promise<void> {
     // 静态请求表示当前连接，须重解析原请求；具体 access 是浏览指定套餐，不能强绑当前选择。
     if (!requested || !("mode" in requested)) return;
     const current = await this.resolveRequestAccountAccess(requested);
-    const scope = (access: MaridAccountAccess | undefined) =>
+    const scope = (access: QodexAccountAccess | undefined) =>
       access
         ? [
             access.family,
@@ -376,7 +376,7 @@ export class BigModelUsageQuotaProvider {
 
   private async getStartPlanSnapshot(
     providerId: string,
-    accountAccess: MaridAccountAccess | undefined,
+    accountAccess: QodexAccountAccess | undefined,
     invalidateBalanceCache = false,
   ): Promise<UsageEntitlementSnapshot> {
     const generatedAt = Date.now();
@@ -478,7 +478,7 @@ export class BigModelUsageQuotaProvider {
 
   private async resolveStartPlanAuthorization(
     providerId: string,
-    accountAccess: MaridAccountAccess | undefined,
+    accountAccess: QodexAccountAccess | undefined,
   ): Promise<{
     authorization: string;
     provider: ResolvedQuotaAuthorization["provider"];
@@ -551,7 +551,7 @@ export class BigModelUsageQuotaProvider {
     const authorization = await this.resolveCodingPlanResetAuthorization(request);
     const payload = await readCodingPlanResetApiJson(
       this.apiClient,
-      buildRuntimeMaridApiUrl(this.env, `${CODING_PLAN_RESET_BASE_PATH}/status`),
+      buildRuntimeQodexApiUrl(this.env, `${CODING_PLAN_RESET_BASE_PATH}/status`),
       {
         method: "GET",
         timeoutMs: REQUEST_TIMEOUT_MS,
@@ -584,7 +584,7 @@ export class BigModelUsageQuotaProvider {
     const authorization = await this.resolveCodingPlanResetAuthorization(request);
     const payload = await readCodingPlanResetApiJson(
       this.apiClient,
-      buildRuntimeMaridApiUrl(this.env, `${CODING_PLAN_RESET_BASE_PATH}/use`),
+      buildRuntimeQodexApiUrl(this.env, `${CODING_PLAN_RESET_BASE_PATH}/use`),
       {
         method: "POST",
         timeoutMs: REQUEST_TIMEOUT_MS,
@@ -614,7 +614,7 @@ export class BigModelUsageQuotaProvider {
     try {
       payload = await readCodingPlanResetApiJson(
         this.apiClient,
-        buildRuntimeMaridApiUrl(this.env, `${CODING_PLAN_RESET_BASE_PATH}/opportunity`),
+        buildRuntimeQodexApiUrl(this.env, `${CODING_PLAN_RESET_BASE_PATH}/opportunity`),
         {
           method: "POST",
           timeoutMs: REQUEST_TIMEOUT_MS,
@@ -660,7 +660,7 @@ export class BigModelUsageQuotaProvider {
     const authorization = await this.resolveCodingPlanResetAuthorization(request);
     const payload = await readCodingPlanResetApiJson(
       this.apiClient,
-      buildRuntimeMaridApiUrl(this.env, `${CODING_PLAN_RESET_BASE_PATH}/history/read`),
+      buildRuntimeQodexApiUrl(this.env, `${CODING_PLAN_RESET_BASE_PATH}/history/read`),
       {
         method: "POST",
         timeoutMs: REQUEST_TIMEOUT_MS,
@@ -679,7 +679,7 @@ export class BigModelUsageQuotaProvider {
       throw new Error("coding_plan_reset_account_access_required");
     }
     const account = await this.loadOAuthAccountMaterial(accountAccess.family);
-    if (!account?.maridJwtToken) throw new Error("coding_plan_reset_marid_jwt_required");
+    if (!account?.qodexJwtToken) throw new Error("coding_plan_reset_qodex_jwt_required");
     if (!account.accessToken.trim()) throw new Error("coding_plan_reset_maas_jwt_required");
     await this.assertUnchangedRequestAccess(request.accountAccess, accountAccess);
     // 关联套餐未必与主登录渠道同名。两种 JWT 必须来自同一会话快照，防止换号时拼接。
@@ -690,9 +690,9 @@ export class BigModelUsageQuotaProvider {
       )
     )
       throw new Error("coding_plan_reset_account_changed");
-    const maridJwt = account.maridJwtToken;
+    const qodexJwt = account.qodexJwtToken;
     return {
-      maridAuthorization: /^Bearer\s/i.test(maridJwt) ? maridJwt : `Bearer ${maridJwt}`,
+      qodexAuthorization: /^Bearer\s/i.test(qodexJwt) ? qodexJwt : `Bearer ${qodexJwt}`,
       codingPlanAuthorization: account.accessToken.trim(),
       teamContext: resolveTeamPlanContext(accountAccess),
     };
@@ -858,7 +858,7 @@ export class BigModelUsageQuotaProvider {
   ): Promise<ResolvedQuotaAuthorization | null> {
     if (request.allowEnvApiKey !== false && request.requirePreferredProvider !== true) {
       const envApiKey =
-        readEnv(this.env, "MARID_BIGMODEL_USAGE_API_KEY") ??
+        readEnv(this.env, "QODEX_BIGMODEL_USAGE_API_KEY") ??
         readEnv(this.env, "BIGMODEL_USAGE_API_KEY");
       if (envApiKey) {
         return {
@@ -1001,7 +1001,7 @@ function createCodingPlanResetHeaders(
   includeTargetScope: boolean,
 ): Record<string, string> {
   const headers: Record<string, string> = {
-    Authorization: authorization.maridAuthorization,
+    Authorization: authorization.qodexAuthorization,
     "X-Bigmodel-Authorization": authorization.codingPlanAuthorization,
   };
   if (!includeTargetScope) {
@@ -1118,7 +1118,7 @@ function readCodingPlanResetEnvelopeData<TSchema extends z.ZodType>(
   return result.data;
 }
 
-function resolveTeamPlanContext(accountAccess: MaridAccountAccess): TeamPlanContext | null {
+function resolveTeamPlanContext(accountAccess: QodexAccountAccess): TeamPlanContext | null {
   return accountAccess.planKind === "team-coding-plan"
     ? {
         organizationId: accountAccess.organizationId,
@@ -1676,7 +1676,7 @@ function addDaysToDateKey(dateKey: string, days: number): string {
 }
 
 function resolveQuotaUrlFromEnv(env: NodeJS.ProcessEnv): string | undefined {
-  return readEnv(env, "MARID_BIGMODEL_USAGE_QUOTA_URL") ?? readEnv(env, "BIGMODEL_USAGE_QUOTA_URL");
+  return readEnv(env, "QODEX_BIGMODEL_USAGE_QUOTA_URL") ?? readEnv(env, "BIGMODEL_USAGE_QUOTA_URL");
 }
 
 function resolveCodingPlanApiKeyError(providerId: string | undefined): string {

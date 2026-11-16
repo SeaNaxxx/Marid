@@ -1,12 +1,12 @@
 // MRO02：真实 Web 页面、RPC、Host 项目服务和隔离 SQLite；不发送模型请求。
-// 启动：pnpm --filter @marid/web exec vite --host 127.0.0.1 --port 5178 --strictPort
+// 启动：pnpm --filter @qodex/web exec vite --host 127.0.0.1 --port 5178 --strictPort
 // 运行：pnpm exec tsx packages/web/test/e2e/remote-control/projects/manual-review/pending/remote-project-directory.mjs
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { chromium } from "playwright-core";
-import { ServiceChannels } from "@marid/shared";
-import { V4_WIRE_PROTOCOL_VERSION } from "@marid/shared/marid-protocol-v4";
+import { ServiceChannels } from "@qodex/shared";
+import { V4_WIRE_PROTOCOL_VERSION } from "@qodex/shared/qodex-protocol-v4";
 import {
   BufferReader,
   deserialize,
@@ -79,9 +79,9 @@ try {
           socket.send(JSON.stringify({ type: "pair_status_ack", pair_status: "matched" }));
         const payload = message.payload;
         if (!payload) return;
-        if (payload.marid_type === "rpc-frame" || payload.marid_type === "rpc-frame-ack") {
+        if (payload.qodex_type === "rpc-frame" || payload.qodex_type === "rpc-frame-ack") {
           if (
-            payload.marid_type === "rpc-frame" &&
+            payload.qodex_type === "rpc-frame" &&
             payload.bridgeSessionId === directoryReadinessRecovery.bridgeSessionId &&
             payload.fragmentCount === 1
           ) {
@@ -110,26 +110,26 @@ try {
           workspaces: fixture.workspaces,
           initialViewState: view,
         };
-        if (payload.marid_type === "bootstrap-request")
+        if (payload.qodex_type === "bootstrap-request")
           send(socket, {
-            marid_type: "bootstrap-response",
+            qodex_type: "bootstrap-response",
             requestId: payload.requestId,
             success: true,
             result,
           });
-        if (payload.marid_type === "workspace-list-request")
+        if (payload.qodex_type === "workspace-list-request")
           send(socket, {
-            marid_type: "workspace-list-response",
+            qodex_type: "workspace-list-response",
             requestId: payload.requestId,
             success: true,
             result,
           });
-        if (payload.marid_type === "mobile-view-state-update") {
+        if (payload.qodex_type === "mobile-view-state-update") {
           fixture.traffic.views.push(payload);
           view = payload.viewState;
-          send(socket, { marid_type: "mobile-view-state-updated", requestId: payload.requestId });
+          send(socket, { qodex_type: "mobile-view-state-updated", requestId: payload.requestId });
         }
-        if (payload.marid_type !== "workspace-bridge-open") return;
+        if (payload.qodex_type !== "workspace-bridge-open") return;
         fixture.traffic.opens.push(payload);
         const target = fixture.workspaces.find(
           (item) => (item.workspaceIdentity || item.workspacePath) === payload.workspaceKey,
@@ -150,7 +150,7 @@ try {
         const channels = fixture.channels(remoteBridge);
         // relay RPC 首帧只能在客户端收到 ready、登记桥接代际后发送，顺序沿用共享夹具。
         send(socket, {
-          marid_type: "workspace-bridge-ready",
+          qodex_type: "workspace-bridge-ready",
           requestId: payload.requestId,
           bridgeSessionId: payload.bridgeSessionId,
           bridgeGeneration: payload.bridgeGeneration,
@@ -161,7 +161,7 @@ try {
           theme,
           events: {
             ...channels.events,
-            [`${ServiceChannels.MaridAgent}:onDynamicConversationFrame`]: frames.event,
+            [`${ServiceChannels.QodexAgent}:onDynamicConversationFrame`]: frames.event,
           },
           responses: {
             ...channels.responses,
@@ -171,7 +171,7 @@ try {
               return channels.responses["window-project-changes:getCapabilities"](...args);
             },
             [`${ServiceChannels.SettingsSync}:getFirstRunPromptState`]: { handled: true },
-            [`${ServiceChannels.MaridAgent}:helloConversationV4`]: {
+            [`${ServiceChannels.QodexAgent}:helloConversationV4`]: {
               kind: "hello",
               protocolVersion: V4_WIRE_PROTOCOL_VERSION,
               connectionId: bridge.bridgeSessionId,
@@ -186,17 +186,17 @@ try {
                 compression: "none",
               },
             },
-            [`${ServiceChannels.MaridAgent}:initializeConversationV4`]: null,
-            [`${ServiceChannels.MaridAgent}:subscribeConversationV4`]: (input) => {
+            [`${ServiceChannels.QodexAgent}:initializeConversationV4`]: null,
+            [`${ServiceChannels.QodexAgent}:subscribeConversationV4`]: (input) => {
               const subscriptionId = `sub-${bridge.bridgeSessionId}-${input.sessionId}`;
               snapshots.set(input.sessionId, () =>
                 frames.fire(taskSnapshotFrame(input.sessionId, subscriptionId)),
               );
               return { ack: { subscriptionId, mode: "snapshot", logEpoch: "e2e" } };
             },
-            [`${ServiceChannels.MaridAgent}:unsubscribeConversationV4`]: null,
-            [`${ServiceChannels.MaridAgent}:conversationWorkflowRunsV4`]: { runs: [] },
-            [`${ServiceChannels.MaridAgent}:conversationPlansV4`]: { plans: [] },
+            [`${ServiceChannels.QodexAgent}:unsubscribeConversationV4`]: null,
+            [`${ServiceChannels.QodexAgent}:conversationWorkflowRunsV4`]: { runs: [] },
+            [`${ServiceChannels.QodexAgent}:conversationPlansV4`]: { plans: [] },
           },
         });
         bridges.set(bridge.bridgeSessionId, desktopBridge);
@@ -238,7 +238,7 @@ try {
         new URL("/remote/v4?app_version=3.15.1&sid=e2e-device&mid=e2e-mid", origin).href,
       );
       const onboarding = page.getByTestId("onboarding-page");
-      const welcome = page.getByRole("dialog", { name: /欢迎使用 Marid|Welcome to Marid/ });
+      const welcome = page.getByRole("dialog", { name: /欢迎使用 Qodex|Welcome to Qodex/ });
       await local().or(onboarding).or(welcome).first().waitFor();
       if (await onboarding.isVisible())
         await onboarding.getByRole("button", { name: /退出引导|Exit onboarding/ }).click();

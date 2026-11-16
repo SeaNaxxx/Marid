@@ -7,8 +7,8 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
-import type { MaridElicitationQuestion, MaridElicitationRequest } from "@marid/shared";
-import type { InteractionAutoResolution } from "@marid/shared/marid-protocol-v4";
+import type { QodexElicitationQuestion, QodexElicitationRequest } from "@qodex/shared";
+import type { InteractionAutoResolution } from "@qodex/shared/qodex-protocol-v4";
 import { CheckIcon, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge.js";
 import { Button } from "@/components/ui/button.js";
@@ -16,11 +16,11 @@ import { cn } from "@/components/lib/utils.js";
 import { Textarea } from "@/components/ui/textarea.js";
 import { InteractionRequestOriginBadge } from "@/InteractionRequestOriginBadge.js";
 import { isImeComposingKeyEvent } from "@/lib/imeComposition.js";
-import type { ElicitationFormDraft } from "@/store/maridSessionStoreTypes.js";
-import { useMaridIntl } from "./i18n/IntlProvider.js";
+import type { ElicitationFormDraft } from "@/store/qodexSessionStoreTypes.js";
+import { useQodexIntl } from "./i18n/IntlProvider.js";
 
 interface ElicitationDialogProps {
-  request: MaridElicitationRequest;
+  request: QodexElicitationRequest;
   autoResolution?: InteractionAutoResolution;
   onRespond: (
     requestId: string,
@@ -102,7 +102,7 @@ function useElicitationCountdownSeconds(autoResolution: InteractionAutoResolutio
   return getElicitationCountdownSeconds(autoResolution, clockNow);
 }
 
-export interface NormalizedElicitationQuestion extends MaridElicitationQuestion {
+export interface NormalizedElicitationQuestion extends QodexElicitationQuestion {
   key: string;
 }
 
@@ -162,7 +162,7 @@ export function resolveElicitationCustomInputKeyAction(event: {
 }
 
 export function normalizeElicitationQuestions(
-  request: MaridElicitationRequest,
+  request: QodexElicitationRequest,
 ): NormalizedElicitationQuestion[] {
   const sourceQuestions =
     request.questions && request.questions.length > 0
@@ -193,7 +193,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function isPlanApprovalElicitationRequest(request: MaridElicitationRequest): boolean {
+function isPlanApprovalElicitationRequest(request: QodexElicitationRequest): boolean {
   const schema = request.schema;
   return (
     isRecord(schema) && schema.interaction === "plan_approval" && schema.toolName === "ExitPlanMode"
@@ -202,7 +202,7 @@ function isPlanApprovalElicitationRequest(request: MaridElicitationRequest): boo
 
 export function createInitialElicitationDrafts(
   questions: readonly NormalizedElicitationQuestion[],
-  request: MaridElicitationRequest,
+  request: QodexElicitationRequest,
 ): DraftState {
   return Object.fromEntries(
     questions.map((question, index) => {
@@ -217,7 +217,7 @@ export function createInitialElicitationDrafts(
 }
 
 function normalizeInitialQuestionIndex(
-  request: MaridElicitationRequest,
+  request: QodexElicitationRequest,
   questions: readonly NormalizedElicitationQuestion[],
 ) {
   if (questions.length === 0) {
@@ -348,7 +348,7 @@ function ElicitationDialogContent({
   initialFormDraft,
   onFormDraftChange,
 }: ElicitationDialogProps) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const questions = useMemo(() => normalizeElicitationQuestions(request), [request]);
   const [questionIndex, setQuestionIndex] = useState(
     () => initialFormDraft?.questionIndex ?? normalizeInitialQuestionIndex(request, questions),

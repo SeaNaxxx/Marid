@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { CircleHelp, LoaderCircle } from "lucide-react";
-import { MARID_AGENT_PROVIDER, type MaridConfigOption } from "@marid/shared";
+import { QODEX_AGENT_PROVIDER, type QodexConfigOption } from "@qodex/shared";
 import { ThoughtLevelCycleControl } from "@/chat-input-toolbar/ThoughtLevelCycleControl.js";
-import type { useMaridIntl } from "@/i18n/IntlProvider.js";
+import type { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 export type SubagentReasoningFieldState =
   | { kind: "not-applicable" }
   | { kind: "unknown"; status: "loading" | "unavailable" }
   | { kind: "unsupported" }
-  | { kind: "supported"; option: MaridConfigOption };
+  | { kind: "supported"; option: QodexConfigOption };
 
 export function SubagentReasoningField({
   disabled,
@@ -18,7 +18,7 @@ export function SubagentReasoningField({
   state,
 }: {
   disabled: boolean;
-  intl: ReturnType<typeof useMaridIntl>["intl"];
+  intl: ReturnType<typeof useQodexIntl>["intl"];
   labelVisibilityClassName: string;
   onValueCommit: (value: string) => void;
   state: SubagentReasoningFieldState;
@@ -66,7 +66,7 @@ export function SubagentReasoningField({
     <ThoughtLevelCycleControl
       intl={intl}
       option={state.option}
-      provider={MARID_AGENT_PROVIDER}
+      provider={QODEX_AGENT_PROVIDER}
       onCurrentValueCommit={onValueCommit}
       showInvalidCurrentValue
       disabled={!interactive}

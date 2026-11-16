@@ -1,8 +1,8 @@
-import type { MaridPromptAttachment } from "@marid/shared";
+import type { QodexPromptAttachment } from "@qodex/shared";
 
 export function deriveSessionTitle(
   content: string,
-  attachments: readonly MaridPromptAttachment[],
+  attachments: readonly QodexPromptAttachment[],
 ): string {
   if (content.length > 0) {
     return content.slice(0, 50) + (content.length > 50 ? "..." : "");

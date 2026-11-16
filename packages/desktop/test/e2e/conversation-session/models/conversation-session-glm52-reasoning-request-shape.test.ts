@@ -1,4 +1,4 @@
-import { TID_CHAT_MODEL_SELECT_TRIGGER, TID_SETTINGS_BACK_BUTTON } from "@marid/shared/test-ids";
+import { TID_CHAT_MODEL_SELECT_TRIGGER, TID_SETTINGS_BACK_BUTTON } from "@qodex/shared/test-ids";
 import {
   DEFAULT_WORKSPACE,
   clearAppData,

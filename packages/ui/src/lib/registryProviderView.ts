@@ -1,4 +1,4 @@
-import type { ModelSelectionView } from "@marid/services";
+import type { ModelSelectionView } from "@qodex/services";
 
 export function resolveProviderLabel(
   providerId: string | undefined,

@@ -1,16 +1,16 @@
-import { IMaridAgentService, type IBotsService, type ServiceCollection } from "@marid/services";
-import { createTopicResourceRelayChannel } from "@marid/services/node";
-import type { WindowHostAttachmentScope, MaridTopicResourceRelayRequest } from "@marid/shared";
+import { IQodexAgentService, type IBotsService, type ServiceCollection } from "@qodex/services";
+import { createTopicResourceRelayChannel } from "@qodex/services/node";
+import type { WindowHostAttachmentScope, QodexTopicResourceRelayRequest } from "@qodex/shared";
 
 /** 反向请求必须属于发起它的物理连接，并仍绑定当前 logical session，不能只比较文件路径。 */
 export function createWindowTopicResourceRelay(deps: {
-  getPeerAgentService(): IMaridAgentService | undefined;
+  getPeerAgentService(): IQodexAgentService | undefined;
   resolveServices(scope: WindowHostAttachmentScope): ServiceCollection;
   getBots(): IBotsService | undefined;
 }) {
   const resolve = (
     request: Pick<
-      MaridTopicResourceRelayRequest,
+      QodexTopicResourceRelayRequest,
       "remoteSessionId" | "workspaceIdentity" | "workspacePath"
     >,
   ) => {
@@ -24,7 +24,7 @@ export function createWindowTopicResourceRelay(deps: {
           workspaceIdentity: request.workspaceIdentity,
           workspacePath: request.workspacePath,
         })
-        .get(IMaridAgentService) !== peer
+        .get(IQodexAgentService) !== peer
     )
       throw new Error("Topic resource source connection mismatch");
     const bots = deps.getBots();

@@ -17,7 +17,7 @@ import {
   resolveProviderTemplateName,
 } from "./config/index.js";
 import { resolveOwnedOrder } from "./owned-order.js";
-import type { ModelSelection } from "@marid/shared/model-selection";
+import type { ModelSelection } from "@qodex/shared/model-selection";
 import type { ProviderConfigSnapshot, ProviderSource } from "./sources.js";
 
 export interface ProviderConfigLayerSnapshot {
@@ -44,7 +44,7 @@ export interface PersonalProviderConfigRepository extends ProviderSource<Provide
 }
 
 export interface ProviderConfigServiceDependencies {
-  readonly maridBuiltinSource: ProviderSource<ProviderConfigLayerSnapshot>;
+  readonly qodexBuiltinSource: ProviderSource<ProviderConfigLayerSnapshot>;
   readonly personalRepository: PersonalProviderConfigRepository;
 }
 
@@ -94,35 +94,35 @@ function writableProviderOverlay(
 }
 
 export class ProviderConfigService implements ProviderSource<ProviderConfigSnapshot> {
-  readonly #maridBuiltinSource: ProviderSource<ProviderConfigLayerSnapshot>;
+  readonly #qodexBuiltinSource: ProviderSource<ProviderConfigLayerSnapshot>;
   readonly #personalRepository: PersonalProviderConfigRepository;
   readonly #listeners = new Set<(reason: string) => void>();
   readonly #sourceDisposers: Array<() => void>;
   #disposed = false;
 
   constructor(dependencies: ProviderConfigServiceDependencies) {
-    this.#maridBuiltinSource = dependencies.maridBuiltinSource;
+    this.#qodexBuiltinSource = dependencies.qodexBuiltinSource;
     this.#personalRepository = dependencies.personalRepository;
     this.#sourceDisposers = [
-      this.#maridBuiltinSource.onDidChange((reason) => this.#emit(`maridBuiltin:${reason}`)),
+      this.#qodexBuiltinSource.onDidChange((reason) => this.#emit(`qodexBuiltin:${reason}`)),
       this.#personalRepository.onDidChange((reason) => this.#emit(`personal:${reason}`)),
     ];
   }
 
   async read(): Promise<ProviderConfigSnapshot> {
     this.#assertNotDisposed();
-    const [maridBuiltin, personal] = await Promise.all([
-      this.#maridBuiltinSource.read(),
+    const [qodexBuiltin, personal] = await Promise.all([
+      this.#qodexBuiltinSource.read(),
       this.#personalRepository.read(),
     ]);
     return Object.freeze({
-      revision: JSON.stringify([maridBuiltin.revision, personal.revision]),
-      maridBuiltinRevision: maridBuiltin.revision,
+      revision: JSON.stringify([qodexBuiltin.revision, personal.revision]),
+      qodexBuiltinRevision: qodexBuiltin.revision,
       personalRevision: personal.revision,
-      maridBuiltinProviders: maridBuiltin.providers,
-      maridBuiltinProviderTemplates: maridBuiltin.providerTemplates ?? ProviderTemplateMap.empty(),
+      qodexBuiltinProviders: qodexBuiltin.providers,
+      qodexBuiltinProviderTemplates: qodexBuiltin.providerTemplates ?? ProviderTemplateMap.empty(),
       personalProviders: personal.providers,
-      maridBuiltinModelRules: maridBuiltin.models,
+      qodexBuiltinModelRules: qodexBuiltin.models,
       personalModels: personal.models,
       personalProviderOrder: personal.providerOrder ?? [],
     });
@@ -148,12 +148,12 @@ export class ProviderConfigService implements ProviderSource<ProviderConfigSnaps
     metadata?: Pick<ProviderConfigRule, "providerName" | "templateId" | "enabled">,
   ): Promise<ProviderConfigLayerSnapshot> {
     assertNonEmptyId("providerId", providerId);
-    const maridBuiltin = await this.#maridBuiltinSource.read();
+    const qodexBuiltin = await this.#qodexBuiltinSource.read();
     return this.#updatePersonal((current) => {
       assertMembershipCurrent(membership, providerId, current);
-      const builtin = maridBuiltin.providers.get(providerId);
+      const builtin = qodexBuiltin.providers.get(providerId);
       const currentPersonal = current.providers.get(providerId);
-      const currentEffectiveProviders = maridBuiltin.providers.overlay(current.providers);
+      const currentEffectiveProviders = qodexBuiltin.providers.overlay(current.providers);
       // 账号总禁用已撤销；在公共写入边界拒绝新操作，避免隐藏 UI 后仍能写出无效状态。
       if (builtin?.access?.type === "zhipu-account" && metadata?.enabled === false) {
         throw new Error(`Account Provider 不允许禁用: ${providerId}`);
@@ -162,7 +162,7 @@ export class ProviderConfigService implements ProviderSource<ProviderConfigSnaps
         // 通用保存入口只解析 ProviderConfig，曾绕过 Personal Source Schema，
         // 允许固定 Account Provider 的 access 被写盘，直到下次读取才整份拒绝。
         throw new Error(
-          `固定 Account Provider 的 Access 只能由 Marid Built-in Config 声明: ${providerId}`,
+          `固定 Account Provider 的 Access 只能由 Qodex Built-in Config 声明: ${providerId}`,
         );
       }
       // 普通保存曾同时承担创建语义，删除后的迟到保存可以凭空复活 Overlay。
@@ -184,7 +184,7 @@ export class ProviderConfigService implements ProviderSource<ProviderConfigSnaps
         normalized = normalized.overlay(new ProviderConfigValue({ group }));
       }
       const membershipBaseline =
-        builtin ?? resolveTemplateBaseline(maridBuiltin, current.providers, providerId);
+        builtin ?? resolveTemplateBaseline(qodexBuiltin, current.providers, providerId);
       const next = normalized.withModelMembershipFrom(
         // 普通 Provider 保存也保留动态成员顺序；不能改名称时又按静态名单删掉已保存的调序。
         normalizePersonalProviderMembership(
@@ -204,7 +204,7 @@ export class ProviderConfigService implements ProviderSource<ProviderConfigSnaps
           : { providerName: metadata.providerName?.trim() || null }),
         config: next,
       });
-      const nextEffectiveProviders = maridBuiltin.providers.overlay(providers);
+      const nextEffectiveProviders = qodexBuiltin.providers.overlay(providers);
       // 旧版本可能已经留下重名 Provider。全量校验会让这些历史问题阻断
       // 任意无关 Provider 的保存；这里仅禁止本次名称变更新引入重名。
       assertProviderLabelMutationIsUnique(
@@ -223,9 +223,9 @@ export class ProviderConfigService implements ProviderSource<ProviderConfigSnaps
   async createPersonalProvider(
     input: CreatePersonalProviderInput = {},
   ): Promise<PersonalProviderCreation> {
-    const maridBuiltin = await this.#maridBuiltinSource.read();
+    const qodexBuiltin = await this.#qodexBuiltinSource.read();
     const templateId = input.templateId?.trim();
-    const template = templateId ? maridBuiltin.providerTemplates?.get(templateId) : undefined;
+    const template = templateId ? qodexBuiltin.providerTemplates?.get(templateId) : undefined;
     if (templateId && !template) throw new Error(`Provider Template 不存在: ${templateId}`);
     if (input.initialConfig?.group !== undefined) {
       throw new Error("initialConfig 不能包含 group");
@@ -235,10 +235,10 @@ export class ProviderConfigService implements ProviderSource<ProviderConfigSnaps
     }
     let createdProviderId: ProviderId | undefined;
     await this.#updatePersonal((current) => {
-      const occupied = new Set([...maridBuiltin.providers.keys(), ...current.providers.keys()]);
+      const occupied = new Set([...qodexBuiltin.providers.keys(), ...current.providers.keys()]);
       const providerId = nextPersonalProviderId(occupied, templateId);
       createdProviderId = providerId;
-      const effectiveProviders = resolvePersonalProviderBaselines(maridBuiltin, current.providers);
+      const effectiveProviders = resolvePersonalProviderBaselines(qodexBuiltin, current.providers);
       const label = nextPersonalProviderLabel(
         input.providerName ??
           (template && templateId
@@ -262,7 +262,7 @@ export class ProviderConfigService implements ProviderSource<ProviderConfigSnaps
         providers,
         models: current.models,
         providerOrder: appendCurrentProviderOrder(
-          maridBuiltin.providers,
+          qodexBuiltin.providers,
           providers,
           current.providerOrder,
           providerId,
@@ -285,11 +285,11 @@ export class ProviderConfigService implements ProviderSource<ProviderConfigSnaps
   async reorderPersonalProviders(
     providerIds: readonly ProviderId[],
   ): Promise<ProviderConfigLayerSnapshot> {
-    const maridBuiltin = await this.#maridBuiltinSource.read();
+    const qodexBuiltin = await this.#qodexBuiltinSource.read();
     return this.#updatePersonal((current) => ({
       providers: current.providers,
       models: current.models,
-      providerOrder: normalizeProviderOrder(maridBuiltin.providers, current.providers, providerIds),
+      providerOrder: normalizeProviderOrder(qodexBuiltin.providers, current.providers, providerIds),
     }));
   }
 
@@ -299,13 +299,13 @@ export class ProviderConfigService implements ProviderSource<ProviderConfigSnaps
     membership?: ProviderModelMembership,
   ): Promise<ProviderConfigLayerSnapshot> {
     assertNonEmptyId("providerId", providerId);
-    const maridBuiltin = await this.#maridBuiltinSource.read();
+    const qodexBuiltin = await this.#qodexBuiltinSource.read();
     return this.#updatePersonal((current) => {
       assertMembershipCurrent(membership, providerId, current);
       const builtinProvider =
-        maridBuiltin.providers.get(providerId) ??
-        resolveTemplateBaseline(maridBuiltin, current.providers, providerId);
-      const provider = writableProviderOverlay(maridBuiltin, current, providerId);
+        qodexBuiltin.providers.get(providerId) ??
+        resolveTemplateBaseline(qodexBuiltin, current.providers, providerId);
+      const provider = writableProviderOverlay(qodexBuiltin, current, providerId);
       const modelOrder = normalizeModelOrder(
         membership?.inheritedModelIds ?? builtinProvider?.builtinModelIds ?? [],
         provider.personalModelIds ?? [],
@@ -328,13 +328,13 @@ export class ProviderConfigService implements ProviderSource<ProviderConfigSnaps
   ): Promise<ProviderConfigLayerSnapshot> {
     const normalizedProviderId = normalizeId("providerId", providerId);
     const normalizedModelId = normalizeId("modelId", modelId);
-    const maridBuiltin = await this.#maridBuiltinSource.read();
+    const qodexBuiltin = await this.#qodexBuiltinSource.read();
     return this.#updatePersonal((current) => {
       assertMembershipCurrent(membership, normalizedProviderId, current);
-      const provider = writableProviderOverlay(maridBuiltin, current, normalizedProviderId);
+      const provider = writableProviderOverlay(qodexBuiltin, current, normalizedProviderId);
       const builtinModelIds =
         membership?.inheritedModelIds ??
-        resolveProviderBuiltinModelIds(maridBuiltin, current.providers, normalizedProviderId);
+        resolveProviderBuiltinModelIds(qodexBuiltin, current.providers, normalizedProviderId);
       if (builtinModelIds.includes(normalizedModelId)) {
         throw new Error(`Model 已存在: ${normalizedProviderId}/${normalizedModelId}`);
       }
@@ -375,13 +375,13 @@ export class ProviderConfigService implements ProviderSource<ProviderConfigSnaps
     const currentId = normalizeId("modelId", currentModelId);
     const nextId = normalizeId("modelId", nextModelId);
     if (currentId === nextId) return this.#personalRepository.read();
-    const maridBuiltin = await this.#maridBuiltinSource.read();
+    const qodexBuiltin = await this.#qodexBuiltinSource.read();
     return this.#updatePersonal((current) => {
       assertMembershipCurrent(membership, normalizedProviderId, current);
       const provider = current.providers.get(normalizedProviderId);
       const builtinModelIds =
         membership?.inheritedModelIds ??
-        resolveProviderBuiltinModelIds(maridBuiltin, current.providers, normalizedProviderId);
+        resolveProviderBuiltinModelIds(qodexBuiltin, current.providers, normalizedProviderId);
       // 继承归属保护适用于 Facade 和底层直接调用，不能只在有动态上下文时检查。
       if (builtinModelIds.includes(currentId))
         throw new Error(`Built-in Model 不能重命名: ${normalizedProviderId}/${currentId}`);
@@ -422,7 +422,7 @@ export class ProviderConfigService implements ProviderSource<ProviderConfigSnaps
     const id = normalizeId("providerId", providerId);
     const model = normalizeId("modelId", modelId);
     if (typeof enabled !== "boolean") throw new Error("Model enabled 必须是 boolean");
-    const builtin = await this.#maridBuiltinSource.read();
+    const builtin = await this.#qodexBuiltinSource.read();
     return this.#updatePersonal((current) => {
       assertMembershipCurrent(membership, id, current);
       const provider = current.providers.get(id);
@@ -458,7 +458,7 @@ export class ProviderConfigService implements ProviderSource<ProviderConfigSnaps
     const normalizedProviderId = normalizeId("providerId", providerId);
     const originalId = normalizeId("modelId", originalModelId);
     const nextId = normalizeId("modelId", nextModelId);
-    const maridBuiltin = await this.#maridBuiltinSource.read();
+    const qodexBuiltin = await this.#qodexBuiltinSource.read();
     return this.#updatePersonal((current) => {
       assertMembershipCurrent(membership, normalizedProviderId, current);
       if (current.revision !== expectedPersonalRevision) {
@@ -473,7 +473,7 @@ export class ProviderConfigService implements ProviderSource<ProviderConfigSnaps
       const provider = current.providers.get(normalizedProviderId);
       const builtinModelIds =
         membership?.inheritedModelIds ??
-        resolveProviderBuiltinModelIds(maridBuiltin, current.providers, normalizedProviderId);
+        resolveProviderBuiltinModelIds(qodexBuiltin, current.providers, normalizedProviderId);
       const builtinSet = new Set(builtinModelIds);
       if (originalId !== nextId && builtinSet.has(originalId)) {
         throw new Error(`Built-in Model 不能重命名: ${normalizedProviderId}/${originalId}`);
@@ -525,7 +525,7 @@ export class ProviderConfigService implements ProviderSource<ProviderConfigSnaps
   ): Promise<ProviderConfigLayerSnapshot> {
     const normalizedProviderId = normalizeId("providerId", providerId);
     const normalizedModelId = normalizeId("modelId", modelId);
-    const builtin = await this.#maridBuiltinSource.read();
+    const builtin = await this.#qodexBuiltinSource.read();
     return this.#updatePersonal((current) => {
       assertMembershipCurrent(membership, normalizedProviderId, current);
       const provider = current.providers.get(normalizedProviderId);
@@ -649,7 +649,7 @@ function uniqueInOrder<T extends string>(values: readonly T[]): T[] {
 }
 
 function normalizeProviderOrder(
-  _maridBuiltinProviders: ProviderConfigMap,
+  _qodexBuiltinProviders: ProviderConfigMap,
   personalProviders: ProviderConfigMap,
   requested: readonly ProviderId[],
 ): ProviderId[] {
@@ -661,17 +661,17 @@ function normalizeProviderOrder(
 }
 
 function appendCurrentProviderOrder(
-  maridBuiltinProviders: ProviderConfigMap,
+  qodexBuiltinProviders: ProviderConfigMap,
   personalProviders: ProviderConfigMap,
   currentOrder: readonly ProviderId[] | undefined,
   addedProviderId: ProviderId,
 ): ProviderId[] {
   const current = normalizeProviderOrder(
-    maridBuiltinProviders,
+    qodexBuiltinProviders,
     personalProviders,
     currentOrder ?? [],
   );
-  return normalizeProviderOrder(maridBuiltinProviders, personalProviders, [
+  return normalizeProviderOrder(qodexBuiltinProviders, personalProviders, [
     ...current.filter((providerId) => providerId !== addedProviderId),
     addedProviderId,
   ]);
@@ -708,16 +708,16 @@ function normalizeProviderIdSeed(value: string): string {
 }
 
 function resolvePersonalProviderBaselines(
-  maridBuiltin: ProviderConfigLayerSnapshot,
+  qodexBuiltin: ProviderConfigLayerSnapshot,
   personalProviders: ProviderConfigMap,
 ): ProviderConfigMap {
   const personal = personalProviders.mapConfigs((config, _id, rule) => {
     const template = rule.templateId
-      ? maridBuiltin.providerTemplates?.get(rule.templateId)
+      ? qodexBuiltin.providerTemplates?.get(rule.templateId)
       : undefined;
     return template ? template.config.overlay(config) : config;
   });
-  return maridBuiltin.providers.overlay(personal);
+  return qodexBuiltin.providers.overlay(personal);
 }
 
 function resolveTemplateBaseline(

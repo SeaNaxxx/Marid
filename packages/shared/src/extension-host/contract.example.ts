@@ -7,12 +7,12 @@ import {
 
 // 清单两步校验：新版本插件装在旧宿主上得到 incompatible，而不是 invalid。
 export const incompatibleExample = validateExtensionManifest({
-  engines: { marid: "^2.0.0" },
+  engines: { qodex: "^2.0.0" },
   unknownField: true,
 });
 
 export const invalidExample = validateExtensionManifest({
-  engines: { marid: "^1.0.0" },
+  engines: { qodex: "^1.0.0" },
   contributes: { commands: [{ id: "open", titel: "typo" }] },
 });
 
@@ -25,7 +25,7 @@ export const staticEntryExample = resolvePluginManifest(
     manifest: {
       name: "demo",
       extension: {
-        engines: { marid: "^1.0.0" },
+        engines: { qodex: "^1.0.0" },
         main: "./dist/extension.js",
         contributes: { views: [{ id: "panel", title: "Demo" }] },
       },

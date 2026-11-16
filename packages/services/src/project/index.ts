@@ -1,4 +1,4 @@
-import type { FileEntry } from "@marid/shared";
+import type { FileEntry } from "@qodex/shared";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
 import type { Stats } from "node:fs";

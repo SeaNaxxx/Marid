@@ -2,12 +2,12 @@
 // 行集合只来自 Host 的创建记录；点击后切到项目 workspace，并在主区展示这条记录。
 import { LoaderCircle, TriangleAlertIcon } from "lucide-react";
 import { memo, useCallback } from "react";
-import type { ManagedWorktreeCreation } from "@marid/shared";
-import { TID_WORKTREE_CREATING_ROW } from "@marid/shared/test-ids";
+import type { ManagedWorktreeCreation } from "@qodex/shared";
+import { TID_WORKTREE_CREATING_ROW } from "@qodex/shared/test-ids";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { useTabStoreApi } from "@/store/TabStoreProvider.js";
-import { useMaridSessionStore } from "@/store/maridSessionStore.js";
+import { useQodexSessionStore } from "@/store/qodexSessionStore.js";
 import { useManagedWorktreeCreations } from "./useManagedWorktreeCreations.js";
 
 export const ManagedWorktreeCreatingRows = memo(function ManagedWorktreeCreatingRows({
@@ -29,10 +29,10 @@ export const ManagedWorktreeCreatingRows = memo(function ManagedWorktreeCreating
 });
 
 function CreatingRow({ creation }: { creation: ManagedWorktreeCreation }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const tabStore = useTabStoreApi();
-  const viewWorktreeCreation = useMaridSessionStore((state) => state.viewWorktreeCreation);
-  const active = useMaridSessionStore((state) => {
+  const viewWorktreeCreation = useQodexSessionStore((state) => state.viewWorktreeCreation);
+  const active = useQodexSessionStore((state) => {
     const workspace = state.getWorkspaceState(creation.workspacePath);
     return workspace.activeTaskId === null && workspace.draftWorktreeCreationId === creation.id;
   });

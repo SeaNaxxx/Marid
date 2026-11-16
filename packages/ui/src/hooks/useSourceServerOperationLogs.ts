@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { sourceServerOperationLogSchema, type SourceServerOperationLog } from "@marid/shared";
-import type { ISourceServerManagementService } from "@marid/services";
+import { sourceServerOperationLogSchema, type SourceServerOperationLog } from "@qodex/shared";
+import type { ISourceServerManagementService } from "@qodex/services";
 import { logger } from "@/logger.js";
 
 /** 事件只触发重读，关闭页面后仍从同一个 Host owner 查询；不在 UI 累积历史。 */

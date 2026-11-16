@@ -7,20 +7,20 @@ import {
   ModelPropertiesConfig,
   ProviderApiConfig,
   ProviderConfig,
-} from "@marid/provider";
+} from "@qodex/provider";
 import {
   NodePersonalProviderConfigRepository,
   NodeProviderRegistryRuntime,
   createNodeModelSelectionFacade,
-} from "@marid/provider-node";
+} from "@qodex/provider-node";
 import {
-  createMaridAgentService,
-  createMaridTaskServiceAdapter,
+  createQodexAgentService,
+  createQodexTaskServiceAdapter,
   getDataBaseDir,
   setDataBaseDir,
-} from "@marid/services/node";
+} from "@qodex/services/node";
 import { TaskIndexRepo } from "../../../../services/src/session/taskIndexRepo.js";
-import { createMaridTaskIndexSyncer } from "../../../../services/src/marid-agent/maridTaskIndexSyncer.js";
+import { createQodexTaskIndexSyncer } from "../../../../services/src/qodex-agent/qodexTaskIndexSyncer.js";
 import { getE2EAppDataPaths } from "./desktop-app.js";
 import {
   createBotsServiceHarness,
@@ -47,7 +47,7 @@ export async function createBotWorkerIntegration(baseUrl: string, dropTextContai
     if (errors.length) throw new AggregateError(errors, "Bot worker fixture cleanup failed");
   };
   try {
-    const personalFilePath = join(home, ".marid/v2/provider_config.json");
+    const personalFilePath = join(home, ".qodex/v2/provider_config.json");
     const modelSelection = {
       providerId: "e2e-bot-worker",
       modelId: "e2e-bot-model",
@@ -86,10 +86,10 @@ export async function createBotWorkerIntegration(baseUrl: string, dropTextContai
       ),
     }));
     personal.dispose();
-    const builtin = resolve("../../config/provider/marid-builtin.json");
+    const builtin = resolve("../../config/provider/qodex-builtin.json");
     const runtime = new NodeProviderRegistryRuntime({
       personalFilePath,
-      maridBuiltinFilePath: builtin,
+      qodexBuiltinFilePath: builtin,
       watch: false,
       personalPollingIntervalMs: false,
     });
@@ -138,7 +138,7 @@ export async function createBotWorkerIntegration(baseUrl: string, dropTextContai
     });
     const reverseReplies: unknown[] = [];
     const reverseResources: unknown[] = [];
-    const agent = createMaridAgentService({
+    const agent = createQodexAgentService({
       // 项目化创建要求先预留 task 归属；旧夹具漏接此 Host 端口，在调用 CLI 前即失败。
       prepareSessionCreation: async (target) => {
         const prepared = projects.reserveCreatedTask({
@@ -155,17 +155,17 @@ export async function createBotWorkerIntegration(baseUrl: string, dropTextContai
       commandResolver: () => ({
         command: process.execPath,
         args: [
-          resolve("../../apps/marid-cli/packages/cli/dist/marid.cjs"),
+          resolve("../../apps/qodex-cli/packages/cli/dist/qodex.cjs"),
           "app-server",
           "--stdio",
         ],
         env: {
           HOME: home,
           USERPROFILE: home,
-          MARID_DATA_BASE_DIR: home,
-          MARID_RUNTIME_ENV: "development",
-          MARID_BUILTIN_PROVIDER_CONFIG_FILE: builtin,
-          MARID_PERSONAL_PROVIDER_CONFIG_FILE: personalFilePath,
+          QODEX_DATA_BASE_DIR: home,
+          QODEX_RUNTIME_ENV: "development",
+          QODEX_BUILTIN_PROVIDER_CONFIG_FILE: builtin,
+          QODEX_PERSONAL_PROVIDER_CONFIG_FILE: personalFilePath,
         },
       }),
       modelSelectionReadinessSource: modelSelectionService,
@@ -216,15 +216,15 @@ export async function createBotWorkerIntegration(baseUrl: string, dropTextContai
             ...rest,
           );
     }
-    const syncer = createMaridTaskIndexSyncer({ agentService: agent, taskIndexRepo: repo });
+    const syncer = createQodexTaskIndexSyncer({ agentService: agent, taskIndexRepo: repo });
     cleanup.push(() => syncer.disposeAll());
     cleanup.push(() => bot.service.disposeAllAndWait());
-    const task = createMaridTaskServiceAdapter({
-      maridAgentService: agent,
+    const task = createQodexTaskServiceAdapter({
+      qodexAgentService: agent,
       taskIndexRepo: repo,
       taskIndexSyncer: syncer,
     });
-    Object.assign(bot.maridTaskService, task);
+    Object.assign(bot.qodexTaskService, task);
     return {
       home,
       workspacePath,

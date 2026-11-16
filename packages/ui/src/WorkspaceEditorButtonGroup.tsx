@@ -1,4 +1,4 @@
-import { createOpenInEditorRemoteTarget, type EditorInfo, type RemoteTarget } from "@marid/shared";
+import { createOpenInEditorRemoteTarget, type EditorInfo, type RemoteTarget } from "@qodex/shared";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button.js";
 import { ChevronDown } from "lucide-react";
@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { persistLastSelectedEditorId, readLastSelectedEditorId } from "@/lib/editorPreference.js";
 import {
   resolveWorkspaceEditorSelection,
@@ -33,7 +33,7 @@ export function WorkspaceEditorButtonGroup({
   remoteTarget?: RemoteTarget;
   onSelectedEditorChange?: (editor: EditorInfo | null) => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const platform = usePlatform();
   const isOfficeMode = useIsOfficeMode();
 

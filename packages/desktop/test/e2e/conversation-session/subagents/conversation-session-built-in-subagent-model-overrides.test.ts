@@ -1,7 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { parse as parseYaml } from "yaml";
-import { decodeCustomModelValue, encodeCustomModelValue } from "@marid/shared";
+import { decodeCustomModelValue, encodeCustomModelValue } from "@qodex/shared";
 import {
   TID_CHAT_MODEL_SELECT_ITEM,
   TID_CHAT_MODEL_SELECT_GROUP,
@@ -16,7 +16,7 @@ import {
   TID_TASK_SETTINGS_BUTTON,
   TID_V4_SUBAGENT_OPEN_SIDE_PANE,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   DEFAULT_WORKSPACE,
   clearAppData,

@@ -14,16 +14,16 @@ export function resolveProductionRemoteAssetCacheDir(
 ) {
   const pathApi = pathApiForPlatform(platform);
   if (platform === "darwin") {
-    return pathApi.join(homeDir, "Library", "Application Support", "Marid", "remote-assets-cache");
+    return pathApi.join(homeDir, "Library", "Application Support", "Qodex", "remote-assets-cache");
   }
 
   if (platform === "win32") {
     const appDataDir = env.APPDATA?.trim() || pathApi.join(homeDir, "AppData", "Roaming");
-    return pathApi.join(appDataDir, "Marid", "remote-assets-cache");
+    return pathApi.join(appDataDir, "Qodex", "remote-assets-cache");
   }
 
   const configDir = env.XDG_CONFIG_HOME?.trim() || pathApi.join(homeDir, ".config");
-  return pathApi.join(configDir, "Marid", "remote-assets-cache");
+  return pathApi.join(configDir, "Qodex", "remote-assets-cache");
 }
 
 export function buildDesktopRemoteProdEnv(
@@ -32,16 +32,16 @@ export function buildDesktopRemoteProdEnv(
   homeDir = homedir(),
 ) {
   const cacheDir =
-    baseEnv.MARID_REMOTE_ASSET_CACHE_DIR?.trim() ||
+    baseEnv.QODEX_REMOTE_ASSET_CACHE_DIR?.trim() ||
     resolveProductionRemoteAssetCacheDir(baseEnv, platform, homeDir);
 
   return {
     ...baseEnv,
-    // remote CDN 基址现在跟随 MARID_ENV 分流；该脚本用于复现生产态下载链路，
+    // remote CDN 基址现在跟随 QODEX_ENV 分流；该脚本用于复现生产态下载链路，
     // 因此需要同时强制 production 和 CDN 开关，避免默认 test 环境落到测试资源 CDN。
-    MARID_ENV: "production",
-    MARID_DEV_REMOTE_ASSET_USE_CDN: "1",
-    MARID_REMOTE_ASSET_CACHE_DIR: cacheDir,
+    QODEX_ENV: "production",
+    QODEX_DEV_REMOTE_ASSET_USE_CDN: "1",
+    QODEX_REMOTE_ASSET_CACHE_DIR: cacheDir,
   };
 }
 
@@ -51,7 +51,7 @@ export function resolvePnpmCommand(platform = process.platform) {
 
 export function runDesktopRemoteProdDev() {
   const repoRoot = resolve(import.meta.dirname, "..");
-  const child = spawn(resolvePnpmCommand(), ["--filter", "@marid/desktop", "dev"], {
+  const child = spawn(resolvePnpmCommand(), ["--filter", "@qodex/desktop", "dev"], {
     cwd: repoRoot,
     stdio: "inherit",
     env: buildDesktopRemoteProdEnv(),

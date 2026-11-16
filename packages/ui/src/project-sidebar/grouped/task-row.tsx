@@ -1,17 +1,17 @@
-import { TID_TASK_ITEM, TID_TASK_ROW_WORKTREE_ICON, testId } from "@marid/shared/test-ids";
-import type { ProjectTask as MaridTaskMeta } from "@/project-sidebar/contract.js";
+import { TID_TASK_ITEM, TID_TASK_ROW_WORKTREE_ICON, testId } from "@qodex/shared/test-ids";
+import type { ProjectTask as QodexTaskMeta } from "@/project-sidebar/contract.js";
 import { memo, useContext, useState } from "react";
 import type { KeyboardEvent, MouseEvent } from "react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import type { UniqueIdentifier } from "@dnd-kit/core";
-import { isCronTask, isOffPeakTask } from "@marid/shared";
+import { isCronTask, isOffPeakTask } from "@qodex/shared";
 import { ArrowUpToLine, Clock, GitBranch, ListTree, LoaderCircle, Moon, X } from "lucide-react";
 import { formatWorktreeLabel } from "@/managed-worktrees/index.js";
 import { cn } from "@/components/lib/utils.js";
 import { Badge } from "@/components/ui/badge.js";
 import { toast } from "@/components/ui/toast.js";
 import { ContextMenu, ContextMenuTrigger } from "@/components/ui/context-menu.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import {
   deriveTaskLeadingIndicator,
   formatTaskRelativeTime,
@@ -63,7 +63,7 @@ function GroupedTaskRowComponent({
   dragOverlay,
   tooltipsDisabled,
 }: {
-  task: MaridTaskMeta;
+  task: QodexTaskMeta;
   currentGroupId?: string;
   groups: TaskGroupMenuItem[];
   remoteSessionId?: string;
@@ -71,19 +71,19 @@ function GroupedTaskRowComponent({
   isMobileActive: boolean;
   workspaceLabel: string;
   onSelectTask: (workspacePath: string, taskId: string, workspaceIdentity?: string) => void;
-  onCloseTask: (task: MaridTaskMeta) => void;
-  onOpenFileTree?: (task: MaridTaskMeta) => void;
-  onMoveTaskToGroup: (task: MaridTaskMeta, groupId: string | null) => void;
-  onMoveTaskToTop: (task: MaridTaskMeta) => void;
-  onStartRenameTask: (task: MaridTaskMeta) => void;
-  onArchiveTask: (task: MaridTaskMeta) => void;
-  onMarkTaskAsUnread: (task: MaridTaskMeta) => void;
+  onCloseTask: (task: QodexTaskMeta) => void;
+  onOpenFileTree?: (task: QodexTaskMeta) => void;
+  onMoveTaskToGroup: (task: QodexTaskMeta, groupId: string | null) => void;
+  onMoveTaskToTop: (task: QodexTaskMeta) => void;
+  onStartRenameTask: (task: QodexTaskMeta) => void;
+  onArchiveTask: (task: QodexTaskMeta) => void;
+  onMarkTaskAsUnread: (task: QodexTaskMeta) => void;
   dragId?: UniqueIdentifier;
   dragging?: boolean;
   dragOverlay?: boolean;
   tooltipsDisabled?: boolean;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const presentation = useContext(ProjectTaskListContext);
   const workspaceActionsDisabled = useOptionalTabStore((state) =>
     isWorkspaceReadOnly(state, task.workspacePath, task.workspaceIdentity),

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { toZhOrEnLocale } from "@marid/shared";
+import { toZhOrEnLocale } from "@qodex/shared";
 import { useStore } from "zustand";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { toast } from "@/components/ui/toast.js";
 import { CloudContentDialog } from "@/components/cloud-content-dialog/CloudContentDialog.js";
 import { MarketingFailureDialog } from "@/components/marketing-touch/MarketingFailureDialog.js";
@@ -15,8 +15,8 @@ export function MarketingDialogs({ controller }: { controller: MarketingTouchCon
     marketingNavigation,
     (state) => state.request?.target.page === "upgrade",
   );
-  const { locale, intl } = useMaridIntl();
-  const claimError = state.errorAction === "claim_marid_plan" ? state.error : null;
+  const { locale, intl } = useQodexIntl();
+  const claimError = state.errorAction === "claim_qodex_plan" ? state.error : null;
   useEffect(() => {
     if (state.error && !claimError) {
       toast(state.error);
@@ -69,7 +69,7 @@ export function MarketingDialogs({ controller }: { controller: MarketingTouchCon
             },
             claim_plan: async (action) => {
               await controller.dialogAction({
-                type: "claim_marid_plan",
+                type: "claim_qodex_plan",
                 args: { plan_id: action.planId },
               });
             },

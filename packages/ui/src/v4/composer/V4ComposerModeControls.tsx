@@ -2,16 +2,16 @@ import { modeTriggerColor } from "@/chat-input-toolbar/display-help.js";
 import { memo, useCallback, useMemo } from "react";
 import { LightbulbIcon, XIcon, ChevronDownIcon } from "lucide-react";
 import {
-  MARID_AGENT_PROVIDER,
-  getMaridAgentAvailableModes,
-  type MaridConfigOption,
-} from "@marid/shared";
+  QODEX_AGENT_PROVIDER,
+  getQodexAgentAvailableModes,
+  type QodexConfigOption,
+} from "@qodex/shared";
 import {
   TID_CHAT_MODE_SELECT_TRIGGER,
   TID_CHAT_MODE_SELECT_ITEM,
   TID_V4_COMPOSER_INPUT,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -29,7 +29,7 @@ import {
   getModeOptionDescriptionMessageId,
   resolveModeOptionIcon,
 } from "@/chat-input-toolbar/display.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { useYoloModeConfirmation } from "@/hooks/useConfirmDialog.js";
 import { useConfirmDialogStore } from "@/store/confirmDialogStore.js";
 import { isCoarseTouchDevice } from "@/lib/pickerFocus.js";
@@ -62,7 +62,7 @@ function V4ComposerModeSwitchImpl({
   | "onConfigPickerOpenChange"
   | "onSwitchMode"
 >) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   // 原草稿回调随 scope 换代，旧确认不能把权限写入后来选中的任务。
   const confirmMode = useYoloModeConfirmation(disabled ? null : onSwitchMode, draftConfig?.mode);
   const requestSwitchMode = useCallback(
@@ -71,9 +71,9 @@ function V4ComposerModeSwitchImpl({
     },
     [confirmMode, onSwitchMode],
   );
-  const displayProvider = provider ?? MARID_AGENT_PROVIDER;
+  const displayProvider = provider ?? QODEX_AGENT_PROVIDER;
   const modeShortcutLabel = useShortcutCommandLabel("cycleSessionMode");
-  const modes = getMaridAgentAvailableModes();
+  const modes = getQodexAgentAvailableModes();
   const permissions = modes.filter((mode) => mode.id !== "plan");
   // 新菜单隐藏 Edit，但历史草稿仍可回显，不能因候选变化隐藏整个权限入口。
   const selected =
@@ -85,14 +85,14 @@ function V4ComposerModeSwitchImpl({
   const planLabel = label(plan);
   // Plan 拆成独立勾选项后仍需保留原菜单说明，复用相同的国际化映射。
   const planDescriptionId = getModeOptionDescriptionMessageId(displayProvider, { value: plan.id });
-  const modeOption = useMemo<MaridConfigOption>(
+  const modeOption = useMemo<QodexConfigOption>(
     () => ({
       id: "mode",
       name: "Mode",
       category: "mode",
       type: "select",
       currentValue: draftConfig?.mode ?? "build",
-      options: getMaridAgentAvailableModes()
+      options: getQodexAgentAvailableModes()
         .filter((mode) => mode.id !== "plan")
         .map((mode) => ({ value: mode.id, name: mode.name })),
     }),

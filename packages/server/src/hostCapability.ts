@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import type { ServerRemoteHostCapability } from "@marid/shared";
+import type { ServerRemoteHostCapability } from "@qodex/shared";
 
 export const DEFAULT_HOST_CAPABILITY_TTL_MS = 30_000;
 

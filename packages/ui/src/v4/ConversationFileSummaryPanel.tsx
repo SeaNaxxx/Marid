@@ -6,8 +6,8 @@ import type {
   TurnHeaderRow,
   V4ConversationFileChangesResult,
   V4ConversationFileRewindPreviewResult,
-} from "@marid/shared/marid-protocol-v4";
-import { TID_V4_FILE_SUMMARY_UNDO_LOCKED } from "@marid/shared/test-ids";
+} from "@qodex/shared/qodex-protocol-v4";
+import { TID_V4_FILE_SUMMARY_UNDO_LOCKED } from "@qodex/shared/test-ids";
 import { Button } from "@/components/ui/button.js";
 import { cn } from "@/components/lib/utils.js";
 import {
@@ -15,7 +15,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { FileDisplayInline } from "@/lib/fileDisplay.js";
 import { toWorkspaceRelativePath } from "@/lib/taskChangeSummary.js";
 import { buildChangeSummaryFilePreviewSource } from "@/messageChangeSummaryPreview.js";
@@ -78,7 +78,7 @@ export function ConversationFileSummaryPanel({
   context,
   assistantText = "",
 }: ConversationFileSummaryPanelProps) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const genUiSources = useMemo(() => collectGenUiSourcePaths(assistantText), [assistantText]);
   const filtersSources = genUiSources.length > 0;
   const [open, setOpen] = useState(false);

@@ -1,7 +1,7 @@
 import type {
   CodingPlanCardCopyItem,
   CodingPlanProductPreviewPayment,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export function normalizeCodingPlanCardCopyItems(
   items: unknown,

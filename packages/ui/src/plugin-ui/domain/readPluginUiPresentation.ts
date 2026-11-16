@@ -1,4 +1,4 @@
-import { mcpToolDisplayUiSchema } from "@marid/shared/mcp-apps";
+import { mcpToolDisplayUiSchema } from "@qodex/shared/mcp-apps";
 import type { PluginUiPresentation } from "../contract.js";
 
 /**

@@ -1,4 +1,4 @@
-import { TID_CHAT_MODEL_SELECT_TRIGGER } from "@marid/shared/test-ids";
+import { TID_CHAT_MODEL_SELECT_TRIGGER } from "@qodex/shared/test-ids";
 import {
   E2E_BIGMODEL_PLAN_PROVIDER_ID,
   E2E_PLAN_FIRST_MODEL,
@@ -49,8 +49,8 @@ const HIGHSPEED_E2E_CONNECTION = {
 
 declare global {
   interface Window {
-    __maridHighspeedEntranceProbe?: HighspeedEntranceProbe;
-    __maridHighspeedComposerProbe?: HighspeedComposerProbe;
+    __qodexHighspeedEntranceProbe?: HighspeedEntranceProbe;
+    __qodexHighspeedComposerProbe?: HighspeedComposerProbe;
   }
 }
 
@@ -163,7 +163,7 @@ export async function waitForHighspeedComposerCleared(timeoutMsg: string) {
 /** 从此刻起记录扩散 Canvas 是否挂载过；按新增节点判定，挂载后很快卸载也能记到。 */
 export async function startHighspeedEntranceProbe() {
   await browser.execute(() => {
-    window.__maridHighspeedEntranceProbe?.observer.disconnect();
+    window.__qodexHighspeedEntranceProbe?.observer.disconnect();
     const state = { diffusionMounted: false };
     const observer = new MutationObserver((records) => {
       for (const record of records) {
@@ -179,16 +179,16 @@ export async function startHighspeedEntranceProbe() {
       }
     });
     observer.observe(document.body, { childList: true, subtree: true });
-    window.__maridHighspeedEntranceProbe = { observer, state };
+    window.__qodexHighspeedEntranceProbe = { observer, state };
   });
 }
 
 /** 停止探针并读取入场快照：入场方式、背景阶段、模型标识是否已呈现，以及期间扩散 Canvas 是否挂载过。 */
 export function takeHighspeedEntranceProbe(): Promise<HighspeedEntranceSnapshot> {
   return browser.execute(() => {
-    const probe = window.__maridHighspeedEntranceProbe;
+    const probe = window.__qodexHighspeedEntranceProbe;
     probe?.observer.disconnect();
-    delete window.__maridHighspeedEntranceProbe;
+    delete window.__qodexHighspeedEntranceProbe;
     const surface = document.querySelector<HTMLElement>('[data-highspeed-composer="true"]');
     return {
       diffusionMounted: probe ? probe.state.diffusionMounted : null,
@@ -209,7 +209,7 @@ export function takeHighspeedEntranceProbe(): Promise<HighspeedEntranceSnapshot>
  */
 export async function startHighspeedComposerProbe() {
   await browser.execute(() => {
-    window.__maridHighspeedComposerProbe?.observer.disconnect();
+    window.__qodexHighspeedComposerProbe?.observer.disconnect();
     const state = {
       highspeedSeen: document.querySelector('[data-highspeed-composer="true"]') !== null,
     };
@@ -222,16 +222,16 @@ export async function startHighspeedComposerProbe() {
       childList: true,
       subtree: true,
     });
-    window.__maridHighspeedComposerProbe = { observer, state };
+    window.__qodexHighspeedComposerProbe = { observer, state };
   });
 }
 
 /** 停止探针；探针缺失时返回 null，调用方用 `toBe(false)` 断言可避免否定断言空转通过。 */
 export function takeHighspeedComposerProbe(): Promise<boolean | null> {
   return browser.execute(() => {
-    const probe = window.__maridHighspeedComposerProbe;
+    const probe = window.__qodexHighspeedComposerProbe;
     probe?.observer.disconnect();
-    delete window.__maridHighspeedComposerProbe;
+    delete window.__qodexHighspeedComposerProbe;
     return probe ? probe.state.highspeedSeen : null;
   });
 }

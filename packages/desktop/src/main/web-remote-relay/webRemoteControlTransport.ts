@@ -2,12 +2,12 @@ import { WebSocket, type RawData } from "ws";
 import {
   WebRemoteControlRelayPayloadSerializer,
   type WebRemoteControlPayloadSendResult,
-} from "@marid/client";
+} from "@qodex/client";
 import {
   WEB_REMOTE_CONTROL_RPC_TRANSPORT_LIMITS,
   parseWebRemoteControlAppPayload,
   type WebRemoteControlAppPayload,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   WEB_REMOTE_CONTROL_V2_HEARTBEAT_ACK_TIMEOUT_MS,
   WebRemoteControlV2ConnectionError,
@@ -17,7 +17,7 @@ import {
   parseWebRemoteControlRelayV2IncomingMessage,
   type WebRemoteControlRelayV2IncomingMessage,
   type WebRemoteControlRelayV2OutgoingMessage,
-} from "@marid/shared/web-remote-relay";
+} from "@qodex/shared/web-remote-relay";
 import {
   noteWebRemoteRelayConnectAttempt,
   noteWebRemoteRelayReconnect,
@@ -219,8 +219,8 @@ export class WebRemoteControlDeviceTransport {
       if (
         value &&
         typeof value === "object" &&
-        "marid_type" in value &&
-        (value.marid_type === "rpc-frame" || value.marid_type === "rpc-frame-ack") &&
+        "qodex_type" in value &&
+        (value.qodex_type === "rpc-frame" || value.qodex_type === "rpc-frame-ack") &&
         this.options.onRawTransportPayload?.(value)
       )
         return;

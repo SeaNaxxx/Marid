@@ -1,4 +1,4 @@
-import { parseRemoteWorkspaceIdentity } from "@marid/shared";
+import { parseRemoteWorkspaceIdentity } from "@qodex/shared";
 import { clearAppData, readSettings } from "#e2e/helpers/desktop-app";
 import {
   connectRemoteSourceFromSettings,

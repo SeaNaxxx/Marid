@@ -1,18 +1,18 @@
 import type {
-  MaridTaskListKind,
-  MaridTaskListSortBy,
-  MaridTaskListWorkspaceScope,
-} from "@marid/services";
-import type { MaridTaskMeta } from "@marid/shared";
-import { resolveWorkspaceStateKey } from "@/store/maridSessionStoreSelectors.js";
+  QodexTaskListKind,
+  QodexTaskListSortBy,
+  QodexTaskListWorkspaceScope,
+} from "@qodex/services";
+import type { QodexTaskMeta } from "@qodex/shared";
+import { resolveWorkspaceStateKey } from "@/store/qodexSessionStoreSelectors.js";
 
 export type TaskEntityKey = string;
 export type TaskListCacheKey = string;
-export type TaskListQueryKind = MaridTaskListKind | "workspace";
+export type TaskListQueryKind = QodexTaskListKind | "workspace";
 
 export interface TaskListCacheDescriptor {
   kind: TaskListQueryKind;
-  sortBy: MaridTaskListSortBy;
+  sortBy: QodexTaskListSortBy;
   search: string;
   expanded: boolean;
   visibleLimit: number | null;
@@ -41,14 +41,14 @@ export function buildTaskWorkspaceKey(workspacePath: string, workspaceIdentity?:
   return resolveWorkspaceStateKey(workspacePath, workspaceIdentity);
 }
 
-export function buildTaskEntityKey(task: Pick<MaridTaskMeta, "taskId" | "workspacePath" | "workspaceIdentity">): TaskEntityKey {
+export function buildTaskEntityKey(task: Pick<QodexTaskMeta, "taskId" | "workspacePath" | "workspaceIdentity">): TaskEntityKey {
   return `${buildTaskWorkspaceKey(task.workspacePath, task.workspaceIdentity)}::${task.taskId}`;
 }
 
 export function normalizeTaskListWorkspaceScopes(
-  scopes: MaridTaskListWorkspaceScope[],
-): MaridTaskListWorkspaceScope[] {
-  const uniqueScopes = new Map<string, MaridTaskListWorkspaceScope>();
+  scopes: QodexTaskListWorkspaceScope[],
+): QodexTaskListWorkspaceScope[] {
+  const uniqueScopes = new Map<string, QodexTaskListWorkspaceScope>();
 
   for (const scope of scopes) {
     const workspaceKey = buildTaskWorkspaceKey(scope.workspacePath, scope.workspaceIdentity);
@@ -69,8 +69,8 @@ function normalizeTaskListSearch(search?: string): string {
 
 export function buildTaskListCacheDescriptor(params: {
   kind: TaskListQueryKind;
-  workspaceScopes: MaridTaskListWorkspaceScope[];
-  sortBy: MaridTaskListSortBy;
+  workspaceScopes: QodexTaskListWorkspaceScope[];
+  sortBy: QodexTaskListSortBy;
   search?: string;
   expanded: boolean;
   visibleLimit?: number | null;

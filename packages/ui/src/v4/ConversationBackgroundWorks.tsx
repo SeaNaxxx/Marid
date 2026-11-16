@@ -4,8 +4,8 @@ import {
   TID_V4_BACKGROUND_WORK_CANCEL,
   TID_V4_BACKGROUND_WORK_ITEM,
   testId,
-} from "@marid/shared/test-ids";
-import type { BackgroundWorkSummary } from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/test-ids";
+import type { BackgroundWorkSummary } from "@qodex/shared/qodex-protocol-v4";
 import { runUserAction } from "@/lib/userActionTelemetry.js";
 
 export interface ConversationBackgroundWorksProps {

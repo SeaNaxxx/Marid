@@ -3,8 +3,8 @@ import { isAbsolute, win32 } from "node:path";
 import { execFile, spawn } from "node:child_process";
 import { statSync } from "node:fs";
 import { shell } from "electron";
-import type { OpenInEditorOptions, OpenInEditorRemoteTarget } from "@marid/shared";
-import { listWSLDistros } from "@marid/server/remote/wsl-detect.js";
+import type { OpenInEditorOptions, OpenInEditorRemoteTarget } from "@qodex/shared";
+import { listWSLDistros } from "@qodex/server/remote/wsl-detect.js";
 import { getEditorDefsForCurrentPlatform, resolveEditorDefAppPath } from "./editors.js";
 import { logger } from "./logger.js";
 import {

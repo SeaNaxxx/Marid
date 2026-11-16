@@ -1,4 +1,4 @@
-import type { DockerContainerInfo, IPlatformService } from "@marid/shared";
+import type { DockerContainerInfo, IPlatformService } from "@qodex/shared";
 
 type DockerOptionsPlatform = Pick<
   IPlatformService,

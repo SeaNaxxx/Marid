@@ -1,9 +1,9 @@
-import type { IFileService } from "@marid/services";
+import type { IFileService } from "@qodex/services";
 import {
   REMOTE_WORKSPACE_DIRECTORY_UNAVAILABLE_ERROR_CODE,
   REMOTE_WORKSPACE_DIRECTORY_UNRESPONSIVE_ERROR_CODE,
   REMOTE_WORKSPACE_PREPARATION_TIMEOUT_MS,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 interface RemoteWorkspaceIdentityInput {
   workspacePath: string;

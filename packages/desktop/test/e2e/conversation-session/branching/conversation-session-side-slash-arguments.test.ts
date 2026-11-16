@@ -3,7 +3,7 @@ import {
   TID_V4_COMPOSER_SEND,
   TID_V4_SESSION_PANE,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { clearAppData } from "#e2e/helpers/desktop-app";
 import {
   clickV4Stop,
@@ -116,13 +116,13 @@ async function setPaneComposerText(paneTestId: string, text: string): Promise<vo
           const bridge = (
             input as
               | (HTMLElement & {
-                  __maridLexicalInputE2E?: {
+                  __qodexLexicalInputE2E?: {
                     getText: () => string;
                     setText: (value: string) => void;
                   };
                 })
               | undefined
-          )?.__maridLexicalInputE2E;
+          )?.__qodexLexicalInputE2E;
           if (!bridge) return false;
           bridge.setText(nextText);
           return bridge.getText() === nextText;

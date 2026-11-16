@@ -651,8 +651,8 @@ async function searchHighlightSnapshot() {
         };
       }
     ).highlights;
-    const normalName = "marid-model-trajectory-find";
-    const activeName = "marid-model-trajectory-find-active";
+    const normalName = "qodex-model-trajectory-find";
+    const activeName = "qodex-model-trajectory-find-active";
     return {
       registered: Boolean(registry?.has(normalName) || registry?.has(activeName)),
       normal: registry?.get(normalName)?.size ?? 0,

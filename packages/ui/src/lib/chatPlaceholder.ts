@@ -1,4 +1,4 @@
-import type { MaridTaskRuntimeStatus } from "@marid/shared";
+import type { QodexTaskRuntimeStatus } from "@qodex/shared";
 
 type ChatPlaceholderMessageKey =
   | "chat.placeholder.newTask"
@@ -24,7 +24,7 @@ export function resolveChatPlaceholderKey(options: {
 
 export function shouldDeferChatPlaceholder(options: {
   hasBoundTask: boolean;
-  taskStatus: MaridTaskRuntimeStatus;
+  taskStatus: QodexTaskRuntimeStatus;
 }): boolean {
   const { hasBoundTask, taskStatus } = options;
 

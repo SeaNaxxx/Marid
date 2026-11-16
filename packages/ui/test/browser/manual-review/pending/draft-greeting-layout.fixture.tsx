@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { ConversationDraftEmptyState } from "@/v4/ConversationDraftEmptyState.js";
-import { MaridIntlProvider, useMaridIntl } from "@/i18n/IntlProvider.js";
+import { QodexIntlProvider, useQodexIntl } from "@/i18n/IntlProvider.js";
 import "@/styles.css";
 
 const params = new URLSearchParams(location.search);
@@ -10,7 +10,7 @@ document.documentElement.className = `${theme} theme-zai-${theme}`;
 const compact = params.has("compact");
 
 function Fixture() {
-  const { locale, setLocale } = useMaridIntl();
+  const { locale, setLocale } = useQodexIntl();
   const [revision, setRevision] = useState(0);
   return (
     <main className="min-h-dvh bg-background p-4 text-ui-base text-foreground">
@@ -36,7 +36,7 @@ function Fixture() {
 }
 
 createRoot(document.getElementById("root")!).render(
-  <MaridIntlProvider initialLocale={params.get("locale") === "en-US" ? "en-US" : "zh-CN"}>
+  <QodexIntlProvider initialLocale={params.get("locale") === "en-US" ? "en-US" : "zh-CN"}>
     <Fixture />
-  </MaridIntlProvider>,
+  </QodexIntlProvider>,
 );

@@ -1,7 +1,7 @@
-import type { AppControlNavigationPort } from "@marid/services/node";
+import type { AppControlNavigationPort } from "@qodex/services/node";
 import { z } from "zod";
 
-export const APP_NAVIGATION_IPC = "marid:app-control-navigation";
+export const APP_NAVIGATION_IPC = "qodex:app-control-navigation";
 const identifier = z.string().min(1).max(4096);
 const targetSchema = z.strictObject({
   workspacePath: identifier,
@@ -49,8 +49,8 @@ export const appNavigationRendererIpcSchema = z.discriminatedUnion("type", [
 
 export type AppNavigationOpenInput = Parameters<AppControlNavigationPort["openSession"]>[0];
 export type AppNavigationResult = Awaited<ReturnType<AppControlNavigationPort["openSession"]>>;
-import type { AppNavigationTarget } from "@marid/shared";
-export type { AppNavigationTarget } from "@marid/shared";
+import type { AppNavigationTarget } from "@qodex/shared";
+export type { AppNavigationTarget } from "@qodex/shared";
 export type AppNavigationHostMessage =
   | {
       type: "app-navigation-open";

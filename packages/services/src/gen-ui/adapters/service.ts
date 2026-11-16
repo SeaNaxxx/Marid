@@ -1,13 +1,13 @@
 import { createHash, randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { z } from "zod";
-import { GEN_UI_OUTPUT_DIRECTORY } from "@marid/shared/node";
+import { GEN_UI_OUTPUT_DIRECTORY } from "@qodex/shared/node";
 import {
   GEN_UI_STATIC_DOMAINS,
   buildGenUiScopeKey,
   genUiStateTargetSchema,
-} from "@marid/shared/gen-ui";
-import type { PluginSandboxHandle, PluginSandboxRegisterInput } from "@marid/shared/mcp-apps";
+} from "@qodex/shared/gen-ui";
+import type { PluginSandboxHandle, PluginSandboxRegisterInput } from "@qodex/shared/mcp-apps";
 import type { IGenUiService } from "../contract.js";
 import { getAppConfigDir } from "../../paths.js";
 import { assertGenUiFragment, readGenUiDocument } from "./files.js";
@@ -59,7 +59,7 @@ export function createGenUiService(
         workspaceIdentity: input.workspaceIdentity,
         sessionId: input.sessionId,
         scopeId: input.instanceKey,
-        html: `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><!--__MARID_GEN_UI_STYLES__--><script type="application/json" id="marid-gen-ui-initial-state">${initial}</script><script src="__MARID_GEN_UI_RUNTIME__"></script></head><body>${input.html}<!--__MARID_GEN_UI_INNER_KIT__--></body></html>`,
+        html: `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><!--__QODEX_GEN_UI_STYLES__--><script type="application/json" id="qodex-gen-ui-initial-state">${initial}</script><script src="__QODEX_GEN_UI_RUNTIME__"></script></head><body>${input.html}<!--__QODEX_GEN_UI_INNER_KIT__--></body></html>`,
         csp: {
           connectDomains: [],
           resourceDomains: GEN_UI_STATIC_DOMAINS.map((host) => `https://${host}`),

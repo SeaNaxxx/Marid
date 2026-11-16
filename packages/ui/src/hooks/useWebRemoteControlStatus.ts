@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { WebRemoteControlStatus } from "@marid/shared";
+import type { WebRemoteControlStatus } from "@qodex/shared";
 import { useOptionalPlatform } from "@/hooks/usePlatform.js";
 import { logger } from "@/logger.js";
 

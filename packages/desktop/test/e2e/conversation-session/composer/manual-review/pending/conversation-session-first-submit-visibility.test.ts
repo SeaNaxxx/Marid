@@ -1,7 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 import { join } from "node:path";
 import { writeFile } from "node:fs/promises";
-import { TID_V4_SESSION_PANE, testId } from "@marid/shared/test-ids";
+import { TID_V4_SESSION_PANE, testId } from "@qodex/shared/test-ids";
 import {
   prepareV4ConversationE2E,
   sendV4Prompt,
@@ -22,7 +22,7 @@ describe("草稿首发列表与详情同步", () => {
         await startNewV4Draft();
       }
       // 展开所属项目；折叠偏好不是本用例要改变的创建语义。
-      const project = $('[data-project-name="MaridProject"]');
+      const project = $('[data-project-name="QodexProject"]');
       let expectedProjectId: string | null = null;
       if (scope === "project") {
         await project.waitForDisplayed();
@@ -102,7 +102,7 @@ describe("草稿首发列表与详情同步", () => {
           ).__firstSubmitEvidence!,
       );
       await writeFile(
-        join(process.env.MARID_E2E_ARTIFACT_DIR!, `FSV05-${scope}-frames.json`),
+        join(process.env.QODEX_E2E_ARTIFACT_DIR!, `FSV05-${scope}-frames.json`),
         JSON.stringify(evidence, null, 2),
       );
       const firstDetail = evidence.frames.find(
@@ -115,7 +115,7 @@ describe("草稿首发列表与详情同步", () => {
           .every((frame) => frame.newRows === 0),
       ).toBe(true);
       const db = new DatabaseSync(
-        join(process.env.MARID_E2E_HOME_DIR!, ".marid/v2/tasks-index.sqlite"),
+        join(process.env.QODEX_E2E_HOME_DIR!, ".qodex/v2/tasks-index.sqlite"),
         { readOnly: true },
       );
       try {
@@ -131,7 +131,7 @@ describe("草稿首发列表与详情同步", () => {
         db.close();
       }
       await browser.saveScreenshot(
-        join(process.env.MARID_E2E_ARTIFACT_DIR!, `FSV05-${scope}-first-detail.png`),
+        join(process.env.QODEX_E2E_ARTIFACT_DIR!, `FSV05-${scope}-first-detail.png`),
       );
       await waitForV4UserMessageContaining(marker);
       await waitForV4AssistantMessageContaining("deepseek-e2e-ok");

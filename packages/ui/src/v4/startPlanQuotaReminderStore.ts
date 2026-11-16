@@ -1,6 +1,6 @@
 import { logger } from "@/logger.js";
 
-const PREFIX = "marid:start-plan-reminder:v1:";
+const PREFIX = "qodex:start-plan-reminder:v1:";
 interface RecordEntry {
   expiresAt: number;
   owner: object | null;

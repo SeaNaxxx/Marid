@@ -135,7 +135,7 @@ Provider Store / Family Settings / Runtime Headers / Plan 状态
 ```
 
 代码曾位于 `packages/services/src/model-provider/modelProviderService.ts`。`getProviderRegistrySnapshot()` 缓存
-`MaridProviderRegistrySnapshot`；保存或删除 Provider、Plan 状态和运行时 Header 变化时，
+`QodexProviderRegistrySnapshot`；保存或删除 Provider、Plan 状态和运行时 Header 变化时，
 `emitProviderRegistryChanged()` 会使缓存失效、重新读取并在事件中携带完整 Snapshot。
 
 迁移前 Host 到 Core Worker 的链路如下：
@@ -144,7 +144,7 @@ Provider Store / Family Settings / Runtime Headers / Plan 状态
 ModelProviderService.onDidChangeProviderRegistry
                     |
                     v
-MaridAgentService
+QodexAgentService
 ├─ 对每个 active workspace 排队
 ├─ 用 revision / generatedAt 去重和防旧快照覆盖
 └─ workspace/updateProviderRegistry
@@ -156,8 +156,8 @@ Core Worker Workspace Catalog
 └─ 发布 workspace state / session settings 变化
 ```
 
-`packages/services/src/marid-agent/maridAgentService.ts` 曾订阅 Host 侧事件并推送快照；
-`apps/marid-cli/packages/bootstrap/src/marid-protocol/workspace-model-catalog.ts` 曾在 Worker 内应用快照。
+`packages/services/src/qodex-agent/qodexAgentService.ts` 曾订阅 Host 侧事件并推送快照；
+`apps/qodex-cli/packages/bootstrap/src/qodex-protocol/workspace-model-catalog.ts` 曾在 Worker 内应用快照。
 这是一条跨进程完整快照复制链，已在本轮 M2 迁移中退出本地生产路径；desktop-attached remote 的兼容退出链路
 另行记录，不能据此恢复本地全局推送。
 

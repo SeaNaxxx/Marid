@@ -1,4 +1,4 @@
-import type { BotGroupInputProgress, BotGroupInputStatus } from "@marid/shared";
+import type { BotGroupInputProgress, BotGroupInputStatus } from "@qodex/shared";
 
 const rank = (state: BotGroupInputStatus) =>
   state === "waiting" ? 0 : state === "working" ? 1 : 2;

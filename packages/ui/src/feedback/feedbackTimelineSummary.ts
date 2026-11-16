@@ -1,4 +1,4 @@
-import type { FeedbackTicketEvent, FeedbackTicketStatus } from "@marid/shared";
+import type { FeedbackTicketEvent, FeedbackTicketStatus } from "@qodex/shared";
 import {
   FEEDBACK_STATUS_MESSAGE_IDS,
   formatFeedbackStatusLabel,

@@ -1,4 +1,4 @@
-import type { GitCommitMessageConversationContext } from "@marid/shared";
+import type { GitCommitMessageConversationContext } from "@qodex/shared";
 
 const MAX_COMMIT_CONVERSATION_MESSAGES = 12;
 const MAX_COMMIT_CONVERSATION_MESSAGE_CHARS = 600;

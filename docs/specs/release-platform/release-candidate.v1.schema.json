@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://marid.dev/schemas/release-candidate.v1.schema.json",
-  "title": "Marid Release Candidate v1",
+  "$id": "https://qodex.dev/schemas/release-candidate.v1.schema.json",
+  "title": "Qodex Release Candidate v1",
   "type": "object",
   "additionalProperties": false,
   "required": [

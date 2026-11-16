@@ -3,17 +3,17 @@ import type { UtilityProcess as ElectronUtilityProcess } from "electron";
 import os from "node:os";
 import { join } from "node:path";
 import {
-  formatMaridAgentProcessName,
-  formatMaridGpuProcessName,
-  formatMaridHostProcessName,
-  formatMaridMainProcessName,
-  formatMaridRendererProcessName,
-  formatMaridUtilityProcessName,
+  formatQodexAgentProcessName,
+  formatQodexGpuProcessName,
+  formatQodexHostProcessName,
+  formatQodexMainProcessName,
+  formatQodexRendererProcessName,
+  formatQodexUtilityProcessName,
   type HostResourceUsageProcess,
   type ResourceUsageProcess,
   type ResourceUsageSnapshot,
-  type MaridProvider,
-} from "@marid/shared";
+  type QodexProvider,
+} from "@qodex/shared";
 import { logger } from "./logger.js";
 import { configureNetworkCaptureHost, observeNetworkWindow } from "./resourceManagerNetwork.js";
 import { normalizeElectronCpuToMachinePercent } from "./electronCpuNormalization.js";
@@ -113,7 +113,7 @@ const hostProcesses = new Map<string, ElectronUtilityProcess>();
 
 interface RegisteredAgentProcess {
   pid: number;
-  provider: MaridProvider;
+  provider: QodexProvider;
   workspacePath: string;
   command: string;
   args: string[];
@@ -345,7 +345,7 @@ function collectElectronProcesses(): ResourceUsageProcess[] {
   push(
     baseProcess(
       process.pid,
-      formatMaridMainProcessName(),
+      formatQodexMainProcessName(),
       "main",
       mainMetrics.cpuPercent,
       mainMetrics.memoryBytes,
@@ -355,7 +355,7 @@ function collectElectronProcesses(): ResourceUsageProcess[] {
   for (const m of metrics) {
     if (m.type === "GPU") {
       const { cpuPercent, memoryBytes } = metricsOf(m.pid);
-      push(baseProcess(m.pid, formatMaridGpuProcessName(), "gpu", cpuPercent, memoryBytes));
+      push(baseProcess(m.pid, formatQodexGpuProcessName(), "gpu", cpuPercent, memoryBytes));
     }
   }
 
@@ -368,7 +368,7 @@ function collectElectronProcesses(): ResourceUsageProcess[] {
     push(
       baseProcess(
         rendererPid,
-        formatMaridRendererProcessName(win.getTitle() || `Window ${win.id}`),
+        formatQodexRendererProcessName(win.getTitle() || `Window ${win.id}`),
         "renderer",
         cpuPercent,
         memoryBytes,
@@ -405,7 +405,7 @@ function collectElectronProcesses(): ResourceUsageProcess[] {
     if (child.pid == null) continue;
     const { cpuPercent, memoryBytes } = metricsOf(child.pid);
     push(
-      baseProcess(child.pid, formatMaridHostProcessName(label), "host", cpuPercent, memoryBytes),
+      baseProcess(child.pid, formatQodexHostProcessName(label), "host", cpuPercent, memoryBytes),
     );
   }
 
@@ -416,8 +416,8 @@ function collectElectronProcesses(): ResourceUsageProcess[] {
       baseProcess(
         m.pid,
         m.type === "Utility"
-          ? formatMaridUtilityProcessName(m.name || String(m.pid))
-          : formatMaridUtilityProcessName(m.type, "process"),
+          ? formatQodexUtilityProcessName(m.name || String(m.pid))
+          : formatQodexUtilityProcessName(m.type, "process"),
         "utility",
         cpuPercent,
         memoryBytes,
@@ -447,7 +447,7 @@ function collectUnsampledAgentProcesses(sampledPids: Set<number>): ResourceUsage
       if (sampledPids.has(agent.pid)) continue;
       rows.push({
         pid: agent.pid,
-        name: formatMaridAgentProcessName(agent.provider, agent.workspacePath),
+        name: formatQodexAgentProcessName(agent.provider, agent.workspacePath),
         category: "base",
         groupKey: "cli",
         groupLabel: "cli",

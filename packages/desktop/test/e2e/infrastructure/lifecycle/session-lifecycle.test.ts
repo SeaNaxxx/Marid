@@ -11,8 +11,8 @@ describe("桌面端 E2E session 生命周期", () => {
     const processes = await listSystemProcesses();
     const detectedPids = collectE2EProcessTreePids(processes, {
       chromiumProfileRootDir: dirname(userDataDir),
-      homeDir: process.env.MARID_E2E_HOME_DIR ?? "",
-      runId: process.env.MARID_E2E_RUN_ID,
+      homeDir: process.env.QODEX_E2E_HOME_DIR ?? "",
+      runId: process.env.QODEX_E2E_RUN_ID,
     });
 
     expect(detectedPids).toContain(mainPid);

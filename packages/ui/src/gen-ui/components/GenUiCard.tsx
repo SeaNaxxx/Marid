@@ -7,7 +7,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import { Copy, LoaderCircle, Maximize2, SlidersHorizontal, X } from "lucide-react";
-import type { GenUiReference } from "@marid/shared/gen-ui";
+import type { GenUiReference } from "@qodex/shared/gen-ui";
 import { Button } from "@/components/ui/button.js";
 import {
   Dialog,
@@ -19,7 +19,7 @@ import {
   DialogPortal,
 } from "@/components/ui/dialog.js";
 import { Textarea } from "@/components/ui/textarea.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { useGenUi } from "@/hooks/useGenUi.js";
 import { EMPTY_GEN_UI_SNAPSHOT, type GenUiCardTarget, type GenUiPage } from "../contract.js";
 import { TweakPanel } from "./TweakPanel.js";
@@ -70,7 +70,7 @@ export function GenUiCard({
   target: GenUiCardTarget;
   reference: GenUiReference;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const label = (id: string) => intl.formatMessage({ id: `genUi.${id}` });
   const [expanded, setExpanded] = useState(false),
     [tweaks, setTweaks] = useState(false),

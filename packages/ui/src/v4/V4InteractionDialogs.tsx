@@ -1,31 +1,31 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  type MaridElicitationRequest,
-  type MaridPermissionOption,
-  type MaridProvider,
-} from "@marid/shared";
+  type QodexElicitationRequest,
+  type QodexPermissionOption,
+  type QodexProvider,
+} from "@qodex/shared";
 import { captureRecentOrder } from "@/lib/composerRecent.js";
 import type { ComposerScope } from "@/v4/composer/composerDraftStore.js";
 import {
   committedPermissionGrantMode,
   permissionGrantMode,
   type ConversationSnapshot,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 import { ElicitationDialog } from "@/ElicitationDialog.js";
 import { PermissionDialog } from "@/PermissionDialog.js";
 import { workflowSessionModelOf } from "@/components/workflow-timeline/workflowRunSettings.js";
 import { useOptionalPlatform } from "@/hooks/usePlatform.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { usePendingInteractionTaskNotifications } from "@/hooks/useTaskNotifications.js";
 import { logger } from "@/logger.js";
-import { useMaridStoreWithDefault } from "@/store/StoreProvider.js";
+import { useQodexStoreWithDefault } from "@/store/StoreProvider.js";
 import { useWorkspaceHookReviewStore } from "@/store/workspaceHookReviewStore.js";
 import {
   getTaskUiState,
   getWorkspaceState,
-  useMaridSessionStore,
-} from "@/store/maridSessionStore.js";
-import type { ElicitationFormDraft } from "@/store/maridSessionStoreTypes.js";
+  useQodexSessionStore,
+} from "@/store/qodexSessionStore.js";
+import type { ElicitationFormDraft } from "@/store/qodexSessionStoreTypes.js";
 import { createCommandEnvelope } from "@/v4/commandFactory.js";
 import { pendingCommandRegistry } from "@/v4/pendingCommandRegistry.js";
 import {
@@ -51,7 +51,7 @@ export interface V4InteractionDialogsProps {
   workspaceIdentity?: string;
   remoteSessionId?: string;
   isWebRemoteControl?: boolean;
-  provider?: MaridProvider;
+  provider?: QodexProvider;
   snapshot: ConversationSnapshot | null;
   onCommandSettled?: (commandId: string) => void;
   resolveRecentScope: (sessionId: string) => Promise<ComposerScope>;
@@ -66,9 +66,9 @@ export function getCurrentSessionInteractionSnapshot(
 }
 
 export function resolveV4ElicitationRequest(
-  projected: MaridElicitationRequest | null,
-  botProgress: MaridElicitationRequest | null,
-): MaridElicitationRequest | null {
+  projected: QodexElicitationRequest | null,
+  botProgress: QodexElicitationRequest | null,
+): QodexElicitationRequest | null {
   // Bugfix：V4 snapshot 只保留原始阻塞请求，Bot 代答后的逐题进度必须覆盖同一 request 的投影。
   if (projected && botProgress?.requestId === projected.requestId) {
     return botProgress;
@@ -76,7 +76,7 @@ export function resolveV4ElicitationRequest(
   return projected;
 }
 
-export function buildV4ElicitationProgressKey(request: MaridElicitationRequest): string {
+export function buildV4ElicitationProgressKey(request: QodexElicitationRequest): string {
   return `${request.requestId}:${request.currentQuestionIndex ?? 0}:${JSON.stringify(request.answerDrafts ?? {})}`;
 }
 
@@ -102,7 +102,7 @@ export function V4InteractionDialogs({
   const upsertWorkspaceHookReview = useWorkspaceHookReviewStore((state) => state.upsert);
   const clearWorkspaceHookReview = useWorkspaceHookReviewStore((state) => state.clear);
   const platform = useOptionalPlatform();
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   // task 切换时 sessionId 会先更新，旧 task snapshot 可能再保留一帧。
   // 若直接使用旧 snapshot，会把当前 task 的 renderer-local 问答草稿误判为过期并清理。
   const currentSnapshot = getCurrentSessionInteractionSnapshot(sessionId, snapshot);
@@ -124,13 +124,13 @@ export function V4InteractionDialogs({
   const workspaceHookReview = currentSnapshot?.pendingInteractions.find(
     (interaction) => interaction.payload.kind === "workspaceHookReview",
   );
-  const notificationEnabled = useMaridStoreWithDefault((state) => state.notificationEnabled, true);
-  const botElicitationProgress = useMaridSessionStore(
+  const notificationEnabled = useQodexStoreWithDefault((state) => state.notificationEnabled, true);
+  const botElicitationProgress = useQodexSessionStore(
     (state) =>
       getTaskUiState(getWorkspaceState(state, workspacePath, workspaceIdentity), sessionId)
         .elicitationRequest,
   );
-  const localElicitationDraft = useMaridSessionStore((state) => {
+  const localElicitationDraft = useQodexSessionStore((state) => {
     if (!pending || pending.payload.kind !== "userInput") return undefined;
     return getTaskUiState(getWorkspaceState(state, workspacePath, workspaceIdentity), sessionId)
       .elicitationFormDraftsByRequestId[pending.interactionId];
@@ -273,7 +273,7 @@ export function V4InteractionDialogs({
 
   const persistElicitationDraft = useCallback(
     (requestId: string, draft: ElicitationFormDraft) => {
-      useMaridSessionStore
+      useQodexSessionStore
         .getState()
         .setTaskElicitationFormDraft(workspacePath, sessionId, requestId, draft, workspaceIdentity);
     },
@@ -282,7 +282,7 @@ export function V4InteractionDialogs({
 
   const removeElicitationDraft = useCallback(
     (requestId: string) => {
-      useMaridSessionStore
+      useQodexSessionStore
         .getState()
         .removeTaskElicitationFormDraft(workspacePath, sessionId, requestId, workspaceIdentity);
     },
@@ -297,7 +297,7 @@ export function V4InteractionDialogs({
         .map((interaction) => interaction.interactionId),
     );
     const taskUiState = getTaskUiState(
-      getWorkspaceState(useMaridSessionStore.getState(), workspacePath, workspaceIdentity),
+      getWorkspaceState(useQodexSessionStore.getState(), workspacePath, workspaceIdentity),
       sessionId,
     );
     for (const requestId of Object.keys(taskUiState.elicitationFormDraftsByRequestId)) {
@@ -389,7 +389,7 @@ export function V4InteractionDialogs({
               : intl.formatMessage({ id: "chat.permission.responseFailed" })
             : undefined
         }
-        onRespond={(_requestId, option: MaridPermissionOption, feedback, content) => {
+        onRespond={(_requestId, option: QodexPermissionOption, feedback, content) => {
           if (permissionResponseFlight.current === pending.interactionId) return;
           const interactionId = pending.interactionId;
           permissionResponseFlight.current = interactionId;

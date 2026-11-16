@@ -3,8 +3,8 @@ import type {
   GitDiffResult,
   GitFileChange,
   Locale,
-  MaridWorkspaceGenerateTextParams,
-} from "@marid/shared";
+  QodexWorkspaceGenerateTextParams,
+} from "@qodex/shared";
 import type { ServiceLogger } from "#src/logger/serviceLogger.js";
 
 const MAX_PROMPT_FILES = 20;
@@ -24,17 +24,17 @@ export interface GitCommitMessageCurrentModelProvider {
   readCurrentModel(params: {
     workspacePath: string;
     workspaceIdentity?: string;
-  }): Promise<MaridWorkspaceGenerateTextParams["selection"] | null>;
+  }): Promise<QodexWorkspaceGenerateTextParams["selection"] | null>;
 }
 
 export interface GitCommitMessageTextGenerator {
   generateText(params: {
     workspacePath: string;
     workspaceIdentity?: string;
-    selection: MaridWorkspaceGenerateTextParams["selection"];
+    selection: QodexWorkspaceGenerateTextParams["selection"];
     prompt: string;
     querySource: string;
-  }): Promise<{ text: string; selection: MaridWorkspaceGenerateTextParams["selection"] }>;
+  }): Promise<{ text: string; selection: QodexWorkspaceGenerateTextParams["selection"] }>;
 }
 
 export interface GitCommitMessageGeneratorOptions {
@@ -120,7 +120,7 @@ export class GitCommitMessageGenerator {
   private async resolveCurrentModel(params: {
     workspacePath: string;
     workspaceIdentity?: string;
-  }): Promise<MaridWorkspaceGenerateTextParams["selection"]> {
+  }): Promise<QodexWorkspaceGenerateTextParams["selection"]> {
     const currentModel = await this.options.currentModelProvider.readCurrentModel({
       workspacePath: params.workspacePath,
       workspaceIdentity: params.workspaceIdentity,
@@ -147,7 +147,7 @@ export class GitCommitMessageGenerator {
   private async complete(params: {
     workspacePath: string;
     workspaceIdentity?: string;
-    selection: MaridWorkspaceGenerateTextParams["selection"];
+    selection: QodexWorkspaceGenerateTextParams["selection"];
     prompt: string;
   }): Promise<string> {
     try {

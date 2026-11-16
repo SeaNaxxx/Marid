@@ -1,6 +1,6 @@
 /* eslint-disable max-lines -- 内置 Agent CLI 的安装/卸载状态、随机进度模板与设置同步目前集中在同一 hook，先保持收口，避免把同一条交互链拆散。 */
 import { useCallback, useMemo, useState } from "react";
-import type { MaridProvider } from "@marid/shared";
+import type { QodexProvider } from "@qodex/shared";
 import { useSettings } from "@/hooks/useSettingService.js";
 import {
   resolveBuiltinAgentCliStatus,
@@ -12,7 +12,7 @@ import {
 import {
   persistLastSelectedAgentProvider,
   readLastSelectedAgentProvider,
-} from "@/lib/maridProviderPreference.js";
+} from "@/lib/qodexProviderPreference.js";
 
 const MIN_INSTALL_DURATION_MS = 5_000;
 const MAX_INSTALL_DURATION_MS = 10_000;
@@ -296,8 +296,8 @@ function getInstallTargetProgressAtElapsed(
 }
 
 async function simulateInstallProgress(
-  provider: MaridProvider,
-  setProgress: (provider: MaridProvider, progress: number | null) => void,
+  provider: QodexProvider,
+  setProgress: (provider: QodexProvider, progress: number | null) => void,
 ): Promise<void> {
   const plan = createInstallProgressPlan();
   const startedAt = Date.now();
@@ -352,10 +352,10 @@ async function simulateUninstallDelay(): Promise<void> {
 
 export function useBuiltinAgentCli() {
   const { settings, loading, refresh, update } = useSettings();
-  const [enablingProvider, setEnablingProvider] = useState<MaridProvider | null>(null);
-  const [disablingProvider, setDisablingProvider] = useState<MaridProvider | null>(null);
+  const [enablingProvider, setEnablingProvider] = useState<QodexProvider | null>(null);
+  const [disablingProvider, setDisablingProvider] = useState<QodexProvider | null>(null);
   const [installProgressByProvider, setInstallProgressByProvider] = useState<
-    Partial<Record<MaridProvider, number>>
+    Partial<Record<QodexProvider, number>>
   >({});
   const [error, setError] = useState<string | null>(null);
 
@@ -367,17 +367,17 @@ export function useBuiltinAgentCli() {
   const hasPendingMutation = activeMutatingProvider !== null;
 
   const isEnabled = useCallback(
-    (provider: MaridProvider) => enabledProviders.includes(provider),
+    (provider: QodexProvider) => enabledProviders.includes(provider),
     [enabledProviders],
   );
 
   const getEffectiveProvider = useCallback(
-    (provider: MaridProvider) => getEffectiveBuiltinAgentCliProvider(settings, provider),
+    (provider: QodexProvider) => getEffectiveBuiltinAgentCliProvider(settings, provider),
     [settings],
   );
 
   const getStatus = useCallback(
-    (provider: MaridProvider): BuiltinAgentCliStatus =>
+    (provider: QodexProvider): BuiltinAgentCliStatus =>
       resolveBuiltinAgentCliStatus({
         provider,
         enabledProviders,
@@ -388,13 +388,13 @@ export function useBuiltinAgentCli() {
   );
 
   const canMutateProvider = useCallback(
-    (provider: MaridProvider) =>
+    (provider: QodexProvider) =>
       !hasPendingMutation || activeMutatingProvider === provider,
     [activeMutatingProvider, hasPendingMutation],
   );
 
   const installProvider = useCallback(
-    async (provider: MaridProvider) => {
+    async (provider: QodexProvider) => {
       if (!canMutateProvider(provider)) {
         return;
       }
@@ -444,7 +444,7 @@ export function useBuiltinAgentCli() {
   );
 
   const uninstallProvider = useCallback(
-    async (provider: MaridProvider) => {
+    async (provider: QodexProvider) => {
       if (!canMutateProvider(provider)) {
         return;
       }
@@ -498,7 +498,7 @@ export function useBuiltinAgentCli() {
     canMutateProvider,
     getEffectiveProvider,
     getStatus,
-    getInstallProgress: (provider: MaridProvider) =>
+    getInstallProgress: (provider: QodexProvider) =>
       installProgressByProvider[provider] ?? null,
     installProvider,
     uninstallProvider,

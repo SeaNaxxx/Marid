@@ -1,11 +1,11 @@
-import type { MaridTaskMeta } from "@marid/shared";
+import type { QodexTaskMeta } from "@qodex/shared";
 
 interface StorageLike {
   getItem(key: string): string | null;
   setItem(key: string, value: string): void;
 }
 
-const TASK_ORDER_STORAGE_KEY_PREFIX = "marid-task-order:";
+const TASK_ORDER_STORAGE_KEY_PREFIX = "qodex-task-order:";
 
 function getBrowserStorage(): StorageLike | null {
   if (typeof window === "undefined") {
@@ -65,12 +65,12 @@ export function persistTaskOrder(
   storage?.setItem(getTaskOrderStorageKey(workspacePath), JSON.stringify(normalizeTaskOrder(taskIds)));
 }
 
-export function pruneTaskOrder(taskOrder: readonly string[], tasks: readonly MaridTaskMeta[]): string[] {
+export function pruneTaskOrder(taskOrder: readonly string[], tasks: readonly QodexTaskMeta[]): string[] {
   const taskIds = new Set(tasks.map((task) => task.taskId));
   return normalizeTaskOrder(taskOrder).filter((taskId) => taskIds.has(taskId));
 }
 
-export function sortTasksByOrder(tasks: readonly MaridTaskMeta[], taskOrder: readonly string[]): MaridTaskMeta[] {
+export function sortTasksByOrder(tasks: readonly QodexTaskMeta[], taskOrder: readonly string[]): QodexTaskMeta[] {
   const normalizedTaskOrder = normalizeTaskOrder(taskOrder);
   const orderedIndexByTaskId = new Map(
     normalizedTaskOrder.map((taskId, index) => [taskId, index] as const),

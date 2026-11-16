@@ -1,4 +1,4 @@
-import type { ModelSwitchStage } from "@/store/maridSessionStoreTypes.js";
+import type { ModelSwitchStage } from "@/store/qodexSessionStoreTypes.js";
 
 export function shouldBlockTaskSelectionDuringModelRestart(
   modelSwitchPending: boolean,

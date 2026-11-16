@@ -1,5 +1,5 @@
 export const OPENROUTER_ATTRIBUTION_HEADERS = {
-  "X-OpenRouter-Title": "Marid",
+  "X-OpenRouter-Title": "Qodex",
   "X-OpenRouter-Categories": "programming-app",
 } as const;
 

@@ -1,4 +1,4 @@
-import type { ToolCallCreateWorkflowCausalityGraph } from "@marid/shared/marid-protocol-v4";
+import type { ToolCallCreateWorkflowCausalityGraph } from "@qodex/shared/qodex-protocol-v4";
 
 /**
  * The graph the renderer consumes is exactly the bounded display payload from the

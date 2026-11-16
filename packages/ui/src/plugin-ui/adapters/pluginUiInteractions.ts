@@ -1,7 +1,7 @@
 import { getPluginUiSessionActions } from "@/plugin-ui/adapters/pluginUiSessionActions.js";
 import type { PluginUiHostControllerDeps } from "@/plugin-ui/app/pluginUiHostController.js";
-import type { PluginUiScopeRef } from "@marid/shared/mcp-apps";
-import { buildPluginSandboxScopeId, concatMcpAppsTextContent } from "@marid/shared/mcp-apps";
+import type { PluginUiScopeRef } from "@qodex/shared/mcp-apps";
+import { buildPluginSandboxScopeId, concatMcpAppsTextContent } from "@qodex/shared/mcp-apps";
 import { requestPluginUiFollowUpConfirmation } from "../app/pluginUiFollowUpDialogStore.js";
 import {
   PLUGIN_UI_FOLLOW_UP_STRUCTURED_MAX_BYTES,

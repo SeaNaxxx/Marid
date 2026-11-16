@@ -2,7 +2,7 @@ import {
   BUILTIN_MODEL_PROVIDER_IDS,
   isStartPlanModelProviderId,
   type UsageEntitlementSnapshot,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type {
   GlmQuotaBannerBusinessCode,
   StartPlanConcurrentLimitBannerReason,

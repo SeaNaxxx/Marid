@@ -13,14 +13,14 @@ export const PERMISSION_HOOK_RACE_RESULT_CONTENT =
 const BLOCKING_HOOK_SLEEP_MS = 120000;
 const BLOCKING_HOOK_TIMEOUT_MS = 130000;
 
-const WORKSPACE_MARID_DIR = join(DEFAULT_WORKSPACE, ".marid");
-const USER_CONFIG_DIR = join(dirname(DEFAULT_WORKSPACE), ".marid", "cli");
+const WORKSPACE_QODEX_DIR = join(DEFAULT_WORKSPACE, ".qodex");
+const USER_CONFIG_DIR = join(dirname(DEFAULT_WORKSPACE), ".qodex", "cli");
 const CONFIG_PATH = join(USER_CONFIG_DIR, "config.json");
 const BLOCKER_PATH = join(
-  WORKSPACE_MARID_DIR,
+  WORKSPACE_QODEX_DIR,
   "permission-hook-race-blocker.mjs",
 );
-const TRACE_PATH = join(WORKSPACE_MARID_DIR, "permission-hook-race-trace.jsonl");
+const TRACE_PATH = join(WORKSPACE_QODEX_DIR, "permission-hook-race-trace.jsonl");
 
 let originalConfig: string | null = null;
 
@@ -32,7 +32,7 @@ export interface PermissionHookRaceTraceRecord
 }
 
 export async function installPermissionHookRaceFixture(): Promise<void> {
-  await mkdir(WORKSPACE_MARID_DIR, { recursive: true });
+  await mkdir(WORKSPACE_QODEX_DIR, { recursive: true });
   await mkdir(USER_CONFIG_DIR, { recursive: true });
   await rm(TRACE_PATH, { force: true });
   originalConfig = await readFile(CONFIG_PATH, "utf8").catch(

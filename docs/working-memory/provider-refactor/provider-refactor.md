@@ -62,11 +62,11 @@ M1 已经统一所有生产模型调用的 `Model` / `ModelRequest` 边界。M2 
 
 ```text
 ProviderConfigService
-├─ Marid Built-in Provider Config
+├─ Qodex Built-in Provider Config
 ├─ Account Provider Config
 └─ Personal Provider Config ────────────────┐
                                             ├─> Effective Provider Config
-Marid Built-in Model Config Rules ──────────┤
+Qodex Built-in Model Config Rules ──────────┤
 Personal Model Config Rules ────────────────┘
                              |
                              v

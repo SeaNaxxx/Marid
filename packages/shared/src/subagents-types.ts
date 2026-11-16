@@ -1,4 +1,4 @@
-import type { MaridProvider } from "./marid-task-types-core.js";
+import type { QodexProvider } from "./qodex-task-types-core.js";
 import { modelSelectionSchema, type ModelSelection } from "./model-selection.js";
 
 export type AgentScope = "built-in" | "workspace" | "user";
@@ -113,7 +113,7 @@ export interface SubAgentConfig {
 /** Agent 创建参数 */
 export interface AgentCreateParams {
   config: SubAgentConfig;
-  provider: MaridProvider;
+  provider: QodexProvider;
   scope?: "user" | "workspace";
   workspacePath?: string;
   workspaceIdentity?: string;
@@ -124,7 +124,7 @@ export interface AgentUpdateParams {
   agentId: string;
   config: SubAgentConfig;
   oldFilePath?: string;
-  provider: MaridProvider;
+  provider: QodexProvider;
   scope?: "user" | "workspace";
   workspacePath?: string;
   workspaceIdentity?: string;

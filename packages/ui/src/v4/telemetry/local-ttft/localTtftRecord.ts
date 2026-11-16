@@ -6,8 +6,8 @@ import {
   type LocalTtftFacts,
   type LocalTtftRecord,
   type LocalTtftOutputKind,
-} from "@marid/shared";
-import type { ConversationRow } from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared";
+import type { ConversationRow } from "@qodex/shared/qodex-protocol-v4";
 export interface LocalTtftPending {
   context: LocalTtftContext;
   workspace: string;

@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { PlatformChannels, formatMaridRendererProcessName } from "@marid/shared";
+import { PlatformChannels, formatQodexRendererProcessName } from "@qodex/shared";
 import type {
   ResourceUsageSnapshot,
   NetworkCaptureBridge,
@@ -7,9 +7,9 @@ import type {
   StorageCleanResult,
   StorageManagementBridge,
   StorageUsageSnapshot,
-} from "@marid/shared";
+} from "@qodex/shared";
 
-process.title = formatMaridRendererProcessName("Resource Manager");
+process.title = formatQodexRendererProcessName("Resource Manager");
 
 const storage: StorageManagementBridge = {
   startScan: (): Promise<{ jobId: string }> =>

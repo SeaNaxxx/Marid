@@ -1,8 +1,8 @@
 import { findTrajectoryTextMatches, type TrajectorySearchMatch } from "@/ModelTrajectorySearch.js";
 
-const HIGHLIGHT_NAME = "marid-model-trajectory-find";
-const ACTIVE_HIGHLIGHT_NAME = "marid-model-trajectory-find-active";
-const STYLE_ID = "marid-model-trajectory-find-highlight-style";
+const HIGHLIGHT_NAME = "qodex-model-trajectory-find";
+const ACTIVE_HIGHLIGHT_NAME = "qodex-model-trajectory-find-active";
+const STYLE_ID = "qodex-model-trajectory-find-highlight-style";
 const HIGHLIGHT_STYLE = `
 ::highlight(${HIGHLIGHT_NAME}) {
   background-color: var(--color-find-highlight, #fde68a);

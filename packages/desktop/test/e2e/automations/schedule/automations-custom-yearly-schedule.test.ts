@@ -16,7 +16,7 @@ import {
   TID_AUTOMATIONS_LIST,
   TID_AUTOMATIONS_OPEN,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   clearAppData,
   clickTestIdByDom,

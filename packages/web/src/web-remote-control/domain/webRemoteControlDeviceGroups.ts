@@ -1,4 +1,4 @@
-import type { WebRemoteControlRelayV2Device } from "@marid/shared/web-remote-relay";
+import type { WebRemoteControlRelayV2Device } from "@qodex/shared/web-remote-relay";
 import type { KnownDevice, WebRemoteControlDeviceGroup } from "#src/web-remote-control/contract.js";
 
 /**

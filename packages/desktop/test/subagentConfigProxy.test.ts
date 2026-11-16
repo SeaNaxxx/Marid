@@ -38,7 +38,7 @@ it.each([false, true])(
       env: {
         ...process.env,
         NODE_OPTIONS: `--import=${JSON.stringify(proxy)}`,
-        MARID_E2E_ARTIFACT_DIR: root,
+        QODEX_E2E_ARTIFACT_DIR: root,
       },
       stdio: ["pipe", "pipe", "pipe"],
     });

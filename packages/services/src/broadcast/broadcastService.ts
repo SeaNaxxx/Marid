@@ -1,11 +1,11 @@
-import { Emitter } from "@marid/rpc";
+import { Emitter } from "@qodex/rpc";
 import {
   HostResponseTypes,
   HostMessageTypes,
   broadcastMessageSchema,
   hostBroadcastClaimResultMessageSchema,
   hostBroadcastEnvelopeSchema,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type {
   BroadcastClaimAcquireResult,
   BroadcastClaimLease,

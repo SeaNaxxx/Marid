@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { PluginSandboxCaptureRequest } from "@marid/shared/mcp-apps";
+import type { PluginSandboxCaptureRequest } from "@qodex/shared/mcp-apps";
 
 const dimension = z.number().finite().positive().max(16_384);
 export const sandboxCaptureSchema = z

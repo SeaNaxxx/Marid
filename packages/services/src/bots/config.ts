@@ -8,8 +8,8 @@ import {
   type BotCommandPolicy,
   type BotsConfigFile,
   type BotProvider,
-} from "@marid/shared";
-export { BOT_BIND_CODE_TTL_MS } from "@marid/shared";
+} from "@qodex/shared";
+export { BOT_BIND_CODE_TTL_MS } from "@qodex/shared";
 
 // 回滚兼容：旧 App 对 Options 严格解析，旧文件仅作升级前快照，不得持续回写。
 export const BOTS_CONFIG_FILE = "bot-config.v3.json";

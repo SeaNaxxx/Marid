@@ -17,7 +17,7 @@ export interface DesktopProductIdentity {
   readonly cuaHelperInstallVariant: "preview" | null;
 }
 
-export const MARID_PREVIEW_IDENTITY_ENV: "MARID_PREVIEW_IDENTITY";
+export const QODEX_PREVIEW_IDENTITY_ENV: "QODEX_PREVIEW_IDENTITY";
 
 export function isPreviewIdentityRequested(env?: Record<string, string | undefined>): boolean;
 export function resolveDesktopProductFlavor(

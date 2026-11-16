@@ -1,4 +1,4 @@
-import { ProxyChannel, type IChannelServer } from "@marid/rpc";
+import { ProxyChannel, type IChannelServer } from "@qodex/rpc";
 import type { ServiceDescriptor } from "./descriptors.js";
 import { ICredentialService, scopeCredentialServiceForRpc } from "./credential/credential.js";
 

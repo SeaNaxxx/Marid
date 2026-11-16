@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { Cloud, Folder, FolderGit2, GitBranch } from "lucide-react";
-import type { GitRepositorySummary, MaridTaskMeta } from "@marid/shared";
+import type { GitRepositorySummary, QodexTaskMeta } from "@qodex/shared";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card.js";
 import { cn } from "@/components/lib/utils.js";
 import { resolveGitBranchTriggerLabel } from "@/git-branch-switcher/display.js";
@@ -8,7 +8,7 @@ import {
   useBaseWorkspaceServices,
   useWorkspaceServicesResolution,
 } from "@/hooks/useWorkspaceServices.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { getTaskChangeSummary } from "@/lib/taskChangeSummary.js";
 import { formatWorktreeLabel } from "@/managed-worktrees/index.js";
 import { RemoteTaskDeviceLabel } from "@/remote-connection/RemoteTaskDeviceLabel.js";
@@ -140,7 +140,7 @@ function TaskRowIdentityDetails({
   workspaceLabel,
   remoteSessionId,
 }: {
-  task: MaridTaskMeta;
+  task: QodexTaskMeta;
   workspaceLabel: string;
   remoteSessionId?: string;
 }) {
@@ -159,7 +159,7 @@ function LocalTaskRowIdentityDetails({
   task,
   workspaceLabel,
 }: {
-  task: MaridTaskMeta;
+  task: QodexTaskMeta;
   workspaceLabel: string;
 }) {
   const services = useBaseWorkspaceServices();
@@ -181,7 +181,7 @@ function RemoteTaskRowIdentityDetails({
   workspaceLabel,
   remoteSessionId,
 }: {
-  task: MaridTaskMeta;
+  task: QodexTaskMeta;
   workspaceLabel: string;
   remoteSessionId?: string;
 }) {
@@ -222,13 +222,13 @@ function TaskRowIdentityDetailsBody({
   pathNode,
   branchLabel,
 }: {
-  task: MaridTaskMeta;
+  task: QodexTaskMeta;
   workspaceLabel: string;
   isRemote: boolean;
   pathNode: ReactNode;
   branchLabel: string | null;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const changeSummary = getTaskChangeSummary(task);
   const changeParts = changeSummary ? formatChangeParts(changeSummary) : CHANGE_PARTS_EMPTY;
   return (
@@ -307,11 +307,11 @@ function RawWorkspaceContextPath({ path }: { path: string }) {
 }
 
 function useGitBranchLabel(
-  task: MaridTaskMeta,
+  task: QodexTaskMeta,
   services: WorkspaceServiceAccessor,
   enabled: boolean,
 ): string | null {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const [summary, setSummary] = useState<GitRepositorySummary | null>(null);
   const gitWorkspacePath = task.cwd ?? task.workspacePath;
   useEffect(() => {
@@ -341,7 +341,7 @@ function useGitBranchLabel(
   });
 }
 
-function TaskRowIdentityIcon({ task }: { task: MaridTaskMeta }) {
+function TaskRowIdentityIcon({ task }: { task: QodexTaskMeta }) {
   if (task.workspaceIdentity?.trim()) {
     return <Cloud aria-hidden="true" className="mt-0.5 size-4 shrink-0" />;
   }

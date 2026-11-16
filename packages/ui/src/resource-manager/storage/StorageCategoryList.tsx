@@ -1,13 +1,13 @@
 import { ChevronRight, LoaderCircle } from "lucide-react";
-import { type StorageCategoryId } from "@marid/shared";
+import { type StorageCategoryId } from "@qodex/shared";
 import {
   TID_RESOURCE_MANAGER_STORAGE_CATEGORY_CLEAN,
   TID_RESOURCE_MANAGER_STORAGE_CATEGORY_ROW,
   TID_RESOURCE_MANAGER_STORAGE_CATEGORY_SIZE,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { Button } from "@/components/ui/button.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { formatBytes } from "@/resource-manager/resourceUsageView.js";
 import {
   STORAGE_CATEGORY_ICONS,
@@ -29,7 +29,7 @@ export function StorageCategoryList({
   onOpen: (id: StorageCategoryId) => void;
   onClean: (id: StorageCategoryId) => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   return (
     <div className="overflow-hidden rounded-xl border border-card-border bg-card">
       {categories.map((category) => {

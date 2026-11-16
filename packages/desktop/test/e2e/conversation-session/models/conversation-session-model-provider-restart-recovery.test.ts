@@ -1,6 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { TID_V4_COMPOSER_INPUT, TID_V4_COMPOSER_SEND } from "@marid/shared/test-ids";
+import { TID_V4_COMPOSER_INPUT, TID_V4_COMPOSER_SEND } from "@qodex/shared/test-ids";
 import {
   clearAppData,
   setInputValueByTestIdDom,

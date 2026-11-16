@@ -1,7 +1,7 @@
-import { resolveWorkspaceKey } from "@marid/shared";
+import { resolveWorkspaceKey } from "@qodex/shared";
 import type { WorkspaceTabState } from "@/store/tabStore.js";
 import { useRemoteProjectConnectionPresentation } from "@/project-sidebar/useRemoteProjectConnectionPresentation.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { RemoteConnectionStateIcon } from "@/remote-connection/RemoteConnectionStateIcon.js";
 import { cn } from "@/components/lib/utils.js";
 
@@ -12,7 +12,7 @@ function OfflineRemoteProjectRow({
   tab: WorkspaceTabState;
   onReconnect: (workspaceKey: string) => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const { presentation, busy, deviceName } = useRemoteProjectConnectionPresentation(tab);
   return (
     <button

@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { posix } from "node:path";
-import type { IRemoteBackend, StdioStream } from "@marid/server/remote/backend.js";
-import { REMOTE_BASE } from "@marid/server/remote/deployShared.js";
-import { quotePosixPathArg, quotePosixShellArg } from "@marid/server/remote/posixShell.js";
+import type { IRemoteBackend, StdioStream } from "@qodex/server/remote/backend.js";
+import { REMOTE_BASE } from "@qodex/server/remote/deployShared.js";
+import { quotePosixPathArg, quotePosixShellArg } from "@qodex/server/remote/posixShell.js";
 
 const DEPLOY_LOCK_HEARTBEAT_SECONDS = 30;
 const DEPLOY_LOCK_STALE_SECONDS = 600;
@@ -37,8 +37,8 @@ function destroyLockStreamBestEffort(stream: StdioStream): void {
 }
 
 function buildRemoteDeployLockScript(lockDir: string, ownerToken: string): string {
-  const acquiredMarker = `marid-deploy-lock-acquired:${ownerToken}`;
-  const releaseMarker = `marid-deploy-lock-release:${ownerToken}`;
+  const acquiredMarker = `qodex-deploy-lock-acquired:${ownerToken}`;
+  const releaseMarker = `qodex-deploy-lock-release:${ownerToken}`;
   return [
     "set -eu",
     `lock_dir=${quotePosixPathArg(lockDir)}`,
@@ -125,8 +125,8 @@ export async function acquireRemoteDeployLock(
     1,
     Math.floor(options.releaseTimeoutMs ?? DEFAULT_RELEASE_TIMEOUT_MS),
   );
-  const acquiredMarker = `marid-deploy-lock-acquired:${ownerToken}`;
-  const releaseMarker = `marid-deploy-lock-release:${ownerToken}`;
+  const acquiredMarker = `qodex-deploy-lock-acquired:${ownerToken}`;
+  const releaseMarker = `qodex-deploy-lock-release:${ownerToken}`;
   const stream = await backend.exec(buildRemoteDeployLockCommand(lockDir, ownerToken));
   const close = createStreamClosePromise(stream);
   let stderrText = "";

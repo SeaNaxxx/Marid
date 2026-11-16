@@ -1,5 +1,5 @@
-import type { CuaPermissionKind } from "@marid/shared";
-import type { CuaPermissionStatus } from "@marid/services";
+import type { CuaPermissionKind } from "@qodex/shared";
+import type { CuaPermissionStatus } from "@qodex/services";
 
 function isActionablePermissionState(state: CuaPermissionStatus["accessibility"]): boolean {
   return state === "denied" || state === "stale";

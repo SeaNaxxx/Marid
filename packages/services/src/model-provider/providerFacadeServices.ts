@@ -1,5 +1,5 @@
-import type { Event } from "@marid/rpc";
-import { ServiceChannels } from "@marid/shared";
+import type { Event } from "@qodex/rpc";
+import { ServiceChannels } from "@qodex/shared";
 import {
   type ModelConfigObject,
   type ModelId,
@@ -15,9 +15,9 @@ import {
   type ProviderSettingsView,
   type ResolveModelConfigInput,
   type SavePersonalModelDraftInput,
-} from "@marid/provider";
+} from "@qodex/provider";
 import { createServiceDescriptor } from "../descriptors.js";
-import type { ModelConnectivityResult } from "@marid/shared";
+import type { ModelConnectivityResult } from "@qodex/shared";
 import { createServiceLogger } from "../logger/serviceLogger.js";
 
 export type {
@@ -25,7 +25,7 @@ export type {
   ModelSelectionView,
   ModelSelectionViewInput,
   ProviderSettingsView,
-} from "@marid/provider";
+} from "@qodex/provider";
 
 export interface IProviderSettingsService {
   readonly onDidChange: Event<ProviderSettingsView>;

@@ -7,7 +7,7 @@ import {
   TID_V4_COMPOSER_SEND,
   TID_V4_SESSION_PANE,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { clearAppData, DEFAULT_WORKSPACE, pinE2ELocale } from "#e2e/helpers/desktop-app";
 import {
   prepareV4ConversationE2E,
@@ -347,7 +347,7 @@ async function selectMainTimelineText(text: string): Promise<void> {
         (window as Window & { __selectionTrace?: { events: unknown[] } }).__selectionTrace?.events,
     );
     await writeFile(
-      join(process.env.MARID_E2E_ARTIFACT_DIR!, "selection-events.json"),
+      join(process.env.QODEX_E2E_ARTIFACT_DIR!, "selection-events.json"),
       JSON.stringify(
         {
           text,
@@ -624,10 +624,10 @@ async function expectComposerText(paneTestId: string, text: string): Promise<voi
             (
               input as
                 | (HTMLElement & {
-                    __maridLexicalInputE2E?: { getText: () => string };
+                    __qodexLexicalInputE2E?: { getText: () => string };
                   })
                 | undefined
-            )?.__maridLexicalInputE2E?.getText() === expectedText
+            )?.__qodexLexicalInputE2E?.getText() === expectedText
           );
         },
         paneTestId,

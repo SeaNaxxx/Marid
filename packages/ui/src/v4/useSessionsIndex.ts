@@ -2,7 +2,7 @@
 // 侧栏/任务列表消费本 hook 拿会话摘要列表，替代 zustand 任务态（08-phasing M5 步骤 2）；
 // 多个列表消费者共享同一 workspace 订阅时改走 sessionsIndexRegistry（引用计数复用 store）。
 import { useEffect, useMemo, useSyncExternalStore } from "react";
-import type { SessionSummary } from "@marid/shared/marid-protocol-v4";
+import type { SessionSummary } from "@qodex/shared/qodex-protocol-v4";
 import { useServices } from "@/hooks/useServices.js";
 import { createAgentSessionsIndexTransport } from "@/v4/agentSessionsIndexTransport.js";
 import {
@@ -23,22 +23,22 @@ export function useSessionsIndex(
   workspacePath: string,
   workspaceIdentity?: string,
 ): UseSessionsIndexResult {
-  const { maridAgentService } = useServices();
+  const { qodexAgentService } = useServices();
 
   const store = useMemo(
     () => new SessionsIndexStore(),
     // 每个 workspace 一个 store 实例（依赖变化 → 全新 store 冷启动）。
-    [workspacePath, workspaceIdentity, maridAgentService],
+    [workspacePath, workspaceIdentity, qodexAgentService],
   );
 
   useEffect(() => {
-    const transport = createAgentSessionsIndexTransport(maridAgentService, {
+    const transport = createAgentSessionsIndexTransport(qodexAgentService, {
       workspacePath,
       ...(workspaceIdentity ? { workspaceIdentity } : {}),
     });
     void store.connect(transport, { forceSnapshot: true });
     return () => store.close();
-  }, [store, workspacePath, workspaceIdentity, maridAgentService]);
+  }, [store, workspacePath, workspaceIdentity, qodexAgentService]);
 
   // useSyncExternalStore：store.subscribe/getState 是类字段箭头函数，引用稳定。
   const state = useSyncExternalStore(store.subscribe, store.getState);

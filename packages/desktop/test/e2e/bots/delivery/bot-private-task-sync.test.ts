@@ -1,4 +1,4 @@
-import type { BotProvider, MaridStreamEvent } from "@marid/shared";
+import type { BotProvider, QodexStreamEvent } from "@qodex/shared";
 import {
   createBotsServiceHarness,
   createFeishuConfig,
@@ -83,9 +83,9 @@ describe("BOT-E2E-PS-01 private task output subscription", () => {
           type: "task_run_started",
           startedAt: Date.now(),
           inputOrigin,
-        } as MaridStreamEvent);
-        await emit({ ...base, type: "agent_message_chunk", content: id } as MaridStreamEvent);
-        await emit({ ...base, type: "task_complete", stopReason: "end_turn" } as MaridStreamEvent);
+        } as QodexStreamEvent);
+        await emit({ ...base, type: "agent_message_chunk", content: id } as QodexStreamEvent);
+        await emit({ ...base, type: "task_complete", stopReason: "end_turn" } as QodexStreamEvent);
       };
       await run("IM_REPLY", "desktop");
       await run("DESKTOP_REPLY", "desktop");

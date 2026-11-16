@@ -15,7 +15,7 @@ import {
   TID_V4_SESSION_PANE,
   TID_V4_TURN_NAVIGATOR_ITEM,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { releaseControlledReplay } from "#e2e/helpers/controlled-replay";
 import { clearAppData, seedSettings } from "#e2e/helpers/desktop-app";
 import {
@@ -1085,9 +1085,9 @@ describe("会话区 Background Runtime Task E2E", () => {
           "Successfully stopped task:",
           "<task-notification>",
           "<tool-use-id>toolu_e2e_background_taskstop_agent</tool-use-id>",
-          // 模型用 TaskStop 停止：summary 写明是 Marid 停止的。
+          // 模型用 TaskStop 停止：summary 写明是 Qodex 停止的。
           "<status>killed</status>",
-          "was stopped by Marid</summary>",
+          "was stopped by Qodex</summary>",
         ],
         lastUserMessageIncludes: ["<task-notification>"],
       },
@@ -2541,10 +2541,10 @@ async function startVisibleUserMessageSampler() {
         samples: VisibleUserMessageSample[];
       };
       const sampleWindow = window as typeof window & {
-        __maridBg17UserMessageSampler?: SamplerState;
+        __qodexBg17UserMessageSampler?: SamplerState;
       };
-      if (sampleWindow.__maridBg17UserMessageSampler) {
-        clearInterval(sampleWindow.__maridBg17UserMessageSampler.intervalId);
+      if (sampleWindow.__qodexBg17UserMessageSampler) {
+        clearInterval(sampleWindow.__qodexBg17UserMessageSampler.intervalId);
       }
       const collect = () => {
         const root = document.querySelector<HTMLElement>(`[data-testid="${messagesTestId}"]`);
@@ -2554,12 +2554,12 @@ async function startVisibleUserMessageSampler() {
           id: element.getAttribute("data-message-id"),
           text: element.innerText.replace(/\u00a0/g, " ").trim(),
         }));
-        sampleWindow.__maridBg17UserMessageSampler?.samples.push({
+        sampleWindow.__qodexBg17UserMessageSampler?.samples.push({
           at: Date.now(),
           messages,
         });
       };
-      sampleWindow.__maridBg17UserMessageSampler = {
+      sampleWindow.__qodexBg17UserMessageSampler = {
         intervalId: setInterval(collect, 50),
         samples: [],
       };
@@ -2573,17 +2573,17 @@ async function startVisibleUserMessageSampler() {
 async function stopVisibleUserMessageSampler() {
   return await browser.execute(() => {
     const sampleWindow = window as typeof window & {
-      __maridBg17UserMessageSampler?: {
+      __qodexBg17UserMessageSampler?: {
         intervalId: ReturnType<typeof setInterval>;
         samples: VisibleUserMessageSample[];
       };
     };
-    const sampler = sampleWindow.__maridBg17UserMessageSampler;
+    const sampler = sampleWindow.__qodexBg17UserMessageSampler;
     if (!sampler) {
       return [] satisfies VisibleUserMessageSample[];
     }
     clearInterval(sampler.intervalId);
-    delete sampleWindow.__maridBg17UserMessageSampler;
+    delete sampleWindow.__qodexBg17UserMessageSampler;
     return sampler.samples;
   });
 }
@@ -2819,9 +2819,9 @@ async function startBackgroundTaskControlPresenceProbe(
   await openV4ComposerRunningBackgroundWorks();
   await browser.execute(
     (expectedKind, expectedText, expectedTaskId, v4SessionPanePrefix) => {
-      const probeKey = "__maridBackgroundTaskControlPresenceProbe";
+      const probeKey = "__qodexBackgroundTaskControlPresenceProbe";
       const probeWindow = window as typeof window & {
-        __maridBackgroundTaskControlPresenceProbe?: {
+        __qodexBackgroundTaskControlPresenceProbe?: {
           intervalId: number;
           missingTransitions: Array<{
             atMs: number;
@@ -2884,7 +2884,7 @@ async function startBackgroundTaskControlPresenceProbe(
         if (state.hasReturnedToTask && state.wasPresent === true && !present) {
           const store = (
             window as typeof window & {
-              __maridSessionStoreE2E?: {
+              __qodexSessionStoreE2E?: {
                 getState: () => {
                   workspaces: Record<
                     string,
@@ -2904,7 +2904,7 @@ async function startBackgroundTaskControlPresenceProbe(
                 };
               };
             }
-          ).__maridSessionStoreE2E;
+          ).__qodexSessionStoreE2E;
           const taskRuntime = Object.values(store?.getState().workspaces ?? {})
             .map((workspace) => workspace.taskRuntimeByTaskId?.[expectedTaskId])
             .find(Boolean);
@@ -2935,9 +2935,9 @@ async function startBackgroundTaskControlPresenceProbe(
 
 async function stopBackgroundTaskControlPresenceProbe(): Promise<BackgroundTaskControlPresenceProbeResult> {
   return browser.execute(() => {
-    const probeKey = "__maridBackgroundTaskControlPresenceProbe";
+    const probeKey = "__qodexBackgroundTaskControlPresenceProbe";
     const probeWindow = window as typeof window & {
-      __maridBackgroundTaskControlPresenceProbe?: {
+      __qodexBackgroundTaskControlPresenceProbe?: {
         intervalId: number;
         missingTransitions: BackgroundTaskControlPresenceProbeResult["missingTransitions"];
         observedPresent: boolean;

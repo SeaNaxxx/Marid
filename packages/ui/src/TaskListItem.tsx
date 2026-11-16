@@ -12,13 +12,13 @@ import {
   Pin,
   Smartphone,
 } from "lucide-react";
-import { isCronTask, isOffPeakTask, type MaridTaskMeta } from "@marid/shared";
+import { isCronTask, isOffPeakTask, type QodexTaskMeta } from "@qodex/shared";
 import {
   TID_TASK_ARCHIVE,
   TID_TASK_ITEM,
   TID_TASK_ROW_WORKTREE_ICON,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { formatWorktreeLabel } from "@/managed-worktrees/index.js";
 import { Badge } from "@/components/ui/badge.js";
 import { Button } from "@/components/ui/button.js";
@@ -71,7 +71,7 @@ type TaskListItemIntl = {
 interface TaskListItemProps {
   workspacePath: string;
   remoteSessionId?: string;
-  task: MaridTaskMeta;
+  task: QodexTaskMeta;
   isPinned: boolean;
   isArchived?: boolean;
   isActive: boolean;
@@ -108,11 +108,11 @@ function areJsonFieldsEqual(left: unknown, right: unknown) {
   return JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
 }
 
-function getTaskAutomationIdentity(task: MaridTaskMeta): string | undefined {
-  return task.cronAutomationId ?? (task as MaridTaskMeta & { automationId?: string }).automationId;
+function getTaskAutomationIdentity(task: QodexTaskMeta): string | undefined {
+  return task.cronAutomationId ?? (task as QodexTaskMeta & { automationId?: string }).automationId;
 }
 
-function areTaskListItemTaskFieldsEqual(left: MaridTaskMeta, right: MaridTaskMeta) {
+function areTaskListItemTaskFieldsEqual(left: QodexTaskMeta, right: QodexTaskMeta) {
   if (left === right) {
     return true;
   }
@@ -329,7 +329,7 @@ export const MemoTaskItem = memo(function TaskListItem({
       // 原因：此行同时可复制到分屏、移动到项目；只允许 copy 会让浏览器拒绝项目的 move/drop。
       event.dataTransfer.effectAllowed = "copyMove";
       const payload = {
-        kind: "marid/session" as const,
+        kind: "qodex/session" as const,
         workspacePath,
         ...(task.workspaceIdentity?.trim() ? { workspaceIdentity: task.workspaceIdentity } : {}),
         ...(remoteSessionId ? { remoteSessionId } : {}),
@@ -915,7 +915,7 @@ export function TaskListItemContextMenuContent({
   organizationActions?: React.ReactNode;
   workspacePath: string;
   remoteSessionId?: string;
-  task: MaridTaskMeta;
+  task: QodexTaskMeta;
   isPinned: boolean;
   isArchived?: boolean;
   intl: TaskListItemIntl;

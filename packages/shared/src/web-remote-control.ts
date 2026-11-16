@@ -18,8 +18,8 @@ import type {
   MigrateLegacyCommonMcpResult,
   SaveCliMcpToUserDirectoryRequest,
 } from "./mcp.js";
-import type { MaridProvider } from "./marid-task-types-core.js";
-import type { SessionWorkflowActivity } from "./marid-protocol-v4/sessions-index-workflow-activity.js";
+import type { QodexProvider } from "./qodex-task-types-core.js";
+import type { SessionWorkflowActivity } from "./qodex-protocol-v4/sessions-index-workflow-activity.js";
 import type { WebRemoteControlRpcTransportPayload } from "./web-remote-control-rpc-transport.js";
 import type { WebRemoteControlMobileLogAppPayload } from "#src/web-remote-relay/index.js";
 import type { WorkspacePurpose } from "./workspacePurpose.js";
@@ -146,7 +146,7 @@ export function resolveWebRemoteControlRoutePathFromBaseUrl(baseUrl: string): st
   let pathname = "/";
 
   try {
-    pathname = new URL(rawBaseUrl, "https://marid.invalid").pathname;
+    pathname = new URL(rawBaseUrl, "https://qodex.invalid").pathname;
   } catch {
     pathname = rawBaseUrl.startsWith("/") ? rawBaseUrl : `/${rawBaseUrl}`;
   }
@@ -409,37 +409,37 @@ export type WebRemoteControlExternalWorkspaceBridge =
 
 export interface WebRemoteControlBootstrapRequestPayload {
   terminalClientSessionId?: string;
-  marid_type: "bootstrap-request";
+  qodex_type: "bootstrap-request";
   requestId: string;
 }
 
 export interface WebRemoteControlBootstrapResponsePayload {
-  marid_type: "bootstrap-response";
+  qodex_type: "bootstrap-response";
   requestId: string;
   success: true;
   result: WebRemoteControlWindowBootstrapResult;
 }
 
 export interface WebRemoteControlWorkspaceListRequestPayload {
-  marid_type: "workspace-list-request";
+  qodex_type: "workspace-list-request";
   requestId: string;
 }
 
 export interface WebRemoteControlWorkspaceListResponsePayload {
-  marid_type: "workspace-list-response";
+  qodex_type: "workspace-list-response";
   requestId: string;
   success: true;
   result: WebRemoteControlWorkspaceListResult;
 }
 
 export interface WebRemoteControlWorkspaceListUpdatedPayload {
-  marid_type: "workspace-list-updated";
+  qodex_type: "workspace-list-updated";
   result: WebRemoteControlWorkspaceListResult;
 }
 
 export interface WebRemoteControlWorkspaceBridgeOpenPayload {
   terminalClientSessionId?: string;
-  marid_type: "workspace-bridge-open";
+  qodex_type: "workspace-bridge-open";
   requestId: string;
   bridgeSessionId: string;
   bridgeGeneration?: number;
@@ -453,7 +453,7 @@ export interface WebRemoteControlWorkspaceBridgeOpenPayload {
 }
 
 export interface WebRemoteControlWorkspaceBridgeReadyPayload {
-  marid_type: "workspace-bridge-ready";
+  qodex_type: "workspace-bridge-ready";
   requestId: string;
   bridgeSessionId: string;
   bridgeGeneration?: number;
@@ -462,7 +462,7 @@ export interface WebRemoteControlWorkspaceBridgeReadyPayload {
 }
 
 export interface WebRemoteControlWorkspaceBridgeErrorPayload {
-  marid_type: "workspace-bridge-error";
+  qodex_type: "workspace-bridge-error";
   requestId: string;
   bridgeSessionId?: string;
   bridgeGeneration?: number;
@@ -472,20 +472,20 @@ export interface WebRemoteControlWorkspaceBridgeErrorPayload {
 }
 
 export interface WebRemoteControlWorkspaceReconnectRequestPayload {
-  marid_type: "workspace-reconnect-request";
+  qodex_type: "workspace-reconnect-request";
   requestId: string;
   workspaceKey: string;
 }
 
 export type WebRemoteControlWorkspaceReconnectResponsePayload =
   | {
-      marid_type: "workspace-reconnect-response";
+      qodex_type: "workspace-reconnect-response";
       requestId: string;
       workspaceKey: string;
       success: true;
     }
   | {
-      marid_type: "workspace-reconnect-response";
+      qodex_type: "workspace-reconnect-response";
       requestId: string;
       workspaceKey: string;
       success: false;
@@ -493,7 +493,7 @@ export type WebRemoteControlWorkspaceReconnectResponsePayload =
     };
 
 export interface WebRemoteControlMobileViewStatePayload {
-  marid_type: "mobile-view-state-update";
+  qodex_type: "mobile-view-state-update";
   viewState: WebRemoteControlMobileViewState;
   deviceInfo?: WebRemoteControlMobileDeviceInfo;
 }
@@ -505,7 +505,7 @@ export interface WebRemoteControlMobileTaskView {
 }
 
 export interface WebRemoteControlMobileTaskViewUpdatePayload {
-  marid_type: "mobile-task-view-update";
+  qodex_type: "mobile-task-view-update";
   epoch: string;
   seq: number;
   bridgeSessionId: string;
@@ -514,13 +514,13 @@ export interface WebRemoteControlMobileTaskViewUpdatePayload {
 }
 
 export interface WebRemoteControlMobileTaskViewRequestPayload {
-  marid_type: "mobile-task-view-request";
+  qodex_type: "mobile-task-view-request";
   epoch: string;
 }
 
 export type WebRemoteControlPlatformRequestPayload = {
   [K in WebRemoteControlPlatformMethod]: {
-    marid_type: "platform-request";
+    qodex_type: "platform-request";
     requestId: string;
     method: K;
     args?: WebRemoteControlPlatformMethodArgsMap[K];
@@ -530,7 +530,7 @@ export type WebRemoteControlPlatformRequestPayload = {
 export type WebRemoteControlPlatformResponsePayload =
   | {
       [K in WebRemoteControlPlatformMethod]: {
-        marid_type: "platform-response";
+        qodex_type: "platform-response";
         requestId: string;
         method: K;
         success: true;
@@ -538,7 +538,7 @@ export type WebRemoteControlPlatformResponsePayload =
       };
     }[WebRemoteControlPlatformMethod]
   | {
-      marid_type: "platform-response";
+      qodex_type: "platform-response";
       requestId: string;
       method: WebRemoteControlPlatformMethod;
       success: false;
@@ -547,7 +547,7 @@ export type WebRemoteControlPlatformResponsePayload =
 
 /** @deprecated 仅供 legacy adapter 单测/迁移使用；production parser 自 04D-3 起拒绝。 */
 export interface WebRemoteControlRpcFramePayload {
-  marid_type: "rpc-frame";
+  qodex_type: "rpc-frame";
   bridgeSessionId: string;
   bridgeGeneration?: number;
   recoveryId?: string;
@@ -556,7 +556,7 @@ export interface WebRemoteControlRpcFramePayload {
 }
 
 export interface WebRemoteControlBridgeDegradedPayload {
-  marid_type: "bridge-degraded";
+  qodex_type: "bridge-degraded";
   bridgeSessionId: string;
   bridgeGeneration?: number;
   recoveryId?: string;
@@ -573,7 +573,7 @@ export interface WebRemoteControlBridgeDegradedPayload {
 }
 
 export interface WebRemoteControlAppErrorPayload {
-  marid_type: "app-error";
+  qodex_type: "app-error";
   requestId?: string;
   bridgeSessionId?: string;
   reason: WebRemoteControlFailureReason;
@@ -590,7 +590,7 @@ export type WebRemoteControlMobileDiagnosticEvent =
   | "failure";
 
 export interface WebRemoteControlMobileDiagnosticPayload {
-  marid_type: "mobile-diagnostic";
+  qodex_type: "mobile-diagnostic";
   event: WebRemoteControlMobileDiagnosticEvent;
   timestamp: number;
   state?: string;
@@ -609,7 +609,7 @@ export interface WebRemoteControlMobileDiagnosticPayload {
 
 export type WebRemoteControlAppPayload =
   | {
-      marid_type: "telemetry-report";
+      qodex_type: "telemetry-report";
       event: MobileSessionCreateTelemetry | MobilePluginDiscoveryTelemetry;
     }
   | WebRemoteControlBootstrapRequestPayload
@@ -674,7 +674,7 @@ export interface WebRemoteControlTaskTarget {
   workspaceKind: "local" | "remote";
   createdAt: number;
   updatedAt: number;
-  provider?: MaridProvider;
+  provider?: QodexProvider;
   unreadAt?: number;
 }
 

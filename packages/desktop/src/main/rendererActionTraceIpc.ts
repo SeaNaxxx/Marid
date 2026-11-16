@@ -3,7 +3,7 @@ import {
   DISABLED_RENDERER_ACTION_TRACE_CONFIG,
   PlatformChannels,
   type RendererActionTraceConfigV1,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type { RendererActionTraceBroker } from "./rendererActionTraceBroker.js";
 import type { RendererActionTraceRollout } from "./rendererActionTraceRollout.js";
 
@@ -120,8 +120,8 @@ export function resolveRuntimeConfig(
   config: RendererActionTraceConfigV1,
   env: Record<string, string | undefined>,
 ): RendererActionTraceConfigV1 {
-  if (isTruthy(env.MARID_LOCAL_TTFT_ENABLED)) config = { ...config, localTtftEnabled: true };
-  if (!isTruthy(env.MARID_RENDERER_ACTION_TRACE_ENABLED)) return config;
+  if (isTruthy(env.QODEX_LOCAL_TTFT_ENABLED)) config = { ...config, localTtftEnabled: true };
+  if (!isTruthy(env.QODEX_RENDERER_ACTION_TRACE_ENABLED)) return config;
   return {
     ...config,
     enabled: true,

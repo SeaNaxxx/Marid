@@ -1,9 +1,9 @@
-import type { PipSessionEvent } from "@marid/marid-cua/pip-session";
+import type { PipSessionEvent } from "@qodex/qodex-cua/pip-session";
 import {
   createPipSessionClient,
   type PipSessionClient,
   type PipSessionClientOptions,
-} from "@marid/marid-cua/pip-session/node";
+} from "@qodex/qodex-cua/pip-session/node";
 import { createServiceLogger, type ServiceLogger } from "../logger/serviceLogger.js";
 import type { CuaPipSessionService } from "./cuaPipSession.js";
 

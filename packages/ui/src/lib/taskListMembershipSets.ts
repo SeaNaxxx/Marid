@@ -2,8 +2,8 @@
 // membership，sessions-index 只在后续投影中补充实时 activity/detail。
 // unread 同为组织态（setTaskUnread 写 tasks-index），与 pin/archive 同类，
 // 不进冻结的 sessions-index schema；这里平行拉取 unreadAt map，列表构建时 join。
-import type { IMaridTaskService } from "@marid/services";
-import type { MaridTaskMeta } from "@marid/shared";
+import type { IQodexTaskService } from "@qodex/services";
+import type { QodexTaskMeta } from "@qodex/shared";
 import { buildTaskEntityKey } from "@/lib/taskQueryCache.js";
 
 export interface TaskListMembershipScope {
@@ -12,14 +12,14 @@ export interface TaskListMembershipScope {
 }
 
 export type TaskListMembershipService = Pick<
-  IMaridTaskService,
+  IQodexTaskService,
   "listPinnedTaskIds" | "listArchivedTasks" | "listTasks" | "listPinnedTasks"
 > &
-  Partial<Pick<IMaridTaskService, "listDeletedTaskIds">>;
+  Partial<Pick<IQodexTaskService, "listDeletedTaskIds">>;
 
 export interface TaskListMembershipSets {
   /** tasks-index 三个持久分区（active/pinned/archived）的完整 task 行并集。 */
-  taskIndexItems: MaridTaskMeta[];
+  taskIndexItems: QodexTaskMeta[];
   pinnedIds: Set<string>;
   archivedIds: Set<string>;
   /** tasks-index 持久删除 tombstone；优先于所有列表 kind。 */
@@ -27,7 +27,7 @@ export interface TaskListMembershipSets {
   /** taskId → unreadAt（tasks-index 组织态；sessions-index 不携带，join 用）。 */
   unreadAtByTaskId: Map<string, number>;
   /** taskId → terminal status（tasks-index 历史终态；用于冷启动 stored summary 补红点）。 */
-  terminalStatusByTaskId: Map<string, Extract<MaridTaskMeta["status"], "completed" | "error">>;
+  terminalStatusByTaskId: Map<string, Extract<QodexTaskMeta["status"], "completed" | "error">>;
   /**
    * taskId → 旧 task-index 手动标题。
    *
@@ -144,7 +144,7 @@ async function listWithAvailability<T>(
   }
 }
 
-function collectUnreadAt(unreadAtByTaskId: Map<string, number>, tasks: MaridTaskMeta[]): void {
+function collectUnreadAt(unreadAtByTaskId: Map<string, number>, tasks: QodexTaskMeta[]): void {
   for (const task of tasks) {
     if (typeof task.unreadAt === "number") {
       unreadAtByTaskId.set(task.taskId, task.unreadAt);
@@ -154,7 +154,7 @@ function collectUnreadAt(unreadAtByTaskId: Map<string, number>, tasks: MaridTask
 
 function collectTerminalStatuses(
   terminalStatusByTaskId: TaskListMembershipSets["terminalStatusByTaskId"],
-  tasks: MaridTaskMeta[],
+  tasks: QodexTaskMeta[],
 ): void {
   for (const task of tasks) {
     if (task.status === "completed" || task.status === "error") {
@@ -165,7 +165,7 @@ function collectTerminalStatuses(
 
 function collectTitleOverrides(
   titleOverrideByTaskId: Map<string, string>,
-  tasks: MaridTaskMeta[],
+  tasks: QodexTaskMeta[],
 ): void {
   for (const task of tasks) {
     if (task.titleOverridden === true && task.title.trim().length > 0) {
@@ -176,7 +176,7 @@ function collectTitleOverrides(
 
 function collectCronAutomationIds(
   cronAutomationIdByTaskId: Map<string, string>,
-  tasks: MaridTaskMeta[],
+  tasks: QodexTaskMeta[],
 ): void {
   for (const task of tasks) {
     if (task.cronAutomationId) {
@@ -185,8 +185,8 @@ function collectCronAutomationIds(
   }
 }
 
-function mergeTaskIndexItems(lists: MaridTaskMeta[][]): MaridTaskMeta[] {
-  const itemByEntityKey = new Map<string, MaridTaskMeta>();
+function mergeTaskIndexItems(lists: QodexTaskMeta[][]): QodexTaskMeta[] {
+  const itemByEntityKey = new Map<string, QodexTaskMeta>();
   for (const task of lists.flat()) {
     itemByEntityKey.set(buildTaskEntityKey(task), task);
   }
@@ -357,7 +357,7 @@ export async function fetchTaskListMembershipSetsForEndpoints(
     titleOverrideByTaskId: new Map<string, string>(),
     cronAutomationIdByTaskId: new Map<string, string>(),
   };
-  const taskIndexItemByEntityKey = new Map<string, MaridTaskMeta>();
+  const taskIndexItemByEntityKey = new Map<string, QodexTaskMeta>();
   for (const result of results) {
     for (const task of result.taskIndexItems) {
       taskIndexItemByEntityKey.set(buildTaskEntityKey(task), task);

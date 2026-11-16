@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fetch the Termux Bionic deb closure for Marid's embedded Android runtime.
+"""Fetch the Termux Bionic deb closure for Qodex's embedded Android runtime.
 
 Seeds (owner task list): nodejs-lts, libandroid-support, openssl, libicu,
 zlib, libsqlite, ca-certificates, bash.
@@ -87,7 +87,7 @@ def resolve_closure(pkgs, seeds):
 
 
 def fetch(url, dest):
-    req = urllib.request.Request(url, headers={"User-Agent": "marid-runtime-fetch/0.1"})
+    req = urllib.request.Request(url, headers={"User-Agent": "qodex-runtime-fetch/0.1"})
     with urllib.request.urlopen(req, timeout=60) as r, open(dest, "wb") as f:
         while True:
             chunk = r.read(1 << 16)

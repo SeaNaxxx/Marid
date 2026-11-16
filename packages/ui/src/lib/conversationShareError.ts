@@ -1,5 +1,5 @@
-import type { ConversationShareFailureIssue } from "@marid/services";
-import { conversationShareRejectionSchema, type ConversationShareRejection } from "@marid/shared";
+import type { ConversationShareFailureIssue } from "@qodex/services";
+import { conversationShareRejectionSchema, type ConversationShareRejection } from "@qodex/shared";
 
 export interface ConversationShareErrorDetails {
   name: string;

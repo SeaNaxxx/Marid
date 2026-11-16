@@ -1,8 +1,8 @@
 import { watch, type FSWatcher } from "node:fs";
 import { stat } from "node:fs/promises";
 import { resolve } from "node:path";
-import { Emitter, Event, type Event as RpcEvent } from "@marid/rpc";
-import type { FileWatchEvent } from "@marid/shared";
+import { Emitter, Event, type Event as RpcEvent } from "@qodex/rpc";
+import type { FileWatchEvent } from "@qodex/shared";
 import { createServiceLogger, type ServiceLogger } from "#src/logger/serviceLogger.js";
 import type { IFileWatcherService } from "./fileWatcher.js";
 import { registerMemoryDiagnosticsProvider } from "#src/memoryDiagnostics.js";

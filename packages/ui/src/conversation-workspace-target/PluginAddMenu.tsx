@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.js";
 import { usePluginCreator } from "@/conversation-workspace-target/usePluginCreator.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 export function PluginAddMenu({
   onCreateTask,
@@ -26,7 +26,7 @@ export function PluginAddMenu({
   size?: "default" | "lg";
   isWebRemoteControl?: boolean;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const creator = usePluginCreator(onCreateTask, isWebRemoteControl);
   return (
     <DropdownMenu>

@@ -1,9 +1,9 @@
 import armsRum from "@arms/rum-electron";
 import {
-  MARID_VERSION,
+  QODEX_VERSION,
   type DatabaseStartupState,
   type ArmsCustomEventPayload,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { ensureDesktopDeviceMidSync } from "./desktopDeviceMid.js";
 import { buildFinalArmsCustomEventPayload } from "./desktopArmsCustomEvent.js";
 import { logger } from "./logger.js";
@@ -38,7 +38,7 @@ function send(
       context: {
         deviceMid,
         platform: process.platform,
-        appVersion: MARID_VERSION,
+        appVersion: QODEX_VERSION,
         armsEnv: armsRum.getConfig().env === "prod" ? "prod" : "local",
         rendererId: 0,
       },

@@ -1,5 +1,5 @@
 import { additionalRequestModalSelectors } from "@/request-security-edition/errors.js";
-import { isStartPlanModelProviderId, type MarketingPopup } from "@marid/shared";
+import { isStartPlanModelProviderId, type MarketingPopup } from "@qodex/shared";
 import type {
   CloudContentDialogPayload,
   CloudDialogHero,

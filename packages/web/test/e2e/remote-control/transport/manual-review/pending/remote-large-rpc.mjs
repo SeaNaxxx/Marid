@@ -10,8 +10,8 @@ import { chromium } from "playwright-core";
 import {
   createAcknowledgedWebRemoteControlRelayProtocol,
   WebRemoteControlRelayPayloadSerializer,
-} from "@marid/client";
-import { ServiceChannels } from "@marid/shared";
+} from "@qodex/client";
+import { ServiceChannels } from "@qodex/shared";
 import { createDeviceSwitchDesktopBridge } from "../../../projects/manual-review/pending/remote-device-switch.helpers.mjs";
 import { setup } from "../../../authentication/manual-review/pending/remote-login-v2.helpers.mjs";
 
@@ -42,13 +42,13 @@ function createTransportPair({ holdAck = false, available = true, replayBufferMa
       measureFrameBytes: (frame) => serializer.prepare(frame).bytes,
       sendFrame: (frame) => {
         if (!available) return false;
-        if (frame.marid_type === "rpc-frame-ack" && holdAck) {
+        if (frame.qodex_type === "rpc-frame-ack" && holdAck) {
           heldAcks.push({ side, frame });
           return true;
         }
         const bytes = serializer.prepare(frame).bytes;
         assert.ok(bytes <= MiB, "最终物理外壳必须不超过 1 MiB");
-        if (frame.marid_type === "rpc-frame") frames[side].push(bytes);
+        if (frame.qodex_type === "rpc-frame") frames[side].push(bytes);
         peers[1 - side].acceptPayload(frame);
         return true;
       },
@@ -140,7 +140,7 @@ function transportChecks() {
         assert.deepEqual(p.frames[0], [...firstBatch, ...firstBatch]);
         assert.deepEqual(p.delivered[1], [expected]);
         const foreignAck = {
-          marid_type: "rpc-frame-ack",
+          qodex_type: "rpc-frame-ack",
           bridgeSessionId: "foreign",
           bridgeGeneration: Number.MAX_SAFE_INTEGER,
           recoveryId: "r".repeat(256),
@@ -274,9 +274,9 @@ async function browserScenario(browser, origin, { width, theme, locale }) {
         socket.send(JSON.stringify({ type: "pair_status_ack", pair_status: "matched" }));
       const p = message.payload;
       if (!p) return;
-      if (p.marid_type === "rpc-frame" || p.marid_type === "rpc-frame-ack") {
+      if (p.qodex_type === "rpc-frame" || p.qodex_type === "rpc-frame-ack") {
         bridges.get(p.bridgeSessionId)?.acceptPayload(p);
-        if (p.marid_type === "rpc-frame-ack") {
+        if (p.qodex_type === "rpc-frame-ack") {
           traffic.ackedMessageSeqs.push(p.ackMessageSeq);
           acked ||= traffic.largeMessageSeqs.some((seq) => p.ackMessageSeq >= seq);
         }
@@ -289,16 +289,16 @@ async function browserScenario(browser, origin, { width, theme, locale }) {
         workspaces,
         initialViewState: { activeWorkspaceKey: workspacePath, updatedAt: 1 },
       };
-      if (p.marid_type === "bootstrap-request" || p.marid_type === "workspace-list-request")
+      if (p.qodex_type === "bootstrap-request" || p.qodex_type === "workspace-list-request")
         send({
-          marid_type: p.marid_type.replace("request", "response"),
+          qodex_type: p.qodex_type.replace("request", "response"),
           requestId: p.requestId,
           success: true,
           result,
         });
-      if (p.marid_type === "mobile-view-state-update")
-        send({ marid_type: "mobile-view-state-updated", requestId: p.requestId });
-      if (p.marid_type !== "workspace-bridge-open") return;
+      if (p.qodex_type === "mobile-view-state-update")
+        send({ qodex_type: "mobile-view-state-updated", requestId: p.requestId });
+      if (p.qodex_type !== "workspace-bridge-open") return;
       traffic.opens++;
       for (const bridge of bridges.values()) bridge.dispose();
       bridges.clear();
@@ -309,7 +309,7 @@ async function browserScenario(browser, origin, { width, theme, locale }) {
         bridgeGeneration: p.bridgeGeneration,
       };
       send({
-        marid_type: "workspace-bridge-ready",
+        qodex_type: "workspace-bridge-ready",
         requestId: p.requestId,
         bridgeSessionId: p.bridgeSessionId,
         bridgeGeneration: p.bridgeGeneration,
@@ -320,7 +320,7 @@ async function browserScenario(browser, origin, { width, theme, locale }) {
           send(rawFrame) {
             const frame = JSON.parse(rawFrame).payload;
             if (
-              frame.marid_type === "rpc-frame" &&
+              frame.qodex_type === "rpc-frame" &&
               frame.messageBytes > 8 * MiB &&
               frame.fragmentIndex === 0
             )
@@ -358,7 +358,7 @@ async function browserScenario(browser, origin, { width, theme, locale }) {
       desktop.onDegraded((fault) => {
         traffic.faults.push(fault.reasonCode);
         send({
-          marid_type: "bridge-degraded",
+          qodex_type: "bridge-degraded",
           bridgeSessionId: p.bridgeSessionId,
           bridgeGeneration: p.bridgeGeneration,
           reason: "rpc-transport-fault",

@@ -1,5 +1,5 @@
-import { BufferReader, BufferWriter, deserialize, serialize, VSBuffer } from "@marid/rpc";
-import { ISourceServerManagementService, type UpdateConnectionProfileInput } from "@marid/services";
+import { BufferReader, BufferWriter, deserialize, serialize, VSBuffer } from "@qodex/rpc";
+import { ISourceServerManagementService, type UpdateConnectionProfileInput } from "@qodex/services";
 
 const DISCONNECT_REQUEST = -8301;
 const UPDATE_REQUEST = -8302;

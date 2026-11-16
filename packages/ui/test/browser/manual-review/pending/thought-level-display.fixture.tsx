@@ -1,13 +1,13 @@
 import { useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import type { IServiceAccessor } from "@marid/services";
-import type { IPlatformService, MaridConfigOption } from "@marid/shared";
+import type { IServiceAccessor } from "@qodex/services";
+import type { IPlatformService, QodexConfigOption } from "@qodex/shared";
 import { ThoughtLevelCycleControl } from "@/chat-input-toolbar/ThoughtLevelCycleControl.js";
 import { getNextThoughtLevelValue } from "@/chat-input-toolbar/thoughtLevelOptions.js";
 import { TooltipProvider } from "@/components/ui/tooltip.js";
 import { PlatformProvider } from "@/hooks/usePlatform.js";
 import { ServiceProvider } from "@/hooks/useServices.js";
-import { MaridIntlProvider, useMaridIntl } from "@/i18n/IntlProvider.js";
+import { QodexIntlProvider, useQodexIntl } from "@/i18n/IntlProvider.js";
 import { SubagentReasoningField } from "@/settings/SubagentReasoningField.js";
 import { useToolbarShortcutBindings } from "@/v4/composer/toolbarShortcuts.js";
 import "@/styles.css";
@@ -37,12 +37,12 @@ const options = values.map((value) => ({
 const noop = () => {};
 
 function Fixture() {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const [value, setValue] = useState("minimal");
   const [committed, setCommitted] = useState("");
   const selectRef = useRef<HTMLSpanElement>(null);
   const cycleRef = useRef<HTMLSpanElement>(null);
-  const option: MaridConfigOption = {
+  const option: QodexConfigOption = {
     id: "thought_level",
     category: "thought_level",
     type: "select",
@@ -110,11 +110,11 @@ function Fixture() {
 createRoot(document.getElementById("root")!).render(
   <ServiceProvider services={services}>
     <PlatformProvider platform={platform}>
-      <MaridIntlProvider initialLocale={params.get("locale") === "zh-CN" ? "zh-CN" : "en-US"}>
+      <QodexIntlProvider initialLocale={params.get("locale") === "zh-CN" ? "zh-CN" : "en-US"}>
         <TooltipProvider>
           <Fixture />
         </TooltipProvider>
-      </MaridIntlProvider>
+      </QodexIntlProvider>
     </PlatformProvider>
   </ServiceProvider>,
 );

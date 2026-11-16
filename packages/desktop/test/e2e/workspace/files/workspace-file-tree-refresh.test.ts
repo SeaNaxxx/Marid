@@ -6,7 +6,7 @@ import {
   TID_WORKSPACE_FILE_TREE_REFRESH_BUTTON,
   TID_WORKSPACE_FILE_TREE_ROW,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   DEFAULT_WORKSPACE,
   clearAppData,

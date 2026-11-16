@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import type { MaridProvider } from "@marid/shared";
+import type { QodexProvider } from "@qodex/shared";
 import { logger } from "@/logger.js";
-import { useMaridTaskService } from "@/hooks/useMaridTaskService.js";
+import { useQodexTaskService } from "@/hooks/useQodexTaskService.js";
 
 /**
  * useWorkspaceActiveTaskState 的导出返回类型间接引用此接口，声明生成要求它可导出。
  * @lintignore
  */
 export interface TaskNativeSessionLogFileState {
-  provider: MaridProvider | null;
+  provider: QodexProvider | null;
   path: string | null;
   exists: boolean;
   loading: boolean;
@@ -39,7 +39,7 @@ const INITIAL_STATE: TaskNativeSessionLogFileState = {
 };
 
 export function supportsTaskNativeSessionLogFile(
-  _provider: MaridProvider | null | undefined,
+  _provider: QodexProvider | null | undefined,
 ): boolean {
   // 仅剩 glm provider，始终支持读取原生会话日志。
   return true;
@@ -48,16 +48,16 @@ export function supportsTaskNativeSessionLogFile(
 /**
  * 读取当前 task 对应的原生会话日志路径。
  *
- * 路径规则统一通过 maridTaskService 解析，避免 UI 层猜 provider 自己的目录结构。
+ * 路径规则统一通过 qodexTaskService 解析，避免 UI 层猜 provider 自己的目录结构。
  */
 export function useTaskNativeSessionLogFile(
   workspacePath: string,
   taskId: string | null,
-  providerHint?: MaridProvider | null,
+  providerHint?: QodexProvider | null,
   workspaceIdentity?: string,
   options: { enabled?: boolean } = {},
 ) {
-  const maridTaskService = useMaridTaskService(workspacePath, undefined, workspaceIdentity);
+  const qodexTaskService = useQodexTaskService(workspacePath, undefined, workspaceIdentity);
   const [state, setState] = useState<TaskNativeSessionLogFileState>(INITIAL_STATE);
   const requestVersionRef = useRef(0);
   const enabled = options.enabled ?? true;
@@ -99,7 +99,7 @@ export function useTaskNativeSessionLogFile(
       error: null,
     });
 
-    void maridTaskService
+    void qodexTaskService
       .getTaskNativeSessionLogFile({
         taskId,
         workspacePath,
@@ -143,7 +143,7 @@ export function useTaskNativeSessionLogFile(
     return () => {
       disposed = true;
     };
-  }, [enabled, maridTaskService, providerHint, taskId, workspaceIdentity, workspacePath]);
+  }, [enabled, qodexTaskService, providerHint, taskId, workspaceIdentity, workspacePath]);
 
   return state;
 }

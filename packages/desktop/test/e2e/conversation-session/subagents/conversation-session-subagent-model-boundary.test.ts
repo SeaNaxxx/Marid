@@ -4,14 +4,14 @@ import {
   getUpstreamRequestToolNames,
 } from "#e2e/helpers/conversation-session-network";
 import { readFile } from "node:fs/promises";
-import { encodeCustomModelValue } from "@marid/shared";
+import { encodeCustomModelValue } from "@qodex/shared";
 import {
   TID_CHAT_MODEL_SELECT_GROUP,
   TID_CHAT_MODEL_SELECT_ITEM,
   TID_CHAT_MODEL_SELECT_TRIGGER,
   TID_V4_STOP,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { clearAppData, clickTestIdByDom } from "#e2e/helpers/desktop-app";
 import {
   getV4PaneSnapshot,

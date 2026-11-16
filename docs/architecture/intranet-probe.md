@@ -26,9 +26,9 @@
 可选环境变量：
 
 - `PORT`（默认 `3850`）
-- `MARID_INTRANET_PROBE_PATH`（默认 `/api/intranet/probe`）
-- `MARID_INTRANET_PROBE_MARKER`（默认 `marid-intranet`）
-- `MARID_INTRANET_PROBE_TOKEN`（可选，配置后客户端需带 `x-marid-intranet-token`）
+- `QODEX_INTRANET_PROBE_PATH`（默认 `/api/intranet/probe`）
+- `QODEX_INTRANET_PROBE_MARKER`（默认 `qodex-intranet`）
+- `QODEX_INTRANET_PROBE_TOKEN`（可选，配置后客户端需带 `x-qodex-intranet-token`）
 
 ## 客户端
 
@@ -40,7 +40,7 @@ const result = await services.systemService.probeIntranet({
     {
       kind: "service",
       url: "http://10.0.0.100:3850/api/intranet/probe",
-      expectedMarker: "marid-intranet",
+      expectedMarker: "qodex-intranet",
       // token: "可选",
     },
   ],

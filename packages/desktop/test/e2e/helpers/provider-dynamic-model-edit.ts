@@ -1,7 +1,7 @@
-import { BUILTIN_MODEL_PROVIDER_IDS } from "@marid/shared";
-import { TID_MODEL_PROVIDER_ADD_MODEL_BUTTON } from "@marid/shared/test-ids";
-import { ModelConfig } from "@marid/provider";
-import { NodePersonalProviderConfigRepository } from "@marid/provider-node";
+import { BUILTIN_MODEL_PROVIDER_IDS } from "@qodex/shared";
+import { TID_MODEL_PROVIDER_ADD_MODEL_BUTTON } from "@qodex/shared/test-ids";
+import { ModelConfig } from "@qodex/provider";
+import { NodePersonalProviderConfigRepository } from "@qodex/provider-node";
 import { clickTestIdByDom, getE2EAppDataPaths } from "./desktop-app.js";
 
 /** Todo 88：只从账单 mock 提供成员，不能 seed Personal modelIds 让错误的静态校验侥幸通过。 */

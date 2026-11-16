@@ -1,6 +1,6 @@
 export const DEVELOPER_TOOLS_STORAGE_KEYS = [
-  "marid:developer-tools:enabled",
-  "marid:token-debug:enabled",
+  "qodex:developer-tools:enabled",
+  "qodex:token-debug:enabled",
 ] as const;
 
 const DISABLED_VALUES = new Set(["0", "false", "off", "no"]);

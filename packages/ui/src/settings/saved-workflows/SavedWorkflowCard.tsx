@@ -6,10 +6,10 @@ import {
   TID_WORKFLOW_CARD_RUN,
   TID_WORKFLOW_ACTION_DELETE,
   TID_WORKFLOW_ACTION_MOVE,
-  type MaridSavedWorkflowEntry,
-  type MaridSavedWorkflowRun,
-} from "@marid/shared";
-import { testId } from "@marid/shared/test-ids";
+  type QodexSavedWorkflowEntry,
+  type QodexSavedWorkflowRun,
+} from "@qodex/shared";
+import { testId } from "@qodex/shared/test-ids";
 import { Button } from "@/components/ui/button.js";
 import {
   DropdownMenu,
@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.js";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import {
   AutomationMoreHorizontalIcon,
   AutomationRunNowIcon,
@@ -35,10 +35,10 @@ export function SavedWorkflowLastRunBadge({
   run,
   now,
 }: {
-  run: MaridSavedWorkflowRun | undefined;
+  run: QodexSavedWorkflowRun | undefined;
   now: number;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const kind = savedWorkflowRunBadgeKind(run?.status);
   if (kind === "never" || !run) {
     return (
@@ -86,17 +86,17 @@ export function SavedWorkflowLastRunBadge({
 }
 
 interface SavedWorkflowCardProps {
-  entry: MaridSavedWorkflowEntry;
-  lastRun: MaridSavedWorkflowRun | undefined;
+  entry: QodexSavedWorkflowEntry;
+  lastRun: QodexSavedWorkflowRun | undefined;
   now: number;
   busy?: boolean;
-  onOpen: (entry: MaridSavedWorkflowEntry) => void;
-  onRun: (entry: MaridSavedWorkflowEntry) => void;
-  onRevise: (entry: MaridSavedWorkflowEntry) => void;
-  onCopyPath: (entry: MaridSavedWorkflowEntry) => void;
+  onOpen: (entry: QodexSavedWorkflowEntry) => void;
+  onRun: (entry: QodexSavedWorkflowEntry) => void;
+  onRevise: (entry: QodexSavedWorkflowEntry) => void;
+  onCopyPath: (entry: QodexSavedWorkflowEntry) => void;
   /** 作用域动作：项目档「提升为全局」（AI 概括）/ 全局档「移到项目…」；仅在传入时出现。 */
-  onMove?: (entry: MaridSavedWorkflowEntry) => void;
-  onDelete: (entry: MaridSavedWorkflowEntry) => void;
+  onMove?: (entry: QodexSavedWorkflowEntry) => void;
+  onDelete: (entry: QodexSavedWorkflowEntry) => void;
 }
 
 /**
@@ -115,7 +115,7 @@ export const SavedWorkflowCard = memo(function SavedWorkflowCard({
   onMove,
   onDelete,
 }: SavedWorkflowCardProps) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const argNames = Object.keys(entry.args ?? {});
   const visibleArgs = argNames.slice(0, MAX_ARG_CHIPS);
   const hiddenArgCount = argNames.length - visibleArgs.length;

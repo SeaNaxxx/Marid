@@ -20,4 +20,4 @@
   -> desktop and mobile converge
 ```
 
-当前实现入口：`apps/marid-cli/packages/bootstrap/src/marid-protocol-v4/commands/handlers/goal-compact.ts`。
+当前实现入口：`apps/qodex-cli/packages/bootstrap/src/qodex-protocol-v4/commands/handlers/goal-compact.ts`。

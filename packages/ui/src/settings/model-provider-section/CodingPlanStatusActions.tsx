@@ -1,5 +1,5 @@
 import { CodingPlanEntryButton } from "@/settings/CodingPlanEntryButton.js";
-import type { CodingPlanBillingDiscountConfig } from "@marid/shared";
+import type { CodingPlanBillingDiscountConfig } from "@qodex/shared";
 import { ArrowLeftIcon, LoaderCircle, RocketIcon } from "lucide-react";
 import { cn } from "@/components/lib/utils.js";
 import { Button } from "@/components/ui/button.js";
@@ -7,7 +7,7 @@ import {
   CodingPlanBillingDiscountBadgePill,
   CodingPlanBillingDiscountInfoDialog,
 } from "@/CodingPlanBillingDiscount.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import type { CodingPlanLoginOptions } from "./codingPlanPricingCards.js";
 
 export function CodingPlanStatusActions({
@@ -35,7 +35,7 @@ export function CodingPlanStatusActions({
   onLogin?: (options?: CodingPlanLoginOptions) => void;
   onDisconnect?: () => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
 
   return (
     <div className="flex shrink-0 flex-wrap justify-start gap-2">
@@ -78,7 +78,7 @@ export function CodingPlanUpgradeAction({
   billingDiscountConfig?: CodingPlanBillingDiscountConfig;
   onUpgradePlansVisibleChange: (visible: boolean) => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const billingDiscountButtonActive = billingDiscountActive === true && !upgradePlansVisible;
 
   const upgradeButton = (

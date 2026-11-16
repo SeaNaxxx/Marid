@@ -9,8 +9,8 @@ import { mutateProjectTask, readProjectTaskMeta } from "@/project-sidebar/task-m
 import { useBaseWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
 import { useTabStoreApi } from "@/store/TabStoreProvider.js";
 import { isWorkspaceTab } from "@/store/tabStore.js";
-import { useMaridSessionStore } from "@/store/maridSessionStore.js";
-import { onTaskNavigationCommitted } from "@/store/maridSessionStoreNavigation.js";
+import { useQodexSessionStore } from "@/store/qodexSessionStore.js";
+import { onTaskNavigationCommitted } from "@/store/qodexSessionStoreNavigation.js";
 import { logger } from "@/logger.js";
 
 /** 前台完成补记记录：written=已补写，marker=补写回包的未读版本（自动清除的 CAS 凭据）。 */
@@ -74,7 +74,7 @@ export function useProjectUnreadSignals(
       started: boolean;
     }>();
     const ports = {
-      service: services.maridTaskService,
+      service: services.qodexTaskService,
       controller: services.windowControllerService,
     };
     const foregroundCompletions = foregroundCompletionsRef.current;
@@ -245,7 +245,7 @@ export function useProjectUnreadSignals(
       const tabState = tabs.getState();
       const tab = tabState.tabs.find((item) => item.id === tabState.activeTabId);
       const key = target.workspaceIdentity?.trim() || target.workspacePath;
-      const state = useMaridSessionStore.getState();
+      const state = useQodexSessionStore.getState();
       const route = state.taskNavHistory.entries[state.taskNavHistory.cursor];
       // 前台完成只认完整导航地址；缓存 activeTaskId 或其它工作区的同名任务不代表当前页面。
       return Boolean(
@@ -351,7 +351,7 @@ export function useProjectUnreadSignals(
     const subscriptions = services.windowControllerService
       ? [services.windowControllerService.onDynamicTaskUnreadSignal()(receive)]
       : scopes.map((scope) =>
-          services.maridTaskService.onDynamicWorkspaceEvent(scope)((event) => {
+          services.qodexTaskService.onDynamicWorkspaceEvent(scope)((event) => {
             if (
               event.type !== "workspace_task_list_changed" ||
               event.reason !== "task_status_changed" ||

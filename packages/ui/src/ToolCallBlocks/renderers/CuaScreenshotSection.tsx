@@ -1,10 +1,10 @@
 import { ImageIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import type { CuaScreenshotDetails } from "@/ToolCallBlocks/renderers/cuaScreenshotDetails.js";
 
 export function CuaScreenshotSection({ screenshot }: { screenshot: CuaScreenshotDetails }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const metadata: Array<[string, string]> = [];
   const titleId = screenshot.zoom
     ? "chat.toolCall.cua.details.zoomPreview"

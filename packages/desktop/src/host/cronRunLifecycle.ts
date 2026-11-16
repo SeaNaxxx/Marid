@@ -1,7 +1,7 @@
 import type {
-  MaridAutomationRunOutcome,
-  MaridAutomationTrigger,
-} from "@marid/shared";
+  QodexAutomationRunOutcome,
+  QodexAutomationTrigger,
+} from "@qodex/shared";
 
 export interface CronRunLifecycleRepo {
   ensureRunClaimed(params: {
@@ -9,11 +9,11 @@ export interface CronRunLifecycleRepo {
     automationId: string;
     workspaceKey: string;
     scheduledAt: number | null;
-    trigger: MaridAutomationTrigger;
+    trigger: QodexAutomationTrigger;
   }): Promise<void>;
   markRunOutcome(
     runId: string,
-    outcome: MaridAutomationRunOutcome,
+    outcome: QodexAutomationRunOutcome,
     error?: string,
   ): Promise<void>;
   markRunDispatch(params: {
@@ -30,7 +30,7 @@ export interface CronRunLifecycleIdentity {
   automationId: string;
   workspaceKey: string;
   scheduledAt: number | null;
-  trigger: MaridAutomationTrigger;
+  trigger: QodexAutomationTrigger;
 }
 
 type LogWarn = (message: string, error: unknown) => void;
@@ -60,7 +60,7 @@ export function startManualClaimHeartbeat(
 export async function recordCronRunOutcomeBestEffort(
   params: CronRunLifecycleIdentity & {
     repo: CronRunLifecycleRepo;
-    outcome: MaridAutomationRunOutcome;
+    outcome: QodexAutomationRunOutcome;
     error?: string;
     logWarn: LogWarn;
   },
@@ -123,7 +123,7 @@ export async function settleManualDispatchFailureBestEffort(
 export async function settleCronRunTerminalOutcome(
   params: CronRunLifecycleIdentity & {
     repo: CronRunLifecycleRepo;
-    outcome: Exclude<MaridAutomationRunOutcome, "running">;
+    outcome: Exclude<QodexAutomationRunOutcome, "running">;
     error?: string;
     logWarn: LogWarn;
   },

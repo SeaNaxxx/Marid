@@ -1,5 +1,5 @@
 import { createSourceServerMigrationCounts } from "./sourceServerMigrationCounts.js";
-import { Emitter, type Event } from "@marid/rpc";
+import { Emitter, type Event } from "@qodex/rpc";
 import {
   sourceServerManagementSnapshotSchema,
   sourceServerLifecycleSourceIdSchema,
@@ -23,7 +23,7 @@ import {
   type SourceServerManagementStateDelta,
   type SourceServerOperationLog,
   type SourceServerRunningTasksResult,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type {
   SourceServerDirectorySnapshot,
   SourceServerReconnectCandidate,
@@ -33,7 +33,7 @@ import type {
   SourceServerConnectionManagerOptions,
   ConnectSourceServerOptions,
 } from "./sourceServerConnectionManager.js";
-import type { ISourceServerManagementService, UpdateConnectionProfileInput } from "@marid/services";
+import type { ISourceServerManagementService, UpdateConnectionProfileInput } from "@qodex/services";
 
 interface SourceServerManagementDirectory {
   readonly onDidChange?: Event<void>;

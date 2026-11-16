@@ -7,7 +7,7 @@ import type {
   IntranetProbeResult,
   IntranetProbeTarget,
   SystemInfo,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { logger } from "@/logger.js";
 import { useServices } from "./useServices.js";
 

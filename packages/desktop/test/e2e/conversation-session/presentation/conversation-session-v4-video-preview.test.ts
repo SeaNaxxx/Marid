@@ -7,8 +7,8 @@
 import { mkdir, open, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { TID_V4_ATTACHMENT, TID_V4_ROW_ATTACHMENTS } from "@marid/shared/test-ids";
-import { PROTOCOL_V4_LIMITS } from "@marid/shared/marid-protocol-v4";
+import { TID_V4_ATTACHMENT, TID_V4_ROW_ATTACHMENTS } from "@qodex/shared/test-ids";
+import { PROTOCOL_V4_LIMITS } from "@qodex/shared/qodex-protocol-v4";
 import { DEFAULT_WORKSPACE, clearAppData } from "#e2e/helpers/desktop-app";
 import { restartIntoWorkspacePreservingProfile } from "#e2e/helpers/model-provider-restart";
 import { removeV4ComposerAttachmentAt } from "#e2e/helpers/v4-composer-edit";
@@ -24,7 +24,7 @@ import {
   waitForV4TimelineContaining,
 } from "#e2e/helpers/v4-conversation";
 
-const CASE_ROOT = join(DEFAULT_WORKSPACE, ".marid-e2e", "conversation-session-v4-video-preview");
+const CASE_ROOT = join(DEFAULT_WORKSPACE, ".qodex-e2e", "conversation-session-v4-video-preview");
 const PLAYABLE_VIDEO_FILENAME = "e2e-composer-preview.mp4";
 const GALLERY_IMAGE_FILENAME = "e2e-gallery-image.png";
 const UNSUPPORTED_VIDEO_FILENAME = "e2e-unsupported.mov";
@@ -105,8 +105,8 @@ describe("v4 VI06/VI07：image/video 媒体 gallery 与 edit", () => {
         );
         if (!file || !target) throw new Error("缺少本地视频 File 或会话 drop surface");
         const bridge = (
-          window as Window & { marid?: { getPathForFile(file: File): string | null } }
-        ).marid;
+          window as Window & { qodex?: { getPathForFile(file: File): string | null } }
+        ).qodex;
         const data = new DataTransfer();
         data.items.add(file);
         const result = [bridge?.getPathForFile(file), bridge?.getPathForFile(data.files[0]!)];
@@ -182,11 +182,11 @@ describe("v4 VI06/VI07：image/video 媒体 gallery 与 edit", () => {
     expect(sentCards.map(({ width }) => width)).toEqual([80, 80, 80, 80, 80]);
     expect(sentCards.map(({ height }) => height)).toEqual([80, 80, 80, 80, 80]);
     expect(sentCards.every(({ role }) => role === "button")).toBe(true);
-    expect(sentCards[0]?.src.startsWith("marid-media:")).toBe(true);
+    expect(sentCards[0]?.src.startsWith("qodex-media:")).toBe(true);
     expect(sentCards[1]?.src.startsWith("blob:")).toBe(true);
-    expect(sentCards[2]?.src.startsWith("marid-media:")).toBe(true);
+    expect(sentCards[2]?.src.startsWith("qodex-media:")).toBe(true);
     expect(sentCards[3]?.src.startsWith("blob:")).toBe(true);
-    expect(sentCards[4]?.src.startsWith("marid-media:")).toBe(true);
+    expect(sentCards[4]?.src.startsWith("qodex-media:")).toBe(true);
     expect(localMediaPath(sentCards[0]?.src).split(/[\\/]/)).toContain("video-cache");
     expect(localMediaPath(sentCards[4]?.src)).toBe(largeVideoPath);
     await expectUnauthorizedLocalMediaPathRejected(VIDEO_SOURCE_PATH);
@@ -235,7 +235,7 @@ describe("v4 VI06/VI07：image/video 媒体 gallery 与 edit", () => {
     await clickV4Send();
     await waitForV4TimelineContaining("V4_VIDEO_PREVIEW_EDIT_OK", 45_000);
     const editedSentCards = await waitForSentMediaCards(["image", "video", "video", "video"]);
-    expect(editedSentCards[3]?.src.startsWith("marid-media:")).toBe(true);
+    expect(editedSentCards[3]?.src.startsWith("qodex-media:")).toBe(true);
     await openSentMedia(3);
     await waitForPlayableVideo(LARGE_VIDEO_FILENAME, editedSentCards[3]?.src);
     await closeMediaPreview();
@@ -489,14 +489,14 @@ async function waitForUnsupportedVideo(filename: string) {
 async function installVideoBlobProbe() {
   await browser.execute(() => {
     const probeWindow = window as Window & {
-      __maridVideoBlobProbe?: {
+      __qodexVideoBlobProbe?: {
         calls: Array<{ size: number; type: string }>;
         original: typeof URL.createObjectURL;
       };
     };
     const original = URL.createObjectURL.bind(URL);
     const calls: Array<{ size: number; type: string }> = [];
-    probeWindow.__maridVideoBlobProbe = { calls, original };
+    probeWindow.__qodexVideoBlobProbe = { calls, original };
     URL.createObjectURL = (object: Blob | MediaSource) => {
       if (object instanceof Blob) calls.push({ size: object.size, type: object.type });
       return original(object);
@@ -509,10 +509,10 @@ async function waitForVideoBlob(mediaType: string) {
     () =>
       browser.execute((expectedMediaType) => {
         const probeWindow = window as Window & {
-          __maridVideoBlobProbe?: { calls: Array<{ size: number; type: string }> };
+          __qodexVideoBlobProbe?: { calls: Array<{ size: number; type: string }> };
         };
         return (
-          probeWindow.__maridVideoBlobProbe?.calls.some(
+          probeWindow.__qodexVideoBlobProbe?.calls.some(
             (call) => call.type === expectedMediaType && call.size > 0,
           ) === true
         );
@@ -524,20 +524,20 @@ async function waitForVideoBlob(mediaType: string) {
 async function readVideoBlobCalls(): Promise<Array<{ size: number; type: string }>> {
   return browser.execute(() => {
     const probeWindow = window as Window & {
-      __maridVideoBlobProbe?: { calls: Array<{ size: number; type: string }> };
+      __qodexVideoBlobProbe?: { calls: Array<{ size: number; type: string }> };
     };
-    return probeWindow.__maridVideoBlobProbe?.calls ?? [];
+    return probeWindow.__qodexVideoBlobProbe?.calls ?? [];
   });
 }
 
 async function restoreVideoBlobProbe() {
   await browser.execute(() => {
     const probeWindow = window as Window & {
-      __maridVideoBlobProbe?: { original: typeof URL.createObjectURL };
+      __qodexVideoBlobProbe?: { original: typeof URL.createObjectURL };
     };
-    const probe = probeWindow.__maridVideoBlobProbe;
+    const probe = probeWindow.__qodexVideoBlobProbe;
     if (probe) URL.createObjectURL = probe.original;
-    delete probeWindow.__maridVideoBlobProbe;
+    delete probeWindow.__qodexVideoBlobProbe;
   });
 }
 
@@ -568,7 +568,7 @@ async function closeMediaPreview() {
 function localMediaPath(src: string | undefined): string {
   if (!src) throw new Error("本地媒体 URL 不存在");
   const url = new URL(src);
-  expect(url.protocol).toBe("marid-media:");
+  expect(url.protocol).toBe("qodex-media:");
   const path = url.searchParams.get("path");
   if (!path) throw new Error(`本地媒体 URL 缺少 path: ${src}`);
   return path;
@@ -576,7 +576,7 @@ function localMediaPath(src: string | undefined): string {
 
 async function expectUnauthorizedLocalMediaPathRejected(path: string) {
   const result = await browser.executeAsync((candidatePath, done) => {
-    const url = new URL("marid-media://local/preview");
+    const url = new URL("qodex-media://local/preview");
     url.searchParams.set("path", candidatePath);
     // 旧协议会被这个 renderer 自报 MIME 绕过；新协议只认 Main 的精确路径授权集合。
     url.searchParams.set("mediaType", "video/mp4");

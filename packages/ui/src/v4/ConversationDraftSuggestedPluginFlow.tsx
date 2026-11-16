@@ -1,13 +1,13 @@
 import {
-  MARID_OFFICIAL_PLUGIN_MARKETPLACE_ID,
-  type MaridPluginsResolveSuggestedReferenceResult,
-} from "@marid/shared";
+  QODEX_OFFICIAL_PLUGIN_MARKETPLACE_ID,
+  type QodexPluginsResolveSuggestedReferenceResult,
+} from "@qodex/shared";
 
 export interface DraftSuggestedPluginFlow {
   anchorItemId: string;
   operationId: string;
   plugin: { stableId: string; label: string };
-  result?: MaridPluginsResolveSuggestedReferenceResult;
+  result?: QodexPluginsResolveSuggestedReferenceResult;
   stage: "checking" | "missing" | "disabled" | "unavailable";
 }
 
@@ -40,12 +40,12 @@ export async function trackDraftSuggestedPluginOperation<T>(
 }
 
 export function resolveDraftSuggestedPluginFlowStage(
-  result: MaridPluginsResolveSuggestedReferenceResult,
+  result: QodexPluginsResolveSuggestedReferenceResult,
 ): DraftSuggestedPluginFlow["stage"] {
   const { status } = result;
   if (
     (status === "ready" || status === "disabled" || status === "missing") &&
-    (result.marketplace !== MARID_OFFICIAL_PLUGIN_MARKETPLACE_ID ||
+    (result.marketplace !== QODEX_OFFICIAL_PLUGIN_MARKETPLACE_ID ||
       result.sourceTrust !== "official" ||
       !result.pluginName)
   ) {

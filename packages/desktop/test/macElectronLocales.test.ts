@@ -15,9 +15,9 @@ afterEach(() => {
 });
 
 function createPackagedApp(lprojNames: string[]) {
-  const root = mkdtempSync(join(tmpdir(), "marid-mac-locales-"));
+  const root = mkdtempSync(join(tmpdir(), "qodex-mac-locales-"));
   tempDirs.push(root);
-  const appPath = join(root, "Marid.app");
+  const appPath = join(root, "Qodex.app");
   const resourcesDir = resolveMacElectronFrameworkResourcesDir(appPath);
   mkdirSync(resourcesDir, { recursive: true });
   for (const name of lprojNames) mkdirSync(join(resourcesDir, `${name}.lproj`));

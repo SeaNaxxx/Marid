@@ -1,11 +1,11 @@
 import {
   DEFAULT_FEEDBACK_TICKET_FRAMEWORK,
-  type MaridProvider,
+  type QodexProvider,
   type FeedbackTicketFramework,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export function inferFeedbackFrameworkFromAgentProvider(
-  _provider: MaridProvider | null | undefined,
+  _provider: QodexProvider | null | undefined,
 ): FeedbackTicketFramework {
   return DEFAULT_FEEDBACK_TICKET_FRAMEWORK;
 }

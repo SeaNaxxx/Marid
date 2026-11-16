@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import type { IPlatformService } from "@marid/shared";
+import type { IPlatformService } from "@qodex/shared";
 import { logger } from "@/logger.js";
 import {
   bindRemoteWorkspaceIdentity,

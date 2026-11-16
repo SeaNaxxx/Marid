@@ -1,4 +1,4 @@
-import type { ConversationRow, ToolCallRow } from "@marid/shared/marid-protocol-v4";
+import type { ConversationRow, ToolCallRow } from "@qodex/shared/qodex-protocol-v4";
 import type { WorkflowDraftPosition } from "@/ToolCallBlocks/shared.js";
 import {
   isPlainRecord,

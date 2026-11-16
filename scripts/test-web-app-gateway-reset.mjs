@@ -11,7 +11,7 @@ import { pathToFileURL } from "node:url";
 const repoRoot = resolve(import.meta.dirname, "..");
 const startScript = join(repoRoot, "docker/web-app/start.mjs");
 
-const tempDir = await mkdtemp(join(tmpdir(), "marid-web-app-gateway-reset-"));
+const tempDir = await mkdtemp(join(tmpdir(), "qodex-web-app-gateway-reset-"));
 const dataDir = join(tempDir, "data");
 const workspaceDir = join(tempDir, "workspace");
 const webDistDir = join(tempDir, "web");
@@ -26,7 +26,7 @@ try {
   await mkdir(dataDir, { recursive: true });
   await mkdir(workspaceDir, { recursive: true });
   await mkdir(webDistDir, { recursive: true });
-  await writeFile(join(webDistDir, "index.html"), "<!doctype html><html><body>Marid test</body></html>\n");
+  await writeFile(join(webDistDir, "index.html"), "<!doctype html><html><body>Qodex test</body></html>\n");
   await writeFile(agentEntry, "module.exports = {};\n");
   await writeFile(
     injectResetEntry,
@@ -42,7 +42,7 @@ try {
     backendEntry,
     `import { createServer } from "node:http";
 
-const startDelayMs = Number(process.env.MARID_TEST_BACKEND_START_DELAY_MS || 0);
+const startDelayMs = Number(process.env.QODEX_TEST_BACKEND_START_DELAY_MS || 0);
 
 setTimeout(() => {
   const server = createServer((req, res) => {
@@ -74,14 +74,14 @@ setTimeout(() => {
       ...process.env,
       NODE_OPTIONS: appendNodeImport(process.env.NODE_OPTIONS, injectResetEntry),
       PORT: String(publicPort),
-      MARID_BACKEND_PORT: String(backendPort),
-      MARID_DATA_BASE_DIR: dataDir,
-      MARID_SERVER_ENTRY: backendEntry,
-      MARID_AGENT_ENTRY: agentEntry,
-      MARID_SERVER_WORKSPACE: workspaceDir,
-      MARID_STORAGE_DIR: join(dataDir, ".marid"),
-      MARID_TEST_BACKEND_START_DELAY_MS: "1000",
-      MARID_WEB_DIST_DIR: webDistDir,
+      QODEX_BACKEND_PORT: String(backendPort),
+      QODEX_DATA_BASE_DIR: dataDir,
+      QODEX_SERVER_ENTRY: backendEntry,
+      QODEX_AGENT_ENTRY: agentEntry,
+      QODEX_SERVER_WORKSPACE: workspaceDir,
+      QODEX_STORAGE_DIR: join(dataDir, ".qodex"),
+      QODEX_TEST_BACKEND_START_DELAY_MS: "1000",
+      QODEX_WEB_DIST_DIR: webDistDir,
     },
     stdio: ["ignore", "pipe", "pipe"],
   });

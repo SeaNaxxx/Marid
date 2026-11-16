@@ -1,4 +1,4 @@
-import type { MaridCommand, MaridSlashCommand } from "@marid/shared";
+import type { QodexCommand, QodexSlashCommand } from "@qodex/shared";
 
 function normalizeSlashCommandName(name: string): string {
   return name.trim().replace(/^\/+/, "");
@@ -8,7 +8,7 @@ function slashCommandKey(name: string): string {
   return normalizeSlashCommandName(name).toLowerCase();
 }
 
-function commandToSlashCommand(command: MaridCommand): MaridSlashCommand | null {
+function commandToSlashCommand(command: QodexCommand): QodexSlashCommand | null {
   if (!command.enabled) {
     return null;
   }
@@ -27,14 +27,14 @@ function commandToSlashCommand(command: MaridCommand): MaridSlashCommand | null 
 }
 
 export function mergeSlashCommandsAfterCommandRefresh(
-  currentSlashCommands: readonly MaridSlashCommand[],
-  refreshedCommands: readonly MaridCommand[],
-): MaridSlashCommand[] {
+  currentSlashCommands: readonly QodexSlashCommand[],
+  refreshedCommands: readonly QodexCommand[],
+): QodexSlashCommand[] {
   const preservedCommands = currentSlashCommands.filter((command) => command.source !== "custom");
   const preservedNames = new Set(
     preservedCommands.map((command) => slashCommandKey(command.name)).filter(Boolean),
   );
-  const customCommands: MaridSlashCommand[] = [];
+  const customCommands: QodexSlashCommand[] = [];
   const seenCustomNames = new Set<string>();
 
   for (const command of refreshedCommands) {

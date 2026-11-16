@@ -1,4 +1,4 @@
-import type { IPlatformService } from "@marid/shared";
+import type { IPlatformService } from "@qodex/shared";
 
 export interface ImagePreviewDialogItem {
   alt: string;

@@ -2,8 +2,8 @@
 
 ## 规则
 
-Computer Use 的真实实现来自 workspace 包 `@marid/marid-cua`（producer）。开源导出用 `packages/marid-cua`
-占位包替换它，占位包在 `package.json` 声明 `maridCuaPlaceholder: true`，所有能力 fail-closed。
+Computer Use 的真实实现来自 workspace 包 `@qodex/qodex-cua`（producer）。开源导出用 `packages/qodex-cua`
+占位包替换它，占位包在 `package.json` 声明 `qodexCuaPlaceholder: true`，所有能力 fail-closed。
 
 占位包保留公共 `build` 和 `tsconfig.json` 入口，构建只检查随包类型声明。
 日志回调的 traceId 与参数类型和真实 producer 一致，使公共调用方无需按发行版本分支。
@@ -25,8 +25,8 @@ Sharp 的暂存与校验仍以“producer 是否声明 Sharp 依赖”为准（`
 ## 所有者与接口
 
 - 唯一判定：`packages/desktop/scripts/computer-use-producer.mjs` 的 `readComputerUseProducer` /
-  `isRealComputerUseProducerInstalled`。从桌面包目录向上查找最近一次安装的 `@marid/marid-cua`，
-  读取清单的 `maridCuaPlaceholder` 字段。
+  `isRealComputerUseProducerInstalled`。从桌面包目录向上查找最近一次安装的 `@qodex/qodex-cua`，
+  读取清单的 `qodexCuaPlaceholder` 字段。
 - 构建配置同步求值，判定只做一次小文件同步读取。
 
 ## 验收

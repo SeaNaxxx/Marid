@@ -1,5 +1,5 @@
-import type { PipSessionEvent } from "@marid/marid-cua/pip-session";
-import { ServiceChannels } from "@marid/shared";
+import type { PipSessionEvent } from "@qodex/qodex-cua/pip-session";
+import { ServiceChannels } from "@qodex/shared";
 
 import { createServiceDescriptor } from "../descriptors.js";
 

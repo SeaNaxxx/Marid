@@ -1,7 +1,7 @@
 import {
   TID_CHAT_SUMMARY_PANEL,
   TID_V4_COMPOSER_BACKGROUND_WORK_TRIGGER,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 
 export interface RunningSubagentControl {
   childSessionId: string;
@@ -206,8 +206,8 @@ export async function clickRunningSubagentStop(control: RunningSubagentControl):
   expect(await button.getAttribute("data-subagent-execution-id")).toBe(control.executionId);
   // 旧等待器只按类型找历史 ACK，会把上一项停止成功误算成本次成功。
   const start = await browser.execute(() => {
-    const host = window as Window & { __maridV4CommandAcksE2E?: unknown[] };
-    return host.__maridV4CommandAcksE2E?.length ?? 0;
+    const host = window as Window & { __qodexV4CommandAcksE2E?: unknown[] };
+    return host.__qodexV4CommandAcksE2E?.length ?? 0;
   });
   await button.click();
   let ack: { type: string; status: string; reasonCode?: string } | null = null;
@@ -217,13 +217,13 @@ export async function clickRunningSubagentStop(control: RunningSubagentControl):
         const entries =
           (
             window as Window & {
-              __maridV4CommandAcksE2E?: Array<{
+              __qodexV4CommandAcksE2E?: Array<{
                 type: string;
                 status: string;
                 reasonCode?: string;
               }>;
             }
-          ).__maridV4CommandAcksE2E ?? [];
+          ).__qodexV4CommandAcksE2E ?? [];
         return entries.slice(after).find((entry) => entry.type === "stopSubagent") ?? null;
       }, start);
       return ack !== null;

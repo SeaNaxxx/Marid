@@ -4,7 +4,7 @@ import { selectCombinedComposerThoughtLevel } from "./composer-model-picker.js";
 // 与旧 conversation-session.ts 的区别：所有定位走 TID_V4_* 常量（testid contract v2，
 // 带 paneId 维度），状态断言读 v4 pane 的 data-* 投影属性，不再依赖旧 ChatView DOM。
 // 旧 helper 的登录/工作区/provider 部分继续复用（desktop-app.ts / upstream-provider.ts）。
-import { encodeCustomModelValue } from "@marid/shared";
+import { encodeCustomModelValue } from "@qodex/shared";
 import {
   TID_CHAT_ERROR_DETAILS_BUTTON,
   TID_CHAT_ATTACHMENT_BUTTON,
@@ -56,7 +56,7 @@ import {
   TID_V4_TURN_NAVIGATOR_ITEM,
   TID_V4_TURN_NAVIGATOR_TOOLTIP,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   clickTestIdByDom,
   DEFAULT_WORKSPACE,
@@ -117,8 +117,8 @@ export async function pickV4ComposerFiles(paths: string[]) {
 interface PrepareV4ConversationE2EOptions {
   resetDraftBeforeProvider?: boolean;
   skipProvider?: boolean;
-  /** 跳过 ensureV4ShellReady 的 MaridProject 等待。已登录冷启（真实凭据 seed 后 reloadSession）
-   * 的 app 按 startupWorkspace 语义落在 conversation backing workspace，MaridProject 永远不出现；
+  /** 跳过 ensureV4ShellReady 的 QodexProject 等待。已登录冷启（真实凭据 seed 后 reloadSession）
+   * 的 app 按 startupWorkspace 语义落在 conversation backing workspace，QodexProject 永远不出现；
    * 调用方需自行等待 v4 shell 就绪（如侧栏新任务按钮）。见 ANALYSIS r3-rerun §46。 */
   skipShellReady?: boolean;
 }
@@ -210,11 +210,11 @@ export async function waitForV4WorkspacePresentationReady(
         (targetPath, caseInsensitive) => {
           const workspaces = (
             window as Window & {
-              __maridSessionStoreE2E?: {
+              __qodexSessionStoreE2E?: {
                 getState(): { workspaces: Record<string, { slashCommands?: unknown[] }> };
               };
             }
-          ).__maridSessionStoreE2E?.getState().workspaces;
+          ).__qodexSessionStoreE2E?.getState().workspaces;
           // Windows 路径大小写不敏感，store key 可能与夹具路径的盘符/目录大小写不同。
           const normalize = (path: string) => (caseInsensitive ? path.toLowerCase() : path);
           return Object.entries(workspaces ?? {}).some(
@@ -259,9 +259,9 @@ async function ensureV4PreparationDraft(options: PrepareV4ConversationE2EOptions
       const input = pane?.querySelector<HTMLElement>(`[data-testid="${inputId}"]`);
       const activePath = (
         window as Window & {
-          __maridTabStoreE2E?: { getState(): { activeWorkspacePath?: string | null } };
+          __qodexTabStoreE2E?: { getState(): { activeWorkspacePath?: string | null } };
         }
-      ).__maridTabStoreE2E?.getState().activeWorkspacePath;
+      ).__qodexTabStoreE2E?.getState().activeWorkspacePath;
       return Boolean(
         pane?.dataset.sessionId === "draft" &&
         input?.getClientRects().length &&
@@ -481,7 +481,7 @@ export async function getV4ConversationState(): Promise<V4ConversationStateSnaps
 
 /**
  * v4 composer 输入（M5 起为 Lexical contenteditable）：写入走
- * setInputValueByTestIdDom 的 __maridLexicalInputE2E bridge 分支（驱动真实 editor state）。
+ * setInputValueByTestIdDom 的 __qodexLexicalInputE2E bridge 分支（驱动真实 editor state）。
  */
 export async function sendV4Prompt(prompt: string) {
   const resendOnDraftRegeneration = consumeDraftRegenerationResend();
@@ -611,8 +611,8 @@ async function isDraftRegenerationSendFailure(since: number): Promise<boolean> {
             properties?: Record<string, unknown>;
           };
           const events =
-            (window as Window & { __maridArmsCustomEventsE2E?: SendFunnelEvent[] })
-              .__maridArmsCustomEventsE2E ?? [];
+            (window as Window & { __qodexArmsCustomEventsE2E?: SendFunnelEvent[] })
+              .__qodexArmsCustomEventsE2E ?? [];
           const click = events.find(
             (event) => event.name === "send_click" && (event.recordedAt ?? 0) >= sinceMs,
           );
@@ -671,7 +671,7 @@ export async function sendV4PromptAndWaitAccepted(
       (paneTestId, inputTestId, sendTestId, timelineTestId, marker) => {
         const pane = document.querySelector<HTMLElement>(`[data-testid="${paneTestId}"]`);
         const input = pane?.querySelector<
-          HTMLElement & { __maridLexicalInputE2E?: { getText: () => string } }
+          HTMLElement & { __qodexLexicalInputE2E?: { getText: () => string } }
         >(`[data-testid="${inputTestId}"]`);
         const send = pane?.querySelector<HTMLButtonElement>(`[data-testid="${sendTestId}"]`);
         const timeline = pane?.querySelector<HTMLElement>(`[data-testid="${timelineTestId}"]`);
@@ -683,7 +683,7 @@ export async function sendV4PromptAndWaitAccepted(
             (row.innerText || row.textContent || "").includes(marker),
         );
         return {
-          composerText: input?.__maridLexicalInputE2E?.getText() ?? null,
+          composerText: input?.__qodexLexicalInputE2E?.getText() ?? null,
           paneExists: Boolean(pane),
           sendDisabled: send?.disabled ?? null,
           sessionId: pane?.getAttribute("data-session-id") ?? null,
@@ -1262,13 +1262,13 @@ export function getLatestV4CommandAck(type: string): Promise<{
     const entries =
       (
         window as Window & {
-          __maridV4CommandAcksE2E?: Array<{
+          __qodexV4CommandAcksE2E?: Array<{
             type: string;
             status: string;
             reasonCode?: string;
           }>;
         }
-      ).__maridV4CommandAcksE2E ?? [];
+      ).__qodexV4CommandAcksE2E ?? [];
     return [...entries].reverse().find((entry) => entry.type === commandType) ?? null;
   }, type);
 }
@@ -1395,7 +1395,7 @@ export function getV4DraftThoughtState(workspacePath: string): Promise<{
   return browser.execute(
     (path, modelTestId) => {
       const e2eWindow = window as Window & {
-        __maridSessionStoreE2E?: {
+        __qodexSessionStoreE2E?: {
           getState: () => {
             getWorkspaceState?: (workspacePath: string) => {
               configOptions?: Array<{
@@ -1408,7 +1408,7 @@ export function getV4DraftThoughtState(workspacePath: string): Promise<{
         };
       };
       const options =
-        e2eWindow.__maridSessionStoreE2E?.getState().getWorkspaceState?.(path).configOptions ?? [];
+        e2eWindow.__qodexSessionStoreE2E?.getState().getWorkspaceState?.(path).configOptions ?? [];
       const model = options.find((option) => option.category === "model");
       const thought = options.find((option) => option.category === "thought_level");
       const v4Config = document.querySelector<HTMLElement>(`[data-testid="${modelTestId}"]`);
@@ -2239,7 +2239,7 @@ export async function waitForV4PaneById(
 /** pane 作用域内写 composer 文本并点发送（同 sendV4Prompt，但按 paneId 收口）。 */
 export async function sendV4PromptInPane(paneId: string, prompt: string) {
   const paneShellTestId = testId(TID_V4_PANE_SHELL, paneId);
-  // M5：composer 为 Lexical contenteditable——写入走编辑器挂载的 __maridLexicalInputE2E
+  // M5：composer 为 Lexical contenteditable——写入走编辑器挂载的 __qodexLexicalInputE2E
   // bridge（驱动真实 editor state）；bridge.focus() 同时驱动 Focus 层 → composer 归属该 pane。
   await browser.waitUntil(
     async () =>
@@ -2250,13 +2250,13 @@ export async function sendV4PromptInPane(paneId: string, prompt: string) {
           if (!element) return false;
           const bridge = (
             element as HTMLElement & {
-              __maridLexicalInputE2E?: {
+              __qodexLexicalInputE2E?: {
                 focus: () => void;
                 getText: () => string;
                 setText: (text: string) => void;
               };
             }
-          ).__maridLexicalInputE2E;
+          ).__qodexLexicalInputE2E;
           if (!bridge) return false;
           bridge.focus();
           bridge.setText(nextValue);
@@ -2568,8 +2568,8 @@ export function getV4ComposerText(): Promise<string | null> {
   return browser.execute((inputTestId) => {
     const element = document.querySelector<HTMLElement>(`[data-testid="${inputTestId}"]`);
     const bridge = (
-      element as (HTMLElement & { __maridLexicalInputE2E?: { getText: () => string } }) | null
-    )?.__maridLexicalInputE2E;
+      element as (HTMLElement & { __qodexLexicalInputE2E?: { getText: () => string } }) | null
+    )?.__qodexLexicalInputE2E;
     return bridge ? bridge.getText() : null;
   }, TID_V4_COMPOSER_INPUT);
 }

@@ -5,12 +5,12 @@ import {
   getDesktopMenuMessage,
   isValidShortcutBinding,
   resolveLocaleFromLanguageTag,
-  MARID_ENV,
-  MARID_PRODUCT_FLAVOR,
+  QODEX_ENV,
+  QODEX_PRODUCT_FLAVOR,
   type DesktopCommandId,
   type Locale,
-} from "@marid/shared";
-import { readMaridStdioTapDevState } from "@marid/services/node";
+} from "@qodex/shared";
+import { readQodexStdioTapDevState } from "@qodex/services/node";
 import { CHECK_FOR_UPDATE_MENU_ID, setAutoUpdaterMenuLocale } from "./autoUpdater.js";
 import {
   DESKTOP_ZOOM_MAX_LEVEL,
@@ -18,12 +18,12 @@ import {
   clampDesktopZoomLevel,
 } from "./desktopZoom.js";
 import {
-  HELP_TOGGLE_MARID_STDIO_TAP_MENU_ID,
+  HELP_TOGGLE_QODEX_STDIO_TAP_MENU_ID,
   HELP_TOGGLE_DEV_TOOLS_MENU_ID,
 } from "./desktopCommandHandlers.js";
 
-export const HELP_MARID_ENDPOINT_PRODUCTION_MENU_ID = "help.marid-endpoint.production";
-export const HELP_MARID_ENDPOINT_TEST_MENU_ID = "help.marid-endpoint.test";
+export const HELP_QODEX_ENDPOINT_PRODUCTION_MENU_ID = "help.qodex-endpoint.production";
+export const HELP_QODEX_ENDPOINT_TEST_MENU_ID = "help.qodex-endpoint.test";
 
 export function getDesktopMenuLabel(
   locale: Locale,
@@ -40,13 +40,13 @@ export function resolveSystemApplicationLocale(): Locale {
   return resolveLocaleFromLanguageTag(systemLocale);
 }
 
-export function updateMaridStdioTapDevMenuState() {
+export function updateQodexStdioTapDevMenuState() {
   const menu = Menu.getApplicationMenu();
-  const item = menu?.getMenuItemById(HELP_TOGGLE_MARID_STDIO_TAP_MENU_ID);
+  const item = menu?.getMenuItemById(HELP_TOGGLE_QODEX_STDIO_TAP_MENU_ID);
   if (!item) {
     return;
   }
-  const state = readMaridStdioTapDevState();
+  const state = readQodexStdioTapDevState();
   item.checked = state.enabled;
   item.visible = state.visible;
 }
@@ -85,7 +85,7 @@ function resolveMenuAccelerator(
 
 function buildApplicationMenuTemplate(options: {
   currentApplicationLocale: Locale;
-  maridEndpointSelection?: "production" | "test" | "custom";
+  qodexEndpointSelection?: "production" | "test" | "custom";
   executeDesktopCommand: (
     command: DesktopCommandId,
     senderWindow?: BrowserWindow | null,
@@ -99,7 +99,7 @@ function buildApplicationMenuTemplate(options: {
     getDesktopMenuLabel(options.currentApplicationLocale, id);
   const getAppLabel = (id: (typeof desktopMenuMessageIds)[keyof typeof desktopMenuMessageIds]) =>
     getLabel(id).replaceAll("{appName}", app.name);
-  const stdioTapState = readMaridStdioTapDevState();
+  const stdioTapState = readQodexStdioTapDevState();
   const isLocalDevelopmentRuntime = !app.isPackaged;
   const currentZoomLevel = clampDesktopZoomLevel(options.currentZoomLevel ?? 0);
   const canResetZoom = currentZoomLevel !== 0;
@@ -121,7 +121,7 @@ function buildApplicationMenuTemplate(options: {
                 click: () => void options.executeDesktopCommand(DesktopCommandIds.ShowAbout),
               },
               // 更新入口跟随产品身份：Preview 禁用更新器，生产后端的 Preview 也不例外。
-              ...(MARID_PRODUCT_FLAVOR === "production"
+              ...(QODEX_PRODUCT_FLAVOR === "production"
                 ? [
                     {
                       id: CHECK_FOR_UPDATE_MENU_ID,
@@ -262,7 +262,7 @@ function buildApplicationMenuTemplate(options: {
                 label: getLabel(desktopMenuMessageIds.helpAbout),
                 click: () => void options.executeDesktopCommand(DesktopCommandIds.ShowAbout),
               },
-              ...(MARID_PRODUCT_FLAVOR === "production"
+              ...(QODEX_PRODUCT_FLAVOR === "production"
                 ? [
                     {
                       id: CHECK_FOR_UPDATE_MENU_ID,
@@ -283,49 +283,49 @@ function buildApplicationMenuTemplate(options: {
         ...(isLocalDevelopmentRuntime && stdioTapState.visible
           ? [
               {
-                id: HELP_TOGGLE_MARID_STDIO_TAP_MENU_ID,
-                label: getLabel(desktopMenuMessageIds.helpToggleMaridStdioTap),
+                id: HELP_TOGGLE_QODEX_STDIO_TAP_MENU_ID,
+                label: getLabel(desktopMenuMessageIds.helpToggleQodexStdioTap),
                 type: "checkbox" as const,
                 checked: stdioTapState.enabled,
                 click: () =>
-                  void options.executeDesktopCommand(DesktopCommandIds.ToggleMaridStdioTapDevProxy),
+                  void options.executeDesktopCommand(DesktopCommandIds.ToggleQodexStdioTapDevProxy),
               },
               { type: "separator" as const },
             ]
           : []),
-        ...(MARID_ENV === "test"
+        ...(QODEX_ENV === "test"
           ? [
               {
-                label: getLabel(desktopMenuMessageIds.helpMaridEndpoint),
+                label: getLabel(desktopMenuMessageIds.helpQodexEndpoint),
                 submenu: [
                   {
-                    id: HELP_MARID_ENDPOINT_PRODUCTION_MENU_ID,
-                    label: getLabel(desktopMenuMessageIds.helpMaridEndpointProduction),
+                    id: HELP_QODEX_ENDPOINT_PRODUCTION_MENU_ID,
+                    label: getLabel(desktopMenuMessageIds.helpQodexEndpointProduction),
                     type: "radio" as const,
-                    checked: (options.maridEndpointSelection ?? "production") === "production",
+                    checked: (options.qodexEndpointSelection ?? "production") === "production",
                     click: () =>
                       void options.executeDesktopCommand(
-                        DesktopCommandIds.SetMaridEndpointProduction,
+                        DesktopCommandIds.SetQodexEndpointProduction,
                       ),
                   },
                   {
-                    id: HELP_MARID_ENDPOINT_TEST_MENU_ID,
-                    label: getLabel(desktopMenuMessageIds.helpMaridEndpointTest),
+                    id: HELP_QODEX_ENDPOINT_TEST_MENU_ID,
+                    label: getLabel(desktopMenuMessageIds.helpQodexEndpointTest),
                     type: "radio" as const,
-                    checked: options.maridEndpointSelection === "test",
+                    checked: options.qodexEndpointSelection === "test",
                     click: () =>
-                      void options.executeDesktopCommand(DesktopCommandIds.SetMaridEndpointTest),
+                      void options.executeDesktopCommand(DesktopCommandIds.SetQodexEndpointTest),
                   },
                   { type: "separator" as const },
                   {
-                    label: getLabel(desktopMenuMessageIds.helpMaridEndpointCustom),
+                    label: getLabel(desktopMenuMessageIds.helpQodexEndpointCustom),
                     click: () =>
-                      void options.executeDesktopCommand(DesktopCommandIds.SetMaridEndpointCustom),
+                      void options.executeDesktopCommand(DesktopCommandIds.SetQodexEndpointCustom),
                   },
                   {
-                    label: getLabel(desktopMenuMessageIds.helpMaridEndpointReset),
+                    label: getLabel(desktopMenuMessageIds.helpQodexEndpointReset),
                     click: () =>
-                      void options.executeDesktopCommand(DesktopCommandIds.ResetMaridEndpoint),
+                      void options.executeDesktopCommand(DesktopCommandIds.ResetQodexEndpoint),
                   },
                 ],
               },
@@ -364,7 +364,7 @@ function buildApplicationMenuTemplate(options: {
 
 export function rebuildApplicationMenu(options: {
   currentApplicationLocale: Locale;
-  maridEndpointSelection?: "production" | "test" | "custom";
+  qodexEndpointSelection?: "production" | "test" | "custom";
   executeDesktopCommand: (
     command: DesktopCommandId,
     senderWindow?: BrowserWindow | null,
@@ -378,7 +378,7 @@ export function rebuildApplicationMenu(options: {
     Menu.buildFromTemplate(
       buildApplicationMenuTemplate({
         currentApplicationLocale: options.currentApplicationLocale,
-        maridEndpointSelection: options.maridEndpointSelection,
+        qodexEndpointSelection: options.qodexEndpointSelection,
         executeDesktopCommand: options.executeDesktopCommand,
         currentZoomLevel: options.currentZoomLevel,
         shortcutBindings: options.shortcutBindings,
@@ -388,6 +388,6 @@ export function rebuildApplicationMenu(options: {
   );
   setAutoUpdaterMenuLocale(options.currentApplicationLocale);
   if (!app.isPackaged) {
-    updateMaridStdioTapDevMenuState();
+    updateQodexStdioTapDevMenuState();
   }
 }

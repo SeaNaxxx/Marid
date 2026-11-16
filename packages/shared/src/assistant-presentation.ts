@@ -1,9 +1,9 @@
 import {
   getLatestAssistantContentPart,
-  type MaridAssistantMessagePart,
+  type QodexAssistantMessagePart,
 } from "./assistant-message-parts.js";
 
-export interface MaridAssistantPresentationToolCall {
+export interface QodexAssistantPresentationToolCall {
   toolId: string;
   parentToolUseId?: string | null;
   kind: string;
@@ -15,7 +15,7 @@ export interface MaridAssistantPresentationToolCall {
   raw?: unknown;
 }
 
-export type MaridAssistantPresentationBlock =
+export type QodexAssistantPresentationBlock =
   | {
       type: "content";
       content: string;
@@ -26,21 +26,21 @@ export type MaridAssistantPresentationBlock =
     }
   | {
       type: "tool-call";
-      toolCall: MaridAssistantPresentationToolCall;
+      toolCall: QodexAssistantPresentationToolCall;
     };
 
-export interface MaridAssistantPresentation {
-  messageParts: MaridAssistantMessagePart[];
-  blocks: MaridAssistantPresentationBlock[];
-  latestPart: Extract<MaridAssistantPresentationBlock, { type: "content" }> | null;
-  historyBlocks: MaridAssistantPresentationBlock[];
+export interface QodexAssistantPresentation {
+  messageParts: QodexAssistantMessagePart[];
+  blocks: QodexAssistantPresentationBlock[];
+  latestPart: Extract<QodexAssistantPresentationBlock, { type: "content" }> | null;
+  historyBlocks: QodexAssistantPresentationBlock[];
 }
 
-export interface BuildMaridAssistantPresentationOptions {
+export interface BuildQodexAssistantPresentationOptions {
   content: string;
   thought?: string;
-  toolCalls?: readonly MaridAssistantPresentationToolCall[];
-  parts?: readonly MaridAssistantMessagePart[];
+  toolCalls?: readonly QodexAssistantPresentationToolCall[];
+  parts?: readonly QodexAssistantMessagePart[];
   streaming?: boolean;
   interrupted?: boolean;
   settling?: boolean;
@@ -50,7 +50,7 @@ function buildFallbackAssistantParts({
   content,
   thought,
   toolCalls,
-}: Pick<BuildMaridAssistantPresentationOptions, "content" | "thought" | "toolCalls">) {
+}: Pick<BuildQodexAssistantPresentationOptions, "content" | "thought" | "toolCalls">) {
   const rootToolCalls = (toolCalls ?? []).filter((toolCall) => {
     const parentToolUseId = toolCall.parentToolUseId ?? null;
     return (
@@ -73,7 +73,7 @@ function buildFallbackAssistantParts({
   ];
 }
 
-export function buildMaridAssistantPresentation({
+export function buildQodexAssistantPresentation({
   content,
   thought,
   toolCalls = [],
@@ -81,14 +81,14 @@ export function buildMaridAssistantPresentation({
   streaming = false,
   interrupted = false,
   settling = false,
-}: BuildMaridAssistantPresentationOptions): MaridAssistantPresentation {
+}: BuildQodexAssistantPresentationOptions): QodexAssistantPresentation {
   const messageParts =
     parts && parts.length > 0
       ? [...parts]
       : buildFallbackAssistantParts({ content, thought, toolCalls });
   const toolCallById = new Map(toolCalls.map((toolCall) => [toolCall.toolId, toolCall]));
   const renderedToolCallIds = new Set<string>();
-  const blocks: MaridAssistantPresentationBlock[] = [];
+  const blocks: QodexAssistantPresentationBlock[] = [];
 
   for (const part of messageParts) {
     if (part.type === "content") {
@@ -122,12 +122,12 @@ export function buildMaridAssistantPresentation({
       : getLatestAssistantContentPart(
           blocks
             .filter(
-              (block): block is Extract<MaridAssistantPresentationBlock, { type: "content" }> =>
+              (block): block is Extract<QodexAssistantPresentationBlock, { type: "content" }> =>
                 block.type === "content",
             )
             .map((block) => ({ type: "content", content: block.content })),
         );
-  let latestPart: Extract<MaridAssistantPresentationBlock, { type: "content" }> | null = null;
+  let latestPart: Extract<QodexAssistantPresentationBlock, { type: "content" }> | null = null;
   let latestBlockIndex = -1;
   if (latestContentPart) {
     latestBlockIndex = blocks.findLastIndex(
@@ -136,7 +136,7 @@ export function buildMaridAssistantPresentation({
     latestPart =
       latestBlockIndex >= 0
         ? (blocks[latestBlockIndex] as Extract<
-            MaridAssistantPresentationBlock,
+            QodexAssistantPresentationBlock,
             { type: "content" }
           >)
         : null;

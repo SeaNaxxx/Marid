@@ -1,4 +1,4 @@
-import type { ClientSceneConfig, ClientSceneItem } from "@marid/services";
+import type { ClientSceneConfig, ClientSceneItem } from "@qodex/services";
 
 export interface DraftSuggestedPromptLocalizedText {
   cn?: string;

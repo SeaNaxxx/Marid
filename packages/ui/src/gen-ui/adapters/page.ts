@@ -1,7 +1,7 @@
 import { AppBridge, type McpUiHostContext } from "@modelcontextprotocol/ext-apps/app-bridge";
 import { z } from "zod";
-import type { IGenUiService } from "@marid/services";
-import type { PluginSandboxPlatformPort, PluginSandboxHandle } from "@marid/shared/mcp-apps";
+import type { IGenUiService } from "@qodex/services";
+import type { PluginSandboxPlatformPort, PluginSandboxHandle } from "@qodex/shared/mcp-apps";
 import {
   GEN_UI_STATE_METHOD,
   GEN_UI_FOLLOW_UP_METHOD,
@@ -15,7 +15,7 @@ import {
   genUiTweakMessageSchema,
   genUiTweakResultSchema,
   type GenUiTweakValues,
-} from "@marid/shared/gen-ui";
+} from "@qodex/shared/gen-ui";
 import {
   createPluginUiPagePlane,
   createPluginUiMessagePortTransport,
@@ -114,8 +114,8 @@ export function createGenUiPage(input: GenUiPageInput): GenUiPage {
     // SDK 持有上一份上下文用于差异比较，不能与可写投影共享同一对象。
     const active = new AppBridge(
       null,
-      { name: "marid-gen-ui", version: "1" },
-      { openLinks: {}, experimental: { "marid/gen-ui": {} } },
+      { name: "qodex-gen-ui", version: "1" },
+      { openLinks: {}, experimental: { "qodex/gen-ui": {} } },
       { hostContext: { ...context } },
     );
     bridge = active;

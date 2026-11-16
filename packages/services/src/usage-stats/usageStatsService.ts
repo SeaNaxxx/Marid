@@ -15,18 +15,18 @@ import type {
   UsageEntitlementSnapshot,
   UsageStatsRequest,
   UsageStatsSnapshot,
-} from "@marid/shared";
-import { isCodingPlanModelProviderId } from "@marid/shared";
+} from "@qodex/shared";
+import { isCodingPlanModelProviderId } from "@qodex/shared";
 import type { OAuthAccountMaterial } from "#src/oauth/repo/oauthCredentialRepo.js";
 import type { IAccountRequestAuthService } from "../model-provider/accountRequestAuthService.js";
-import type { IMaridAgentService } from "../marid-agent/maridAgent.js";
+import type { IQodexAgentService } from "../qodex-agent/qodexAgent.js";
 import type { IUsageStatsService } from "./usageStats.js";
 import {
   BigModelUsageQuotaProvider,
   type UsageApiAuthorizationRequest,
   type UsageApiAuthorization,
 } from "./providers/bigmodelUsageQuotaProvider.js";
-import type { OfficialMcpCredentialSource } from "./providers/maridMcpQuotaProvider.js";
+import type { OfficialMcpCredentialSource } from "./providers/qodexMcpQuotaProvider.js";
 
 interface UsageStatsServiceDependencies {
   apiClient: ApiClient;
@@ -39,8 +39,8 @@ interface UsageStatsServiceDependencies {
     request: UsageApiAuthorizationRequest,
   ) => Promise<UsageApiAuthorization | null>;
   env?: NodeJS.ProcessEnv;
-  /** App Usage 经 Marid Protocol 读取 agent 数据库真实统计。 */
-  maridAgentService: Pick<IMaridAgentService, "getAppUsageStats">;
+  /** App Usage 经 Qodex Protocol 读取 agent 数据库真实统计。 */
+  qodexAgentService: Pick<IQodexAgentService, "getAppUsageStats">;
   /**
    * 官方 Server MCP 额度的凭证来源（与 server MCP 调用同一套 5 个身份头）。
    * 缺省时 entitlement 快照不含 MCP 额度。
@@ -83,8 +83,8 @@ export function createUsageStatsService(
   return {
     async getAppUsageSnapshot(request: AppUsageRequest): Promise<AppUsageSnapshot> {
       // App Usage 现读取 agent 数据库真实统计（model_usage/turn_usage/tool_usage），
-      // 经 Marid Protocol usage/stats 取回。不再读本地 session JSON 估算。
-      return dependencies.maridAgentService.getAppUsageStats({
+      // 经 Qodex Protocol usage/stats 取回。不再读本地 session JSON 估算。
+      return dependencies.qodexAgentService.getAppUsageStats({
         range: request.range,
         timeZone: request.timeZone,
       });

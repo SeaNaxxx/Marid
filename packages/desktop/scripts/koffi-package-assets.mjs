@@ -68,7 +68,7 @@ export function stageKoffiIntoBundledAgents({ koffiPackageRoot, glmDir, targetPl
 export function verifyStagedKoffi({
   resourcesDir,
   targetPlatform,
-  pluginRelativePath = "packages/marid-cua-plugin",
+  pluginRelativePath = "packages/qodex-cua-plugin",
 }) {
   const platformKey = koffiPlatformKey(targetPlatform);
   const koffiRoot = resolve(resourcesDir, "glm", pluginRelativePath, "node_modules", "koffi");

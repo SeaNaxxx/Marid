@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { PROTOCOL_V4_LIMITS } from "@marid/shared/marid-protocol-v4";
+import { PROTOCOL_V4_LIMITS } from "@qodex/shared/qodex-protocol-v4";
 import { logger } from "@/logger.js";
 import { useV4Conversation } from "@/v4/V4ConversationContext.js";
 

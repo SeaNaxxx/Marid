@@ -1,4 +1,4 @@
-import type { ClientSceneConfig, ClientSceneItem } from "@marid/services";
+import type { ClientSceneConfig, ClientSceneItem } from "@qodex/services";
 import type { AutomationScheduledTemplateIconName } from "@/settings/AutomationScheduledTemplateIcon.js";
 import type { OffPeakTemplateIconName } from "@/settings/OffPeakTemplateIcon.js";
 import { canVisualizeCronInAutomationEditor } from "@/settings/automationFormat.js";

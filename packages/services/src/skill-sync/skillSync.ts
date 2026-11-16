@@ -1,5 +1,5 @@
-import type { SkillDataSyncPayload } from "@marid/shared";
-import { ServiceChannels } from "@marid/shared";
+import type { SkillDataSyncPayload } from "@qodex/shared";
+import { ServiceChannels } from "@qodex/shared";
 import { createServiceDescriptor } from "../descriptors.js";
 import type { IDataSyncCategoryService } from "../data-sync/contract.js";
 

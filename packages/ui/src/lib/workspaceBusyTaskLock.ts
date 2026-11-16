@@ -1,14 +1,14 @@
-import type { MaridProvider, MaridTaskRuntimeStatus } from "@marid/shared";
+import type { QodexProvider, QodexTaskRuntimeStatus } from "@qodex/shared";
 
-function isBusyTaskRuntimeStatus(status: MaridTaskRuntimeStatus): boolean {
+function isBusyTaskRuntimeStatus(status: QodexTaskRuntimeStatus): boolean {
   return status === "creating" || status === "restoring" || status === "streaming";
 }
 
 function buildTaskProviderByTaskId(
-  optimisticTaskMetaByTaskId: Record<string, { provider?: MaridProvider }>,
-  taskListCache?: Array<{ taskId: string; provider?: MaridProvider }> | null,
-): Record<string, MaridProvider | undefined> {
-  const providerByTaskId: Record<string, MaridProvider | undefined> = {};
+  optimisticTaskMetaByTaskId: Record<string, { provider?: QodexProvider }>,
+  taskListCache?: Array<{ taskId: string; provider?: QodexProvider }> | null,
+): Record<string, QodexProvider | undefined> {
+  const providerByTaskId: Record<string, QodexProvider | undefined> = {};
 
   for (const task of taskListCache ?? []) {
     if (!task.provider) {
@@ -28,10 +28,10 @@ function buildTaskProviderByTaskId(
 }
 
 export function hasBusyTaskInWorkspaceProvider(
-  selectedProvider: MaridProvider,
-  taskRuntimeByTaskId: Record<string, { status: MaridTaskRuntimeStatus; provider?: MaridProvider }>,
-  optimisticTaskMetaByTaskId: Record<string, { provider?: MaridProvider }>,
-  taskListCache?: Array<{ taskId: string; provider?: MaridProvider }> | null,
+  selectedProvider: QodexProvider,
+  taskRuntimeByTaskId: Record<string, { status: QodexTaskRuntimeStatus; provider?: QodexProvider }>,
+  optimisticTaskMetaByTaskId: Record<string, { provider?: QodexProvider }>,
+  taskListCache?: Array<{ taskId: string; provider?: QodexProvider }> | null,
   activeTaskId?: string | null,
 ): boolean {
   const providerByTaskId = buildTaskProviderByTaskId(optimisticTaskMetaByTaskId, taskListCache);

@@ -3,13 +3,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ExternalLinkIcon, RefreshCwIcon } from "lucide-react";
 import { useServices } from "@/hooks/useServices.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
-import { RENDERER_MARID_ENDPOINT_URLS } from "@/lib/rendererMaridEndpoint.js";
+import { RENDERER_QODEX_ENDPOINT_URLS } from "@/lib/rendererQodexEndpoint.js";
 import { logger } from "@/logger.js";
 import { cn } from "@/components/lib/utils.js";
 import { Button } from "@/components/ui/button.js";
 import { EmbeddedWebsiteHeader } from "@/components/EmbeddedWebsiteHeader.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
-import { useMaridStoreWithDefault } from "@/store/StoreProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
+import { useQodexStoreWithDefault } from "@/store/StoreProvider.js";
 import { normalizeThemePreference, resolveTheme } from "@/useTheme.js";
 import type { CodingPlanProviderId } from "@/settings/model-provider-section/constants.js";
 import type { CodingPlanFunnelContext } from "@/lib/codingPlanFunnelTelemetry.js";
@@ -31,10 +31,10 @@ import {
 import {
   CodingPlanWebviewChannels,
   type CodingPlanPurchaseCompletePayload,
-  MARID_ENV,
-  MARID_VERSION,
+  QODEX_ENV,
+  QODEX_VERSION,
   toZhOrEnLocale,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 interface CodingPlanEmbeddedWebviewDialogProps {
   onOpenChange: (open: boolean) => void;
@@ -47,8 +47,8 @@ interface CodingPlanEmbeddedWebviewDialogProps {
   /**
    * 官网页购买成功后的回调。
    *
-   * 官网页通过 preload 注入的 window.maridBridge.notifyPurchaseComplete({ provider })
-   * 发送 marid:coding-plan-purchase-complete 频道消息，本组件在 webview 的
+   * 官网页通过 preload 注入的 window.qodexBridge.notifyPurchaseComplete({ provider })
+   * 发送 qodex:coding-plan-purchase-complete 频道消息，本组件在 webview 的
    * ipc-message 事件里识别该频道并触发此回调（经 onPurchaseCompleteRef 防 stale closure）。
    * 上层（CodingPlanUpgradeDialog）在此回调里刷新 entitlements/providers 并关闭 webview。
    */
@@ -58,7 +58,7 @@ interface CodingPlanEmbeddedWebviewDialogProps {
 interface CodingPlanWebviewImportMetaEnv {
   DEV?: boolean;
   VITE_CODING_PLAN_WEBVIEW_ORIGIN?: string;
-  VITE_MARID_E2E_STORE_BRIDGE?: string;
+  VITE_QODEX_E2E_STORE_BRIDGE?: string;
 }
 
 interface CodingPlanWebviewNavigationState {
@@ -82,12 +82,12 @@ export function CodingPlanEmbeddedWebviewDialog({
   onPurchaseComplete,
   onOpenResult,
 }: CodingPlanEmbeddedWebviewDialogProps) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const { oauthService } = useServices();
   const authGeneration = useRef(0);
   const platform = usePlatform();
-  const theme = useMaridStoreWithDefault((state) => state.theme, "zai-dark");
-  const userId = useMaridStoreWithDefault((state) => state.user?.id ?? null, null);
+  const theme = useQodexStoreWithDefault((state) => state.theme, "zai-dark");
+  const userId = useQodexStoreWithDefault((state) => state.user?.id ?? null, null);
   const webviewRef = useRef<ElectronWebviewTag | null>(null);
   const onOpenResultRef = useRef(onOpenResult);
   onOpenResultRef.current = onOpenResult;
@@ -125,10 +125,10 @@ export function CodingPlanEmbeddedWebviewDialog({
     const env = readCodingPlanWebviewImportMetaEnv();
     const origin = resolveCodingPlanEmbeddedOrigin({
       dev: env.DEV === true,
-      endpointOrigin: RENDERER_MARID_ENDPOINT_URLS.origin,
-      e2eStoreBridgeEnabled: env.VITE_MARID_E2E_STORE_BRIDGE === "1",
+      endpointOrigin: RENDERER_QODEX_ENDPOINT_URLS.origin,
+      e2eStoreBridgeEnabled: env.VITE_QODEX_E2E_STORE_BRIDGE === "1",
       overrideOrigin: env.VITE_CODING_PLAN_WEBVIEW_ORIGIN,
-      maridEnv: MARID_ENV,
+      qodexEnv: QODEX_ENV,
     });
     // URL 带 ?lang= hint 让官网首屏就有正确语言，避免注入前的英文闪烁。
     // 同步带 ?theme= hint，避免官网 SSR 默认 dark 在 App 浅色主题下首帧闪烁。
@@ -162,7 +162,7 @@ export function CodingPlanEmbeddedWebviewDialog({
         const currentUrl = typeof webview.getURL === "function" ? webview.getURL() : "";
         if (
           !isTrustedCodingPlanEmbeddedWebviewUrl(currentUrl, {
-            e2eStoreBridgeEnabled: env.VITE_MARID_E2E_STORE_BRIDGE === "1",
+            e2eStoreBridgeEnabled: env.VITE_QODEX_E2E_STORE_BRIDGE === "1",
           })
         ) {
           // dom-ready 会在后续主 frame 导航时再次触发，初始 src 可信不代表
@@ -195,7 +195,7 @@ export function CodingPlanEmbeddedWebviewDialog({
           throw new Error("OAuth session changed during website handoff");
         }
         const credentials: CodingPlanEmbeddedCredentials = {
-          maridJwtToken: session?.maridJwtToken,
+          qodexJwtToken: session?.qodexJwtToken,
           zaiAccessToken:
             session?.loginProvider === "zai" && provider === "zai"
               ? session.legacyOAuthToken
@@ -209,7 +209,7 @@ export function CodingPlanEmbeddedWebviewDialog({
           funnelContext,
           deviceMid,
           userId: session?.userId,
-          appVersion: MARID_VERSION,
+          appVersion: QODEX_VERSION,
         });
         const script = createCodingPlanAuthInjectionScript({
           provider,
@@ -381,8 +381,8 @@ export function CodingPlanEmbeddedWebviewDialog({
         setLoadError(event.details.reason);
         onOpenResultRef.current?.(false);
       };
-      // ipc-message: 官网页通过 preload 的 window.maridBridge.notifyPurchaseComplete
-      // 发回购买完成信号（marid:coding-plan-purchase-complete）。
+      // ipc-message: 官网页通过 preload 的 window.qodexBridge.notifyPurchaseComplete
+      // 发回购买完成信号（qodex:coding-plan-purchase-complete）。
       // 参照 useEmbeddedBrowserWheelChain.ts 的 ipc-message handler 模式。
       const handleIpcMessage = (event: ElectronWebviewIpcMessageEvent) => {
         if (event.channel !== CodingPlanWebviewChannels.PurchaseComplete) {
@@ -535,7 +535,7 @@ export function CodingPlanEmbeddedWebviewDialog({
           <webview
             ref={handleWebviewRef}
             allowpopups={"" as unknown as boolean}
-            partition="persist:marid-coding-plan"
+            partition="persist:qodex-coding-plan"
             src={webviewUrl}
             className={cn(
               "min-h-0 flex-1 bg-background [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",

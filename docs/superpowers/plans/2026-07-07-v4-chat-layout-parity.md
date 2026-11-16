@@ -37,9 +37,9 @@ import { describe, expect, it, vi } from "vitest";
 import type {
   ConversationSnapshot,
   UserInputRow,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 import { SessionPane } from "@/v4/SessionPane.js";
-import { MaridIntlProvider } from "@/i18n/IntlProvider.js";
+import { QodexIntlProvider } from "@/i18n/IntlProvider.js";
 
 const projectionState = vi.hoisted(() => ({
   current: null as {
@@ -65,7 +65,7 @@ vi.mock("@/v4/V4ConversationContext.js", () => ({
 }));
 
 vi.mock("@/store/StoreProvider.js", () => ({
-  useMaridStoreWithDefault: (_selector: unknown, fallback: unknown) => fallback,
+  useQodexStoreWithDefault: (_selector: unknown, fallback: unknown) => fallback,
 }));
 
 vi.mock("@/v4/composer/useDraftConfigControl.js", () => ({
@@ -215,7 +215,7 @@ function renderPane(): string {
 
   return renderToStaticMarkup(
     createElement(
-      MaridIntlProvider,
+      QodexIntlProvider,
       { initialLocale: "zh-CN" },
       createElement(SessionPane, {
         paneId: "workspace-main",

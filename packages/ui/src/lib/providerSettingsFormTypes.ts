@@ -1,11 +1,11 @@
-import { isApiKeyAccess } from "@marid/provider";
+import { isApiKeyAccess } from "@qodex/provider";
 import type {
   ConfigValidationIssue,
   AccountProviderState,
   ModelConfigObject,
   ProviderConfigObject,
   ProviderSettingsProviderView,
-} from "@marid/provider";
+} from "@qodex/provider";
 
 /** 设置页面在一次编辑会话中使用的 Provider 状态。 */
 export interface ProviderSettingsFormProvider extends Pick<

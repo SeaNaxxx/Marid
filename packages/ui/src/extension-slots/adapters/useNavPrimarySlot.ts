@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 import { useOpenExtensionView } from "@/extension-slots/adapters/extensionViewsContext.js";
 import {
@@ -26,7 +26,7 @@ import type {
  */
 export function useNavPrimarySlot(props: NavPrimarySlotProps): NavPrimarySlotModel | null {
   const service = useExtensionsService();
-  const { locale } = useMaridIntl();
+  const { locale } = useQodexIntl();
   const { table, snapshot, status } = useExtensionSlotsState(service, (state) => ({
     table: state.table,
     snapshot: state.snapshot,

@@ -131,7 +131,7 @@ export async function copyHighspeedCardImage(
   const speedup = highspeedSpeedup(metrics);
   const savedPercent = highspeedSavedPercent(metrics);
   const imageLabels: HighspeedShareImageLabels = labels ?? {
-    benefit: "Marid & Coding Plan Exclusive Benefits",
+    benefit: "Qodex & Coding Plan Exclusive Benefits",
     standardSpeed: "standard generation speed",
     speedSummary: `HighSpeed · ${formatHighspeedDurationShort(metrics.durationMs)}`,
     lessWaiting: `${savedPercent}% less waiting`,

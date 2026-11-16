@@ -1,4 +1,4 @@
-import type { ProviderSettingsView } from "@marid/services";
+import type { ProviderSettingsView } from "@qodex/services";
 
 export interface ManualClaimPlanStartUsingTarget {
   readonly providerExecutable?: boolean;

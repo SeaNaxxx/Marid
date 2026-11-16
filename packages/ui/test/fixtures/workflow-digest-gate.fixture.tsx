@@ -1,10 +1,10 @@
 import "@/styles.css";
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import type { IPlatformService } from "@marid/shared";
-import type { ToolCallRow } from "@marid/shared/marid-protocol-v4";
+import type { IPlatformService } from "@qodex/shared";
+import type { ToolCallRow } from "@qodex/shared/qodex-protocol-v4";
 import { PlatformProvider } from "@/hooks/usePlatform.js";
-import { MaridIntlProvider } from "@/i18n/IntlProvider.js";
+import { QodexIntlProvider } from "@/i18n/IntlProvider.js";
 import { TooltipProvider } from "@/components/ui/tooltip.js";
 import { DEFAULT_CODE_PREVIEW_SETTINGS } from "@/lib/codePreviewSettings.js";
 import { ConversationTurnGroup } from "@/v4/ConversationTurnGroup.js";
@@ -45,7 +45,7 @@ function Fixture() {
     timelineOnly: false,
   };
   return (
-    <MaridIntlProvider initialLocale="en-US">
+    <QodexIntlProvider initialLocale="en-US">
       <PlatformProvider platform={{} as IPlatformService}>
         <TooltipProvider>
           <button onClick={() => setJoined(true)}>Join run</button>
@@ -68,7 +68,7 @@ function Fixture() {
           />
         </TooltipProvider>
       </PlatformProvider>
-    </MaridIntlProvider>
+    </QodexIntlProvider>
   );
 }
 createRoot(document.getElementById("root")!).render(<Fixture />);

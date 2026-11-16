@@ -1,4 +1,4 @@
-import type { AssistantTextRow, UserInputRow } from "@marid/shared/marid-protocol-v4";
+import type { AssistantTextRow, UserInputRow } from "@qodex/shared/qodex-protocol-v4";
 import type { ChatSearchResultHighlightRequest } from "@/v4/legacyChatViewTypes.js";
 import type { ConversationTurnRenderUnit } from "@/v4/conversationTurnRenderUnits.js";
 import { projectAssistantCodeComments } from "@/lib/assistantCodeComment.js";

@@ -1,13 +1,13 @@
 import { type ComponentProps, useCallback, useMemo } from "react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
-import type { AppUsageSnapshot } from "@marid/shared";
+import type { AppUsageSnapshot } from "@qodex/shared";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import {
   UsageEmptyState,
   formatCompactTokenUsage,
@@ -36,7 +36,7 @@ type ModelChartKey = {
   color: string;
   label: string;
 };
-type UsageIntl = ReturnType<typeof useMaridIntl>["intl"];
+type UsageIntl = ReturnType<typeof useQodexIntl>["intl"];
 type ChartTooltipContentProps = ComponentProps<typeof ChartTooltipContent>;
 
 export function filterDailyModelTooltipPayload<T extends { value?: unknown }>(
@@ -178,7 +178,7 @@ function DailyModelChartTooltipContent(props: ChartTooltipContentProps) {
 }
 
 export function AppUsageDailyModelTrendChart({ snapshot }: { snapshot: AppUsageSnapshot }) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const { topModels, modelKeys, chartConfig, chartData, maxTokens } = useMemo(
     // Recharts 3.8 会把 data / legend / graphical item props 写入内部 store。
     // 这里稳定派生数组和配置对象，避免父组件重渲染时因引用变化反复触发内部 dispatch。

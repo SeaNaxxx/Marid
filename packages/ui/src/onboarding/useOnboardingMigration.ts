@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { SettingsSyncSelection } from "@marid/shared";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import type { SettingsSyncSelection } from "@qodex/shared";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { getPathLeaf } from "@/lib/path.js";
 import type { useClaudeSessionMigration } from "@/hooks/useClaudeSessionMigration.js";
 import type { useSettingsSync } from "@/hooks/useSettingsSync.js";
@@ -58,7 +58,7 @@ export function useOnboardingMigration(
   settingsSync: ReturnType<typeof useSettingsSync>,
   options: { includeSettingsSelections?: boolean } = {},
 ) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const [finishExecution, setFinishExecution] = useState<FinishExecutionState>(
     createInitialFinishExecutionState,
   );

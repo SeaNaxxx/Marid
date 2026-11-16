@@ -1,10 +1,10 @@
 /**
  * 国内入口（zai_cn）新账号夹具：账号从未注册 BigModel。
- * Marid 主体与 JWT 有效；登录回包与 profile 都只有 Marid 主体，没有 bigmodel 关联块。
+ * Qodex 主体与 JWT 有效；登录回包与 profile 都只有 Qodex 主体，没有 bigmodel 关联块。
  * Spec 与账号控制面 mock 共用这些值，避免两侧各写一份身份导致 profile 匹配不上。
  */
-export const CN_UNLINKED_E2E_USER_ID = "marid-cn-new-user";
-export const CN_UNLINKED_E2E_MARID_JWT = "e2e-cn-unlinked-marid-jwt";
+export const CN_UNLINKED_E2E_USER_ID = "qodex-cn-new-user";
+export const CN_UNLINKED_E2E_QODEX_JWT = "e2e-cn-unlinked-qodex-jwt";
 export const CN_UNLINKED_E2E_UPSTREAM_TOKEN = "e2e-cn-unlinked-upstream-oauth";
 
 /** 明确成功但无关联的 profile：不能被解释成查询失败，也不能产生关联材料。 */
@@ -25,6 +25,6 @@ export function buildCnUnlinkedSessionCredentials(): Record<string, string> {
       user_id: CN_UNLINKED_E2E_USER_ID,
       name: "CN New User",
     }),
-    maridjwttoken: CN_UNLINKED_E2E_MARID_JWT,
+    qodexjwttoken: CN_UNLINKED_E2E_QODEX_JWT,
   };
 }

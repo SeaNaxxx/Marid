@@ -1,7 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import { join, normalize } from "node:path";
-import { ExtensionError } from "@marid/shared/extension-host";
-import type { AppProjectRef } from "@marid/session-control/contracts";
+import { ExtensionError } from "@qodex/shared/extension-host";
+import type { AppProjectRef } from "@qodex/session-control/contracts";
 import type { IProjectService, VirtualProject } from "#src/project/contract.js";
 import type { ServiceLogger } from "#src/logger/serviceLogger.js";
 

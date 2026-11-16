@@ -1,5 +1,5 @@
-import { HostResponseTypes } from "@marid/shared";
-import { setNetworkTelemetrySink, type NetworkObservation } from "@marid/rpc";
+import { HostResponseTypes } from "@qodex/shared";
+import { setNetworkTelemetrySink, type NetworkObservation } from "@qodex/rpc";
 
 interface HostNetworkTelemetryParentPort {
   postMessage(message: unknown): void;

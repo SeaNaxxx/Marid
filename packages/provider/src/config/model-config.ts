@@ -16,7 +16,7 @@ import {
   type modelPropertiesDataSchema,
   type modelOptionSpecsDataSchema,
   type modelConfigDataSchema,
-} from "@marid/shared/model-config";
+} from "@qodex/shared/model-config";
 import { validateConfigSchema } from "./schema-validation.js";
 import { clearManualModelConfig } from "./manual-model-config.js";
 import {
@@ -505,7 +505,7 @@ export class ModelConfigRules {
     return undefined;
   }
 
-  toMaridBuiltinJSON(): BuiltinModelConfigRulesData {
+  toQodexBuiltinJSON(): BuiltinModelConfigRulesData {
     return builtinModelConfigRulesSchema.parse({
       modelRules: this.#collect("model"),
       modelApiRules: this.#collect("model-api"),
@@ -525,7 +525,7 @@ export class ModelConfigRules {
 
   toJSON() {
     return {
-      ...this.toMaridBuiltinJSON(),
+      ...this.toQodexBuiltinJSON(),
       manualProviderModelRules: this.#collect("manual-provider-model"),
     };
   }

@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
-import { Emitter, type Event } from "@marid/rpc";
-import { atomicWritePrivateTextFile, backupCorruptFile } from "@marid/shared/node";
+import { Emitter, type Event } from "@qodex/rpc";
+import { atomicWritePrivateTextFile, backupCorruptFile } from "@qodex/shared/node";
 import {
   extensionActivationHoldSchema,
   extensionGrantSchema,
@@ -16,12 +16,12 @@ import {
   type ExtensionGrantsSnapshot,
   type ExtensionStaticTable,
   type StaticPlugin,
-} from "@marid/shared/extension-host";
+} from "@qodex/shared/extension-host";
 import { z } from "zod";
 import type { ServiceLogger } from "#src/logger/serviceLogger.js";
 
 // 授权记录（docs/plugins/extension-host.md §17.7）：唯一 owner 是本服务，文件
-// `~/.marid/v2/extensions/grants.json`。没有记录就拒绝。卸载删除记录，禁用不删。
+// `~/.qodex/v2/extensions/grants.json`。没有记录就拒绝。卸载删除记录，禁用不删。
 //
 //   grants.json（记录）⊕ 静态表（清单声明的档位与版本）──► 生效档位 + 整份授权状态（带 rev）
 //

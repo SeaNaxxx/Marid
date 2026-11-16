@@ -1,25 +1,25 @@
 import {
-  MARID_AGENT_PROVIDER,
-  MARID_COMMAND_AGENT_SOURCES,
-  type MaridProvider,
+  QODEX_AGENT_PROVIDER,
+  QODEX_COMMAND_AGENT_SOURCES,
+  type QodexProvider,
   type CommandAgentSource,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export const COMMAND_AGENT_SOURCES = [
-  ...MARID_COMMAND_AGENT_SOURCES,
+  ...QODEX_COMMAND_AGENT_SOURCES,
 ] as const satisfies readonly CommandAgentSource[];
 
 export const COMMAND_AGENT_SOURCE_META: Record<
   CommandAgentSource,
   {
     labelId: string;
-    provider: MaridProvider;
+    provider: QodexProvider;
     pathHint: string;
   }
 > = {
-  maridAgent: {
-    labelId: "settings.commands.source.maridAgent",
-    pathHint: "~/.marid/commands",
-    provider: MARID_AGENT_PROVIDER,
+  qodexAgent: {
+    labelId: "settings.commands.source.qodexAgent",
+    pathHint: "~/.qodex/commands",
+    provider: QODEX_AGENT_PROVIDER,
   },
 };

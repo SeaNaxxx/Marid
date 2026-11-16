@@ -5,7 +5,7 @@ import {
   TID_SETTINGS_SECTION_NAV,
   TID_TASK_SETTINGS_BUTTON,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   clearAppData,
   clickTestIdByDom,
@@ -24,13 +24,13 @@ import {
 import { prepareV4ConversationE2E } from "#e2e/helpers/v4-conversation";
 
 // DSYNC-10：设置 → 数据同步 → 设备 → 推送命令（docs/remote/data-sync.md「命令」）。
-// 本机来源合并 ~/.marid/commands 与 ~/.agents/commands，统一写入远端 ~/.marid/commands；
-// 远端断言用 docker exec 读容器内文件与 ~/.marid/cli/config.json 的启用覆盖。
+// 本机来源合并 ~/.qodex/commands 与 ~/.agents/commands，统一写入远端 ~/.qodex/commands；
+// 远端断言用 docker exec 读容器内文件与 ~/.qodex/cli/config.json 的启用覆盖。
 const CASE_MARKER = "E2E_DSYNC_10_COMMAND_PUSH";
 const NESTED_KEY = "/e2e-dsync/commit";
 const AGENTS_KEY = "/e2e-dsync-review";
-const REMOTE_COMMANDS = "/home/dev/.marid/commands";
-const REMOTE_CLI_CONFIG = "/home/dev/.marid/cli/config.json";
+const REMOTE_COMMANDS = "/home/dev/.qodex/commands";
+const REMOTE_CLI_CONFIG = "/home/dev/.qodex/cli/config.json";
 
 const NESTED_CONTENT = [
   "---",
@@ -71,7 +71,7 @@ async function waitForRowStatus(key: string, status: string, timeoutMsg: string)
 
 /** 本机 config.json 读改写：只加一条命令禁用覆盖，保留 E2E 预置的其他配置。 */
 async function disableLocalCommand(homeDir: string, filePath: string) {
-  const configPath = join(homeDir, ".marid", "cli", "config.json");
+  const configPath = join(homeDir, ".qodex", "cli", "config.json");
   let config: Record<string, unknown> = {};
   try {
     config = JSON.parse(await readFile(configPath, "utf-8")) as Record<string, unknown>;
@@ -92,14 +92,14 @@ describe(`${CASE_MARKER}: 数据同步页推送命令`, () => {
     await clearAppData();
   });
 
-  it("DSYNC-10-01 推送子目录下的禁用命令与 ~/.agents 来源的命令，远端写入 ~/.marid/commands 且保持禁用", async function () {
+  it("DSYNC-10-01 推送子目录下的禁用命令与 ~/.agents 来源的命令，远端写入 ~/.qodex/commands 且保持禁用", async function () {
     this.timeout(20 * 60_000);
     const config = readSSHRuntimeConfig(CASE_MARKER);
     const container = readRemoteDockerContainer(CASE_MARKER);
     const workspacePath = config.workspacePaths[0];
     const { homeDir } = getE2EAppDataPaths();
 
-    const nestedPath = join(homeDir, ".marid", "commands", "e2e-dsync", "commit.md");
+    const nestedPath = join(homeDir, ".qodex", "commands", "e2e-dsync", "commit.md");
     const agentsPath = join(homeDir, ".agents", "commands", "e2e-dsync-review.md");
     await mkdir(dirname(nestedPath), { recursive: true });
     await writeFile(nestedPath, NESTED_CONTENT);

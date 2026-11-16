@@ -1,11 +1,11 @@
-import { recordArmsCustomEventForE2E } from "@marid/ui";
+import { recordArmsCustomEventForE2E } from "@qodex/ui";
 import {
   DesktopCommandIds,
   buildLocalMediaPreviewUrl,
   resolveLocaleFromLanguageTag,
   unwrapRemoteWorkspaceBindResult,
   type IPlatformService,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 import { desktopBrowserPlatformBridge } from "./desktopBrowserPlatformBridge.js";
 import { registerAppControlNavigationHandler } from "#src/app-control-navigation/renderer.js";
@@ -18,12 +18,12 @@ export function createDesktopPlatform(options: {
     onAppControlNavigation: (handler) =>
       registerAppControlNavigationHandler(
         {
-          subscribe: (listener) => window.marid.onAppControlNavigationMessage(listener),
+          subscribe: (listener) => window.qodex.onAppControlNavigationMessage(listener),
           register: (generation) =>
-            window.marid.sendAppControlNavigation({ type: "register", generation }),
+            window.qodex.sendAppControlNavigation({ type: "register", generation }),
           unregister: (generation) =>
-            window.marid.sendAppControlNavigation({ type: "unregister", generation }),
-          reply: (message) => window.marid.sendAppControlNavigation({ type: "result", ...message }),
+            window.qodex.sendAppControlNavigation({ type: "unregister", generation }),
+          reply: (message) => window.qodex.sendAppControlNavigation({ type: "result", ...message }),
         },
         handler,
         crypto.randomUUID(),
@@ -33,207 +33,207 @@ export function createDesktopPlatform(options: {
     pluginSandbox: createDesktopPluginSandboxPlatform(),
     createLocalMediaPreviewUrl: buildLocalMediaPreviewUrl,
     isLocalDevelopmentRuntime: options.isLocalDevelopmentRuntime,
-    selectDirectory: () => window.marid.selectDirectory(),
-    selectDirectories: () => window.marid.selectDirectories(),
-    selectFile: () => window.marid.selectFile(),
-    selectFiles: () => window.marid.selectFiles?.() ?? Promise.resolve([]),
-    createTempTextAttachment: (payload) => window.marid.createTempTextAttachment(payload),
+    selectDirectory: () => window.qodex.selectDirectory(),
+    selectDirectories: () => window.qodex.selectDirectories(),
+    selectFile: () => window.qodex.selectFile(),
+    selectFiles: () => window.qodex.selectFiles?.() ?? Promise.resolve([]),
+    createTempTextAttachment: (payload) => window.qodex.createTempTextAttachment(payload),
     materializeWorkflowArtifactFile: (payload) =>
-      window.marid.materializeWorkflowArtifactFile(payload),
-    onRemoteConnectionLog: (handler) => window.marid.onRemoteConnectionLog(handler),
-    onRemoteSessionClosed: (handler) => window.marid.onRemoteSessionClosed(handler),
+      window.qodex.materializeWorkflowArtifactFile(payload),
+    onRemoteConnectionLog: (handler) => window.qodex.onRemoteConnectionLog(handler),
+    onRemoteSessionClosed: (handler) => window.qodex.onRemoteSessionClosed(handler),
     // Source 自动重连会替换 logical session；统一由 preload bridge 转发换代事件。
     onRemoteSessionReconnected: (handler) =>
-      window.marid.onRemoteSessionReconnected?.(handler) ?? (() => {}),
+      window.qodex.onRemoteSessionReconnected?.(handler) ?? (() => {}),
     activateOrSetWorkspace: (path) =>
-      window.marid.activateOrSetWorkspace?.(path) ?? Promise.resolve({ activated: false }),
+      window.qodex.activateOrSetWorkspace?.(path) ?? Promise.resolve({ activated: false }),
     connectRemote: (remoteOptions, requestId, context) =>
-      window.marid.connectRemote(remoteOptions, requestId, context),
+      window.qodex.connectRemote(remoteOptions, requestId, context),
     requestSourceSettingsAttachment: (sourceServerId) =>
-      window.marid.requestSourceSettingsAttachment?.(sourceServerId) ??
+      window.qodex.requestSourceSettingsAttachment?.(sourceServerId) ??
       Promise.reject(new Error("Source settings attachment bridge unavailable")),
     cancelPendingRemoteConnection: (requestId) =>
-      window.marid.cancelPendingRemoteConnection?.(requestId) ?? Promise.resolve(),
+      window.qodex.cancelPendingRemoteConnection?.(requestId) ?? Promise.resolve(),
     bindRemoteWorkspaceSessionContext: async (context) => {
-      if (!window.marid.bindRemoteWorkspaceSessionContext) {
+      if (!window.qodex.bindRemoteWorkspaceSessionContext) {
         throw new Error("Desktop bindRemoteWorkspaceSessionContext bridge unavailable");
       }
       // preload 返回结构化结果，在页面一侧还原错误才能保留 code/retryable。
       return unwrapRemoteWorkspaceBindResult(
-        await window.marid.bindRemoteWorkspaceSessionContext(context),
+        await window.qodex.bindRemoteWorkspaceSessionContext(context),
       );
     },
-    startWebRemoteControl: (context) => window.marid.startWebRemoteControl(context),
-    stopWebRemoteControl: () => window.marid.stopWebRemoteControl(),
-    getWebRemoteControlStatus: () => window.marid.getWebRemoteControlStatus(),
+    startWebRemoteControl: (context) => window.qodex.startWebRemoteControl(context),
+    stopWebRemoteControl: () => window.qodex.stopWebRemoteControl(),
+    getWebRemoteControlStatus: () => window.qodex.getWebRemoteControlStatus(),
     onWebRemoteControlStatusChanged: (handler) =>
-      window.marid.onWebRemoteControlStatusChanged?.(handler) ?? (() => {}),
-    disposeRemoteSession: (sessionId) => window.marid.disposeRemoteSession(sessionId),
-    isDockerAvailable: () => window.marid.isDockerAvailable(),
-    listWSLDistros: () => window.marid.listWSLDistros(),
-    listDockerContainers: () => window.marid.listDockerContainers(),
-    listSSHConfigAliases: () => window.marid.listSSHConfigAliases(),
-    loadMcpFromUserDirectory: (payload) => window.marid.loadMcpFromUserDirectory(payload),
-    saveMcpToUserDirectory: (payload) => window.marid.saveMcpToUserDirectory(payload),
-    migrateLegacyCommonMcp: (payload) => window.marid.migrateLegacyCommonMcp(payload),
-    openExternal: (url) => window.marid.openExternal(url),
-    openFeedback: () => window.marid.executeDesktopCommand(DesktopCommandIds.OpenFeedback),
-    openCommunity: () => window.marid.executeDesktopCommand(DesktopCommandIds.OpenCommunity),
-    canOpenCommunity: (locale) => window.marid.canOpenCommunity(locale),
-    openInFileManager: (path) => window.marid.openInFileManager(path),
-    openExternalFile: (path) => window.marid.openExternalFile(path),
-    openCuaPermissionOnboarding: window.marid.openCuaPermissionOnboarding
+      window.qodex.onWebRemoteControlStatusChanged?.(handler) ?? (() => {}),
+    disposeRemoteSession: (sessionId) => window.qodex.disposeRemoteSession(sessionId),
+    isDockerAvailable: () => window.qodex.isDockerAvailable(),
+    listWSLDistros: () => window.qodex.listWSLDistros(),
+    listDockerContainers: () => window.qodex.listDockerContainers(),
+    listSSHConfigAliases: () => window.qodex.listSSHConfigAliases(),
+    loadMcpFromUserDirectory: (payload) => window.qodex.loadMcpFromUserDirectory(payload),
+    saveMcpToUserDirectory: (payload) => window.qodex.saveMcpToUserDirectory(payload),
+    migrateLegacyCommonMcp: (payload) => window.qodex.migrateLegacyCommonMcp(payload),
+    openExternal: (url) => window.qodex.openExternal(url),
+    openFeedback: () => window.qodex.executeDesktopCommand(DesktopCommandIds.OpenFeedback),
+    openCommunity: () => window.qodex.executeDesktopCommand(DesktopCommandIds.OpenCommunity),
+    canOpenCommunity: (locale) => window.qodex.canOpenCommunity(locale),
+    openInFileManager: (path) => window.qodex.openInFileManager(path),
+    openExternalFile: (path) => window.qodex.openExternalFile(path),
+    openCuaPermissionOnboarding: window.qodex.openCuaPermissionOnboarding
       ? (permissionOptions) =>
-          window.marid.openCuaPermissionOnboarding?.(permissionOptions) ??
+          window.qodex.openCuaPermissionOnboarding?.(permissionOptions) ??
           Promise.resolve({ success: false, error: "not_supported" })
       : undefined,
-    prepareCuaHelperPermissionDrag: window.marid.prepareCuaHelperPermissionDrag
+    prepareCuaHelperPermissionDrag: window.qodex.prepareCuaHelperPermissionDrag
       ? () =>
-          window.marid.prepareCuaHelperPermissionDrag?.() ??
+          window.qodex.prepareCuaHelperPermissionDrag?.() ??
           Promise.resolve({ success: false, error: "not_supported" })
       : undefined,
-    startCuaHelperPermissionDrag: window.marid.startCuaHelperPermissionDrag
-      ? () => window.marid.startCuaHelperPermissionDrag?.()
+    startCuaHelperPermissionDrag: window.qodex.startCuaHelperPermissionDrag
+      ? () => window.qodex.startCuaHelperPermissionDrag?.()
       : undefined,
     notifyWebRemoteControlAuthStateChanged: (change) =>
-      window.marid.notifyWebRemoteControlAuthStateChanged(change),
-    registerOAuthState: (payload) => window.marid.registerOAuthState(payload),
-    onOAuthCallback: (callback) => window.marid.onOAuthCallback(callback),
-    onPaymentCallback: (callback) => window.marid.onPaymentCallback(callback),
-    onShareImport: (callback) => window.marid.onShareImport?.(callback) ?? (() => {}),
-    notifyRendererReady: () => window.marid.notifyRendererReady(),
-    syncTelemetryContext: (context) => window.marid.syncTelemetryContext(context),
-    reportTelemetryEvent: (payload) => window.marid.reportTelemetryEvent(payload),
+      window.qodex.notifyWebRemoteControlAuthStateChanged(change),
+    registerOAuthState: (payload) => window.qodex.registerOAuthState(payload),
+    onOAuthCallback: (callback) => window.qodex.onOAuthCallback(callback),
+    onPaymentCallback: (callback) => window.qodex.onPaymentCallback(callback),
+    onShareImport: (callback) => window.qodex.onShareImport?.(callback) ?? (() => {}),
+    notifyRendererReady: () => window.qodex.notifyRendererReady(),
+    syncTelemetryContext: (context) => window.qodex.syncTelemetryContext(context),
+    reportTelemetryEvent: (payload) => window.qodex.reportTelemetryEvent(payload),
     reportArmsCustomEvent: (payload) => {
       recordArmsCustomEventForE2E(payload);
-      return window.marid.reportArmsCustomEvent(payload);
+      return window.qodex.reportArmsCustomEvent(payload);
     },
-    getRendererActionTraceConfig: window.marid.getRendererActionTraceConfig
-      ? () => window.marid.getRendererActionTraceConfig!()
+    getRendererActionTraceConfig: window.qodex.getRendererActionTraceConfig
+      ? () => window.qodex.getRendererActionTraceConfig!()
       : undefined,
-    onRendererActionTraceConfigChanged: window.marid.onRendererActionTraceConfigChanged
-      ? (callback) => window.marid.onRendererActionTraceConfigChanged!(callback)
+    onRendererActionTraceConfigChanged: window.qodex.onRendererActionTraceConfigChanged
+      ? (callback) => window.qodex.onRendererActionTraceConfigChanged!(callback)
       : undefined,
-    reportLocalTtftBatch: (batch) => window.marid.reportLocalTtftBatch(batch),
-    reportRendererActionTraceBatch: window.marid.reportRendererActionTraceBatch
-      ? (batch) => window.marid.reportRendererActionTraceBatch!(batch)
+    reportLocalTtftBatch: (batch) => window.qodex.reportLocalTtftBatch(batch),
+    reportRendererActionTraceBatch: window.qodex.reportRendererActionTraceBatch
+      ? (batch) => window.qodex.reportRendererActionTraceBatch!(batch)
       : undefined,
-    reportRendererHeapSample: window.marid.reportRendererHeapSample
-      ? (sample) => window.marid.reportRendererHeapSample!(sample)
+    reportRendererHeapSample: window.qodex.reportRendererHeapSample
+      ? (sample) => window.qodex.reportRendererHeapSample!(sample)
       : undefined,
-    showTaskNotification: (payload) => window.marid.showTaskNotification(payload),
+    showTaskNotification: (payload) => window.qodex.showTaskNotification(payload),
     // 扩展的系统通知（§18.1 H8）：只有桌面实现；Web 与手机远控没有这两个方法，Renderer 按 unsupported 处理。
-    showExtensionNotification: (payload) => window.marid.showExtensionNotification(payload),
-    onExtensionNotificationClick: (handler) => window.marid.onExtensionNotificationClick(handler),
-    syncWindowTabs: (paths) => window.marid.syncWindowTabs(paths),
+    showExtensionNotification: (payload) => window.qodex.showExtensionNotification(payload),
+    onExtensionNotificationClick: (handler) => window.qodex.onExtensionNotificationClick(handler),
+    syncWindowTabs: (paths) => window.qodex.syncWindowTabs(paths),
     syncWebRemoteControlWorkspaces: (workspaces) =>
-      window.marid.syncWebRemoteControlWorkspaces?.(workspaces),
+      window.qodex.syncWebRemoteControlWorkspaces?.(workspaces),
     onWebRemoteControlReconnectWorkspace: (handler) =>
-      window.marid.onWebRemoteControlReconnectWorkspace?.(handler) ?? (() => {}),
+      window.qodex.onWebRemoteControlReconnectWorkspace?.(handler) ?? (() => {}),
     onWebRemoteControlRendererAction: (handler) =>
-      window.marid.onWebRemoteControlRendererAction?.(handler) ?? (() => {}),
-    syncWindowUnreadCount: (count) => window.marid.syncWindowUnreadCount(count),
-    syncActiveTaskSession: (sessionId) => window.marid.syncActiveTaskSession(sessionId),
-    syncAppSettings: (patch) => window.marid.syncAppSettings?.(patch),
+      window.qodex.onWebRemoteControlRendererAction?.(handler) ?? (() => {}),
+    syncWindowUnreadCount: (count) => window.qodex.syncWindowUnreadCount(count),
+    syncActiveTaskSession: (sessionId) => window.qodex.syncActiveTaskSession(sessionId),
+    syncAppSettings: (patch) => window.qodex.syncAppSettings?.(patch),
     // 桥缺失（旧 preload 升级窗口）时按 supported 兜底，与 Windows 现状一致，设置开关可用。
     getCloseToTrayCapability: () =>
-      window.marid.getCloseToTrayCapability?.() ??
+      window.qodex.getCloseToTrayCapability?.() ??
       Promise.resolve({ supported: true, gnomeLikeWithoutTray: false }),
-    setShortcutRecordingActive: (active) => window.marid.setShortcutRecordingActive?.(active),
-    onFocusTab: (handler) => window.marid.onFocusTab(handler),
-    onNewTab: (handler) => window.marid.onNewTab(handler),
+    setShortcutRecordingActive: (active) => window.qodex.setShortcutRecordingActive?.(active),
+    onFocusTab: (handler) => window.qodex.onFocusTab(handler),
+    onNewTab: (handler) => window.qodex.onNewTab(handler),
     onCloseActiveContextRequest: (handler) =>
-      window.marid.onCloseActiveContextRequest?.(handler) ?? (() => {}),
-    onOpenBrowserUrl: (handler) => window.marid.onOpenBrowserUrl?.(handler) ?? (() => {}),
+      window.qodex.onCloseActiveContextRequest?.(handler) ?? (() => {}),
+    onOpenBrowserUrl: (handler) => window.qodex.onOpenBrowserUrl?.(handler) ?? (() => {}),
     onEmbeddedBrowserPermissionPrompt: (handler) =>
-      window.marid.onEmbeddedBrowserPermissionPrompt?.(handler) ?? (() => {}),
+      window.qodex.onEmbeddedBrowserPermissionPrompt?.(handler) ?? (() => {}),
     resolveEmbeddedBrowserPermissionPrompt: (request) =>
-      window.marid.resolveEmbeddedBrowserPermissionPrompt?.(request),
+      window.qodex.resolveEmbeddedBrowserPermissionPrompt?.(request),
     getEmbeddedBrowserSitePermissions: () =>
-      window.marid.getEmbeddedBrowserSitePermissions?.() ?? Promise.resolve({}),
+      window.qodex.getEmbeddedBrowserSitePermissions?.() ?? Promise.resolve({}),
     setEmbeddedBrowserSitePermission: (request) =>
-      window.marid.setEmbeddedBrowserSitePermission?.(request) ?? Promise.resolve({}),
+      window.qodex.setEmbeddedBrowserSitePermission?.(request) ?? Promise.resolve({}),
     clearEmbeddedBrowserSitePermissions: () =>
-      window.marid.clearEmbeddedBrowserSitePermissions?.() ?? Promise.resolve({}),
+      window.qodex.clearEmbeddedBrowserSitePermissions?.() ?? Promise.resolve({}),
     resetEmbeddedBrowserSitePermission: (request) =>
-      window.marid.resetEmbeddedBrowserSitePermission?.(request) ?? Promise.resolve({}),
+      window.qodex.resetEmbeddedBrowserSitePermission?.(request) ?? Promise.resolve({}),
     onBrowserViewScreenshotSurfacePrepare: (handler) =>
-      window.marid.onBrowserViewScreenshotSurfacePrepare?.(handler) ?? (() => {}),
+      window.qodex.onBrowserViewScreenshotSurfacePrepare?.(handler) ?? (() => {}),
     onBrowserViewScreenshotSurfaceRelease: (handler) =>
-      window.marid.onBrowserViewScreenshotSurfaceRelease?.(handler) ?? (() => {}),
+      window.qodex.onBrowserViewScreenshotSurfaceRelease?.(handler) ?? (() => {}),
     browserViewScreenshotSurfaceReady: (payload) =>
-      window.marid.browserViewScreenshotSurfaceReady?.(payload),
+      window.qodex.browserViewScreenshotSurfaceReady?.(payload),
     ...desktopBrowserPlatformBridge,
-    onNewTask: (handler) => window.marid.onNewTask(handler),
+    onNewTask: (handler) => window.qodex.onNewTask(handler),
     onOpenWorkspace: (handler) => {
       // 开发态或升级后的旧窗口可能仍运行未暴露 onOpenWorkspace 的 preload，
       // renderer 直接调用会在启动时崩溃。这里和 activateOrSetWorkspace 一样做兼容兜底，
       // 缺少该 bridge 时只禁用原生菜单回调，不影响应用继续打开。
-      return window.marid.onOpenWorkspace?.(handler) ?? (() => {});
+      return window.qodex.onOpenWorkspace?.(handler) ?? (() => {});
     },
-    onOpenWorkspacePath: (handler) => window.marid.onOpenWorkspacePath?.(handler) ?? (() => {}),
-    onOpenFeedbackDialog: (handler) => window.marid.onOpenFeedbackDialog?.(handler) ?? (() => {}),
-    onOpenTicketsPanel: (handler) => window.marid.onOpenTicketsPanel?.(handler) ?? (() => {}),
-    onWindowFullscreenChanged: (handler) => window.marid.onWindowFullscreenChanged(handler),
-    getDesktopWindowChromeState: window.marid.getDesktopWindowChromeState
-      ? () => window.marid.getDesktopWindowChromeState!()
+    onOpenWorkspacePath: (handler) => window.qodex.onOpenWorkspacePath?.(handler) ?? (() => {}),
+    onOpenFeedbackDialog: (handler) => window.qodex.onOpenFeedbackDialog?.(handler) ?? (() => {}),
+    onOpenTicketsPanel: (handler) => window.qodex.onOpenTicketsPanel?.(handler) ?? (() => {}),
+    onWindowFullscreenChanged: (handler) => window.qodex.onWindowFullscreenChanged(handler),
+    getDesktopWindowChromeState: window.qodex.getDesktopWindowChromeState
+      ? () => window.qodex.getDesktopWindowChromeState!()
       : undefined,
-    onDesktopWindowChromeStateChanged: window.marid.onDesktopWindowChromeStateChanged
-      ? (handler) => window.marid.onDesktopWindowChromeStateChanged!(handler)
+    onDesktopWindowChromeStateChanged: window.qodex.onDesktopWindowChromeStateChanged
+      ? (handler) => window.qodex.onDesktopWindowChromeStateChanged!(handler)
       : undefined,
-    getWindowControlsOverlayMetrics: () => window.marid.getWindowControlsOverlayMetrics?.() ?? null,
+    getWindowControlsOverlayMetrics: () => window.qodex.getWindowControlsOverlayMetrics?.() ?? null,
     onWindowControlsOverlayChanged: (handler) =>
-      window.marid.onWindowControlsOverlayChanged?.(handler) ?? (() => {}),
+      window.qodex.onWindowControlsOverlayChanged?.(handler) ?? (() => {}),
     getDesktopZoomLevel: () =>
-      window.marid.getDesktopZoomLevel?.() ?? Promise.resolve({ zoomLevel: 0 }),
+      window.qodex.getDesktopZoomLevel?.() ?? Promise.resolve({ zoomLevel: 0 }),
     onDesktopZoomLevelChanged: (handler) =>
-      window.marid.onDesktopZoomLevelChanged?.(handler) ?? (() => {}),
-    onTaskNotificationClick: (handler) => window.marid.onTaskNotificationClick(handler),
-    exportLogs: () => window.marid.exportLogs(),
+      window.qodex.onDesktopZoomLevelChanged?.(handler) ?? (() => {}),
+    onTaskNotificationClick: (handler) => window.qodex.onTaskNotificationClick(handler),
+    exportLogs: () => window.qodex.exportLogs(),
     captureWindowScreenshot: () =>
-      window.marid.captureWindowScreenshot?.() ?? Promise.resolve(null),
-    onUpdateReady: (callback) => window.marid.onUpdateReady(callback),
-    onUpdateCheckResult: (callback) => window.marid.onUpdateCheckResult(callback),
-    onUpdateStateChanged: (callback) => window.marid.onUpdateStateChanged?.(callback) ?? (() => {}),
+      window.qodex.captureWindowScreenshot?.() ?? Promise.resolve(null),
+    onUpdateReady: (callback) => window.qodex.onUpdateReady(callback),
+    onUpdateCheckResult: (callback) => window.qodex.onUpdateCheckResult(callback),
+    onUpdateStateChanged: (callback) => window.qodex.onUpdateStateChanged?.(callback) ?? (() => {}),
     getUpdateState: () =>
-      window.marid.getUpdateState?.() ?? Promise.resolve({ kind: "idle", enabled: true }),
-    downloadUpdate: () => window.marid.downloadUpdate?.() ?? Promise.resolve(),
-    cancelUpdateDownload: () => window.marid.cancelUpdateDownload?.() ?? Promise.resolve(),
-    openUpdateStatusWindow: () => window.marid.openUpdateStatusWindow?.() ?? Promise.resolve(),
+      window.qodex.getUpdateState?.() ?? Promise.resolve({ kind: "idle", enabled: true }),
+    downloadUpdate: () => window.qodex.downloadUpdate?.() ?? Promise.resolve(),
+    cancelUpdateDownload: () => window.qodex.cancelUpdateDownload?.() ?? Promise.resolve(),
+    openUpdateStatusWindow: () => window.qodex.openUpdateStatusWindow?.() ?? Promise.resolve(),
     getAutoUpdatePreferences: () =>
-      window.marid.getAutoUpdatePreferences?.() ??
+      window.qodex.getAutoUpdatePreferences?.() ??
       Promise.resolve({ autoDownloadAndInstallUpdates: false }),
     setAutoDownloadAndInstallUpdates: (enabled) =>
-      window.marid.setAutoDownloadAndInstallUpdates?.(enabled) ?? Promise.resolve(),
+      window.qodex.setAutoDownloadAndInstallUpdates?.(enabled) ?? Promise.resolve(),
     getDesktopSessionActivity: () =>
-      window.marid.getDesktopSessionActivity?.() ??
+      window.qodex.getDesktopSessionActivity?.() ??
       Promise.resolve({ runningAgentSessionCount: 0 }),
-    getMaridStdioTapDevState: () =>
-      window.marid.getMaridStdioTapDevState?.() ??
+    getQodexStdioTapDevState: () =>
+      window.qodex.getQodexStdioTapDevState?.() ??
       Promise.resolve({ enabled: false, visible: false, logDir: "", statePath: "" }),
-    onSettingsChanged: (callback) => window.marid.onSettingsChanged?.(callback) ?? (() => {}),
+    onSettingsChanged: (callback) => window.qodex.onSettingsChanged?.(callback) ?? (() => {}),
     onApplicationLocaleChanged: (callback) =>
-      window.marid.onApplicationLocaleChanged?.(callback) ?? (() => {}),
-    onPostUpdateReleaseNotes: (callback) => window.marid.onPostUpdateReleaseNotes(callback),
+      window.qodex.onApplicationLocaleChanged?.(callback) ?? (() => {}),
+    onPostUpdateReleaseNotes: (callback) => window.qodex.onPostUpdateReleaseNotes(callback),
     acknowledgePostUpdateReleaseNotes: (version) =>
-      window.marid.acknowledgePostUpdateReleaseNotes(version),
-    skipUpdateVersion: (version) => window.marid.skipUpdateVersion?.(version) ?? Promise.resolve(),
-    quitAndInstallUpdate: () => window.marid.quitAndInstallUpdate(),
-    getInstalledEditors: (filePath) => window.marid.getInstalledEditors(filePath),
-    getFileApplications: (target) => window.marid.getFileApplications(target),
+      window.qodex.acknowledgePostUpdateReleaseNotes(version),
+    skipUpdateVersion: (version) => window.qodex.skipUpdateVersion?.(version) ?? Promise.resolve(),
+    quitAndInstallUpdate: () => window.qodex.quitAndInstallUpdate(),
+    getInstalledEditors: (filePath) => window.qodex.getInstalledEditors(filePath),
+    getFileApplications: (target) => window.qodex.getFileApplications(target),
     openFileWithApplication: (applicationId, target) =>
-      window.marid.openFileWithApplication(applicationId, target),
+      window.qodex.openFileWithApplication(applicationId, target),
     getApplicationIcon: (bundleId) =>
-      window.marid.getApplicationIcon?.(bundleId) ?? Promise.resolve(null),
+      window.qodex.getApplicationIcon?.(bundleId) ?? Promise.resolve(null),
     openInEditor: (editorId, path, editorOptions) =>
-      window.marid.openInEditor(editorId, path, editorOptions),
-    executeDesktopCommand: (command) => window.marid.executeDesktopCommand(command),
-    setApplicationLocale: (locale) => window.marid.setApplicationLocale(locale),
+      window.qodex.openInEditor(editorId, path, editorOptions),
+    executeDesktopCommand: (command) => window.qodex.executeDesktopCommand(command),
+    setApplicationLocale: (locale) => window.qodex.setApplicationLocale(locale),
     getSystemLocale: () =>
-      window.marid.getSystemLocale?.() ??
+      window.qodex.getSystemLocale?.() ??
       Promise.resolve(resolveLocaleFromLanguageTag(navigator.language)),
-    setTitleBarTheme: (theme) => window.marid.setTitleBarTheme(theme),
+    setTitleBarTheme: (theme) => window.qodex.setTitleBarTheme(theme),
     getDeviceId: () =>
-      (window as Window & { __MARID_DEVICE_ID__?: string }).__MARID_DEVICE_ID__ ?? "",
+      (window as Window & { __QODEX_DEVICE_ID__?: string }).__QODEX_DEVICE_ID__ ?? "",
   };
 }

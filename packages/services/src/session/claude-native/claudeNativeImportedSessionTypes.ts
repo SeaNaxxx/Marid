@@ -1,6 +1,6 @@
-import type { MaridPersistedMessage, MaridTaskPersistStatus } from "@marid/shared";
+import type { QodexPersistedMessage, QodexTaskPersistStatus } from "@qodex/shared";
 
-/** 导入来源身份：外部原生 CLI（Claude Code），与 agent runtime 的 MaridProvider 无关。 */
+/** 导入来源身份：外部原生 CLI（Claude Code），与 agent runtime 的 QodexProvider 无关。 */
 export type ClaudeNativeImportSourceProvider = "claude";
 
 export interface ClaudeNativeImportedSessionSource {
@@ -12,7 +12,7 @@ export interface ClaudeNativeImportedSessionSource {
   updatedAt: number;
   title?: string;
   model?: string;
-  status?: MaridTaskPersistStatus;
+  status?: QodexTaskPersistStatus;
   migrationSource?: "claudeCode";
-  messages: MaridPersistedMessage[];
+  messages: QodexPersistedMessage[];
 }

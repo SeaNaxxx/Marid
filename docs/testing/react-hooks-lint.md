@@ -63,9 +63,9 @@ pnpm exec oxlint -c "$audit_dir/hooks.json" \
   --no-ignore --disable-nested-config --format json \
   packages/ui/src packages/desktop/src packages/web/src packages/web-share/src \
   packages/stream-animate/src packages/e2e-report/src apps/dev-docs/src \
-  apps/marid-cli/packages/tui/src apps/marid-cli/packages/debug/src \
-  apps/marid-cli/packages/office-runtime/ui \
-  apps/marid-cli/packages/marid-site-plugin/src/ui > "$audit_dir/result.json"
+  apps/qodex-cli/packages/tui/src apps/qodex-cli/packages/debug/src \
+  apps/qodex-cli/packages/office-runtime/ui \
+  apps/qodex-cli/packages/qodex-site-plugin/src/ui > "$audit_dir/result.json"
 ```
 
 保留原始 JSON；按规则、类别、文件和行号汇总。缺失、多余、不稳定引用、复杂表达式、

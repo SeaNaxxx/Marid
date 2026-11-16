@@ -2,27 +2,27 @@ import {
   collectTelemetryRendererContext,
   resolveWorkspaceTelemetryDetail,
   type RendererTelemetryEventPayload,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type {
-  MaridMcpReadResourceResult,
-  MaridMcpUiCallToolResult,
-  MaridMcpUiCancelCallResult,
-  MaridMcpUiListResourceTemplatesResult,
-  MaridMcpUiListResourcesResult,
-  MaridMcpUiReadResourceResult,
-  MaridPluginsListUiSurfacesResult,
-} from "@marid/shared";
+  QodexMcpReadResourceResult,
+  QodexMcpUiCallToolResult,
+  QodexMcpUiCancelCallResult,
+  QodexMcpUiListResourceTemplatesResult,
+  QodexMcpUiListResourcesResult,
+  QodexMcpUiReadResourceResult,
+  QodexPluginsListUiSurfacesResult,
+} from "@qodex/shared";
 import type {
   McpAppResourceMeta,
   PluginSandboxHandle,
   PluginSandboxRegisterInput,
-} from "@marid/shared/mcp-apps";
+} from "@qodex/shared/mcp-apps";
 import {
   MCP_APPS_HTML_MAX_BYTES,
   MCP_APPS_HTML_MIME_TYPES,
   MCP_APPS_UI_READ_RESOURCE_MAX_BYTES,
   normalizeMcpAppResourceMeta,
-} from "@marid/shared/mcp-apps";
+} from "@qodex/shared/mcp-apps";
 import { createServiceLogger } from "../logger/serviceLogger.js";
 import type {
   IPluginUiBridgeService,
@@ -41,7 +41,7 @@ export interface PluginUiBridgeServiceDependencies {
   validateInstance?: (params: import("./contract.js").PluginUiPluginScope) => Promise<void>;
   openInstance?: (
     params: PluginUiPrepareSandboxParams,
-  ) => Promise<import("@marid/shared/mcp-apps").McpAppInstance>;
+  ) => Promise<import("@qodex/shared/mcp-apps").McpAppInstance>;
   closeInstance?: (params: import("./contract.js").PluginUiPluginScope) => Promise<void>;
 
   readMcpResource?: (params: {
@@ -51,34 +51,34 @@ export interface PluginUiBridgeServiceDependencies {
     pluginId: string;
     serverName: string;
     uri: string;
-    instance: import("@marid/shared/mcp-apps").McpAppInstance;
-  }) => Promise<MaridMcpReadResourceResult>;
+    instance: import("@qodex/shared/mcp-apps").McpAppInstance;
+  }) => Promise<QodexMcpReadResourceResult>;
   callMcpToolForUi?: (
     params: PluginUiCallToolParams,
     options?: { signal?: AbortSignal },
-  ) => Promise<MaridMcpUiCallToolResult>;
+  ) => Promise<QodexMcpUiCallToolResult>;
   /** 取消带 callId 的进行中调用。 */
   cancelMcpToolCallForUi?: (
     params: PluginUiCancelToolCallParams,
-  ) => Promise<MaridMcpUiCancelCallResult>;
+  ) => Promise<QodexMcpUiCancelCallResult>;
   /** 页面发起的 `resources/read`，agent 侧 `mcp/uiReadResource` 做归属与 mimeType 校验。 */
   readMcpResourceForUi?: (
     params: PluginUiReadResourceParams,
-  ) => Promise<MaridMcpUiReadResourceResult>;
+  ) => Promise<QodexMcpUiReadResourceResult>;
   /** 资源列表 / 模板 / 订阅代理；缺省（web / 远程）时对应方法抛 unavailable。 */
   listMcpResourcesForUi?: (
     params: PluginUiListResourcesParams,
-  ) => Promise<MaridMcpUiListResourcesResult>;
+  ) => Promise<QodexMcpUiListResourcesResult>;
   listMcpResourceTemplatesForUi?: (
     params: PluginUiListResourcesParams,
-  ) => Promise<MaridMcpUiListResourceTemplatesResult>;
+  ) => Promise<QodexMcpUiListResourceTemplatesResult>;
   subscribeMcpResourceForUi?: (params: PluginUiResourceSubscriptionParams) => Promise<unknown>;
   unsubscribeMcpResourceForUi?: (params: PluginUiResourceSubscriptionParams) => Promise<unknown>;
   registerSandbox?: (input: PluginSandboxRegisterInput) => Promise<PluginSandboxHandle>;
   /** 工作区级 `plugins/listUiSurfaces`。 */
   listPluginUiSurfaces?: (
     params: PluginUiWorkspaceTarget,
-  ) => Promise<MaridPluginsListUiSurfacesResult>;
+  ) => Promise<QodexPluginsListUiSurfacesResult>;
   /** 由 display.ui 提供的 CSP / prefersBorder 在 prepare 时随 params 传入；这里只做透传。 */
 }
 
@@ -106,13 +106,13 @@ export function createPluginUiBridgeService(
   dependencies: PluginUiBridgeServiceDependencies = {},
 ): IPluginUiBridgeService {
   // prepare 每个沙箱只有一两次，info 级留生命周期轨迹（读资源 / 登记 / 失败），排 e2e 与用户现场用。
-  // 修复：logger 必须在工厂里创建而不是模块顶层——本文件经 @marid/services 入口也被打进 renderer bundle，
+  // 修复：logger 必须在工厂里创建而不是模块顶层——本文件经 @qodex/services 入口也被打进 renderer bundle，
   // 顶层 createServiceLogger 会在 import 时读 process.pid，renderer 里直接 ReferenceError，整个主界面起不来。
   const log = createServiceLogger("plugin-ui-bridge");
   const preparing = new Map<string, Promise<PluginSandboxHandle>>();
   const prepareSandboxOnce = async (
     params: PluginUiPrepareSandboxParams,
-    instance: import("@marid/shared/mcp-apps").McpAppInstance,
+    instance: import("@qodex/shared/mcp-apps").McpAppInstance,
   ) => {
     if (
       !dependencies.readMcpResource ||
@@ -132,7 +132,7 @@ export function createPluginUiBridgeService(
       scopeId: params.scopeId,
       resourceUri: params.resourceUri,
     });
-    let result: MaridMcpReadResourceResult;
+    let result: QodexMcpReadResourceResult;
     try {
       result = await dependencies.readMcpResource({ ...bound, uri: params.resourceUri });
     } catch (error) {
@@ -172,7 +172,7 @@ export function createPluginUiBridgeService(
         scopeId: params.scopeId,
         html,
         ...(csp ? { csp } : {}),
-        // 资源级 `_meta["marid/csp"]`：unsafe-eval / wasm-unsafe-eval 放宽只认资源自己的声明。
+        // 资源级 `_meta["qodex/csp"]`：unsafe-eval / wasm-unsafe-eval 放宽只认资源自己的声明。
         ...(meta?.cspRelaxations ? { cspRelaxations: meta.cspRelaxations } : {}),
         ...(meta?.permissions ? { permissions: meta.permissions } : {}),
         ...(prefersBorder !== undefined ? { prefersBorder } : {}),
@@ -324,7 +324,7 @@ function unavailable(feature: string): PluginUiBridgeError {
  * 8 MiB 总量守卫：结果经 MessagePort 结构化克隆进沙箱，
  * agent 侧已按同一常量限流，这里再算一次解码后大小（text 按 UTF-8、blob 按 base64 解码长度）防止旧 agent 漏检。
  */
-export function assertUiReadResourceSize(result: MaridMcpUiReadResourceResult, uri: string): void {
+export function assertUiReadResourceSize(result: QodexMcpUiReadResourceResult, uri: string): void {
   let total = 0;
   for (const content of result.contents) {
     if (typeof content.text === "string") total += Buffer.byteLength(content.text, "utf8");
@@ -346,7 +346,7 @@ function decodedBase64Length(value: string): number {
 }
 
 /** 兼容旧调用：只要 HTML 文本。 */
-export function pickHtmlContent(result: MaridMcpReadResourceResult, uri: string): string {
+export function pickHtmlContent(result: QodexMcpReadResourceResult, uri: string): string {
   return pickHtmlResource(result, uri).html;
 }
 
@@ -359,7 +359,7 @@ const LIST_LEVEL_META_MAX_PAGES = 8;
 async function readListLevelResourceMeta(
   list: PluginUiBridgeServiceDependencies["listMcpResourcesForUi"],
   params: PluginUiPrepareSandboxParams & {
-    instance: import("@marid/shared/mcp-apps").McpAppInstance;
+    instance: import("@qodex/shared/mcp-apps").McpAppInstance;
   },
 ): Promise<McpAppResourceMeta | null> {
   if (!list) return null;
@@ -392,7 +392,7 @@ async function readListLevelResourceMeta(
  * blob、超限一律拒绝，不降级、不截断；没有任何 HTML 项时按第一项的 mimeType 报错。
  */
 export function pickHtmlResource(
-  result: MaridMcpReadResourceResult,
+  result: QodexMcpReadResourceResult,
   uri: string,
 ): { html: string; meta: McpAppResourceMeta | null } {
   if (result.contents.length === 0) {

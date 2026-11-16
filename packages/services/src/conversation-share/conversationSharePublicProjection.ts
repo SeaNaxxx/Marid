@@ -4,13 +4,13 @@ import {
   conversationShareContentBlockSchema,
   type ConversationShareContentBlock,
   type ConversationShareArtifactDescriptor,
-} from "@marid/shared";
-import { toolCallDisplaySchema } from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared";
+import { toolCallDisplaySchema } from "@qodex/shared/qodex-protocol-v4";
 import type {
   ArtifactRow,
   WireConversationRow,
   ToolCallRow,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 
 import { ConversationShareServiceError } from "./conversationShare.js";
 
@@ -69,7 +69,7 @@ function visitStrings(value: unknown, visitor: (value: string) => void): void {
 }
 
 function assertSafeString(value: string): void {
-  if (/^marid-artifact:\/\//iu.test(value)) {
+  if (/^qodex-artifact:\/\//iu.test(value)) {
     throwProjectionError(
       "artifact_protocol_not_ready",
       "Artifact references must be represented by formal conversation artifact rows",
@@ -97,7 +97,7 @@ function projectToolDisplay(row: ToolCallRow) {
 }
 
 function isPublicArtifactRef(value: string): boolean {
-  return /^marid-artifact:\/\/share\/[A-Za-z0-9._~-]+$/u.test(value);
+  return /^qodex-artifact:\/\/share\/[A-Za-z0-9._~-]+$/u.test(value);
 }
 
 function assertTerminalAndSafe(rows: WireConversationRow[]): void {
@@ -414,7 +414,7 @@ function projectRow(
         mimeType: row.mimeType,
         sizeBytes: row.sizeBytes,
         sha256: row.sha256,
-        ref: `marid-artifact://share/${artifactVersionId}`,
+        ref: `qodex-artifact://share/${artifactVersionId}`,
         state: row.state,
       };
     }
@@ -574,7 +574,7 @@ export function assertConversationSharePublicProjection(input: {
     } else if (row.kind === "artifact") {
       if (
         !PUBLIC_ARTIFACT_ID.test(row.artifactVersionId) ||
-        row.ref !== `marid-artifact://share/${row.artifactVersionId}`
+        row.ref !== `qodex-artifact://share/${row.artifactVersionId}`
       ) {
         throwProjectionError(
           "invalid_conversation",

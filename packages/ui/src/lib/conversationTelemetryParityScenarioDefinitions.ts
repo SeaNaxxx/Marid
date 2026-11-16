@@ -992,7 +992,7 @@ function buildScenarios(): ConversationTelemetryParityScenario[] {
     {
       kind: "visible.error",
       errorKey: "tdp17-3007",
-      displayMessage: requestSecurityMessagesEnUS["marid.error.providerBusiness.3007"],
+      displayMessage: requestSecurityMessagesEnUS["qodex.error.providerBusiness.3007"],
       code: "3007",
       traceId: "tdp17-trace",
       sessionId: "tdp17-session",
@@ -1200,11 +1200,11 @@ function buildScenarios(): ConversationTelemetryParityScenario[] {
     ]),
     scenario("TDP17", [{ kind: "verification.assert" }, ...tdp17], {}, { chat_error_banner: 1 }, [
       "visible-3007",
-      "exact-marid-plan-provider",
+      "exact-qodex-plan-provider",
       "one-shot-header",
       "accepted-duplicate-handled",
       "failure-retryable",
-      "non-marid-plan-skipped",
+      "non-qodex-plan-skipped",
     ]),
     scenario(
       "TDP18",

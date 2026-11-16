@@ -3,21 +3,21 @@
 // As part of the single-package merge the type definitions + functional helpers
 // (CuaPermissionStatus, CuaPermissionStatusResult, isCuaPermissionStatusAvailable,
 // shouldRunCuaScreenCaptureProbe, ICuaPermissionService interface, etc.) moved
-// to @marid/marid-cua/src/broker/ports.ts. The descriptor registration itself stays in
+// to @qodex/qodex-cua/src/broker/ports.ts. The descriptor registration itself stays in
 // services (host control plane — depends on services' createServiceDescriptor
-// + @marid/shared ServiceChannels), so services internal callers (node.ts,
-// accessor.ts, services/index.ts) and ui consumers (via @marid/services root
+// + @qodex/shared ServiceChannels), so services internal callers (node.ts,
+// accessor.ts, services/index.ts) and ui consumers (via @qodex/services root
 // export) keep importing `ICuaPermissionService` from this exact path.
 //
 // producer 只拥有 type contract；VALUE descriptor 继续由 services 的
 // createServiceDescriptor 创建，避免 producer 反向依赖 RPC/service registry。
 
-import { ServiceChannels } from "@marid/shared";
+import { ServiceChannels } from "@qodex/shared";
 
 import { createServiceDescriptor } from "../descriptors.js";
 
 // Type layer — type-only imports from the consolidated package (erased by TS
-// at compile time; Vite never resolves @marid/marid-cua for these).
+// at compile time; Vite never resolves @qodex/qodex-cua for these).
 import type {
   CuaPermissionState,
   CuaPermissionStatus,
@@ -27,7 +27,7 @@ import type {
   CuaPermissionRestartResult,
   CuaPermissionRestartOptions,
   ICuaPermissionService as BrokerICuaPermissionService,
-} from "@marid/marid-cua/broker";
+} from "@qodex/qodex-cua/broker";
 
 // Re-export types for consumers.
 export type {
@@ -46,7 +46,7 @@ export type {
 export {
   isCuaPermissionStatusAvailable,
   shouldRunCuaScreenCaptureProbe,
-} from "@marid/marid-cua/broker/ports";
+} from "@qodex/qodex-cua/broker/ports";
 
 export interface ICuaPermissionService extends BrokerICuaPermissionService {}
 

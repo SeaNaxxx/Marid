@@ -1,12 +1,12 @@
-import { Emitter } from "@marid/rpc";
-import type { IRemoteBackend } from "@marid/server/remote";
+import { Emitter } from "@qodex/rpc";
+import type { IRemoteBackend } from "@qodex/server/remote";
 import type {
   IPromptAttachmentTransferService,
   PromptAttachmentStageParams,
   PromptAttachmentStageResult,
   PromptAttachmentTransferProgress,
-} from "@marid/services";
-import type { MaridPromptAttachment } from "@marid/shared";
+} from "@qodex/services";
+import type { QodexPromptAttachment } from "@qodex/shared";
 import {
   cleanupRemotePromptAttachment,
   cleanupStaleRemotePromptAttachments,
@@ -103,13 +103,13 @@ export function createRemotePromptAttachmentTransferService(
       try {
         if (previous) await cleanupRecord(params.operationId, previous);
         if (!isCurrent()) throw canceled();
-        const attachment: MaridPromptAttachment = {
+        const attachment: QodexPromptAttachment = {
           kind: params.mime.startsWith("image/") ? "image" : "file",
           filename: params.fileName,
           localPath: params.localPath,
           mimeType: params.mime,
           sizeBytes: params.sizeBytes ?? 0,
-        } as MaridPromptAttachment;
+        } as QodexPromptAttachment;
         const workspaceKey = params.workspaceIdentity?.trim() || params.workspacePath;
         const materialized = await materializeRemotePromptAttachments(
           {

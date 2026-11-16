@@ -1,4 +1,4 @@
-import type { TraceId } from "@marid/shared";
+import type { TraceId } from "@qodex/shared";
 
 export interface ProcessTreeTerminatorLogger {
   debug?: (traceId: TraceId | undefined, ...args: unknown[]) => void;

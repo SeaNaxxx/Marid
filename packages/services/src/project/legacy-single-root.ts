@@ -1,7 +1,7 @@
-import type { AppSettings, FileEntry, SystemInfo, MaridTaskMeta } from "@marid/shared";
+import type { AppSettings, FileEntry, SystemInfo, QodexTaskMeta } from "@qodex/shared";
 import { createHash } from "node:crypto";
 import { posix, win32 } from "node:path";
-import { remoteHostIdFromWorkspaceIdentity } from "@marid/shared";
+import { remoteHostIdFromWorkspaceIdentity } from "@qodex/shared";
 import type { IProjectService, VirtualProject, ProjectTask } from "#src/project/contract.js";
 import { LEGACY_SINGLE_ROOT_PROJECT_PREFIX } from "#src/project/contract.js";
 
@@ -15,7 +15,7 @@ interface LegacyProjectReadPort {
   readTasks(input: {
     workspacePath: string;
     kind: "active" | "pinned" | "archived";
-  }): Promise<MaridTaskMeta[]>;
+  }): Promise<QodexTaskMeta[]>;
   ensureConversation(): Promise<string>;
   readKnownWorkspaces?(): Promise<
     readonly { workspacePath: string; workspacePurpose?: "project" | "conversation" }[]

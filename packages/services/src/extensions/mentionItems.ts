@@ -7,13 +7,13 @@ import {
   type MentionItemsResult,
   type ProvideMentionItemsInput,
   type StaticSlotItem,
-} from "@marid/shared/extension-host";
-import { maridProtocolErrorCodes } from "@marid/shared";
+} from "@qodex/shared/extension-host";
+import { qodexProtocolErrorCodes } from "@qodex/shared";
 import type { ServiceLogger } from "#src/logger/serviceLogger.js";
 import {
-  MARID_AGENT_RUNTIME_UNAVAILABLE_CODE,
-  type IMaridAgentService,
-} from "#src/marid-agent/maridAgent.js";
+  QODEX_AGENT_RUNTIME_UNAVAILABLE_CODE,
+  type IQodexAgentService,
+} from "#src/qodex-agent/qodexAgent.js";
 
 // composer.mention 的候选项路由（docs/plugins/extension-host.md §16.6）：
 // - command 条目 → 扩展进程的命令（参数 { query }），返回值按插槽的 commandResult 校验；
@@ -26,7 +26,7 @@ export interface MentionItemsRouterDeps {
   staticTable(): ExtensionStaticTable;
   /** 当前代际的扩展进程连接；没有时为 null。 */
   connection(): { gen: number; host: IExtensionHostChannel } | null;
-  agent: Pick<IMaridAgentService, "getPluginMentionItems">;
+  agent: Pick<IQodexAgentService, "getPluginMentionItems">;
   logger: Pick<ServiceLogger, "debug" | "warn">;
 }
 
@@ -53,8 +53,8 @@ function toolErrorCode(error: unknown): string {
     }
     const code = (error as { code?: unknown }).code;
     if (
-      code === maridProtocolErrorCodes.sessionUnavailable ||
-      code === MARID_AGENT_RUNTIME_UNAVAILABLE_CODE
+      code === qodexProtocolErrorCodes.sessionUnavailable ||
+      code === QODEX_AGENT_RUNTIME_UNAVAILABLE_CODE
     ) {
       return MENTION_ITEMS_ERROR_CODES.sessionUnavailable;
     }

@@ -1,14 +1,14 @@
 import { buildStartPlanEntitlementOptions } from "@/lib/startPlanEntitlementOptions.js";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import type { ProviderSettingsView } from "@marid/services";
+import type { ProviderSettingsView } from "@qodex/services";
 import {
   getModelProviderFamilySpec,
   type ModelProviderFamilySpec,
   type ProviderFamilyConnectionSelection,
   type ProviderFamilyConnectionSelectionSettings,
-  type MaridAccountAccess,
-  type MaridProviderAccountAccess,
-} from "@marid/shared";
+  type QodexAccountAccess,
+  type QodexProviderAccountAccess,
+} from "@qodex/shared";
 import {
   useUsageEntitlement,
   type UsageEntitlementRefreshOptions,
@@ -131,9 +131,9 @@ function useProviderFamilyEntitlements(params: {
 }
 
 function resolveEntitlementAccountAccess(
-  access: MaridProviderAccountAccess | undefined,
+  access: QodexProviderAccountAccess | undefined,
   selection: ProviderFamilyConnectionSelection | undefined,
-): MaridProviderAccountAccess | MaridAccountAccess | undefined {
+): QodexProviderAccountAccess | QodexAccountAccess | undefined {
   if (access?.mode !== "team-coding-plan" || selection?.kind !== "team-coding-plan") {
     // 展示查询针对这个套餐自身，不让执行期的 current 解析器改成当前另一套餐。
     return access && (access.mode === "start-plan" || access.mode === "individual-coding-plan")

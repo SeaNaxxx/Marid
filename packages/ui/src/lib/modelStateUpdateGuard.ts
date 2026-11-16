@@ -1,8 +1,8 @@
 import {
   decodeCustomModelValue,
-  MARID_MODEL_REASONING_SEPARATOR,
-  type MaridConfigOption,
-} from "@marid/shared";
+  QODEX_MODEL_REASONING_SEPARATOR,
+  type QodexConfigOption,
+} from "@qodex/shared";
 
 function normalizeModelIdentity(value: string | null | undefined): string | null {
   const trimmed = value?.trim();
@@ -23,14 +23,14 @@ function normalizeModelIdentity(value: string | null | undefined): string | null
   const providerId = trimmed.slice(0, separatorIndex).trim();
   const rawModelId = trimmed.slice(separatorIndex + 1).trim();
   // Bugfix：冒号可能属于 OpenRouter modelId，模型身份 guard 只忽略 `$variant`。
-  const reasoningSeparatorIndex = rawModelId.indexOf(MARID_MODEL_REASONING_SEPARATOR);
+  const reasoningSeparatorIndex = rawModelId.indexOf(QODEX_MODEL_REASONING_SEPARATOR);
   const modelId =
     reasoningSeparatorIndex > 0 ? rawModelId.slice(0, reasoningSeparatorIndex).trim() : rawModelId;
   return providerId && modelId ? `${providerId}/${modelId}` : trimmed;
 }
 
 export function readModelCurrentValueForModelStateGuard(
-  configOptions: readonly MaridConfigOption[],
+  configOptions: readonly QodexConfigOption[],
 ): string | null {
   const modelOption = configOptions.find(
     (option) => option.category === "model" && option.type === "select",

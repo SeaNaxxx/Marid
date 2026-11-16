@@ -1,4 +1,4 @@
-import type { IPlatformService, TelemetryEventPayload } from "@marid/shared";
+import type { IPlatformService, TelemetryEventPayload } from "@qodex/shared";
 import { reportAppTelemetryEvent } from "@/lib/appTelemetry.js";
 
 export const PROMPT_TEMPLATE_CLICK_EVENT_NAME = "prompt_template_ck";

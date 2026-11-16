@@ -1,6 +1,6 @@
 import { join } from "node:path";
-import type { IServiceAccessor, ISettingsSyncService } from "@marid/services";
-import { TID_TASK_SETTINGS_BUTTON, TID_SETTINGS_SECTION_NAV, testId } from "@marid/shared/test-ids";
+import type { IServiceAccessor, ISettingsSyncService } from "@qodex/services";
+import { TID_TASK_SETTINGS_BUTTON, TID_SETTINGS_SECTION_NAV, testId } from "@qodex/shared/test-ids";
 import { clickTestIdByDom, waitForTestIdByDom } from "#e2e/helpers/desktop-app";
 import { prepareV4ConversationE2E } from "#e2e/helpers/v4-conversation";
 import { startElectronWindowRecording } from "#e2e/helpers/electron-window-recorder";
@@ -186,7 +186,7 @@ describe("E2E_DSYNC_16_MIGRATION_RACE", () => {
           return Buffer.from(png, "base64");
         },
         outputPath: join(
-          process.env.MARID_E2E_ARTIFACT_DIR ?? ".e2e-artifacts",
+          process.env.QODEX_E2E_ARTIFACT_DIR ?? ".e2e-artifacts",
           `migration-race-${handled}.webm`,
         ),
       });

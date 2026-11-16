@@ -1,4 +1,4 @@
-import type { Event } from "@marid/rpc";
+import type { Event } from "@qodex/rpc";
 import type {
   RemoteTarget,
   SourceServerUpdateRequest,
@@ -9,8 +9,8 @@ import type {
   SourceServerManagementStateDelta,
   SourceServerOperationLog,
   SourceServerRunningTasksResult,
-} from "@marid/shared";
-import { ServiceChannels } from "@marid/shared";
+} from "@qodex/shared";
+import { ServiceChannels } from "@qodex/shared";
 import { createServiceDescriptor } from "../descriptors.js";
 
 export interface UpdateConnectionProfileInput {

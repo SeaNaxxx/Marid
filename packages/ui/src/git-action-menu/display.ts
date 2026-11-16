@@ -1,4 +1,4 @@
-import type { GitRepositorySummary } from "@marid/shared";
+import type { GitRepositorySummary } from "@qodex/shared";
 
 type GitActionMenuPrimaryActionId = "commit" | "push";
 

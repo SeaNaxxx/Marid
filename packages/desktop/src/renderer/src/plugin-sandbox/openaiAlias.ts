@@ -1,9 +1,9 @@
-import type { OpenAiCompatApi, MaridAliasApi } from "./aliasApi.js";
+import type { OpenAiCompatApi, QodexAliasApi } from "./aliasApi.js";
 
 export const OPENAI_SET_GLOBALS_EVENT = "openai:set_globals";
 
-/** 全部转调同一 `window.marid` 实例；globals 变化时由 alias.ts 派发 `openai:set_globals`（detail.globals 与本对象同源）。 */
-export function createOpenAiCompatApi(api: MaridAliasApi): OpenAiCompatApi {
+/** 全部转调同一 `window.qodex` 实例；globals 变化时由 alias.ts 派发 `openai:set_globals`（detail.globals 与本对象同源）。 */
+export function createOpenAiCompatApi(api: QodexAliasApi): OpenAiCompatApi {
   return {
     get toolInput() {
       return api.toolInput;

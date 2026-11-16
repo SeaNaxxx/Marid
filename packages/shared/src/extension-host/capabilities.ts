@@ -22,8 +22,8 @@ import {
   readSessionResultSchema,
   sendToSessionResultSchema,
   waitSessionsResultSchema,
-} from "@marid/session-control/contracts";
-import { contextCompositionSchema } from "#src/marid-protocol-v4/context-composition/contract.js";
+} from "@qodex/session-control/contracts";
+import { contextCompositionSchema } from "#src/qodex-protocol-v4/context-composition/contract.js";
 import { EXTENSION_ERROR_CODES, type ExtensionError } from "#src/extension-host/errors.js";
 import {
   extensionGrantSchema,

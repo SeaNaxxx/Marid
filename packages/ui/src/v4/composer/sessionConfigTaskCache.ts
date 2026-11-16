@@ -1,9 +1,9 @@
-import type { MaridConfigOption } from "@marid/shared";
-import type { SessionConfigState } from "@marid/shared/marid-protocol-v4";
-import { parseModelPickerValue } from "@/lib/maridSessionProjection.js";
+import type { QodexConfigOption } from "@qodex/shared";
+import type { SessionConfigState } from "@qodex/shared/qodex-protocol-v4";
+import { parseModelPickerValue } from "@/lib/qodexSessionProjection.js";
 
 function resolveModelDisplayValue(
-  options: readonly MaridConfigOption[],
+  options: readonly QodexConfigOption[],
   config: Pick<SessionConfigState, "provider" | "model">,
 ): string {
   const provider = config.provider.trim();
@@ -31,9 +31,9 @@ function resolveModelDisplayValue(
  * 目录项和候选列表保持原引用语义，仅替换 model/mode/thought 的 currentValue。
  */
 export function projectSessionConfigToTaskConfigOptions(
-  options: readonly MaridConfigOption[],
+  options: readonly QodexConfigOption[],
   config: Pick<SessionConfigState, "provider" | "model" | "mode" | "thought">,
-): MaridConfigOption[] {
+): QodexConfigOption[] {
   const modelValue = resolveModelDisplayValue(options, config);
   return options.map((option) => {
     if (option.type !== "select") {

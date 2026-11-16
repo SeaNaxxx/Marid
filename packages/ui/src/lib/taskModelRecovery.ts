@@ -1,9 +1,9 @@
-import type { MaridConfigOption, MaridTaskMeta } from "@marid/shared";
-import { getMaridAgentModeSelectOptions } from "@marid/shared";
+import type { QodexConfigOption, QodexTaskMeta } from "@qodex/shared";
+import { getQodexAgentModeSelectOptions } from "@qodex/shared";
 import {
   decodeCustomModelValue,
   encodeCustomModelValue,
-} from "@/lib/maridCustomModelValue.js";
+} from "@/lib/qodexCustomModelValue.js";
 
 function parseProviderQualifiedModel(
   model: string,
@@ -52,7 +52,7 @@ export function resolveGlmRecoveredTaskModelValue(
 }
 
 export function resolveRecoveredTaskModelValue(
-  taskMeta: Pick<MaridTaskMeta, "provider" | "model">,
+  taskMeta: Pick<QodexTaskMeta, "provider" | "model">,
 ): string | null {
   const normalizedTaskModel = taskMeta.model?.trim();
   if (!normalizedTaskModel || isSyntheticModelPlaceholder(normalizedTaskModel)) {
@@ -73,9 +73,9 @@ function resolveModelOptionName(modelValue: string): string {
 }
 
 function ensureModelOptionValue(
-  option: MaridConfigOption,
+  option: QodexConfigOption,
   modelValue: string,
-): MaridConfigOption {
+): QodexConfigOption {
   const options = option.options ?? [];
   const hasOption = options.some((candidate) => candidate.value === modelValue);
   if (hasOption && option.currentValue === modelValue) {
@@ -97,7 +97,7 @@ function ensureModelOptionValue(
   };
 }
 
-function createRecoveredModelOption(modelValue: string): MaridConfigOption {
+function createRecoveredModelOption(modelValue: string): QodexConfigOption {
   return {
     category: "model",
     currentValue: modelValue,
@@ -113,18 +113,18 @@ function createRecoveredModelOption(modelValue: string): MaridConfigOption {
   };
 }
 
-function createRecoveredModeOption(modeValue: string): MaridConfigOption {
+function createRecoveredModeOption(modeValue: string): QodexConfigOption {
   return {
     category: "mode",
     currentValue: modeValue,
     id: "mode",
     name: "Mode",
-    options: getMaridAgentModeSelectOptions(),
+    options: getQodexAgentModeSelectOptions(),
     type: "select",
   };
 }
 
-function createRecoveredThoughtLevelOption(thoughtLevel: string): MaridConfigOption {
+function createRecoveredThoughtLevelOption(thoughtLevel: string): QodexConfigOption {
   return {
     category: "thought_level",
     currentValue: thoughtLevel,
@@ -141,9 +141,9 @@ function createRecoveredThoughtLevelOption(thoughtLevel: string): MaridConfigOpt
 }
 
 function ensureSelectOptionCurrentValue(
-  option: MaridConfigOption,
+  option: QodexConfigOption,
   value: string,
-): MaridConfigOption {
+): QodexConfigOption {
   const options = option.options ?? [];
   const hasOption = options.some((candidate) => candidate.value === value);
   if (hasOption && option.currentValue === value) {
@@ -169,9 +169,9 @@ export function mergeRecoveredTaskModelConfigOptions({
   taskMeta,
   configOptions,
 }: {
-  taskMeta: Pick<MaridTaskMeta, "provider" | "model">;
-  configOptions: readonly MaridConfigOption[];
-}): MaridConfigOption[] | null {
+  taskMeta: Pick<QodexTaskMeta, "provider" | "model">;
+  configOptions: readonly QodexConfigOption[];
+}): QodexConfigOption[] | null {
   const recoveredModelValue = resolveRecoveredTaskModelValue(taskMeta);
   if (!recoveredModelValue) {
     return null;
@@ -206,10 +206,10 @@ export function resolveTaskRestorePreloadConfigOptions({
   taskMeta,
   cachedTaskConfigOptions,
 }: {
-  taskMeta: Pick<MaridTaskMeta, "provider" | "model"> &
-    Partial<Pick<MaridTaskMeta, "mode" | "thoughtLevel">>;
-  cachedTaskConfigOptions?: readonly MaridConfigOption[];
-}): MaridConfigOption[] {
+  taskMeta: Pick<QodexTaskMeta, "provider" | "model"> &
+    Partial<Pick<QodexTaskMeta, "mode" | "thoughtLevel">>;
+  cachedTaskConfigOptions?: readonly QodexConfigOption[];
+}): QodexConfigOption[] {
   let cachedOptions = [...(cachedTaskConfigOptions ?? [])];
   const recoveredOptions = mergeRecoveredTaskModelConfigOptions({
     taskMeta,
@@ -265,9 +265,9 @@ export function mergeGlmRecoveredTaskModelConfigOptions({
   taskMeta,
   configOptions,
 }: {
-  taskMeta: Pick<MaridTaskMeta, "provider" | "model">;
-  configOptions: readonly MaridConfigOption[];
-}): MaridConfigOption[] | null {
+  taskMeta: Pick<QodexTaskMeta, "provider" | "model">;
+  configOptions: readonly QodexConfigOption[];
+}): QodexConfigOption[] | null {
   if (taskMeta.provider !== "glm") {
     return null;
   }

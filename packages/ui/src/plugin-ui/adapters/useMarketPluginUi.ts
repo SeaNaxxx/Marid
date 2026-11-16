@@ -1,9 +1,9 @@
 import { documentViewerInstance, type DraftPluginUiOpenRequest } from "@/plugin-ui/contract.js";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { isRemoteWorkspaceIdentity, type MaridPluginUiSurface } from "@marid/shared";
+import { isRemoteWorkspaceIdentity, type QodexPluginUiSurface } from "@qodex/shared";
 import { useOptionalServices } from "@/hooks/useServices.js";
 import { useOptionalPlatform } from "@/hooks/usePlatform.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { resolvePluginUiSurfaceTitle } from "@/plugin-ui/adapters/usePluginUiSurfaces.js";
 import { useOpenPluginUi } from "@/plugin-ui/adapters/PluginUiProviders.js";
 import { toast } from "@/components/ui/toast.js";
@@ -23,7 +23,7 @@ export function useMarketPluginUi(target: MarketPluginUiTarget) {
   const platform = useOptionalPlatform();
   const bridge = useOptionalServices()?.pluginUiBridgeService;
   const openSidePane = useOpenPluginUi();
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const key = `${target.workspaceIdentity?.trim() || target.workspacePath}\0${target.remoteSessionId ?? ""}\0${target.sessionId ?? ""}\0${target.paneId ?? ""}`;
   const currentKey = useRef<string | null>(key);
   currentKey.current = key;
@@ -36,12 +36,12 @@ export function useMarketPluginUi(target: MarketPluginUiTarget) {
   }, [key]);
   const [selection, setSelection] = useState<{
     key: string;
-    surfaces: MaridPluginUiSurface[];
+    surfaces: QodexPluginUiSurface[];
   } | null>(null);
   const surfaces = selection?.key === key ? selection.surfaces : [];
   const closeSelection = useCallback(() => setSelection(null), []);
   const selectSurface = useCallback(
-    (surface: MaridPluginUiSurface) => {
+    (surface: QodexPluginUiSurface) => {
       if (currentKey.current !== key || !target.workspacePath) return;
       const request: DraftPluginUiOpenRequest = {
         workspacePath: target.workspacePath,

@@ -42,7 +42,7 @@
         "bodyIncludes": [
           "E2E_PLUGIN_APPEND_ONLY_U1",
           "<plugin_reference>",
-          "skill-creator@marid-plugins-official"
+          "skill-creator@qodex-plugins-official"
         ],
         "bodyExcludes": [
           "Generate a concise title",

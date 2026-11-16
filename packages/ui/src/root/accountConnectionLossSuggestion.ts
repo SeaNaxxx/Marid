@@ -1,5 +1,5 @@
-import type { IServiceAccessor, ProviderSettingsView } from "@marid/services";
-import type { ProviderFamilyConnectionSelection } from "@marid/shared";
+import type { IServiceAccessor, ProviderSettingsView } from "@qodex/services";
+import type { ProviderFamilyConnectionSelection } from "@qodex/shared";
 import type { AccountConnectionLoss } from "@/root/accountConnectionRefreshObserver.js";
 import {
   resolveFirstSubscribedTeamPlanConnectionWithContext,

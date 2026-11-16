@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { ChartLineIcon, FileIcon, GaugeIcon, SquareKanbanIcon, TableIcon } from "lucide-react";
-import type { WorkflowRunArtifactKind } from "@marid/shared/marid-protocol-v4";
+import type { WorkflowRunArtifactKind } from "@qodex/shared/qodex-protocol-v4";
 import { FileDisplayIcon, resolveFileDisplayDescriptor } from "@/lib/fileDisplay.js";
 import type {
   ArtifactPresetKind,

@@ -1,14 +1,14 @@
-import { remoteHostIdFromWorkspaceIdentity } from "@marid/shared";
+import { remoteHostIdFromWorkspaceIdentity } from "@qodex/shared";
 import { readFile } from "node:fs/promises";
 
-import type { ModelSelectionView } from "@marid/provider";
+import type { ModelSelectionView } from "@qodex/provider";
 import type {
   BotsConfigFile,
   BotsStateFile,
   ModelSelection,
-  MaridStreamEvent,
-} from "@marid/shared";
-import { createBotsService, type IModelSelectionService } from "@marid/services/node";
+  QodexStreamEvent,
+} from "@qodex/shared";
+import { createBotsService, type IModelSelectionService } from "@qodex/services/node";
 import { resolveE2ERuntimePath } from "../../helpers/e2e-runtime-paths.js";
 
 const E2E_BOT_WORKSPACE = resolveE2ERuntimePath("bots", "e2e-bot-workspace");
@@ -53,9 +53,9 @@ export interface BotsServiceHarness {
   service: ReturnType<typeof createBotsService>;
   subscriptions: Array<{
     params: Record<string, unknown>;
-    listener: (event: MaridStreamEvent) => Promise<void> | void;
+    listener: (event: QodexStreamEvent) => Promise<void> | void;
   }>;
-  maridTaskService: Record<string, unknown>;
+  qodexTaskService: Record<string, unknown>;
 }
 
 export function createBotModelSelectionView(): ModelSelectionView {
@@ -121,10 +121,10 @@ export function createBotsServiceHarness(options: BotsServiceHarnessOptions): Bo
   const respondElicitationCalls: unknown[] = [];
   const subscriptions: Array<{
     params: Record<string, unknown>;
-    listener: (event: MaridStreamEvent) => Promise<void> | void;
+    listener: (event: QodexStreamEvent) => Promise<void> | void;
   }> = [];
 
-  const maridTaskService = {
+  const qodexTaskService = {
     listTasks: async () => [],
     listDeletedTaskIds: async () => [],
     createTask: async (params: unknown) => {
@@ -176,7 +176,7 @@ export function createBotsServiceHarness(options: BotsServiceHarnessOptions): Bo
     stopGeneration: async () => undefined,
     onDynamicTaskEvent:
       (params: Record<string, unknown>) =>
-      (listener: (event: MaridStreamEvent) => Promise<void> | void) => {
+      (listener: (event: QodexStreamEvent) => Promise<void> | void) => {
         subscriptions.push({ params, listener });
         return { dispose() {} };
       },
@@ -190,7 +190,7 @@ export function createBotsServiceHarness(options: BotsServiceHarnessOptions): Bo
       save: async () => undefined,
       delete: async () => undefined,
     },
-    maridTaskService,
+    qodexTaskService,
     settingService: {
       get: async () => ({
         locale: "zh-CN",
@@ -234,7 +234,7 @@ export function createBotsServiceHarness(options: BotsServiceHarnessOptions): Bo
     sendPromptCalls,
     service,
     subscriptions,
-    maridTaskService,
+    qodexTaskService,
   };
 }
 

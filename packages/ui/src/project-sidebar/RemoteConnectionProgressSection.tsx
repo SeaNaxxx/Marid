@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Check, Copy, LoaderCircle } from "lucide-react";
-import { buildRemoteHostWorkspaceIdentity, parseRemoteWorkspaceIdentity } from "@marid/shared";
+import { buildRemoteHostWorkspaceIdentity, parseRemoteWorkspaceIdentity } from "@qodex/shared";
 import type { RemoteProjectHost } from "@/project-sidebar/contract.js";
 import { cn } from "@/components/lib/utils.js";
 import { toast } from "@/components/ui/toast.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 import { useBaseWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
 import { useRemoteDevicePresentationInput } from "@/hooks/useSourceServerStatuses.js";
@@ -48,7 +48,7 @@ export function RemoteConnectionProgressSection({
   status: RemoteConnectionStatus;
   error?: string;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const management = useBaseWorkspaceServices().sourceServerManagementService;
   const sourceServerId = sourceServerIdForHost(host);
   const device = useRemoteDevicePresentationInput(sourceServerId);

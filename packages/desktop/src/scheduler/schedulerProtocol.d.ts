@@ -1,4 +1,4 @@
-import type { ModelSelection } from "@marid/shared";
+import type { ModelSelection } from "@qodex/shared";
 /** scheduler → main */
 export type SchedulerToMainMessage =
   | {

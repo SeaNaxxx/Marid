@@ -1,4 +1,4 @@
-// @marid-dev/plugin-api/manifest（docs/plugins/extension-host.md §17.9）：清单 `extension` 键与顶层 `slots` 的类型。
+// @qodex-dev/plugin-api/manifest（docs/plugins/extension-host.md §17.9）：清单 `extension` 键与顶层 `slots` 的类型。
 export type {
   ExtensionGrant,
   ExtensionManifest,
@@ -11,4 +11,4 @@ export type {
   ManifestSlots,
   ManifestSlotTarget,
   SlotTargetKind,
-} from "@marid/shared/extension-host";
+} from "@qodex/shared/extension-host";

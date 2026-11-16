@@ -1,7 +1,7 @@
 import {
   sourceServerManagementSnapshotSchema,
   type SourceServerManagementSnapshot,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type { ManagedSourceServerConnection } from "./sourceServerConnectionManager.js";
 import type { SourceServerDirectorySnapshot } from "./sourceServerDirectory.js";
 

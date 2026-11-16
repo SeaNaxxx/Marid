@@ -6,7 +6,7 @@
 
 **Architecture:** 保留现有 `ExecutionPort.run()`、`ExecutionPort.start()`、`getBackgroundTask()`、`cancelBackgroundTask()` 作为公共 execution 边界；新增能力只作为 Bash handler 与 Node execution adapter 之间的窄结构化 capability，不扩展公共 `ExecutionPort`。Bash auto-background 只负责“同一个前台进程超时后转后台任务”，完成后仍通过 `BackgroundTaskTracker` 走现有 task-notification、runtime wake、runtime command queue 和 post-turn goal driver。
 
-**Tech Stack:** TypeScript, Vitest, pnpm, `@marid/contracts`, `@marid/adapters`, `@marid/core`, current workspace source only.
+**Tech Stack:** TypeScript, Vitest, pnpm, `@qodex/contracts`, `@qodex/adapters`, `@qodex/core`, current workspace source only.
 
 ## Global Constraints
 
@@ -25,10 +25,10 @@
 
 当前工作区里 Bash background WIP 已经实现了大部分 notification/wake/queue 能力，但 auto-background 入口过宽：
 
-- `apps/marid-cli/packages/contracts/src/interfaces/execution.port.ts` 新增了 `runBackgroundable`、`waitForBackgroundTask`、`BackgroundableExecution*` 类型。
-- `apps/marid-cli/packages/adapters/src/exec/index.ts` 在 `NodeExecutionAdapter.runBackgroundable()` 内做 foreground completion 和 timeout promotion。
-- `apps/marid-cli/packages/core/src/tool/handlers/bash.ts` 通过 `executionPort.runBackgroundable()` 调用 auto-background，并强制 `persistOutput: "always"`。
-- `apps/marid-cli/packages/core/src/tool/executor/background-tasks.ts` 已经能发 Bash `local_bash` task notification，并且可以用 direct waiter 避免 Bash poller。
+- `apps/qodex-cli/packages/contracts/src/interfaces/execution.port.ts` 新增了 `runBackgroundable`、`waitForBackgroundTask`、`BackgroundableExecution*` 类型。
+- `apps/qodex-cli/packages/adapters/src/exec/index.ts` 在 `NodeExecutionAdapter.runBackgroundable()` 内做 foreground completion 和 timeout promotion。
+- `apps/qodex-cli/packages/core/src/tool/handlers/bash.ts` 通过 `executionPort.runBackgroundable()` 调用 auto-background，并强制 `persistOutput: "always"`。
+- `apps/qodex-cli/packages/core/src/tool/executor/background-tasks.ts` 已经能发 Bash `local_bash` task notification，并且可以用 direct waiter 避免 Bash poller。
 
 目标形态：
 
@@ -39,34 +39,34 @@
 
 ## File Structure
 
-- Modify: `apps/marid-cli/packages/contracts/src/interfaces/execution.port.ts`
+- Modify: `apps/qodex-cli/packages/contracts/src/interfaces/execution.port.ts`
   - 移除 generic auto-background 类型和接口方法。
   - 保留已有 `BackgroundExecutionStartResult`、`BackgroundExecutionSnapshot`、`ExecutionPort.start/getBackgroundTask/cancelBackgroundTask`。
 
-- Modify: `apps/marid-cli/packages/adapters/src/exec/index.ts`
+- Modify: `apps/qodex-cli/packages/adapters/src/exec/index.ts`
   - 删除 `NodeExecutionAdapter.runBackgroundable()`。
   - 新增窄方法 `runBashWithAutoBackground(request, options)`，只处理 Bash timeout promotion。
   - 保留 class 上的 `waitForBackgroundTask(taskId, options?)` 作为内部结构化 capability，但不放回公共 `ExecutionPort`。
   - 把 foreground artifact cleanup 限定在 Bash auto-background 内部强制落盘场景，不能破坏普通 `run()` 的 `persistOutput` 语义。
 
-- Create: `apps/marid-cli/packages/core/src/tool/handlers/bash-auto-background.ts`
+- Create: `apps/qodex-cli/packages/core/src/tool/handlers/bash-auto-background.ts`
   - 放 Bash handler 使用的窄类型、type guard 和 wrapper。
   - 让 `bash.ts` 不直接写 structural cast。
 
-- Modify: `apps/marid-cli/packages/core/src/tool/handlers/bash.ts`
+- Modify: `apps/qodex-cli/packages/core/src/tool/handlers/bash.ts`
   - 移除 `createAutoBackgroundExecutionRequest()` 和 `restoreForegroundOutputPersistence()`。
   - 改为调用 `runBashWithOptionalAutoBackground()`。
   - 保留 explicit `run_in_background` 走 `executionPort.start()`。
 
-- Modify: `apps/marid-cli/packages/core/src/tool/executor/background-tasks.ts`
+- Modify: `apps/qodex-cli/packages/core/src/tool/executor/background-tasks.ts`
   - 把 direct waiter 的类型判断改为本文件内部 structural capability，不依赖 `ExecutionPort["waitForBackgroundTask"]`。
   - Bash direct waiter 存在时继续不用 poller；不存在时保留原 `getBackgroundTask()` fallback。
 
 - Modify: tests
-  - `apps/marid-cli/packages/adapters/tests/exec.test.ts`
-  - `apps/marid-cli/packages/core/tests/bash-run-conformance.test.ts`
-  - `apps/marid-cli/packages/core/tests/runtime-tool-loop.test.ts`
-  - `apps/marid-cli/packages/core/tests/tool-contracts.test.ts`
+  - `apps/qodex-cli/packages/adapters/tests/exec.test.ts`
+  - `apps/qodex-cli/packages/core/tests/bash-run-conformance.test.ts`
+  - `apps/qodex-cli/packages/core/tests/runtime-tool-loop.test.ts`
+  - `apps/qodex-cli/packages/core/tests/tool-contracts.test.ts`
 
 - Modify: docs
   - `docs/bash-background-parity.md`
@@ -100,7 +100,7 @@ Expected:
 Run:
 
 ```bash
-git show HEAD:apps/marid-cli/packages/contracts/src/interfaces/execution.port.ts | rg -n "runBackgroundable|BackgroundableExecution|waitForBackgroundTask|BackgroundExecution" -C 2
+git show HEAD:apps/qodex-cli/packages/contracts/src/interfaces/execution.port.ts | rg -n "runBackgroundable|BackgroundableExecution|waitForBackgroundTask|BackgroundExecution" -C 2
 ```
 
 Expected:
@@ -113,20 +113,20 @@ Expected:
 Run:
 
 ```bash
-rg -n "runBackgroundable|BackgroundableExecution|autoBackgroundOnTimeout|waitForBackgroundTask" apps/marid-cli/packages docs/bash-background-parity.md
+rg -n "runBackgroundable|BackgroundableExecution|autoBackgroundOnTimeout|waitForBackgroundTask" apps/qodex-cli/packages docs/bash-background-parity.md
 ```
 
 Expected:
 
 - 列出当前 WIP 中待重构引用。
-- 后续 phase 完成后，`runBackgroundable|BackgroundableExecution|autoBackgroundOnTimeout` 在 `apps/marid-cli/packages` 下应为 0。
+- 后续 phase 完成后，`runBackgroundable|BackgroundableExecution|autoBackgroundOnTimeout` 在 `apps/qodex-cli/packages` 下应为 0。
 
 - [ ] **Step 0.4: Recheck target Bash background facts**
 
 Run:
 
 ```bash
-rg -n "assistantAutoBackgrounded|backgroundTaskId|persistedOutputPath|run_in_background|TaskOutput" apps/marid-cli/packages/contracts/src/tools/bash.ts docs/bash-background-parity.md
+rg -n "assistantAutoBackgrounded|backgroundTaskId|persistedOutputPath|run_in_background|TaskOutput" apps/qodex-cli/packages/contracts/src/tools/bash.ts docs/bash-background-parity.md
 ```
 
 Expected:
@@ -148,10 +148,10 @@ Expected:
 
 **Files:**
 
-- Modify: `apps/marid-cli/packages/adapters/tests/exec.test.ts`
-- Modify: `apps/marid-cli/packages/core/tests/bash-run-conformance.test.ts`
-- Modify: `apps/marid-cli/packages/core/tests/runtime-tool-loop.test.ts`
-- Modify: `apps/marid-cli/packages/core/tests/tool-contracts.test.ts`
+- Modify: `apps/qodex-cli/packages/adapters/tests/exec.test.ts`
+- Modify: `apps/qodex-cli/packages/core/tests/bash-run-conformance.test.ts`
+- Modify: `apps/qodex-cli/packages/core/tests/runtime-tool-loop.test.ts`
+- Modify: `apps/qodex-cli/packages/core/tests/tool-contracts.test.ts`
 
 **Interfaces:**
 
@@ -162,7 +162,7 @@ Expected:
 
 - [ ] **Step 1.1: Replace adapter test entrypoint**
 
-In `apps/marid-cli/packages/adapters/tests/exec.test.ts`, rename auto-background tests so they call `runBashWithAutoBackground` instead of `runBackgroundable`.
+In `apps/qodex-cli/packages/adapters/tests/exec.test.ts`, rename auto-background tests so they call `runBashWithAutoBackground` instead of `runBackgroundable`.
 
 Use this structural helper in the test file:
 
@@ -195,7 +195,7 @@ expect(typeof capable.runBashWithAutoBackground).toBe("function");
 
 - [ ] **Step 1.2: Replace Bash handler conformance fake**
 
-In `apps/marid-cli/packages/core/tests/bash-run-conformance.test.ts`, change the fake execution port test from `runBackgroundableCalled` to `runBashWithAutoBackgroundCalled`.
+In `apps/qodex-cli/packages/core/tests/bash-run-conformance.test.ts`, change the fake execution port test from `runBackgroundableCalled` to `runBashWithAutoBackgroundCalled`.
 
 The fake method should return:
 
@@ -206,7 +206,7 @@ async runBashWithAutoBackground() {
     assistantAutoBackgrounded: true,
     kind: "backgrounded" as const,
     task: {
-      outputPath: "/tmp/marid-bash-output.log",
+      outputPath: "/tmp/qodex-bash-output.log",
       startedAt: new Date(),
       status: "running" as const,
       taskId: "exec_auto_background",
@@ -225,7 +225,7 @@ expect(output.assistantAutoBackgrounded).toBe(true);
 
 - [ ] **Step 1.3: Add no-generic-contract regression**
 
-In `apps/marid-cli/packages/core/tests/tool-contracts.test.ts`, add a runtime shape check that Bash provider schema still exposes background result fields but does not rely on execution-port generic promotion.
+In `apps/qodex-cli/packages/core/tests/tool-contracts.test.ts`, add a runtime shape check that Bash provider schema still exposes background result fields but does not rely on execution-port generic promotion.
 
 Use this expectation style:
 
@@ -264,15 +264,15 @@ Expected:
 
 **Files:**
 
-- Modify: `apps/marid-cli/packages/contracts/src/interfaces/execution.port.ts`
-- Modify imports in `apps/marid-cli/packages/adapters/src/exec/index.ts`
+- Modify: `apps/qodex-cli/packages/contracts/src/interfaces/execution.port.ts`
+- Modify imports in `apps/qodex-cli/packages/adapters/src/exec/index.ts`
 - Modify imports in affected tests
 
 **Checklist**
 
 - [ ] **Step 2.1: Remove generic types from contracts**
 
-Delete these declarations from `apps/marid-cli/packages/contracts/src/interfaces/execution.port.ts`:
+Delete these declarations from `apps/qodex-cli/packages/contracts/src/interfaces/execution.port.ts`:
 
 ```ts
 export interface BackgroundableExecutionRunOptions extends ExecutionRunOptions {
@@ -313,7 +313,7 @@ cancelBackgroundTask?(taskId: string): Promise<BackgroundExecutionSnapshot | und
 
 - [ ] **Step 2.3: Remove stale imports**
 
-In `apps/marid-cli/packages/adapters/src/exec/index.ts`, remove imports of:
+In `apps/qodex-cli/packages/adapters/src/exec/index.ts`, remove imports of:
 
 ```ts
 BackgroundableExecutionRunOptions,
@@ -325,7 +325,7 @@ BackgroundableExecutionRunResult,
 Run:
 
 ```bash
-cd apps/marid-cli/packages/contracts && ../../../../node_modules/.bin/tsc --noEmit
+cd apps/qodex-cli/packages/contracts && ../../../../node_modules/.bin/tsc --noEmit
 ```
 
 Expected:
@@ -345,8 +345,8 @@ Expected:
 
 **Files:**
 
-- Modify: `apps/marid-cli/packages/adapters/src/exec/index.ts`
-- Modify: `apps/marid-cli/packages/adapters/tests/exec.test.ts`
+- Modify: `apps/qodex-cli/packages/adapters/src/exec/index.ts`
+- Modify: `apps/qodex-cli/packages/adapters/tests/exec.test.ts`
 
 **Interfaces:**
 
@@ -489,7 +489,7 @@ Expected:
 
 - Adapter supports Bash auto-background without `runBackgroundable`.
 - Adapter tests pass.
-- `rg -n "runBackgroundable|BackgroundableExecution|autoBackgroundOnTimeout" apps/marid-cli/packages/adapters apps/marid-cli/packages/contracts` returns no matches.
+- `rg -n "runBackgroundable|BackgroundableExecution|autoBackgroundOnTimeout" apps/qodex-cli/packages/adapters apps/qodex-cli/packages/contracts` returns no matches.
 
 ---
 
@@ -499,13 +499,13 @@ Expected:
 
 **Files:**
 
-- Create: `apps/marid-cli/packages/core/src/tool/handlers/bash-auto-background.ts`
-- Modify: `apps/marid-cli/packages/core/src/tool/handlers/bash.ts`
-- Modify: `apps/marid-cli/packages/core/tests/bash-run-conformance.test.ts`
+- Create: `apps/qodex-cli/packages/core/src/tool/handlers/bash-auto-background.ts`
+- Modify: `apps/qodex-cli/packages/core/src/tool/handlers/bash.ts`
+- Modify: `apps/qodex-cli/packages/core/tests/bash-run-conformance.test.ts`
 
 **Interfaces:**
 
-Create `apps/marid-cli/packages/core/src/tool/handlers/bash-auto-background.ts`:
+Create `apps/qodex-cli/packages/core/src/tool/handlers/bash-auto-background.ts`:
 
 ```ts
 import type {
@@ -515,7 +515,7 @@ import type {
   ExecutionRequest,
   ExecutionResult,
   ExecutionRunOptions,
-} from "@marid/contracts";
+} from "@qodex/contracts";
 
 export type BashAutoBackgroundRunResult =
   | {
@@ -623,8 +623,8 @@ Expected:
 
 **Files:**
 
-- Modify: `apps/marid-cli/packages/core/src/tool/executor/background-tasks.ts`
-- Modify: `apps/marid-cli/packages/core/tests/runtime-tool-loop.test.ts`
+- Modify: `apps/qodex-cli/packages/core/src/tool/executor/background-tasks.ts`
+- Modify: `apps/qodex-cli/packages/core/tests/runtime-tool-loop.test.ts`
 
 **Interfaces:**
 
@@ -761,7 +761,7 @@ Use Chinese if the rest of the file is Chinese; keep wording short.
 Run:
 
 ```bash
-rg -n "runBackgroundable|BackgroundableExecution|autoBackgroundOnTimeout|persistOutput: \"always\"" apps/marid-cli/packages docs/bash-background-parity.md
+rg -n "runBackgroundable|BackgroundableExecution|autoBackgroundOnTimeout|persistOutput: \"always\"" apps/qodex-cli/packages docs/bash-background-parity.md
 ```
 
 Expected:
@@ -774,7 +774,7 @@ Expected:
 Run:
 
 ```bash
-node opensource/tools/check-competitor-terms.mjs apps/marid-cli/packages/core/src/tool/handlers/bash.ts apps/marid-cli/packages/core/src/tool/handlers/bash-auto-background.ts apps/marid-cli/packages/core/src/tool/executor/background-tasks.ts docs/bash-background-parity.md
+node opensource/tools/check-competitor-terms.mjs apps/qodex-cli/packages/core/src/tool/handlers/bash.ts apps/qodex-cli/packages/core/src/tool/handlers/bash-auto-background.ts apps/qodex-cli/packages/core/src/tool/executor/background-tasks.ts docs/bash-background-parity.md
 ```
 
 Expected:
@@ -838,7 +838,7 @@ Expected:
 Run:
 
 ```bash
-cd apps/marid-cli/packages/contracts && ../../../../node_modules/.bin/tsc --noEmit
+cd apps/qodex-cli/packages/contracts && ../../../../node_modules/.bin/tsc --noEmit
 cd ../adapters && ../../../../node_modules/.bin/tsc --noEmit
 cd ../core && ../../../../node_modules/.bin/tsc --noEmit
 ```
@@ -868,8 +868,8 @@ Expected:
 Run:
 
 ```bash
-rg -n "runBackgroundable|BackgroundableExecution|autoBackgroundOnTimeout" apps/marid-cli/packages
-node opensource/tools/check-competitor-terms.mjs apps/marid-cli/packages/core/src/tool/handlers/bash.ts apps/marid-cli/packages/core/src/tool/handlers/bash-auto-background.ts apps/marid-cli/packages/core/src/tool/executor/background-tasks.ts docs/bash-background-parity.md
+rg -n "runBackgroundable|BackgroundableExecution|autoBackgroundOnTimeout" apps/qodex-cli/packages
+node opensource/tools/check-competitor-terms.mjs apps/qodex-cli/packages/core/src/tool/handlers/bash.ts apps/qodex-cli/packages/core/src/tool/handlers/bash-auto-background.ts apps/qodex-cli/packages/core/src/tool/executor/background-tasks.ts docs/bash-background-parity.md
 ```
 
 Expected:

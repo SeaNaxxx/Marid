@@ -9,14 +9,14 @@ import visualizeIconUrl from "@/assets/plugin-icons/visualize.png";
 import { isTrustedImageUrl } from "@/lib/trustedImageUrl.js";
 
 const OFFICIAL_PLUGIN_ICON_BY_ID: Readonly<Record<string, string>> = {
-  "design@marid-plugins-official": designIconUrl,
-  "documents@marid-plugins-official": documentsIconUrl,
-  "image-search@marid-plugins-official": imageSearchIconUrl,
-  "pdf@marid-plugins-official": pdfIconUrl,
-  "plugin-creator@marid-plugins-official": pluginCreatorIconUrl,
-  "presentations@marid-plugins-official": presentationsIconUrl,
-  "spreadsheets@marid-plugins-official": spreadsheetsIconUrl,
-  "visualize@marid-plugins-official": visualizeIconUrl,
+  "design@qodex-plugins-official": designIconUrl,
+  "documents@qodex-plugins-official": documentsIconUrl,
+  "image-search@qodex-plugins-official": imageSearchIconUrl,
+  "pdf@qodex-plugins-official": pdfIconUrl,
+  "plugin-creator@qodex-plugins-official": pluginCreatorIconUrl,
+  "presentations@qodex-plugins-official": presentationsIconUrl,
+  "spreadsheets@qodex-plugins-official": spreadsheetsIconUrl,
+  "visualize@qodex-plugins-official": visualizeIconUrl,
 };
 
 const TRUSTED_BUNDLED_PLUGIN_ICONS = new Set(Object.values(OFFICIAL_PLUGIN_ICON_BY_ID));

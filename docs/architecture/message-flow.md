@@ -10,7 +10,7 @@ agentConversationTransport
   ▼
 Host: sendConversationCommandV4
   ▼
-workspaceKey 对应的 marid-cli
+workspaceKey 对应的 qodex-cli
   ├─ command inbox 裁决
   ├─ core 执行
   └─ ProductProjection 更新
@@ -23,7 +23,7 @@ ConversationProjectionStore
 ConversationTimeline / Composer / StatusPanel
 ```
 
-UI 不调用旧 `sendPrompt()` 构造聊天状态，也不从 legacy task event 拼消息。`IMaridTaskService` 仍可服务列表、元数据或过渡兼容面，但不是 V4 conversation 正文事实源。
+UI 不调用旧 `sendPrompt()` 构造聊天状态，也不从 legacy task event 拼消息。`IQodexTaskService` 仍可服务列表、元数据或过渡兼容面，但不是 V4 conversation 正文事实源。
 
 ## 输入时序
 
@@ -63,7 +63,7 @@ SSH remote workspace 由窗口唯一 Host 内的 registry 路由；Main 只转�
 remoteSessionId A -- attachment A --┐
                                     ├-> Window Host / RemoteConnectionRegistry
 remoteSessionId B -- attachment B --┘
-                                    -> remoteHostKey 对应的 one SSH connection / marid-server
+                                    -> remoteHostKey 对应的 one SSH connection / qodex-server
                                     -> workspaceKey A/B 对应的独立 CLI/runtime
 ```
 
@@ -78,7 +78,7 @@ desktop attachment；`DetachServicePort` 只释放一个逻辑 workspace 的 RPC
 | UI pane             | `packages/ui/src/v4/SessionPane.tsx`                                       |
 | UI transport        | `packages/ui/src/v4/agentConversationTransport.ts`                         |
 | UI projection       | `packages/ui/src/v4/sessionDataLayer.ts`、`packages/ui/src/v4/conversationProjectionStore.ts` |
-| Host service        | `packages/services/src/marid-agent/maridAgentService.ts`                   |
-| V4 schema           | `packages/shared/src/marid-protocol-v4/`                                   |
-| CLI gateway/reducer | `apps/marid-cli/packages/bootstrap/src/marid-protocol-v4/`                 |
+| Host service        | `packages/services/src/qodex-agent/qodexAgentService.ts`                   |
+| V4 schema           | `packages/shared/src/qodex-protocol-v4/`                                   |
+| CLI gateway/reducer | `apps/qodex-cli/packages/bootstrap/src/qodex-protocol-v4/`                 |
 | Desktop host        | `packages/desktop/src/host/index.ts`                                       |

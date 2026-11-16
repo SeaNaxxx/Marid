@@ -12,20 +12,20 @@ const { stageThirdPartyNotices } = await import(
 
 // tsup config 可能从不同 cwd 加载，基于配置文件自身目录解析仓库根 package.json。
 const rootPackageJsonPath = resolve(import.meta.dirname, "../../package.json");
-const { version, maridCompatibility } = JSON.parse(readFileSync(rootPackageJsonPath, "utf-8")) as {
+const { version, qodexCompatibility } = JSON.parse(readFileSync(rootPackageJsonPath, "utf-8")) as {
   version: string;
-  maridCompatibility?: { minCompatibleVersion?: string };
+  qodexCompatibility?: { minCompatibleVersion?: string };
 };
-const minCompatibleVersion = maridCompatibility?.minCompatibleVersion ?? version;
+const minCompatibleVersion = qodexCompatibility?.minCompatibleVersion ?? version;
 
-const { environment: maridEnv, content: maridBuiltinProviderConfigJson } =
+const { environment: qodexEnv, content: qodexBuiltinProviderConfigJson } =
   await loadBuiltinProviderConfig();
 
 export const SERVER_HTTP_DEFINES = {
-  __MARID_VERSION__: JSON.stringify(version),
-  __MARID_MIN_COMPATIBLE_VERSION__: JSON.stringify(minCompatibleVersion),
-  __MARID_ENV__: JSON.stringify(maridEnv),
-  __MARID_BUILTIN_PROVIDER_CONFIG_JSON__: JSON.stringify(maridBuiltinProviderConfigJson),
+  __QODEX_VERSION__: JSON.stringify(version),
+  __QODEX_MIN_COMPATIBLE_VERSION__: JSON.stringify(minCompatibleVersion),
+  __QODEX_ENV__: JSON.stringify(qodexEnv),
+  __QODEX_BUILTIN_PROVIDER_CONFIG_JSON__: JSON.stringify(qodexBuiltinProviderConfigJson),
 };
 
 function createSharedDefines() {
@@ -72,11 +72,11 @@ export default defineConfig({
   target: "node22",
   // workspace 包的 exports 指向 .ts 源码，node 运行时无法直接加载，需要 bundle 进来
   noExternal: [
-    "@marid/shared",
-    "@marid/rpc",
-    "@marid/services",
-    "@marid/services/node",
-    "@marid/client",
+    "@qodex/shared",
+    "@qodex/rpc",
+    "@qodex/services",
+    "@qodex/services/node",
+    "@qodex/client",
   ],
   // ssh2 / node-pty 含 .node native addon，不能被 esbuild 处理。
   // undici / axios 这类 CJS 依赖被内联进 ESM bundle 后，运行时会走到

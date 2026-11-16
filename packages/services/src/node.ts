@@ -41,15 +41,15 @@ export type {
   AppControlServiceHandle,
 } from "#src/app-control/contract.js";
 export { createRemoteProjectService } from "#src/remote-projects/index.js";
-import { getMaridDataRootDir as projectDataRoot } from "#src/paths.js";
+import { getQodexDataRootDir as projectDataRoot } from "#src/paths.js";
 import { getDataBaseDir } from "#src/paths.js";
 import { createGitWorktreeRepo } from "#src/git/managed-worktree/index.js";
 import { createGitCommandProvider } from "#src/git/providers/gitCommandProvider.js";
-import { HOST_WORKTREE_COMMAND } from "#src/marid-agent/maridAgent.js";
+import { HOST_WORKTREE_COMMAND } from "#src/qodex-agent/qodexAgent.js";
 import { createTaskGroupService, ITaskGroupService, groupTaskKey } from "#src/task-groups/index.js";
 import { IGenUiService } from "./gen-ui/contract.js";
 import { createGenUiService } from "./gen-ui/node.js";
-// import { channelReplyHostRequestSchema, channelReplyResultSchema } from "@marid/shared";
+// import { channelReplyHostRequestSchema, channelReplyResultSchema } from "@qodex/shared";
 /* eslint-disable max-lines -- host process 服务注册和启动装配需要集中维护，拆散后会更难追踪依赖注入顺序 */
 // Node.js service implementations — NOT safe to import in browser code
 import { createHash, randomBytes } from "node:crypto";
@@ -60,13 +60,13 @@ import {
   createNodeProviderRuntimePathEnv,
   NodeModelSelectionConfigRepository,
   PERSONAL_PROVIDER_CONFIG_FILE_NAME,
-} from "@marid/provider-node";
+} from "@qodex/provider-node";
 import { getAppConfigDir as resolveAppConfigDir } from "./paths.js";
 import {
   createSystemCredentialCipher,
   createServerCredentialCipher,
   type CredentialCipher,
-} from "@marid/shared/credential-security";
+} from "@qodex/shared/credential-security";
 import {
   createHasExistingLocalTask,
   hasAnyAgentSessionRow,
@@ -79,13 +79,13 @@ import {
   type DynamicWorkflowMode,
   type ProviderProvisioningSourceTrigger,
   toBearerAuthorization,
-  MARID_CLIENT_LANGUAGE_ENV,
-} from "@marid/shared";
+  QODEX_CLIENT_LANGUAGE_ENV,
+} from "@qodex/shared";
 
 export {
-  materializeMaridBuiltinProviderConfig,
-  MARID_BUILTIN_PROVIDER_CONFIG_FILE_ENV,
-} from "@marid/provider-node";
+  materializeQodexBuiltinProviderConfig,
+  QODEX_BUILTIN_PROVIDER_CONFIG_FILE_ENV,
+} from "@qodex/provider-node";
 import { randomUUID } from "node:crypto";
 import { getAppConfigDir as getContentAppConfigDir } from "#src/paths.js";
 import { ICloudContentService } from "#src/cloud-content/cloudContent.js";
@@ -95,16 +95,16 @@ import { createMarketingTouchService } from "#src/marketing-touch/marketingTouch
 import { IVoiceInputService } from "#src/voice-input/contract.js";
 import { createVoiceInputService } from "#src/voice-input/voiceInputService.js";
 import { createMarketingAssetRegistry } from "#src/marketing-touch/marketingAssetRegistry.js";
-import type { IChannel } from "@marid/rpc";
+import type { IChannel } from "@qodex/rpc";
 import {
   readTopicResourceFromRelay,
   validateTopicResourceFromRelay,
-} from "./marid-agent/topicResourceRelayClient.js";
+} from "./qodex-agent/topicResourceRelayClient.js";
 export {
   createTopicResourcePeers,
   type TopicResourcePeers,
-} from "./marid-agent/topicResourcePeers.js";
-export { createTopicResourceRelayChannel } from "./marid-agent/topicResourceRelayChannel.js";
+} from "./qodex-agent/topicResourcePeers.js";
+export { createTopicResourceRelayChannel } from "./qodex-agent/topicResourceRelayChannel.js";
 
 export { createFileService } from "./file/fileService.js";
 export {
@@ -132,8 +132,8 @@ export {
   parseFsFaultRulesFromEnvValue,
   resetProcessFsFaultInjectorForTests,
   setFsFaultInjectorForTests,
-  MARID_E2E_FS_FAULTS_ALLOW_ENV,
-  MARID_E2E_FS_FAULTS_ENV,
+  QODEX_E2E_FS_FAULTS_ALLOW_ENV,
+  QODEX_E2E_FS_FAULTS_ENV,
 } from "./fs/fsFaultInjection.js";
 export type {
   FsFaultCheckInput,
@@ -152,7 +152,7 @@ export {
 export {
   setDataBaseDir,
   getDataBaseDir,
-  getMaridDataRootDir,
+  getQodexDataRootDir,
   getConversationWorkspaceDir,
   getAppConfigDir,
   getExportLogStageDir,
@@ -163,7 +163,7 @@ export {
   getGitCheckpointIndexRootDir,
   copyDataDirectory,
   validateDataBaseDirTarget,
-  MARID_WINDOWS_APP_INSTALL_DIR_ENV,
+  QODEX_WINDOWS_APP_INSTALL_DIR_ENV,
 } from "./paths.js";
 export { createGitService } from "./git/gitService.js";
 export { GitCommitMessageGenerator } from "./git/gitCommitMessageGenerator.js";
@@ -177,33 +177,33 @@ export {
 } from "./setting/settingService.js";
 export { createCredentialService } from "./credential/credentialService.js";
 export { createBroadcastService } from "./broadcast/broadcastService.js";
-export { createMaridAgentService } from "./marid-agent/maridAgentService.js";
+export { createQodexAgentService } from "./qodex-agent/qodexAgentService.js";
 export type {
   PluginUserOptionsReader,
-  MaridAgentPluginUserOptionsResult,
-  MaridAgentReadPluginUserOptionsParams,
-} from "./marid-agent/pluginHostQueriesClient.js";
-export { createMaridTaskServiceAdapter } from "./marid-agent/maridTaskServiceAdapter.js";
-export { createMaridSessionService } from "./marid-session/maridSessionService.js";
+  QodexAgentPluginUserOptionsResult,
+  QodexAgentReadPluginUserOptionsParams,
+} from "./qodex-agent/pluginHostQueriesClient.js";
+export { createQodexTaskServiceAdapter } from "./qodex-agent/qodexTaskServiceAdapter.js";
+export { createQodexSessionService } from "./qodex-session/qodexSessionService.js";
 export {
-  resolveDefaultMaridAgentCommand,
-  MaridAgentProcessManager,
-} from "./marid-agent/maridAgentProcessManager.js";
+  resolveDefaultQodexAgentCommand,
+  QodexAgentProcessManager,
+} from "./qodex-agent/qodexAgentProcessManager.js";
 export type {
-  MaridAgentCommand,
-  MaridAgentCommandResolver,
-  MaridAgentCommandResolverContext,
-  MaridAgentProcessManagerOptions,
-} from "./marid-agent/maridAgentProcessManager.js";
-export { MaridProtocolClient } from "./marid-agent/maridProtocolClient.js";
-export type { MaridProtocolTransport } from "./marid-agent/maridProtocolTransport.js";
-export { MaridStdioTransport } from "./marid-agent/maridStdioTransport.js";
+  QodexAgentCommand,
+  QodexAgentCommandResolver,
+  QodexAgentCommandResolverContext,
+  QodexAgentProcessManagerOptions,
+} from "./qodex-agent/qodexAgentProcessManager.js";
+export { QodexProtocolClient } from "./qodex-agent/qodexProtocolClient.js";
+export type { QodexProtocolTransport } from "./qodex-agent/qodexProtocolTransport.js";
+export { QodexStdioTransport } from "./qodex-agent/qodexStdioTransport.js";
 export {
-  getMaridStdioTapDevLogDir,
-  readMaridStdioTapDevState,
-  setMaridStdioTapDevEnabled,
-} from "./marid-agent/maridStdioTapDevConfig.js";
-export type { MaridStdioTapDevState } from "@marid/shared";
+  getQodexStdioTapDevLogDir,
+  readQodexStdioTapDevState,
+  setQodexStdioTapDevEnabled,
+} from "./qodex-agent/qodexStdioTapDevConfig.js";
+export type { QodexStdioTapDevState } from "@qodex/shared";
 export {
   createCuaHelperInstaller,
   requestHelperAccessibilityPermissionViaLaunchServices,
@@ -409,7 +409,7 @@ import {
   buildServerRemoteWorkspaceIdentity,
   DEFAULT_APP_TOOL_SEARCH_MODE,
   remoteHostIdFromWorkspaceIdentity,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { SourceServerWorkspaceAliasRepo } from "./session/sourceServerWorkspaceAliasRepo.js";
 import { SourceServerWorkspaceIdentityMapper } from "./source-server-workspace/sourceServerWorkspaceIdentityChannelServer.js";
 import { ServiceCollection } from "./collection.js";
@@ -423,10 +423,10 @@ import { ISettingService } from "./setting/setting.js";
 import { IOnboardingRecordService } from "./onboarding/onboardingRecord.js";
 import { ICredentialService } from "./credential/credential.js";
 import { IBroadcastService } from "./broadcast/broadcast.js";
-import { IMaridTaskService } from "./session/maridTaskService.js";
-import { IMaridAgentService } from "./marid-agent/maridAgent.js";
-import type { CuaOperationStateReporter } from "./marid-agent/cuaOperationTurnTracker.js";
-import { IMaridSessionService } from "./marid-session/maridSession.js";
+import { IQodexTaskService } from "./session/qodexTaskService.js";
+import { IQodexAgentService } from "./qodex-agent/qodexAgent.js";
+import type { CuaOperationStateReporter } from "./qodex-agent/cuaOperationTurnTracker.js";
+import { IQodexSessionService } from "./qodex-session/qodexSession.js";
 import {
   createUnsupportedConversationShareService,
   IConversationShareService,
@@ -480,19 +480,19 @@ import { createObservableSettingService } from "./setting/observableSettingServi
 import { createCredentialService } from "./credential/credentialService.js";
 import { createBroadcastService } from "./broadcast/broadcastService.js";
 import {
-  createMaridAgentService,
+  createQodexAgentService,
   getInProcessPluginUserOptionsReader,
-} from "./marid-agent/maridAgentService.js";
-import type { PluginUserOptionsReader } from "./marid-agent/pluginHostQueriesClient.js";
-import type { MaridAgentCommandResolver } from "./marid-agent/maridAgentProcessManager.js";
-import { buildAgentTelemetrySpawnEnv } from "./marid-agent/agentTelemetryEnv.js";
-import { resolveMaridAgentPresentationSurface } from "./marid-agent/maridAgentPresentationSurface.js";
-import { createMaridTaskServiceAdapter } from "./marid-agent/maridTaskServiceAdapter.js";
-import { createMaridSessionService } from "./marid-session/maridSessionService.js";
-import { createMaridTaskIndexSyncer } from "./marid-agent/maridTaskIndexSyncer.js";
+} from "./qodex-agent/qodexAgentService.js";
+import type { PluginUserOptionsReader } from "./qodex-agent/pluginHostQueriesClient.js";
+import type { QodexAgentCommandResolver } from "./qodex-agent/qodexAgentProcessManager.js";
+import { buildAgentTelemetrySpawnEnv } from "./qodex-agent/agentTelemetryEnv.js";
+import { resolveQodexAgentPresentationSurface } from "./qodex-agent/qodexAgentPresentationSurface.js";
+import { createQodexTaskServiceAdapter } from "./qodex-agent/qodexTaskServiceAdapter.js";
+import { createQodexSessionService } from "./qodex-session/qodexSessionService.js";
+import { createQodexTaskIndexSyncer } from "./qodex-agent/qodexTaskIndexSyncer.js";
 import { TaskIndexRepo } from "./session/taskIndexRepo.js";
 import { AutomationRepo } from "#src/session/automationRepo.js";
-import type { AppSettings } from "@marid/shared";
+import type { AppSettings } from "@qodex/shared";
 import { createBotsService } from "./bots/botsService.js";
 import { BotsRepo } from "#src/bots/repo.js";
 import {
@@ -511,7 +511,7 @@ import {
 } from "#src/oauth/oauthUnauthorizedRequest.js";
 import { createOAuthProviderLogoutHandler } from "./oauth/oauthProviderLogout.js";
 import { OAuthCredentialRepo } from "./oauth/repo/oauthCredentialRepo.js";
-import { readLegacyMaridConfigProviders } from "./model-provider/legacyMaridConfigProviderReader.js";
+import { readLegacyQodexConfigProviders } from "./model-provider/legacyQodexConfigProviderReader.js";
 import { resolveAccountTeamPlanRuntimeMaterial } from "./model-provider/accountProviderTeamPlanRequestKey.js";
 import { createAccountProviderCredentialStore } from "./model-provider/accountProviderCredentialStore.js";
 import { createAccountProviderCredentialService } from "./model-provider/accountProviderCredentialService.js";
@@ -526,7 +526,7 @@ import { AccountProviderApiClient } from "./model-provider/accountProviderApiCli
 import { createAccountProjectTokenClient } from "./model-provider/accountProjectTokenClient.js";
 import { AccountProviderApiKeyResolver } from "./model-provider/accountProviderApiKeyResolver.js";
 import { createProviderConfigRuntime } from "./model-provider/providerConfigRuntime.js";
-import { fetchMaridBuiltinRemoteRelease } from "./model-provider/maridBuiltinRemoteConfig.js";
+import { fetchQodexBuiltinRemoteRelease } from "./model-provider/qodexBuiltinRemoteConfig.js";
 import {
   createProviderRuntimeFromConfigRuntime,
   type ProviderRuntime,
@@ -568,7 +568,7 @@ import {
   createPluginUiAppToolsService,
   createPluginUiBridgeService,
 } from "./plugin-ui-bridge/index.js";
-import type { PluginSandboxHandle, PluginSandboxRegisterInput } from "@marid/shared/mcp-apps";
+import type { PluginSandboxHandle, PluginSandboxRegisterInput } from "@qodex/shared/mcp-apps";
 import { createPluginSyncService } from "./plugin-sync/pluginSyncService.js";
 import { createPluginsService } from "./plugins/pluginsService.js";
 import { createPluginManagementService } from "./plugins/pluginManagementService.js";
@@ -598,11 +598,11 @@ import {
   buildAgentRuntimeEnv,
 } from "./runtime-tools/agentProxyEnv.js";
 import { ensureAppCaCert } from "./runtime-tools/appCaCert.js";
-import { buildHelperOpenArgs, isCuaLocalDevelopmentRuntime } from "@marid/marid-cua/broker/server";
+import { buildHelperOpenArgs, isCuaLocalDevelopmentRuntime } from "@qodex/qodex-cua/broker/server";
 import { createServiceLogger, type ServiceLogger } from "#src/logger/serviceLogger.js";
 import { ensureTelemetryDeviceMid } from "#src/telemetry/telemetryCore.js";
 import { IOffPeakTaskService } from "./session/offPeakTask.js";
-import type { HighspeedMockScenario } from "@marid/shared";
+import type { HighspeedMockScenario } from "@qodex/shared";
 import { IHighspeedCardService } from "./highspeed/highspeedCard.js";
 import {
   buildHighspeedCodingPlanAuthHeaders,
@@ -627,7 +627,7 @@ import {
 import {
   createOfficialMcpTrustedOriginRegistry,
   OFFICIAL_MCP_DEV_TRUSTED_ORIGINS_ENV,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   BROKER_SOCKET_ENV,
   BROKER_UNAVAILABLE_ENV,
@@ -638,7 +638,7 @@ import {
   ICuaPermissionService,
   ICuaPipSessionService,
   isOfficialCuaPluginEnabledForWorkspace,
-  isPotentialMaridCuaAgentMcpServer,
+  isPotentialQodexCuaAgentMcpServer,
   isScreenCaptureProbeSuccess,
   reapOrphanedHelpers,
   resolveStandaloneStatusLaunchAppPath,
@@ -666,11 +666,11 @@ import {
   getStableCuaPipeName,
   resolveStableCuaWinRecipe,
 } from "#src/cua-permission-broker/stableCuaTransport.js";
-import { HELPER_APP_NAME } from "@marid/marid-cua/broker/helperConstants";
-import { resolveBrokerSocketPath } from "@marid/marid-cua/broker/socketPath";
+import { HELPER_APP_NAME } from "@qodex/qodex-cua/broker/helperConstants";
+import { resolveBrokerSocketPath } from "@qodex/qodex-cua/broker/socketPath";
 import {
-  DEFAULT_MARID_MODEL_CONTEXT_BUDGET_STRATEGY,
-  MARID_JWT_INVALID_BROADCAST_CHANNEL,
+  DEFAULT_QODEX_MODEL_CONTEXT_BUDGET_STRATEGY,
+  QODEX_JWT_INVALID_BROADCAST_CHANNEL,
   formatLogPrefix,
   isCredentialDecryptError,
   isBuiltinOAuthProvider,
@@ -680,28 +680,28 @@ import {
   type ProviderFamilyDomain,
   type OAuthAccountAvailability,
   type ServiceAuthorityMode,
-  resolveRuntimeMaridEndpointOrigin,
+  resolveRuntimeQodexEndpointOrigin,
   resolveSafeTelemetryHostname,
   type BrowserBackendDescriptor,
   type BrowserClientMode,
   type BrowserCommand,
-  isMaridCuaMcpCommand,
-  isMaridCuaMcpPackageArg,
-  isMaridCuaInternalFeatureEnabled,
-  MARID_CUA_PLUGIN_AUTHORITY_ENV_KEY,
-  type MaridAutomation,
-  type MaridAutomationRun,
-  getCapturedMaridAgentTelemetryEnv,
-  MARID_DESKTOP_CONTEXT_PROMPT_ENABLED_ENV,
+  isQodexCuaMcpCommand,
+  isQodexCuaMcpPackageArg,
+  isQodexCuaInternalFeatureEnabled,
+  QODEX_CUA_PLUGIN_AUTHORITY_ENV_KEY,
+  type QodexAutomation,
+  type QodexAutomationRun,
+  getCapturedQodexAgentTelemetryEnv,
+  QODEX_DESKTOP_CONTEXT_PROMPT_ENABLED_ENV,
   ZAI_PROVIDER_ID,
-  maridAccountAccessSchema,
-  maridProviderAccountAccessSchema,
-  MARID_VERSION,
-  MARID_ENV,
-  buildRuntimeMaridApiUrl,
-} from "@marid/shared";
+  qodexAccountAccessSchema,
+  qodexProviderAccountAccessSchema,
+  QODEX_VERSION,
+  QODEX_ENV,
+  buildRuntimeQodexApiUrl,
+} from "@qodex/shared";
 
-// 这些 conversation-share 实现依赖 Node 文件系统；仅通过 @marid/services/node 暴露，
+// 这些 conversation-share 实现依赖 Node 文件系统；仅通过 @qodex/services/node 暴露，
 // 防止 browser-safe 根入口把 node:* 依赖带进 renderer。
 export {
   ConversationShareService,
@@ -835,10 +835,10 @@ export function shouldEnableDefaultCuaProductHelper(
     env?: NodeJS.ProcessEnv;
   } = {},
 ): boolean {
-  // CUA 已随正式版默认开启（isMaridCuaInternalFeatureEnabled 默认 ON，仅显式 0/false/off 关闭；2026-08 注释更正——旧注释称默认关闭已过期）。显式开启后 macOS 使用既有产品 Helper，Windows 使用安装包内 runtime；
+  // CUA 已随正式版默认开启（isQodexCuaInternalFeatureEnabled 默认 ON，仅显式 0/false/off 关闭；2026-08 注释更正——旧注释称默认关闭已过期）。显式开启后 macOS 使用既有产品 Helper，Windows 使用安装包内 runtime；
   // 两端都保持按需启动。关闭时不创建 host、不探测资源、不产生子进程或权限提示。
   const env = options.env ?? process.env;
-  if (!isMaridCuaInternalFeatureEnabled(env)) return false;
+  if (!isQodexCuaInternalFeatureEnabled(env)) return false;
   const platform = options.platform ?? process.platform;
   return platform === "darwin" || platform === "win32";
 }
@@ -945,14 +945,14 @@ export function createDynamicCuaProductMcpServerResolver(options: {
       // delegate 可能跨过 Helper start/health await；dispose 在等待中置 terminal 时，不能把旧代际
       // 刚注入的 socket/token 交给晚到 Agent。移除 CUA candidate，保持其它 MCP 原样。
       return options.isResolverCurrent?.(resolver, context) === false
-        ? servers?.filter((server) => !isPotentialMaridCuaAgentMcpServer(server))
+        ? servers?.filter((server) => !isPotentialQodexCuaAgentMcpServer(server))
         : resolved;
     },
     async restart() {
       // 委托到底层真实 resolver（由 ICuaPermissionService.restartHelper 经此调用）。
       const resolver = await options.getResolver();
       if (!resolver) {
-        throw new Error("Marid Computer Use is not enabled (plugin off or not product mode).");
+        throw new Error("Qodex Computer Use is not enabled (plugin off or not product mode).");
       }
       await resolver.restart();
     },
@@ -960,7 +960,7 @@ export function createDynamicCuaProductMcpServerResolver(options: {
       // 授权完成后的 restart 必须保留 session id，才能复用底层的幂等与时序保障。
       const resolver = await options.getResolver();
       if (!resolver) {
-        throw new Error("Marid Computer Use is not enabled (plugin off or not product mode).");
+        throw new Error("Qodex Computer Use is not enabled (plugin off or not product mode).");
       }
       await resolver.restartAfterPermissionGrant(onboardingSessionId);
     },
@@ -1192,12 +1192,12 @@ export function createDefaultCuaProductHelper(
   };
 }
 
-export const MARID_CUA_BUNDLED_HELPER_APP_PATH_ENV = "MARID_CUA_BUNDLED_HELPER_APP_PATH";
+export const QODEX_CUA_BUNDLED_HELPER_APP_PATH_ENV = "QODEX_CUA_BUNDLED_HELPER_APP_PATH";
 
 export function resolveBundledCuaHelperAppPath(
   env: NodeJS.ProcessEnv = process.env,
 ): string | undefined {
-  const injectedPath = env[MARID_CUA_BUNDLED_HELPER_APP_PATH_ENV]?.trim();
+  const injectedPath = env[QODEX_CUA_BUNDLED_HELPER_APP_PATH_ENV]?.trim();
   if (injectedPath) {
     return injectedPath;
   }
@@ -1209,9 +1209,9 @@ export function resolveBundledCuaHelperAppPath(
 
 export { isOfficialCuaPluginEnabledForWorkspace };
 
-export function hasGlobalCliMaridCuaServer(env: NodeJS.ProcessEnv = process.env): boolean {
+export function hasGlobalCliQodexCuaServer(env: NodeJS.ProcessEnv = process.env): boolean {
   const home = env.HOME?.trim() || homedir();
-  const configPath = join(home, ".marid", "cli", "config.json");
+  const configPath = join(home, ".qodex", "cli", "config.json");
   let parsed: unknown;
   try {
     parsed = JSON.parse(readFileSync(configPath, "utf8"));
@@ -1222,24 +1222,24 @@ export function hasGlobalCliMaridCuaServer(env: NodeJS.ProcessEnv = process.env)
   if (isRecord(parsed.features) && parsed.features.mcp === false) return false;
   if (!isRecord(parsed.mcp) || !isRecord(parsed.mcp.servers)) return false;
   return Object.entries(parsed.mcp.servers).some(([name, config]) =>
-    isGlobalCliMaridCuaServer(name, config),
+    isGlobalCliQodexCuaServer(name, config),
   );
 }
 
-function isGlobalCliMaridCuaServer(name: string, config: unknown): boolean {
+function isGlobalCliQodexCuaServer(name: string, config: unknown): boolean {
   if (!isRecord(config)) return false;
   if (config.enabled === false) return false;
   if (typeof config.type === "string" && config.type !== "stdio") return false;
   if (name === "computer-use") return true;
-  // 与 desktop/services resolver 和 CLI bootstrap 共用 @marid/shared 的单一事实源，避免第三处
-  // 判定漂移：git/.git/本地路径形态的 marid-cua 若这里漏判，全局 CLI env 注入不会带 broker
+  // 与 desktop/services resolver 和 CLI bootstrap 共用 @qodex/shared 的单一事实源，避免第三处
+  // 判定漂移：git/.git/本地路径形态的 qodex-cua 若这里漏判，全局 CLI env 注入不会带 broker
   // socket/token，agent 会回退成 Python/uvx 自己持有 macOS TCC（违反 product broker 边界）。
-  if (typeof config.command === "string" && isMaridCuaMcpCommand(config.command)) {
+  if (typeof config.command === "string" && isQodexCuaMcpCommand(config.command)) {
     return true;
   }
   return (
     Array.isArray(config.args) &&
-    config.args.some((arg) => typeof arg === "string" && isMaridCuaMcpPackageArg(arg))
+    config.args.some((arg) => typeof arg === "string" && isQodexCuaMcpPackageArg(arg))
   );
 }
 
@@ -1275,7 +1275,7 @@ export function createLocalServices(options: {
   >["prepareLegacyAccountConnections"];
   /** 注入后由 ServiceCollection 接管释放，并供 Host 其它 app-managed 下载复用。 */
   hostApiNetworkTransport?: HostApiNetworkTransport;
-  /** Desktop Host 注入 Main 推送的实时界面语言，供 Marid endpoint 的 X-Client-Language；远端 server 不注入。 */
+  /** Desktop Host 注入 Main 推送的实时界面语言，供 Qodex endpoint 的 X-Client-Language；远端 server 不注入。 */
   resolveClientLanguage?: () => string | undefined;
   /** Desktop Host 请求 Main 登记 Agent 已授权的精确本地视频路径。 */
   authorizeLocalMediaPreviewPath?: (path: string) => Promise<string>;
@@ -1290,7 +1290,7 @@ export function createLocalServices(options: {
     Omit<CreateFeedbackServiceOptions, "apiClient" | "credentialService" | "oauthService">
   >;
   reportPluginTelemetryEvent?: (
-    event: import("@marid/shared").RendererTelemetryEventPayload,
+    event: import("@qodex/shared").RendererTelemetryEventPayload,
   ) => void | Promise<void>;
   /**
    * 插件管理变更成功返回（Window Host 侧信号），桌面 Host 用它重推扩展进程的插件清单，
@@ -1303,7 +1303,7 @@ export function createLocalServices(options: {
   taskRuntimeReporter?: RuntimeTaskReporter;
   /** 阻止退出的事项变化（docs/git/worktree.md §6.4）；桌面 Host 转发给 main 汇总确认。 */
   quitBlockerReporter?: {
-    onQuitBlockersChanged(blockers: import("@marid/shared").HostQuitBlocker[]): void;
+    onQuitBlockersChanged(blockers: import("@qodex/shared").HostQuitBlocker[]): void;
   };
   /** workspace 文件搜索默认使用内置过滤器；后续规则来源只需在 Host 装配时注入最终实现。 */
   workspaceFileSearchFilter?: WorkspaceFileSearchFilter;
@@ -1312,25 +1312,25 @@ export function createLocalServices(options: {
   ) => Promise<void> | void;
   /** desktop local host 在 manual run 落库后直接派发，不经过 scheduler 正常路径。 */
   onAutomationManualRunRequested?: (params: {
-    automation: MaridAutomation;
-    run: MaridAutomationRun;
+    automation: QodexAutomation;
+    run: QodexAutomationRun;
   }) => Promise<void>;
   /** 闲时任务翻 schedulable 后请求宿主立即唤醒 scheduler（desktop host 注入 parentPort 转发）。 */
   onOffPeakSchedulerWakeRequested?: () => void;
   // 注入点：默认 resolver 已能覆盖 dev/桌面/SSH 远端三类形态；
   // 测试或特殊宿主想强制走自定义 binary/参数时从这里注入。
-  maridAgentCommandResolver?: MaridAgentCommandResolver;
+  qodexAgentCommandResolver?: QodexAgentCommandResolver;
   /** Desktop Main 提前异步采集的本机 runtime 环境；Local Host 注入后不再同步启动 login shell。 */
   runtimeProcessEnvPatch?: Record<string, string>;
   /** 本地桌面上次 workspace 缺失时，仅用于 Agent 子进程 spawn.cwd 兜底。 */
-  maridAgentSpawnFallbackCwd?: string;
+  qodexAgentSpawnFallbackCwd?: string;
   /** desktop-attached remote server 从 Desktop Host 收到的一次性 Agent 网络配置。 */
   remoteAgentNetwork?: {
     httpProxy?: string;
     noProxy?: string;
   };
-  /** 所属 Environment 的 Marid Built-in Provider Config 物理路径。 */
-  maridBuiltinProviderConfigFilePath: string;
+  /** 所属 Environment 的 Qodex Built-in Provider Config 物理路径。 */
+  qodexBuiltinProviderConfigFilePath: string;
   /** HTTP Server 只有在调用方明确配置认证时才暴露跨 Environment Provisioning target。 */
   providerProvisioningTargetEnabled?: boolean;
   /** Desktop Host 私有通知；只在 Source 成功持久化后请求 Main 调度远端镜像。 */
@@ -1394,13 +1394,13 @@ export function createLocalServices(options: {
   const isDesktopAttachedRemote = options?.serviceAuthorityMode === "desktop-attached-remote";
   // host / remote server 以前直接沿用当前进程环境启动后续服务。
   // GUI 启动的 desktop、SSH/WSL/Docker 拉起的 remote server 往往拿不到用户 login shell 里的 PATH，
-  // 导致 bun 这类只在 shell profile 里追加的命令在 Marid Agent/终端里不可见。
+  // 导致 bun 这类只在 shell profile 里追加的命令在 Qodex Agent/终端里不可见。
   // 这里在所有本地服务启动前统一修正运行时环境，并顺带把内置 rg 注入 PATH，
-  // 让 Marid Agent、终端、认证 runtime 共用同一套命令解析结果。
+  // 让 Qodex Agent、终端、认证 runtime 共用同一套命令解析结果。
   initializeRuntimeProcessEnv(options?.runtimeProcessEnvPatch);
 
   const desktopContextPromptEnabledRaw =
-    process.env[MARID_DESKTOP_CONTEXT_PROMPT_ENABLED_ENV]?.trim();
+    process.env[QODEX_DESKTOP_CONTEXT_PROMPT_ENABLED_ENV]?.trim();
   const desktopContextPromptEnabled =
     desktopContextPromptEnabledRaw === "1"
       ? true
@@ -1420,9 +1420,9 @@ export function createLocalServices(options: {
   const settingService = createObservableSettingService(
     options?.settingService ?? localSettings!.service,
   );
-  const resolveCurrentMaridEndpointOrigin = async () =>
-    resolveRuntimeMaridEndpointOrigin(process.env, {
-      overrideOrigin: (await settingService.get()).maridEndpointOrigin,
+  const resolveCurrentQodexEndpointOrigin = async () =>
+    resolveRuntimeQodexEndpointOrigin(process.env, {
+      overrideOrigin: (await settingService.get()).qodexEndpointOrigin,
     });
   let invalidateProjectTokens = () => {};
   let invalidatePluginUiAccounts: (() => void) | undefined;
@@ -1464,7 +1464,7 @@ export function createLocalServices(options: {
         caCertPath: settings.httpProxyCaCertPath,
       };
     });
-  const maridJwtLogoutHandlerRef: {
+  const qodexJwtLogoutHandlerRef: {
     current: ((input: string | URL, headers: Headers) => void) | null;
   } = { current: null };
   const associatedProfileRefreshRef: {
@@ -1486,19 +1486,19 @@ export function createLocalServices(options: {
       return async () => {
         await associatedProfileRefreshRef.current?.({
           loginProvider: material.loginProvider,
-          userId: material.maridUserId,
+          userId: material.qodexUserId,
           sessionRevision: material.sessionRevision,
         });
       };
     },
-    onMaridJwtInvalid: (input, headers) => maridJwtLogoutHandlerRef.current?.(input, headers),
-    isMaridJwtRequest: (input, headers) =>
+    onQodexJwtInvalid: (input, headers) => qodexJwtLogoutHandlerRef.current?.(input, headers),
+    isQodexJwtRequest: (input, headers) =>
       isCurrentOAuthCredentialRequest({ input, headers, credentialService }),
     isBusinessUnauthorizedRequest: (input, _headers) =>
       isOAuthBusinessRequest({ input, credentialService }),
     resolveBusinessCredentialValidationRequest: (input, headers) =>
       resolveOAuthBusinessCredentialValidationRequest({ input, headers, credentialService }),
-    resolveMaridEndpointOrigin: resolveCurrentMaridEndpointOrigin,
+    resolveQodexEndpointOrigin: resolveCurrentQodexEndpointOrigin,
     resolveClientLanguage: options?.resolveClientLanguage,
   });
   const systemService = createSystemService();
@@ -1556,7 +1556,7 @@ export function createLocalServices(options: {
   });
   const loadOAuthAccountMaterial = (family: ProviderFamilyDomain) =>
     oauthCredentialRepo.loadFamilyMaterial(family);
-  // Start 与付费套餐分开取材料：国内无关联账号只有 Start 材料（Marid 主体与共享 JWT）。
+  // Start 与付费套餐分开取材料：国内无关联账号只有 Start 材料（Qodex 主体与共享 JWT）。
   const loadStartPlanMaterial = (family: ProviderFamilyDomain) =>
     oauthCredentialRepo.loadStartPlanMaterial(family);
   const loadOAuthFamilyTokenSet = async (providerId: string) => {
@@ -1565,10 +1565,10 @@ export function createLocalServices(options: {
     return account
       ? {
           accessToken: account.accessToken,
-          maridJwtToken: account.maridJwtToken,
+          qodexJwtToken: account.qodexJwtToken,
           sessionRevision: account.sessionRevision,
           accountIdentity: account.accountIdentity,
-          maridUserId: account.maridUserId,
+          qodexUserId: account.qodexUserId,
         }
       : null;
   };
@@ -1623,8 +1623,8 @@ export function createLocalServices(options: {
           loadStartPlanMaterial,
         }),
       loadOAuthTokenSet: loadOAuthFamilyTokenSet,
-      loadStartPlanMaridJwt: async (family) =>
-        (await loadStartPlanMaterial(family))?.maridJwtToken ?? null,
+      loadStartPlanQodexJwt: async (family) =>
+        (await loadStartPlanMaterial(family))?.qodexJwtToken ?? null,
       async loadIndividualPlanMaterial(providerId, family, rejectedProjectTokenFingerprint) {
         const accountIdentity = (await loadOAuthAccountMaterial(family))?.accountIdentity;
         if (!accountIdentity) return null;
@@ -1652,29 +1652,29 @@ export function createLocalServices(options: {
   const providerConfigLog = createServiceLogger("provider-config");
   const clientConfigPlatform = resolveClientConfigPlatform();
   const providerConfigRuntime = createProviderConfigRuntime({
-    maridBuiltinFilePath: options.maridBuiltinProviderConfigFilePath,
-    maridBuiltinEnvironment: {
+    qodexBuiltinFilePath: options.qodexBuiltinProviderConfigFilePath,
+    qodexBuiltinEnvironment: {
       environmentConfigRoot: resolveAppConfigDir(),
       platform: clientConfigPlatform,
-      appVersion: MARID_VERSION,
-      resolveEndpointOrigin: resolveCurrentMaridEndpointOrigin,
+      appVersion: QODEX_VERSION,
+      resolveEndpointOrigin: resolveCurrentQodexEndpointOrigin,
       onRefreshResult: (event) => {
         if (event.result === "updated")
-          providerConfigLog.info(undefined, "Marid Built-in CDN 配置已更新", event);
-        else providerConfigLog.debug(undefined, "Marid Built-in 刷新检查", event);
+          providerConfigLog.info(undefined, "Qodex Built-in CDN 配置已更新", event);
+        else providerConfigLog.debug(undefined, "Qodex Built-in 刷新检查", event);
       },
       fetchRelease: (endpointOrigin, signal) =>
-        fetchMaridBuiltinRemoteRelease({
+        fetchQodexBuiltinRemoteRelease({
           apiClient,
-          resolveMaridJwtToken: () => credentialService.load("maridjwttoken"),
+          resolveQodexJwtToken: () => credentialService.load("qodexjwttoken"),
           endpointOrigin,
           signal,
-          appVersion: MARID_VERSION,
+          appVersion: QODEX_VERSION,
           platform: clientConfigPlatform,
         }),
     },
-    onMaridBuiltinRefreshError: (error) => {
-      providerConfigLog.warn(undefined, "Marid Built-in Config 远端刷新失败", { error });
+    onQodexBuiltinRefreshError: (error) => {
+      providerConfigLog.warn(undefined, "Qodex Built-in Config 远端刷新失败", { error });
     },
     onPersonalConfigRecovery: (event) => {
       providerConfigLog.warn(
@@ -1691,9 +1691,9 @@ export function createLocalServices(options: {
         error,
       });
     },
-    // 已发布 config.json 保存的是 Marid 用户配置；清理第三方 ACP 不能移除这条升级路径。
+    // 已发布 config.json 保存的是 Qodex 用户配置；清理第三方 ACP 不能移除这条升级路径。
     // Repository 仅在新 Personal 配置不存在时导入，并保留旧文件以便回滚。
-    readLegacyProviders: () => readLegacyMaridConfigProviders(),
+    readLegacyProviders: () => readLegacyQodexConfigProviders(),
   });
   const accountProviderConfigSource = createAccountProviderConfigSource({
     loadSessionRevision: async () =>
@@ -1759,7 +1759,7 @@ export function createLocalServices(options: {
     },
   );
   let providerConnectivityAgentService:
-    | Pick<IMaridAgentService, "testModelConnectivity">
+    | Pick<IQodexAgentService, "testModelConnectivity">
     | undefined;
   const providerRuntime = createProviderRuntimeFromConfigRuntime({
     configRuntime: providerConfigRuntime,
@@ -1802,12 +1802,12 @@ export function createLocalServices(options: {
         modelSelectionService: providerRuntime.modelSelection,
       }),
   };
-  // mcpSync/hooks 里引用 maridAgentService 的闭包是惰性调用，声明顺序不影响初始化。
+  // mcpSync/hooks 里引用 qodexAgentService 的闭包是惰性调用，声明顺序不影响初始化。
   const skillsService = createSkillsService({ isDesktopRuntime: true });
   const mcpSyncService = createMcpSyncService({
     // mcp/list 的 host 消费点收拢到 mcpSync 服务；真实状态检查仍在 agent 进程。
-    listMcpServerStatuses: (params) => maridAgentService.listMcpServerStatuses(params),
-    setWorkspaceMcpTrust: (params) => maridAgentService.setWorkspaceMcpTrust(params),
+    listMcpServerStatuses: (params) => qodexAgentService.listMcpServerStatuses(params),
+    setWorkspaceMcpTrust: (params) => qodexAgentService.setWorkspaceMcpTrust(params),
   });
   const pluginSyncService = createPluginSyncService();
   const pluginUiAccounts = createPluginUiAccountBindings({
@@ -1816,46 +1816,46 @@ export function createLocalServices(options: {
       const profile = provider ? await oauthCredentialRepo.loadUserProfile(provider) : null;
       return [provider, profile?.id ?? null];
     },
-    open: (params) => maridAgentService.openMcpUiInstance(params),
-    close: (params) => maridAgentService.closeMcpUiInstance(params),
+    open: (params) => qodexAgentService.openMcpUiInstance(params),
+    close: (params) => qodexAgentService.closeMcpUiInstance(params),
   });
   invalidatePluginUiAccounts = () => pluginUiAccounts.invalidate();
   const pluginUiBridgeService = createPluginUiBridgeService({
     reportTelemetryEvent: options?.reportPluginTelemetryEvent,
     openInstance: (params) => pluginUiAccounts.open(params),
     closeInstance: (params) => pluginUiAccounts.close(params),
-    validateInstance: (params) => maridAgentService.validateMcpUiInstance(params),
-    recycleInstance: (params) => maridAgentService.recycleMcpUiInstance(params),
+    validateInstance: (params) => qodexAgentService.validateMcpUiInstance(params),
+    recycleInstance: (params) => qodexAgentService.recycleMcpUiInstance(params),
     // 插件 UI：资源读取与 UI 工具调用都发生在 session 所在的 agent 进程；host 只做校验与登记。
-    readMcpResource: (params) => maridAgentService.readMcpResource(params),
-    callMcpToolForUi: (params) => maridAgentService.callMcpToolForUi(params),
-    cancelMcpToolCallForUi: (params) => maridAgentService.cancelMcpToolCallForUi(params),
-    readMcpResourceForUi: (params) => maridAgentService.readMcpResourceForUi(params),
-    listMcpResourcesForUi: (params) => maridAgentService.listMcpResourcesForUi(params),
+    readMcpResource: (params) => qodexAgentService.readMcpResource(params),
+    callMcpToolForUi: (params) => qodexAgentService.callMcpToolForUi(params),
+    cancelMcpToolCallForUi: (params) => qodexAgentService.cancelMcpToolCallForUi(params),
+    readMcpResourceForUi: (params) => qodexAgentService.readMcpResourceForUi(params),
+    listMcpResourcesForUi: (params) => qodexAgentService.listMcpResourcesForUi(params),
     listMcpResourceTemplatesForUi: (params) =>
-      maridAgentService.listMcpResourceTemplatesForUi(params),
-    subscribeMcpResourceForUi: (params) => maridAgentService.subscribeMcpResourceForUi(params),
-    unsubscribeMcpResourceForUi: (params) => maridAgentService.unsubscribeMcpResourceForUi(params),
-    listPluginUiSurfaces: (params) => maridAgentService.listPluginUiSurfaces(params),
+      qodexAgentService.listMcpResourceTemplatesForUi(params),
+    subscribeMcpResourceForUi: (params) => qodexAgentService.subscribeMcpResourceForUi(params),
+    unsubscribeMcpResourceForUi: (params) => qodexAgentService.unsubscribeMcpResourceForUi(params),
+    listPluginUiSurfaces: (params) => qodexAgentService.listPluginUiSurfaces(params),
     registerSandbox: options?.registerPluginSandbox,
   });
   // App-Provided Tools：页面工具登记与模型调用的认领 / 回传都发生在 session 所在的 agent 进程。
   const pluginUiSamplingService = createPluginUiSamplingService({
-    sample: (params) => maridAgentService.sampleMcpApp(params),
-    cancelSampling: (params) => maridAgentService.cancelMcpAppSampling(params),
+    sample: (params) => qodexAgentService.sampleMcpApp(params),
+    cancelSampling: (params) => qodexAgentService.cancelMcpAppSampling(params),
   });
   const pluginUiAppToolsService = createPluginUiAppToolsService({
-    registerAppToolsForUi: (params) => maridAgentService.registerAppToolsForUi(params),
-    unregisterAppToolsForUi: (params) => maridAgentService.unregisterAppToolsForUi(params),
-    claimAppToolCallForUi: (params) => maridAgentService.claimAppToolCallForUi(params),
-    resolveAppToolCallForUi: (params) => maridAgentService.resolveAppToolCallForUi(params),
+    registerAppToolsForUi: (params) => qodexAgentService.registerAppToolsForUi(params),
+    unregisterAppToolsForUi: (params) => qodexAgentService.unregisterAppToolsForUi(params),
+    claimAppToolCallForUi: (params) => qodexAgentService.claimAppToolCallForUi(params),
+    resolveAppToolCallForUi: (params) => qodexAgentService.resolveAppToolCallForUi(params),
   });
   const subagentsService = createSubagentsService({
     isDesktopRuntime: true,
   });
   const commandsService = createCommandsService({ isDesktopRuntime: true });
   const hooksService = createHooksService({
-    grantWorkspaceHookTrust: (params) => maridAgentService.grantWorkspaceHookTrust(params),
+    grantWorkspaceHookTrust: (params) => qodexAgentService.grantWorkspaceHookTrust(params),
   });
   const memoryService = createMemoryService();
   // 只要当前进程已经装配 Provider Runtime，就由该 Environment 自己的 Selection View
@@ -1866,18 +1866,18 @@ export function createLocalServices(options: {
   // 约束：lifecycle coordinator 懒获取 + 代际 fence（dispose 仅来自显式 workspace 生命周期）；
   // 不创建定时健康探测；Helper restart 尽可能复用 host transport，既有 Agent 的 session、
   // 进程与 MCP stream 保持不变。
-  // P1-a mitigation：createDefaultCuaProductHelper() 在 maridAgentService 存在之前就要组装 resolver，
-  // 但"是否有活跃 turn"这个信号只有 maridAgentService 建好之后才能查询。用前向引用占位——resolver 真正
+  // P1-a mitigation：createDefaultCuaProductHelper() 在 qodexAgentService 存在之前就要组装 resolver，
+  // 但"是否有活跃 turn"这个信号只有 qodexAgentService 建好之后才能查询。用前向引用占位——resolver 真正
   // 调用 hasActiveTurn() 发生在后续某次 resolveMcpServers（异步），那时 hasActiveTurnRef 早已被赋值。
   // 先用前向引用连接 agent service 的 CUA turn tracker，避免在活跃 CUA 请求中途重启 Helper；
   // service 创建完成后再赋值。Helper recovery 始终不能回收 Agent。
   let hasActiveTurnRef: (() => boolean) | undefined;
   const isCuaEnabledForContext = (context?: CuaProductMcpServerResolverContext): boolean =>
-    // 保留 main 原有 gate 行为（避免回归）：dev/internal 特性开启时（MARID_CUA_DEV_MODE=1 或
-    // MARID_CUA_PRODUCT_HELPER=1）即视为启用，不依赖 config.json 显式 enable——main 的 bootstrap
-    // 用 isMaridCuaInternalFeatureEnabled 门控 bundled plugin，与 feat 的 workspace enablement 不同。
+    // 保留 main 原有 gate 行为（避免回归）：dev/internal 特性开启时（QODEX_CUA_DEV_MODE=1 或
+    // QODEX_CUA_PRODUCT_HELPER=1）即视为启用，不依赖 config.json 显式 enable——main 的 bootstrap
+    // 用 isQodexCuaInternalFeatureEnabled 门控 bundled plugin，与 feat 的 workspace enablement 不同。
     // 生产路径（dev mode off）回落到官方插件 workspace enablement 判定（与 feat 一致）。
-    isMaridCuaInternalFeatureEnabled(process.env) ||
+    isQodexCuaInternalFeatureEnabled(process.env) ||
     isOfficialCuaPluginEnabledForWorkspace({
       env: process.env,
       workingDirectory: context?.workspacePath,
@@ -1890,7 +1890,7 @@ export function createLocalServices(options: {
     context?: CuaProductMcpServerResolverContext,
   ): ManagedDefaultCuaProductHelper | undefined => {
     const helper = createDefaultCuaProductHelper({
-      // 转发活跃-turn 查询（前向引用，maridAgentService 建好后赋值）。
+      // 转发活跃-turn 查询（前向引用，qodexAgentService 建好后赋值）。
       hasActiveTurn: () => hasActiveTurnRef?.() ?? false,
     });
     if (!helper) return undefined;
@@ -1968,17 +1968,17 @@ export function createLocalServices(options: {
   // 签名门查询；产品 Helper 不嵌 dev policy，这对 argv 无效（产品签名天然过 Team 门）。
   // 拉起后轮询 ping（5s/100ms），就绪返回 socket 路径，否则 null。
   //
-  // dev 判定直接用上游的 isCuaLocalDevelopmentRuntime（@marid/marid-cua/broker/server，
+  // dev 判定直接用上游的 isCuaLocalDevelopmentRuntime（@qodex/qodex-cua/broker/server，
   // 即本文件已经用来 import buildHelperOpenArgs 的那个 subpath，可正常导入）。
   //
   // 行为等价性（别误读成安全加固）：上游是 `COMPILED_LOCAL_DEVELOPMENT_RUNTIME &&
-  // MARID_RUNTIME_ENV!=="production"`，而那个编译期常量只有 scripts/build-cua-helper-app.mjs
+  // QODEX_RUNTIME_ENV!=="production"`，而那个编译期常量只有 scripts/build-cua-helper-app.mjs
   // 会用 define 折叠（Helper bundle）；desktop host bundle 没有该 define，于是回退成
   // `process.env.NODE_ENV !== "production"` —— 正是复制品写的那一项。所以在**当前**打包形态下
-  // 两者逐字等价，关门靠的是 MARID_RUNTIME_ENV=production（打包态显式注入且不传 NODE_ENV）。
+  // 两者逐字等价，关门靠的是 QODEX_RUNTIME_ENV=production（打包态显式注入且不传 NODE_ENV）。
   //
   // 换成上游的收益是消除漂移面：折叠点、因子个数与 fail-closed 方向都由上游一处决定，
-  // 哪天 host bundle 也补上 __MARID_LOCAL_DEVELOPMENT_RUNTIME__ define（Helper 侧已经有），
+  // 哪天 host bundle 也补上 __QODEX_LOCAL_DEVELOPMENT_RUNTIME__ define（Helper 侧已经有），
   // 编译期门自动生效，不需要再回来改这里。
 
   const cuaStatusLaunchLog = createServiceLogger("cua-status-launch");
@@ -2058,7 +2058,7 @@ export function createLocalServices(options: {
     enabled: cuaPipSessionEnabled,
     resolveCredentials: async () => {
       const host = defaultCuaProductHelperLifecycle.peek()?.helper.macPermissionHost;
-      // PiP 客户端以 role=presentation 声明，资格由 Helper 按对端（Marid 主进程）签名 identifier 裁决。
+      // PiP 客户端以 role=presentation 声明，资格由 Helper 按对端（Qodex 主进程）签名 identifier 裁决。
       if (host?.running && host.socketPath) {
         return {
           socketPath: host.socketPath,
@@ -2104,7 +2104,7 @@ export function createLocalServices(options: {
       ) {
         return {
           available: false,
-          reason: "Marid Computer Use is not enabled (plugin off or not product mode).",
+          reason: "Qodex Computer Use is not enabled (plugin off or not product mode).",
         };
       }
       // 懒启动：状态查询绝不拉起 Helper。托管 host 在（如刚完成授权流）→ 全量查询；
@@ -2126,13 +2126,13 @@ export function createLocalServices(options: {
           return {
             available: false,
             reason:
-              "Marid Computer Use is not running; it will start automatically on first Computer Use use.",
+              "Qodex Computer Use is not running; it will start automatically on first Computer Use use.",
             idle: true,
           } satisfies { available: false; reason: string; idle: true };
         }
         // standalone Helper 上直接查权限真值（身份模式，无 token）。
         try {
-          const { callBrokerMethod } = await import("@marid/marid-cua/broker/helperHealth");
+          const { callBrokerMethod } = await import("@qodex/qodex-cua/broker/helperHealth");
           const report = await callBrokerMethod<{
             grant_owner: string;
             owner?: { display_name?: string };
@@ -2155,7 +2155,7 @@ export function createLocalServices(options: {
         } catch {
           return {
             available: false,
-            reason: "Marid Computer Use is starting up; retry in a moment.",
+            reason: "Qodex Computer Use is starting up; retry in a moment.",
             idle: true,
           } satisfies { available: false; reason: string; idle: true };
         }
@@ -2165,7 +2165,7 @@ export function createLocalServices(options: {
         if (!helper || !isDefaultCuaProductHelperCurrent(helper)) {
           return {
             available: false,
-            reason: "Marid Computer Use lifecycle is disposed.",
+            reason: "Qodex Computer Use lifecycle is disposed.",
           };
         }
         // Screen Recording 的真值必须来自一个新进程：撤销对已运行的常驻 Helper 不生效，
@@ -2174,7 +2174,7 @@ export function createLocalServices(options: {
         if (!isDefaultCuaProductHelperCurrent(helper)) {
           return {
             available: false,
-            reason: "Marid Computer Use lifecycle is disposed.",
+            reason: "Qodex Computer Use lifecycle is disposed.",
           };
         }
         // 真实 screen-capture 探针：TCC screen_recording === "granted" 只说明系统记录了授权，并不保证
@@ -2189,7 +2189,7 @@ export function createLocalServices(options: {
         if (!isDefaultCuaProductHelperCurrent(helper)) {
           return {
             available: false,
-            reason: "Marid Computer Use lifecycle is disposed.",
+            reason: "Qodex Computer Use lifecycle is disposed.",
           };
         }
         const reportedOwnerDisplayName =
@@ -2233,7 +2233,7 @@ export function createLocalServices(options: {
       ) {
         return {
           ok: false,
-          reason: "Marid Computer Use is not enabled (plugin off or not product mode).",
+          reason: "Qodex Computer Use is not enabled (plugin off or not product mode).",
         };
       }
       // 走 resolver.restart()，让 host 尽可能复用 transport；不得通过 disposeWorkspace
@@ -2246,7 +2246,7 @@ export function createLocalServices(options: {
       if (!resolver) {
         return {
           ok: false,
-          reason: "Marid Computer Use is not enabled (plugin off or not product mode).",
+          reason: "Qodex Computer Use is not enabled (plugin off or not product mode).",
         };
       }
       try {
@@ -2258,14 +2258,14 @@ export function createLocalServices(options: {
         if (!helper || !isDefaultCuaProductHelperCurrent(helper)) {
           return {
             ok: false,
-            reason: "Marid Computer Use lifecycle is disposed.",
+            reason: "Qodex Computer Use lifecycle is disposed.",
           };
         }
         return { ok: true };
       } catch (error) {
         return {
           ok: false,
-          reason: `Failed to restart Marid Computer Use: ${
+          reason: `Failed to restart Qodex Computer Use: ${
             error instanceof Error ? error.message : String(error)
           }`,
         };
@@ -2274,7 +2274,7 @@ export function createLocalServices(options: {
   };
   // 动态工作流的用户选择（docs/dynamic-workflow/launch.md「The user's choice」）：本机设置文件是唯一来源，
   // 每次使用时读取。desktop-attached remote Host 读不到桌面的设置，选择由 desktop 推送
-  // （maridAgentService.syncDynamicWorkflowUserMode），这里不注入。读取失败按「跟随」处理。
+  // （qodexAgentService.syncDynamicWorkflowUserMode），这里不注入。读取失败按「跟随」处理。
   const resolveDynamicWorkflowUserMode = isDesktopAttachedRemote
     ? undefined
     : async () => (await settingService.get()).dynamicWorkflowMode;
@@ -2343,18 +2343,18 @@ export function createLocalServices(options: {
     repository: () => taskIndexRepo.getProjectRepository(),
     workspaceDirectory: join(projectDataRoot(), "workspace"),
     afterChange: publishProjectChange,
-    // maridAgentService 在下方创建；端口只在命令执行时取用它。
+    // qodexAgentService 在下方创建；端口只在命令执行时取用它。
     data: {
       repository: () => taskIndexRepo.getProjectDataRepository(),
       port: createProjectDataPort({
         agent: {
           measure: (params) => {
-            if (!maridAgentService.measureSessionData) throw new Error("project.data-unavailable");
-            return maridAgentService.measureSessionData(params);
+            if (!qodexAgentService.measureSessionData) throw new Error("project.data-unavailable");
+            return qodexAgentService.measureSessionData(params);
           },
           purge: (params) => {
-            if (!maridAgentService.purgeSessionData) throw new Error("project.data-unavailable");
-            return maridAgentService.purgeSessionData(params);
+            if (!qodexAgentService.purgeSessionData) throw new Error("project.data-unavailable");
+            return qodexAgentService.purgeSessionData(params);
           },
         },
         checkpointDirectory: (workspacePath) => getWorkspaceCheckpointDirectory(workspacePath),
@@ -2400,7 +2400,7 @@ export function createLocalServices(options: {
   // primaryWindowCoordinator 创建并复用已有窗口，renderer 刷新复用原 Host。以后支持多个主窗口时，
   // 删除需要改由 main 跨 Host 协调（docs/git/worktree.md §8.3）。
   const worktreeRemovalGate = createWorktreeRemovalGate();
-  const maridAgentService = createMaridAgentService({
+  const qodexAgentService = createQodexAgentService({
     credentialCipherProvider,
     runSessionOperation: (target, operation) =>
       worktreeRemovalGate.runSessionOperation(
@@ -2457,18 +2457,18 @@ export function createLocalServices(options: {
       codingPlanSubscriptionService.getDynamicWorkflowClientConfig(),
     ...(resolveDynamicWorkflowUserMode ? { resolveDynamicWorkflowUserMode } : {}),
     forwardDynamicWorkflowUserMode: options?.forwardDynamicWorkflowUserMode,
-    commandResolver: options?.maridAgentCommandResolver,
-    presentationSurface: resolveMaridAgentPresentationSurface({
+    commandResolver: options?.qodexAgentCommandResolver,
+    presentationSurface: resolveQodexAgentPresentationSurface({
       runtimeSurface: options?.agentTelemetry?.runtimeSurface,
       serviceAuthorityMode: options?.serviceAuthorityMode,
       desktopContextPromptEnabled,
     }),
     onAutomationManualRunRequested: options?.onAutomationManualRunRequested,
     // createLocalServices 虽然暴露了 reporter 注入点，旧装配却没有继续传给
-    // MaridAgentProcessManager，导致 host 永远不向 main 上报 Agent spawn/exit，进程监控器
+    // QodexAgentProcessManager，导致 host 永远不向 main 上报 Agent spawn/exit，进程监控器
     // 因而看不到实际运行的 Agent，也无法验证只读到可写升级是否复用同一进程。
     processLifecycleReporter: options?.processLifecycleReporter,
-    spawnFallbackCwd: options?.maridAgentSpawnFallbackCwd,
+    spawnFallbackCwd: options?.qodexAgentSpawnFallbackCwd,
     // browser-use：host→main 执行桥透传给 agent service 的 onRequest browserExecute 路由。
     browserControlExecutor: options?.browserControlExecutor,
     // 机器人凭据只归属于授权 Host；远端独立服务不能借用本机配置扩大读取范围。
@@ -2529,13 +2529,13 @@ export function createLocalServices(options: {
       modelSelectionService: providerRuntime.modelSelection,
     }),
     // host 是身份权威边界：provenance/origin 必须在这里再校验一次，不能只依赖 agent
-    // adapter 的 fetch wrapper。判定实现与 CLI 侧共用 @marid/shared 的同一份，避免分叉。
-    // origin 解析复用 resolveCurrentMaridEndpointOrigin——与闲时任务同口径（含 settings
+    // adapter 的 fetch wrapper。判定实现与 CLI 侧共用 @qodex/shared 的同一份，避免分叉。
+    // origin 解析复用 resolveCurrentQodexEndpointOrigin——与闲时任务同口径（含 settings
     // 覆盖），否则会出现"闲时任务能连、官方 MCP 连不上"。
     // dev 开关必须同样传入，否则本地自测会被 host 单方面拒绝。
     officialMcpTrustedOrigins: createOfficialMcpTrustedOriginRegistry({
       devTrustedOriginsRaw: process.env[OFFICIAL_MCP_DEV_TRUSTED_ORIGINS_ENV],
-      resolveMaridApiOrigin: resolveCurrentMaridEndpointOrigin,
+      resolveQodexApiOrigin: resolveCurrentQodexEndpointOrigin,
     }),
     cuaOperationStateReporter: shouldEnableCuaOperationStateReporter({
       serviceAuthorityMode: options?.serviceAuthorityMode,
@@ -2543,7 +2543,7 @@ export function createLocalServices(options: {
     })
       ? options?.cuaOperationStateReporter
       : undefined,
-    // Marid 只发布 turn/session 事实；面板 terminal policy 由 producer coordinator 决定。
+    // Qodex 只发布 turn/session 事实；面板 terminal policy 由 producer coordinator 决定。
     ...(options?.serviceAuthorityMode === "desktop-local"
       ? {
           onCuaPipSessionLifecycle: (_workspace, event) => {
@@ -2569,12 +2569,12 @@ export function createLocalServices(options: {
           process.platform === "win32" ? getStableCuaPipeName() : resolveBrokerSocketPath();
         cuaProductHelperEnv = {
           [BROKER_SOCKET_ENV]: brokerSocket,
-          [MARID_CUA_PLUGIN_AUTHORITY_ENV_KEY]: randomBytes(16).toString("hex"),
+          [QODEX_CUA_PLUGIN_AUTHORITY_ENV_KEY]: randomBytes(16).toString("hex"),
         };
         if (process.platform === "win32") {
           const recipe = await resolveStableCuaWinRecipe();
           if (recipe) {
-            cuaProductHelperEnv["MARID_CUA_WIN_HELPER_RECIPE"] = JSON.stringify({
+            cuaProductHelperEnv["QODEX_CUA_WIN_HELPER_RECIPE"] = JSON.stringify({
               ...recipe,
               hostPid: process.pid,
             });
@@ -2586,7 +2586,7 @@ export function createLocalServices(options: {
           }
         }
       }
-      const telemetryEnv = getCapturedMaridAgentTelemetryEnv();
+      const telemetryEnv = getCapturedQodexAgentTelemetryEnv();
       const telemetryConfigured = Boolean(
         telemetryEnv.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || telemetryEnv.OTEL_EXPORTER_OTLP_ENDPOINT,
       );
@@ -2607,13 +2607,13 @@ export function createLocalServices(options: {
         }),
         // 把 host 解析出的权威 origin（含 settings 覆盖）下发给 agent，否则 agent 侧只按
         // env 推导，test env + 自定义端点时两侧信任判定的输入分叉、官方 MCP 整体 fail closed。
-        ...buildAgentEndpointOriginEnv(await resolveCurrentMaridEndpointOrigin()),
+        ...buildAgentEndpointOriginEnv(await resolveCurrentQodexEndpointOrigin()),
         // Agent 模型请求的 X-Client-Language 默认取 Agent 进程 Intl（Dock 启动无 LANG 时回退 en-US），
         // 跟界面语言无关；这里把 Host 的实时界面语言按 spawn 时下发，切换语言后下一次启动 Agent 生效。
         // 远端 Host 不注入 resolveClientLanguage，保持远端 Intl 行为。
         ...buildAgentClientLanguageEnv(options?.resolveClientLanguage?.()),
-        // broker 凭据（socket/token）注入 agent spawn env，让内置 marid-cua plugin 的
-        // computer-use MCP server 经 __marid-plugin-host 恢复 token 后连上 broker。
+        // broker 凭据（socket/token）注入 agent spawn env，让内置 qodex-cua plugin 的
+        // computer-use MCP server 经 __qodex-plugin-host 恢复 token 后连上 broker。
         ...cuaProductHelperEnv,
         ...buildAgentTelemetrySpawnEnv({
           deviceMid: telemetryDeviceMid,
@@ -2624,7 +2624,7 @@ export function createLocalServices(options: {
         ...createNodeProviderRuntimePathEnv({
           // Built-in Active 路径按当前 Endpoint 隔离，不能通过同步的固定路径
           // getter 读取；Agent spawn 必须等待本轮 Endpoint Source 完成解析和物化。
-          maridBuiltinFilePath: await providerConfigRuntime.resolveMaridBuiltinActiveFilePath(),
+          qodexBuiltinFilePath: await providerConfigRuntime.resolveQodexBuiltinActiveFilePath(),
           personalFilePath: join(resolveAppConfigDir(), PERSONAL_PROVIDER_CONFIG_FILE_NAME),
         }),
       };
@@ -2642,7 +2642,7 @@ export function createLocalServices(options: {
           resolveSessionRuntimePreferences: async (scope) => {
             // 预算已统一，不能把可选远端配置作为本地/手机 shared-host 建会话的前置条件。
             const settings = await settingService.get();
-            const modelContextBudgetStrategy = DEFAULT_MARID_MODEL_CONTEXT_BUDGET_STRATEGY;
+            const modelContextBudgetStrategy = DEFAULT_QODEX_MODEL_CONTEXT_BUDGET_STRATEGY;
             return {
               askUserQuestionAutoResolutionEnabled:
                 settings.askUserQuestionAutoResolutionEnabled !== false,
@@ -2659,16 +2659,16 @@ export function createLocalServices(options: {
           },
         }),
   });
-  providerConnectivityAgentService = maridAgentService;
+  providerConnectivityAgentService = qodexAgentService;
   // Helper health probe 短暂超时不应在 Computer Use turn 中途回收 Agent。resolver 会把 restart
   // 推迟到下一个 request/turn 边界；若 broker 确实已失效，当前 turn 会自然失败并由下一次请求恢复。
-  hasActiveTurnRef = () => maridAgentService.hasActiveCuaOperationTurn();
-  // desktop-continuous UI 直接订阅 maridSessionService，绕开 Marid task adapter 的
+  hasActiveTurnRef = () => qodexAgentService.hasActiveCuaOperationTurn();
+  // desktop-continuous UI 直接订阅 qodexSessionService，绕开 Qodex task adapter 的
   // mapServiceEvent 路径，导致 task_complete 永远不会写回 sqlite，侧边栏 spinner 不停。
   // 在 services 层装配一个共享的 taskIndexRepo + syncer，session 任意入口都会唤醒
   // shadow 订阅，把 runtime 终态收敛进 sqlite。
-  const maridTaskIndexSyncer = createMaridTaskIndexSyncer({
-    agentService: maridAgentService,
+  const qodexTaskIndexSyncer = createQodexTaskIndexSyncer({
+    agentService: qodexAgentService,
     taskIndexRepo,
   });
   // 自动归档只由这里的定时扫描触发（启动首轮 + 每小时 + 设置变更补扫）；readTree 与任务点击
@@ -2680,7 +2680,7 @@ export function createLocalServices(options: {
       const days = Math.max(1, Math.floor(settings.taskAutoArchiveOlderThanDays ?? 30));
       return {
         cutoff: Date.now() - days * 86_400_000,
-        activeTasks: maridTaskIndexSyncer.activeTaskRefs(),
+        activeTasks: qodexTaskIndexSyncer.activeTaskRefs(),
       };
     },
     repository: () => taskIndexRepo.getProjectRepository(),
@@ -2688,7 +2688,7 @@ export function createLocalServices(options: {
       // Bug 根因：自动归档直接改 sqlite，只广播项目变更，不发 task_archived；
       // Controller 依赖任务事实流关闭已归档任务的 tab，缺事件会让出声的 Browser guest 留在后台。
       for (const task of archived) {
-        maridTaskIndexSyncer.emitWorkspaceTaskListChanged(task, undefined, "task_archived");
+        qodexTaskIndexSyncer.emitWorkspaceTaskListChanged(task, undefined, "task_archived");
       }
       await publishProjectChange();
     },
@@ -2710,9 +2710,9 @@ export function createLocalServices(options: {
   });
   const cuaProductMcpServerResolver =
     options?.cuaProductMcpServerResolver ?? defaultCuaProductMcpServerResolver;
-  const maridSessionService = createMaridSessionService({
-    agentService: maridAgentService,
-    taskIndexSyncer: maridTaskIndexSyncer,
+  const qodexSessionService = createQodexSessionService({
+    agentService: qodexAgentService,
+    taskIndexSyncer: qodexTaskIndexSyncer,
     cuaProductMcpServerResolver,
   });
   const gitCommitMessageGenerator = new GitCommitMessageGenerator({
@@ -2725,7 +2725,7 @@ export function createLocalServices(options: {
     },
     textGenerator: {
       async generateText(params) {
-        return await maridAgentService.generateWorkspaceText({
+        return await qodexAgentService.generateWorkspaceText({
           workspacePath: params.workspacePath,
           ...(params.workspaceIdentity ? { workspaceIdentity: params.workspaceIdentity } : {}),
           selection: params.selection,
@@ -2758,20 +2758,20 @@ export function createLocalServices(options: {
       hasTerminalsUnder: async (path) =>
         (await terminalService.listTerminalIdsUnderPath({ path })).length > 0,
       releaseSessionsUnder: async (target) => {
-        if (!maridAgentService.releaseSessionsUnderDirectory)
+        if (!qodexAgentService.releaseSessionsUnderDirectory)
           throw new Error("worktree.release-unsupported");
-        return await maridAgentService.releaseSessionsUnderDirectory(target);
+        return await qodexAgentService.releaseSessionsUnderDirectory(target);
       },
     },
     agent: {
       supportsWorktreeCwd: async (target) =>
-        (await maridAgentService.supportsWorktreeCwd?.(target)) ?? false,
+        (await qodexAgentService.supportsWorktreeCwd?.(target)) ?? false,
       // HOST_WORKTREE_COMMAND 只有本服务能设置，渲染进程经 RPC 无法携带（§5.1）。
       sendCommand: (command) =>
-        maridAgentService.sendConversationCommandV4({ ...command, [HOST_WORKTREE_COMMAND]: true }),
+        qodexAgentService.sendConversationCommandV4({ ...command, [HOST_WORKTREE_COMMAND]: true }),
       queryCommandResult: async (target) => {
-        if (!maridAgentService.queryCommandResult) throw new Error("worktree.query-unsupported");
-        return await maridAgentService.queryCommandResult(target);
+        if (!qodexAgentService.queryCommandResult) throw new Error("worktree.query-unsupported");
+        return await qodexAgentService.queryCommandResult(target);
       },
     },
     reportCreatingCount: (count) =>
@@ -2780,11 +2780,11 @@ export function createLocalServices(options: {
       ),
     afterChange: publishProjectChange,
   });
-  // task wrapper 由 Marid task service adapter 提供；核心 session 状态由 Marid agent server 维护。
-  const maridTaskService = createMaridTaskServiceAdapter({
-    maridAgentService,
+  // task wrapper 由 Qodex task service adapter 提供；核心 session 状态由 Qodex agent server 维护。
+  const qodexTaskService = createQodexTaskServiceAdapter({
+    qodexAgentService,
     taskIndexRepo,
-    taskIndexSyncer: maridTaskIndexSyncer,
+    taskIndexSyncer: qodexTaskIndexSyncer,
     settingService,
     cuaProductMcpServerResolver,
   });
@@ -2805,8 +2805,8 @@ export function createLocalServices(options: {
             (await sourceServerWorkspaceService.resolveWorkspace({ workspacePath }))
               .canonicalWorkspaceKey
         : undefined,
-    tasks: maridTaskService,
-    agent: maridAgentService,
+    tasks: qodexTaskService,
+    agent: qodexAgentService,
     models: providerRuntime.modelSelection,
     navigation: options?.appControlNavigation,
     prepareCreation: ({ projectId }) => projectService.prepareSession({ projectId }),
@@ -2867,8 +2867,8 @@ export function createLocalServices(options: {
   associatedProfileRefreshRef.current = async (expected) => {
     await oauthService.refreshAccountProfile(expected);
   };
-  const maridJwtLogoutLogger = createServiceLogger("marid-jwt-logout");
-  maridJwtLogoutHandlerRef.current = (input, headers) => {
+  const qodexJwtLogoutLogger = createServiceLogger("qodex-jwt-logout");
+  qodexJwtLogoutHandlerRef.current = (input, headers) => {
     // 条件退出本身已串行去重；不能丢弃等待旧候选期间到来的新凭据 401。
     void oauthService
       .logoutIfCurrentCredentialRequest(input, headers)
@@ -2876,13 +2876,13 @@ export function createLocalServices(options: {
         // 401 分类后可能已完成新登录；只有队列内真正清理的旧会话才广播过期。
         if (invalidated) {
           void broadcastService.send({
-            channel: MARID_JWT_INVALID_BROADCAST_CHANNEL,
+            channel: QODEX_JWT_INVALID_BROADCAST_CHANNEL,
             payload: {},
           });
         }
       })
       .catch((error) => {
-        maridJwtLogoutLogger.warn("Marid JWT logout failed", { error });
+        qodexJwtLogoutLogger.warn("Qodex JWT logout failed", { error });
       });
   };
   // Desktop Host 曾从 Settings View 再扫描一次 Account Provider，既绕开
@@ -2906,12 +2906,12 @@ export function createLocalServices(options: {
       if (providers.length !== 1) return null;
       const provider = providers[0]!;
       const config = provider.config;
-      const staticAccess = maridProviderAccountAccessSchema.parse(config.access.toJSON());
+      const staticAccess = qodexProviderAccountAccessSchema.parse(config.access.toJSON());
       const access = await accountRequestAuthService.resolveAccessCurrent(staticAccess);
       if (!access) return null;
       return {
         providerId: provider.providerId,
-        access: maridAccountAccessSchema.parse(access),
+        access: qodexAccountAccessSchema.parse(access),
         ...(config.api?.baseUrl ? { baseURL: config.api.baseUrl } : {}),
       };
     },
@@ -2933,14 +2933,14 @@ export function createLocalServices(options: {
     // 分享运行时始终走真实 API；测试/Mock 场景应在 service 单测或 Web fixture 中显式注入，
     // 不能让开发环境默认生成仅存在于进程内存的 mock-share 链接。
     apiClient,
-    baseUrl: buildRuntimeMaridApiUrl(process.env, "/api/v1"),
+    baseUrl: buildRuntimeQodexApiUrl(process.env, "/api/v1"),
     tokenProvider: async (): Promise<string | null> => {
       const activeProvider = await oauthCredentialRepo.getActiveProvider();
       if (!activeProvider) {
         return null;
       }
       const tokenSet = await oauthCredentialRepo.loadTokenSet(activeProvider);
-      return tokenSet?.maridJwtToken ?? tokenSet?.accessToken ?? null;
+      return tokenSet?.qodexJwtToken ?? tokenSet?.accessToken ?? null;
     },
   });
   const conversationShareService: IConversationShareServiceType = isDesktopAttachedRemote
@@ -2948,8 +2948,8 @@ export function createLocalServices(options: {
         message: "Conversation publishing is not available for remote workspaces",
       })
     : new ConversationShareService({
-        maridAgentService,
-        maridSessionService,
+        qodexAgentService,
+        qodexSessionService,
         client: conversationShareClient,
         artifactSource: createLocalConversationShareArtifactSource(),
       });
@@ -2957,17 +2957,17 @@ export function createLocalServices(options: {
   // services 集合建好后在 return 前统一登记进 sharedSqliteRepos 侧表
   const sqliteReposToClose: Array<{ close(): void }> = [];
   const marketingAssets = createMarketingAssetRegistry({
-    allowLoopback: MARID_ENV === "test" || process.env.NODE_ENV === "development",
+    allowLoopback: QODEX_ENV === "test" || process.env.NODE_ENV === "development",
   });
   const services = new ServiceCollection()
     .register(
       IMarketingTouchService,
       createMarketingTouchService({
         apiClient,
-        getToken: () => credentialService.load("maridjwttoken"),
+        getToken: () => credentialService.load("qodexjwttoken"),
         getDeviceMid: () => options?.agentTelemetry?.getDeviceMid?.(),
-        baseUrl: buildRuntimeMaridApiUrl(process.env, "/"),
-        appVersion: MARID_VERSION,
+        baseUrl: buildRuntimeQodexApiUrl(process.env, "/"),
+        appVersion: QODEX_VERSION,
         onSnapshot: (snapshot) => marketingAssets.accept(snapshot),
       }),
     )
@@ -2975,8 +2975,8 @@ export function createLocalServices(options: {
       IVoiceInputService,
       createVoiceInputService({
         apiClient,
-        getToken: () => credentialService.load("maridjwttoken"),
-        resolveOrigin: resolveCurrentMaridEndpointOrigin,
+        getToken: () => credentialService.load("qodexjwttoken"),
+        resolveOrigin: resolveCurrentQodexEndpointOrigin,
         createSocket: (url) => hostApiNetworkTransport.createWebSocket(url),
       }),
     )
@@ -3015,9 +3015,9 @@ export function createLocalServices(options: {
       },
     })
     .register(IBroadcastService, broadcastService)
-    .register(IMaridTaskService, maridTaskService)
-    .register(IMaridAgentService, maridAgentService)
-    .register(IMaridSessionService, maridSessionService)
+    .register(IQodexTaskService, qodexTaskService)
+    .register(IQodexAgentService, qodexAgentService)
+    .register(IQodexSessionService, qodexSessionService)
     .register(IProjectService, projectService)
     .register(ITaskGroupService, taskGroupService)
     .register(IRemoteProjectService, remoteProjectService)
@@ -3032,7 +3032,7 @@ export function createLocalServices(options: {
         remoteProjectService,
         ownerHostId: options?.projectStorageHostId ?? "local",
         credentialService,
-        maridTaskService,
+        qodexTaskService,
         broadcastService,
         settingService,
         modelSelectionService: providerRuntime.modelSelection,
@@ -3053,7 +3053,7 @@ export function createLocalServices(options: {
         apiClient,
         loadOAuthAccountMaterial,
         accountRequestAuthService,
-        maridAgentService,
+        qodexAgentService,
         officialMcpCredentialSource,
       }),
     )
@@ -3062,10 +3062,10 @@ export function createLocalServices(options: {
       IClientConfigService,
       createClientConfigService({
         apiClient,
-        resolveMaridJwtToken: () => credentialService.load("maridjwttoken"),
+        resolveQodexJwtToken: () => credentialService.load("qodexjwttoken"),
         resolveRequestContext: async () => ({
-          endpointOrigin: await resolveCurrentMaridEndpointOrigin(),
-          appVersion: MARID_VERSION,
+          endpointOrigin: await resolveCurrentQodexEndpointOrigin(),
+          appVersion: QODEX_VERSION,
           platform: `${process.platform}-${process.arch}`,
         }),
       }),
@@ -3138,7 +3138,7 @@ export function createLocalServices(options: {
           logger: offPeakLogger,
           requestSchedulerWake: options?.onOffPeakSchedulerWakeRequested,
           stopRunningTask: async (params) => {
-            await maridTaskService.stopGeneration({
+            await qodexTaskService.stopGeneration({
               taskId: params.conversationId,
               workspacePath: params.workspacePath,
               ...(params.workspaceIdentity ? { workspaceIdentity: params.workspaceIdentity } : {}),
@@ -3149,7 +3149,7 @@ export function createLocalServices(options: {
           },
         });
         offPeakTaskService.startSync();
-        // 回写前向引用，供 maridAgentService 的 offPeak/create、offPeak/list 协议 handler 调用。
+        // 回写前向引用，供 qodexAgentService 的 offPeak/create、offPeak/list 协议 handler 调用。
         offPeakTaskServiceForAgent = offPeakTaskService;
         return offPeakTaskService;
       })(),
@@ -3157,8 +3157,8 @@ export function createLocalServices(options: {
     .register(
       IHighspeedCardService,
       (() => {
-        const origin = resolveRuntimeMaridEndpointOrigin(process.env);
-        const rawMockScenario = process.env.MARID_HIGHSPEED_MOCK_SCENARIO;
+        const origin = resolveRuntimeQodexEndpointOrigin(process.env);
+        const rawMockScenario = process.env.QODEX_HIGHSPEED_MOCK_SCENARIO;
         const mockScenarios = new Set<HighspeedMockScenario>([
           "hit-fast",
           "miss",
@@ -3177,9 +3177,9 @@ export function createLocalServices(options: {
           const identity = await oauthCredentialRepo.loadIdentityMaterial();
           return identity
             ? {
-                ownerKey: ownerKeyForUser(identity.maridUserId),
+                ownerKey: ownerKeyForUser(identity.qodexUserId),
                 sessionScope: JSON.stringify(identity),
-                maridJwt: identity.maridJwtToken,
+                qodexJwt: identity.qodexJwtToken,
               }
             : null;
         };
@@ -3194,7 +3194,7 @@ export function createLocalServices(options: {
                   allowMockCredentials: false,
                 });
                 return buildHighspeedCodingPlanAuthHeaders({
-                  maridJwt: credentials.jwt,
+                  qodexJwt: credentials.jwt,
                   codingPlanAuthorization: credentials.codingPlanAuthorization,
                   targetType:
                     credentials.organizationId && credentials.projectId ? "TEAM" : "PERSONAL",
@@ -3234,7 +3234,7 @@ export function createLocalServices(options: {
                 return provider?.models.some((model) => model.modelId === modelId) ?? false;
               },
           // 加速推理与 draw 走同一 highspeed 网关、同一 Coding Plan 双 JWT 契约：必须携带
-          // marid JWT + Coding Plan 业务 JWT + Team 身份头。此前只发 marid JWT + 卡 ID，网关
+          // qodex JWT + Coding Plan 业务 JWT + Team 身份头。此前只发 qodex JWT + 卡 ID，网关
           // 无法校验 Coding Plan 权益，返回 401 auth_failed。与 draw 头复用同一次 selected
           // connection 解析，避免把 ZAI 身份的卡打到 BigModel 加速 Provider。
           resolveInferenceAuth: async () => {
@@ -3242,11 +3242,11 @@ export function createLocalServices(options: {
               allowMockCredentials: false,
             });
             return {
-              maridJwt: credentials.jwt,
+              qodexJwt: credentials.jwt,
               family: credentials.providerFamily,
               accountScope: credentials.accountScope,
-              ...(credentials.maridUserId
-                ? { ownerKey: ownerKeyForUser(credentials.maridUserId) }
+              ...(credentials.qodexUserId
+                ? { ownerKey: ownerKeyForUser(credentials.qodexUserId) }
                 : {}),
               codingPlanAuthorization: credentials.codingPlanAuthorization,
               targetType: credentials.organizationId && credentials.projectId ? "TEAM" : "PERSONAL",
@@ -3277,7 +3277,7 @@ export function createLocalServices(options: {
     .register(
       IPluginManagementService,
       createPluginManagementService({
-        maridAgentService,
+        qodexAgentService,
         reportTelemetryEvent: options?.reportPluginTelemetryEvent,
         onMutationSucceeded: options?.onPluginManagementMutated,
       }),
@@ -3287,7 +3287,7 @@ export function createLocalServices(options: {
     .register(
       IHooksService,
       createHooksService({
-        grantWorkspaceHookTrust: (params) => maridAgentService.grantWorkspaceHookTrust(params),
+        grantWorkspaceHookTrust: (params) => qodexAgentService.grantWorkspaceHookTrust(params),
       }),
     )
     .register(IMemoryService, createMemoryService())
@@ -3319,7 +3319,7 @@ export function createLocalServices(options: {
 
   accountRequestAuthServices.set(services, accountRequestAuthService);
   offPeakRequestAuthBuilders.set(services, buildOffPeakRequestAuthForTicket);
-  const pluginUserOptionsReader = getInProcessPluginUserOptionsReader(maridAgentService);
+  const pluginUserOptionsReader = getInProcessPluginUserOptionsReader(qodexAgentService);
   if (pluginUserOptionsReader) pluginUserOptionsReaders.set(services, pluginUserOptionsReader);
 
   providerRuntimes.set(services, providerRuntime);
@@ -3403,7 +3403,7 @@ export function createTelemetryUserIdLoader(
   };
 }
 
-/** 仅给同一事件账号返回当前 Marid JWT；不缓存、不修改登录凭据。 */
+/** 仅给同一事件账号返回当前 Qodex JWT；不缓存、不修改登录凭据。 */
 export function createTelemetryAuthorizationLoader(
   credentialService: Pick<ICredentialService, "load">,
 ): (userId: string) => Promise<string | null> {
@@ -3411,12 +3411,12 @@ export function createTelemetryAuthorizationLoader(
     if (!userId) return null;
     try {
       const provider = (await credentialService.load("oauth:active_provider"))?.trim();
-      // 中国区同样持有 Marid 主 JWT；不能用旧的两渠道白名单阻断远控和上报。
+      // 中国区同样持有 Qodex 主 JWT；不能用旧的两渠道白名单阻断远控和上报。
       if (!provider || !isBuiltinOAuthProvider(provider)) return null;
       const readUserId = async () =>
         readTelemetryOAuthUserId(await credentialService.load(`oauth:${provider}:user_info`));
       if ((await readUserId()) !== userId) return null;
-      const jwt = await credentialService.load("maridjwttoken");
+      const jwt = await credentialService.load("qodexjwttoken");
       // 退出/切账号可能发生在异步读取期间；禁止将旧身份的 token 附到其他账号事件上。
       if (
         (await credentialService.load("oauth:active_provider"))?.trim() !== provider ||
@@ -3432,7 +3432,7 @@ export function createTelemetryAuthorizationLoader(
 
 export function createTelemetryMarketingParamsLoader(
   credentialService: ICredentialService,
-): () => Promise<import("@marid/shared").OAuthLoginAttribution | null> {
+): () => Promise<import("@qodex/shared").OAuthLoginAttribution | null> {
   // 恢复原因：固定返回 null 会丢掉已保存的渠道归因，数仓应读取 OAuth 的同一份事实。
   const repo = new OAuthCredentialRepo(credentialService);
   return () => repo.loadLoginAttribution();
@@ -3467,9 +3467,9 @@ export function disposeServiceResources(services: ServiceCollection): void {
   // 这里集中调用各服务的本地 disposeAll 钩子，把“退出 app = 回收所有托管资源”落成机械动作。
   const disposableServices = [
     services.getOptional(ITerminalService),
-    services.getOptional(IMaridTaskService),
-    services.getOptional(IMaridAgentService),
-    services.getOptional(IMaridSessionService),
+    services.getOptional(IQodexTaskService),
+    services.getOptional(IQodexAgentService),
+    services.getOptional(IQodexSessionService),
     services.getOptional(IBotsService),
     services.getOptional(IFileWatcherService),
     services.getOptional(ISubagentsService),
@@ -3504,14 +3504,14 @@ export async function disposeServiceResourcesAndWait(services: ServiceCollection
     services.getOptional(IGenUiService) as (IGenUiService & { dispose?(): void }) | undefined
   )?.dispose?.();
   // app 关闭时 host 需要等 agent 进程树完成 graceful + force 清理。
-  // 旧的同步 dispose 会在 host 退出时丢掉强杀 timer，导致 marid-cli/app-server 变成孤儿进程。
+  // 旧的同步 dispose 会在 host 退出时丢掉强杀 timer，导致 qodex-cli/app-server 变成孤儿进程。
   // CLI 的 EOF 宽限不能被云内容或终端清理消耗；先关闭 Agent admission 并完成进程回收。
   const disposableServices = [
-    services.getOptional(IMaridAgentService),
+    services.getOptional(IQodexAgentService),
     services.getOptional(ICloudContentService),
     services.getOptional(ITerminalService),
-    services.getOptional(IMaridTaskService),
-    services.getOptional(IMaridSessionService),
+    services.getOptional(IQodexTaskService),
+    services.getOptional(IQodexSessionService),
     services.getOptional(IBotsService),
     services.getOptional(IFileWatcherService),
     services.getOptional(ISubagentsService),
@@ -3585,7 +3585,7 @@ export async function createServerHostServices(options: {
     Parameters<typeof createLocalServices>[0]
   >["topicResourceRelayChannel"];
   sourceServerId: string;
-  maridBuiltinProviderConfigFilePath: string;
+  qodexBuiltinProviderConfigFilePath: string;
   providerProvisioningTargetEnabled?: boolean;
   credentialCipherProvider?: CredentialCipher;
 }) {
@@ -3600,13 +3600,13 @@ export async function createServerHostServices(options: {
   );
   if (!projectStorageHostId) throw new Error("Invalid Source Server storage identity");
   // Bug 原因：billing/balance 把 X-Device-Mid 当必填，而独立 Server 主机没有 Desktop main 写设备身份，
-  // buildMaridSourceHeaders() 又只读不生成。原修复只放在旧 stdio entry，SSH/WSL/Docker 的 Core 与
+  // buildQodexSourceHeaders() 又只读不生成。原修复只放在旧 stdio entry，SSH/WSL/Docker 的 Core 与
   // Lite HTTP 入口共用本装配却没有确保，首次 Start Plan 权益查询返回 400，Start 模型被判为不可用。
   // 收口到本装配，所有独立 Server 入口在创建 services 前得到本机自己的 deviceMid；失败只告警、不阻断启动、不伪造 ID。
   await ensureTelemetryDeviceMid().catch((error: unknown) => {
     createServiceLogger("server-host").warn(
       undefined,
-      "deviceMid 初始化失败，Marid endpoint 请求将不带 X-Device-Mid:",
+      "deviceMid 初始化失败，Qodex endpoint 请求将不带 X-Device-Mid:",
       error instanceof Error ? error.message : String(error),
     );
   });
@@ -3629,7 +3629,7 @@ export async function createServerHostServices(options: {
   const migrationFailedPathCount = await workspaceAliasRepo.getFailedPathCount();
   const services = createLocalServices({
     credentialCipherProvider,
-    maridBuiltinProviderConfigFilePath: options.maridBuiltinProviderConfigFilePath,
+    qodexBuiltinProviderConfigFilePath: options.qodexBuiltinProviderConfigFilePath,
     providerProvisioningTargetEnabled: options.providerProvisioningTargetEnabled,
     serviceAuthorityMode: "standalone-server",
     topicResourceRelayChannel: options.topicResourceRelayChannel,
@@ -3640,10 +3640,10 @@ export async function createServerHostServices(options: {
 }
 
 export { scopeConversationShareServiceForAttachment } from "./conversation-share/conversationShareConnectionScope.js";
-export { localRuntimeNetworkCapture } from "./marid-agent/localRuntimeNetworkCapture.js";
+export { localRuntimeNetworkCapture } from "./qodex-agent/localRuntimeNetworkCapture.js";
 
 /** 只下发可打印 ASCII 的界面语言；缺失时不写该键，Agent 回落自身 Intl。 */
 function buildAgentClientLanguageEnv(locale: string | undefined): Record<string, string> {
   const value = locale?.trim();
-  return value && /^[\x20-\x7e]+$/.test(value) ? { [MARID_CLIENT_LANGUAGE_ENV]: value } : {};
+  return value && /^[\x20-\x7e]+$/.test(value) ? { [QODEX_CLIENT_LANGUAGE_ENV]: value } : {};
 }

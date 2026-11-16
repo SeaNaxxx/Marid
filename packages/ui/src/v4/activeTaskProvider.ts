@@ -1,16 +1,16 @@
-import type { MaridProvider } from "@marid/shared";
-import { selectWorkspaceMaridState, useMaridSessionStore } from "@/store/maridSessionStore.js";
-import type { WorkspaceMaridUIState } from "@/store/maridSessionStoreTypes.js";
+import type { QodexProvider } from "@qodex/shared";
+import { selectWorkspaceQodexState, useQodexSessionStore } from "@/store/qodexSessionStore.js";
+import type { WorkspaceQodexUIState } from "@/store/qodexSessionStoreTypes.js";
 import { useTabStore } from "@/store/TabStoreProvider.js";
 import { isWorkspaceTab } from "@/store/tabStore.js";
 
 export function resolveChatViewActiveTaskProvider(
   taskId: string | null,
   workspaceState: Pick<
-    WorkspaceMaridUIState,
+    WorkspaceQodexUIState,
     "selectedProvider" | "taskListCache" | "optimisticTaskListByTaskId"
   >,
-): MaridProvider {
+): QodexProvider {
   if (!taskId) {
     return workspaceState.selectedProvider;
   }
@@ -47,8 +47,8 @@ export function useChatViewActiveTaskProvider(
   });
   const resolvedWorkspaceIdentity = workspaceIdentity ?? activeTabWorkspaceIdentity;
 
-  return useMaridSessionStore((state) => {
-    const workspaceState = selectWorkspaceMaridState(
+  return useQodexSessionStore((state) => {
+    const workspaceState = selectWorkspaceQodexState(
       state,
       workspacePath,
       resolvedWorkspaceIdentity,

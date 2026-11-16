@@ -54,8 +54,8 @@
 ### Task 2: Emit cleanup error only after final retry
 
 **Files:**
-- Modify: `packages/services/src/marid-agent/maridAgentProcessManager.ts`
-- Test: `packages/services/test/maridAgentProcessManager.test.ts`
+- Modify: `packages/services/src/qodex-agent/qodexAgentProcessManager.ts`
+- Test: `packages/services/test/qodexAgentProcessManager.test.ts`
 
 **Interfaces:**
 - Preserve public `disposeWorkspace` and `disposeAllAndWait` behavior.
@@ -67,7 +67,7 @@
 
 - [ ] **Step 2: Run the focused manager tests and verify they fail**
 
-  Run `pnpm exec vitest run packages/services/test/maridAgentProcessManager.test.ts --reporter=dot`.
+  Run `pnpm exec vitest run packages/services/test/qodexAgentProcessManager.test.ts --reporter=dot`.
 
   Expected: the first-attempt-successful-retry case fails because the current code emits `errorLog` before retry.
 
@@ -81,7 +81,7 @@
 
 - [ ] **Step 5: Commit the retry alert change**
 
-  Run `git add packages/services/src/marid-agent/maridAgentProcessManager.ts packages/services/test/maridAgentProcessManager.test.ts` and commit with `fix(services): report process cleanup errors after retry`.
+  Run `git add packages/services/src/qodex-agent/qodexAgentProcessManager.ts packages/services/test/qodexAgentProcessManager.test.ts` and commit with `fix(services): report process cleanup errors after retry`.
 
 ### Task 3: Update documentation and run verification
 
@@ -96,7 +96,7 @@
 
 - [ ] **Step 2: Run affected tests**
 
-  Run `pnpm exec vitest run packages/services/test/processTreeTerminator.windows.test.ts packages/services/test/maridAgentProcessManager.test.ts --reporter=dot`.
+  Run `pnpm exec vitest run packages/services/test/processTreeTerminator.windows.test.ts packages/services/test/qodexAgentProcessManager.test.ts --reporter=dot`.
 
 - [ ] **Step 3: Run mandatory checks**
 

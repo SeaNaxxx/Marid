@@ -343,7 +343,7 @@ function renderCalls(calls, indent) {
   return calls.map(([name, args]) => `${indent}${name}(${args.join(", ")})`).join("\n");
 }
 
-let out = `package com.marid.app.icons
+let out = `package com.qodex.app.icons
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType
@@ -388,7 +388,7 @@ ${renderCalls(calls, "            ")}
      */
     public val ${name}: ImageVector by lazy {
         ImageVector.Builder(
-            name = "Marid.${name}",
+            name = "Qodex.${name}",
             defaultWidth = 24.dp,
             defaultHeight = 24.dp,
             viewportWidth = 24f,
@@ -401,10 +401,10 @@ ${pathBlocks}
 }
 
 out += `/**
- * The Marid icon set — exact Lucide geometry (lucide-static v1.73.0), so the
+ * The Qodex icon set — exact Lucide geometry (lucide-static v1.73.0), so the
  * Android app renders the same glyphs as the React/Tailwind desktop UI.
  */
-object MaridIcons {
+object QodexIcons {
 ${body.join("\n")}
 }
 `;

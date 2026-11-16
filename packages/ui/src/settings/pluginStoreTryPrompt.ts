@@ -1,6 +1,6 @@
 import { buildPluginMentionMarkdown } from "@/mentions/mentionMarkdown.js";
 import { resolveItemDisplayName, type StorePluginItem } from "@/settings/pluginStoreListing.js";
-import type { ComposerMentionPrefill } from "@/store/maridSessionStoreTypes.js";
+import type { ComposerMentionPrefill } from "@/store/qodexSessionStoreTypes.js";
 
 export function buildPluginStoreTryMention({
   item,

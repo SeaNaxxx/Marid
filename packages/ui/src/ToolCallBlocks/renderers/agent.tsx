@@ -7,7 +7,7 @@ import {
 } from "@/components/workflow-timeline/WorkflowAgentFace.js";
 import { useCallback, useMemo, type ReactNode } from "react";
 import { MessageResponse } from "@/components/ai-elements/message.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { ToolSnapshotFieldNotice } from "@/ToolCallBlocks/ToolSnapshotFieldNotice.js";
 import { ToolLayout } from "../ToolLayout.js";
 import type { ToolCallBlockRenderContext } from "../shared.js";
@@ -150,7 +150,7 @@ function BackgroundAgentProcessSection({
   isRunning: boolean;
   status: string | undefined;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const msg = (id: string, fallback: string) => formatAgentMessage(intl, id, fallback);
   const launchStatus =
     status === "failed"
@@ -204,7 +204,7 @@ function BackgroundAgentProcessSection({
 }
 
 export function AgentToolCallBlock(context: ToolCallBlockRenderContext) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const { toolCall, childToolCalls } = context.toolCallNode;
   const prompt = getAgentPrompt(toolCall);
   const fallbackLabel = formatAgentMessage(intl, "chat.toolCall.agent.fallback", "SubAgent");

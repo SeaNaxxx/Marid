@@ -260,7 +260,7 @@ type ProviderFamilyConnectionMode = "oauth" | "apiKey";
 ```
 
 The mode is persisted as an app-level UI preference in
-`AppSettings.modelProviderFamilyModes`, stored in `~/.marid/v2/setting.json`:
+`AppSettings.modelProviderFamilyModes`, stored in `~/.qodex/v2/setting.json`:
 
 ```json
 {

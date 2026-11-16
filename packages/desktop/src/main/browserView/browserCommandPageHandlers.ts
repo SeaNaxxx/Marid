@@ -1,5 +1,5 @@
-import type { BrowserCommand, BrowserCommandResult } from "@marid/shared";
-import { browserSnapshotSchema } from "@marid/shared";
+import type { BrowserCommand, BrowserCommandResult } from "@qodex/shared";
+import { browserSnapshotSchema } from "@qodex/shared";
 import { EVALUATE_SCRIPT, SNAPSHOT_SCRIPT, VIEWPORT_SCRIPT } from "./browserCommandScripts.js";
 import {
   DEFAULT_NAVIGATE_SETTLE_MS,

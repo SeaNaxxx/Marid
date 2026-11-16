@@ -1,21 +1,21 @@
 /* eslint-disable max-lines -- 远端部署入口集中编排 server/node/agent/tool 资源，拆分需单独整理边界。 */
 import { join } from "node:path";
 import {
-  MARID_VERSION,
+  QODEX_VERSION,
   formatLogPrefix,
   normalizeRemoteResourcePackageSelection,
   type RemoteAssetInstallMode,
   type RemoteResourcePackageId,
   type RemoteResourcePackageSelection,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type { IRemoteBackend, RemoteEnvironment } from "./backend.js";
-import { deployMaridAgentRuntime } from "./maridAgentDeploy.js";
+import { deployQodexAgentRuntime } from "./qodexAgentDeploy.js";
 import {
   deployNodePtyPrebuilds,
   deployNodeRuntime,
   createRemoteComponentVersionResolver,
   logDeployRequired,
-} from "@marid/server/remote/remoteAssetDeployDecision.js";
+} from "@qodex/server/remote/remoteAssetDeployDecision.js";
 import {
   REMOTE_BASE,
   fileExists,
@@ -23,34 +23,34 @@ import {
   formatOptionalValues,
   type DeployLoggers,
   type RemoteAssetDeployOptions,
-} from "@marid/server/remote/deployShared.js";
-import { quotePosixPathArg } from "@marid/server/remote/posixShell.js";
-import { checkServerBundleRequiredMarkers } from "@marid/server/remote/serverBundleDeployCheck.js";
-import { deployRuntimeTools } from "@marid/server/remote/runtimeToolDeploy.js";
-import { REMOTE_AGENT_OFFICIAL_PLUGIN_REQUIRED_RELATIVE_PATHS } from "@marid/server/remote/maridAgentOfficialPluginAssets.js";
+} from "@qodex/server/remote/deployShared.js";
+import { quotePosixPathArg } from "@qodex/server/remote/posixShell.js";
+import { checkServerBundleRequiredMarkers } from "@qodex/server/remote/serverBundleDeployCheck.js";
+import { deployRuntimeTools } from "@qodex/server/remote/runtimeToolDeploy.js";
+import { REMOTE_AGENT_OFFICIAL_PLUGIN_REQUIRED_RELATIVE_PATHS } from "@qodex/server/remote/qodexAgentOfficialPluginAssets.js";
 import {
   ensureRemoteReleaseDirFromCdn,
   selectRemoteAssetManifestComponents,
   type RemoteAssetManifestRef,
-} from "@marid/server/remote/remoteAssetCache.js";
+} from "@qodex/server/remote/remoteAssetCache.js";
 import {
   fetchRemoteDownloadManifest,
   LocalUploadAssetInstaller,
   RemoteDownloadAssetInstaller,
   type RemoteAssetInstaller,
   type RemoteManifestRef,
-} from "@marid/server/remote/remoteAssetInstaller.js";
+} from "@qodex/server/remote/remoteAssetInstaller.js";
 import {
   checkRemoteAssetComponentIdentity,
   createFreshRemoteAssetManifestRefResolver,
   hasRemoteAssetComponentRefreshPending,
   markRemoteAssetComponentRefreshPending,
   writeRemoteAssetComponentMeta,
-} from "@marid/server/remote/remoteAssetLiveIdentity.js";
-import { detectRemoteAssetTools } from "@marid/server/remote/remoteAssetPreflight.js";
-import { assertSupportedRemoteEnvironment } from "@marid/server/remote/remotePlatformSupport.js";
-import { acquireRemoteDeployLock } from "@marid/server/remote/remoteDeployLock.js";
-import type { RemoteAssetNetworkPort } from "@marid/server/remote/remoteAssetNetwork.js";
+} from "@qodex/server/remote/remoteAssetLiveIdentity.js";
+import { detectRemoteAssetTools } from "@qodex/server/remote/remoteAssetPreflight.js";
+import { assertSupportedRemoteEnvironment } from "@qodex/server/remote/remotePlatformSupport.js";
+import { acquireRemoteDeployLock } from "@qodex/server/remote/remoteDeployLock.js";
+import type { RemoteAssetNetworkPort } from "@qodex/server/remote/remoteAssetNetwork.js";
 
 const log = (...args: unknown[]) => console.log(formatLogPrefix("deploy", process.pid), ...args);
 const logWarn = (...args: unknown[]) =>
@@ -87,7 +87,7 @@ export interface DeployOptions {
 }
 
 /**
- * Deploy the marid server to the remote machine.
+ * Deploy the qodex server to the remote machine.
  * Uploads Node.js binary, server bundle, and node-pty prebuild.
  *
  * Returns true if a deploy was performed, false if skipped (version matches).
@@ -127,7 +127,7 @@ export async function deployServer(
   const getRemoteManifestRef = (): Promise<RemoteManifestRef> => {
     remoteManifestPromise ??= fetchRemoteDownloadManifest(
       {
-        version: MARID_VERSION,
+        version: QODEX_VERSION,
         platformArch,
         remoteCdnBaseUrl: options?.remoteCdnBaseUrl,
         remoteCdnBaseUrls: options?.remoteCdnBaseUrls,
@@ -221,7 +221,7 @@ export async function deployServer(
     {
       ...assetDeployOptions,
       platformArch,
-      version: MARID_VERSION,
+      version: QODEX_VERSION,
       assetInstallMode: options?.assetInstallMode,
     },
     { log, logWarn },
@@ -267,14 +267,14 @@ export async function deployServer(
       await markRemoteAssetComponentRefreshPending(backend, {
         componentId: "glm",
         platformArch,
-        appVersion: MARID_VERSION,
+        appVersion: QODEX_VERSION,
       });
     }
 
     // Check if deploy is needed
     if (!serverDeployDecision.shouldDeploy) {
       log("skipped — remote version matches");
-      // 主 server 版本相同只证明 node/marid-server.cjs 可启动，不代表随包工具仍存在。
+      // 主 server 版本相同只证明 node/qodex-server.cjs 可启动，不代表随包工具仍存在。
       // glm 内容跟随 app/server 版本刷新；但 wrapper/bundle 被清理或开发态 bundle 变化时仍要按实体检查修复。
       if (shouldDeployResourcePackage("node-pty")) {
         await deployNodePtyPrebuilds(
@@ -289,7 +289,7 @@ export async function deployServer(
           { log, logWarn },
         );
       }
-      await deployMaridAgentRuntime(
+      await deployQodexAgentRuntime(
         backend,
         env,
         {
@@ -335,8 +335,8 @@ export async function deployServer(
     });
     await installer.installFile({
       componentId: SERVER_BUNDLE_COMPONENT_ID,
-      sourceRelativePath: "server/marid-server.cjs",
-      remotePath: `${REMOTE_BASE}/marid-server.cjs`,
+      sourceRelativePath: "server/qodex-server.cjs",
+      remotePath: `${REMOTE_BASE}/qodex-server.cjs`,
       // App 版本变化是新的发布边界，不能只凭历史 cache 的 `.ready`
       // 判断 server-bundle 可复用；与 GLM 一致，必须重新下载并校验当前 manifest 制品。
       forceRefresh: shouldForceRefreshContentAddressedAssets,
@@ -370,8 +370,8 @@ export async function deployServer(
 
     log("all uploads complete");
 
-    // 部署 Marid Agent runtime 到远程，历史资源包选择已在入口统一忽略。
-    await deployMaridAgentRuntime(
+    // 部署 Qodex Agent runtime 到远程，历史资源包选择已在入口统一忽略。
+    await deployQodexAgentRuntime(
       backend,
       env,
       {
@@ -497,7 +497,7 @@ async function checkServerDeployDecision(
       };
     }
 
-    const serverPath = `${REMOTE_BASE}/marid-server.cjs`;
+    const serverPath = `${REMOTE_BASE}/qodex-server.cjs`;
     const serverExists = await backend.exists(serverPath);
     log("remote server exists:", serverExists);
     if (!serverExists) {
@@ -513,11 +513,11 @@ async function checkServerDeployDecision(
       `${quotePosixPathArg(nodePath)} ${quotePosixPathArg(serverPath)} --version`,
     );
     const version = (await collectStdout(stream)).trim();
-    log("remote version:", JSON.stringify(version), "local:", MARID_VERSION);
-    if (version !== MARID_VERSION) {
+    log("remote version:", JSON.stringify(version), "local:", QODEX_VERSION);
+    if (version !== QODEX_VERSION) {
       return {
         shouldDeploy: true,
-        reason: `remote server version mismatch remote=${version} expected=${MARID_VERSION}`,
+        reason: `remote server version mismatch remote=${version} expected=${QODEX_VERSION}`,
         appVersionChanged: true,
       };
     }
@@ -620,7 +620,7 @@ function resolveMockCdnReleaseDir(mockCdnDir?: string): string | null {
     return null;
   }
 
-  return join(mockCdnDir, "releases", MARID_VERSION);
+  return join(mockCdnDir, "releases", QODEX_VERSION);
 }
 
 async function resolveReleaseDir(
@@ -669,7 +669,7 @@ async function resolveReleaseDir(
       remoteCdnBaseUrl: options?.remoteCdnBaseUrl,
       remoteCdnBaseUrls: options?.remoteCdnBaseUrls,
       remoteCacheDir: options?.remoteCacheDir,
-      version: MARID_VERSION,
+      version: QODEX_VERSION,
       platformArch,
       componentIds,
       manifestRef,
@@ -717,7 +717,7 @@ function resolveRequiredMockReleasePaths(
   for (const componentId of ids) {
     switch (componentId) {
       case SERVER_BUNDLE_COMPONENT_ID:
-        requiredPaths.add("server/marid-server.cjs");
+        requiredPaths.add("server/qodex-server.cjs");
         break;
       case "node-runtime":
         requiredPaths.add(`node/${platformArch}/node`);
@@ -729,7 +729,7 @@ function resolveRequiredMockReleasePaths(
         }
         break;
       case "glm":
-        requiredPaths.add(`glm/${platformArch}/marid.cjs`);
+        requiredPaths.add(`glm/${platformArch}/qodex.cjs`);
         for (const relativePath of REMOTE_AGENT_OFFICIAL_PLUGIN_REQUIRED_RELATIVE_PATHS) {
           requiredPaths.add(`glm/${platformArch}/packages/${relativePath}`);
         }

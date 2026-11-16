@@ -1,27 +1,27 @@
-import { BufferWriter, serialize } from "@marid/rpc";
-import { ServiceChannels } from "@marid/shared";
+import { BufferWriter, serialize } from "@qodex/rpc";
+import { ServiceChannels } from "@qodex/shared";
 import {
   PROTOCOL_V4_LIMITS,
   type V4AttachmentBeginResult,
   type V4AttachmentChunkResult,
   type V4AttachmentPutParams,
   type V4AttachmentPutResult,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 import type {
-  MaridAgentAttachmentBeginParams,
-  MaridAgentAttachmentChunkParams,
-  MaridAgentAttachmentTerminalParams,
-} from "@marid/services";
+  QodexAgentAttachmentBeginParams,
+  QodexAgentAttachmentChunkParams,
+  QodexAgentAttachmentTerminalParams,
+} from "@qodex/services";
 import { logger } from "@/logger.js";
 
 /** 384KiB 可被 3 整除，除末片外 base64 不含 padding；同时为两层 envelope 留足空间。 */
 export const ATTACHMENT_UPLOAD_CHUNK_BYTES = 384 * 1024;
 
 export interface AttachmentUploadAgent {
-  attachmentBeginV4(params: MaridAgentAttachmentBeginParams): Promise<V4AttachmentBeginResult>;
-  attachmentChunkV4(params: MaridAgentAttachmentChunkParams): Promise<V4AttachmentChunkResult>;
-  attachmentCommitV4(params: MaridAgentAttachmentTerminalParams): Promise<V4AttachmentPutResult>;
-  attachmentAbortV4(params: MaridAgentAttachmentTerminalParams): Promise<void>;
+  attachmentBeginV4(params: QodexAgentAttachmentBeginParams): Promise<V4AttachmentBeginResult>;
+  attachmentChunkV4(params: QodexAgentAttachmentChunkParams): Promise<V4AttachmentChunkResult>;
+  attachmentCommitV4(params: QodexAgentAttachmentTerminalParams): Promise<V4AttachmentPutResult>;
+  attachmentAbortV4(params: QodexAgentAttachmentTerminalParams): Promise<void>;
 }
 
 export interface AttachmentUploadWorkspace {
@@ -108,7 +108,7 @@ function createUploadId(): string {
 export function measureAttachmentChannelRequestBytes(method: string, params: unknown): number {
   const writer = new BufferWriter();
   // RequestType.Promise=100；max int id 比正常短生命周期 request id 更保守。
-  serialize(writer, [100, 2_147_483_647, ServiceChannels.MaridAgent, method]);
+  serialize(writer, [100, 2_147_483_647, ServiceChannels.QodexAgent, method]);
   serialize(writer, [params]);
   return writer.buffer.byteLength;
 }
@@ -135,7 +135,7 @@ export async function uploadAttachmentTransaction(
   const uploadId = createUploadId();
   const common = { ...workspace, sessionId: input.sessionId, uploadId };
   const totalChunks = Math.ceil(bytes.byteLength / ATTACHMENT_UPLOAD_CHUNK_BYTES);
-  const beginParams: MaridAgentAttachmentBeginParams = {
+  const beginParams: QodexAgentAttachmentBeginParams = {
     ...common,
     fileName: input.fileName,
     mime: input.mime,
@@ -172,7 +172,7 @@ export async function uploadAttachmentTransaction(
     for (let chunkIndex = begin.nextChunkIndex; chunkIndex < totalChunks; chunkIndex += 1) {
       throwIfAborted(options.signal);
       const start = chunkIndex * ATTACHMENT_UPLOAD_CHUNK_BYTES;
-      const chunkParams: MaridAgentAttachmentChunkParams = {
+      const chunkParams: QodexAgentAttachmentChunkParams = {
         ...common,
         chunkIndex,
         dataBase64: encodeBase64(
@@ -196,7 +196,7 @@ export async function uploadAttachmentTransaction(
       uploadedBytes: bytes.byteLength,
       totalBytes: bytes.byteLength,
     });
-    const terminal = common satisfies MaridAgentAttachmentTerminalParams;
+    const terminal = common satisfies QodexAgentAttachmentTerminalParams;
     assertAttachmentChannelRequest("attachmentCommitV4", terminal);
     return await agent.attachmentCommitV4(terminal);
   } catch (error) {

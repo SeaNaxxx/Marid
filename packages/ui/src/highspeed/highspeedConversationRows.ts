@@ -3,7 +3,7 @@ import type {
   ConversationRowsPartition,
   TurnHeaderRow,
   UserInputRow,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 import { memoizeByRows } from "@/v4/conversationProjectionStore.js";
 
 function sortedHighspeedExpiries(rows: readonly ConversationRow[]): number[] {

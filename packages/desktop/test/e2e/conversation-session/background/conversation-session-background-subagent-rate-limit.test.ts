@@ -1,4 +1,4 @@
-import { TID_V4_SUBAGENT_OPEN_SIDE_PANE } from "@marid/shared/test-ids";
+import { TID_V4_SUBAGENT_OPEN_SIDE_PANE } from "@qodex/shared/test-ids";
 import { clearAppData } from "#e2e/helpers/desktop-app";
 import {
   getUpstreamRequestEvidence,

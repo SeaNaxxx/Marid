@@ -1,4 +1,4 @@
-import type { UsageEntitlementSnapshot, UsageQuotaLimit } from "@marid/shared";
+import type { UsageEntitlementSnapshot, UsageQuotaLimit } from "@qodex/shared";
 
 export function normalizeQuotaModel(value: string): string {
   return value

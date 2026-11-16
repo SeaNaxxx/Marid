@@ -2,11 +2,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Marid Desktop: Main",
+      "name": "Qodex Desktop: Main",
       "type": "pwa-node",
       "request": "attach",
       "port": 9231,
-      "preLaunchTask": "marid: start electron (debug)",
+      "preLaunchTask": "qodex: start electron (debug)",
       "restart": true,
       "timeout": 30000,
       "outFiles": [
@@ -23,11 +23,11 @@
       "console": "integratedTerminal"
     },
     {
-      "name": "Marid Desktop: Main (with host inspect)",
+      "name": "Qodex Desktop: Main (with host inspect)",
       "type": "pwa-node",
       "request": "attach",
       "port": 9231,
-      "preLaunchTask": "marid: start electron (debug with host inspect)",
+      "preLaunchTask": "qodex: start electron (debug with host inspect)",
       "restart": true,
       "timeout": 30000,
       "outFiles": [
@@ -42,7 +42,7 @@
       ]
     },
     {
-      "name": "Marid Desktop: Renderer",
+      "name": "Qodex Desktop: Renderer",
       "type": "pwa-chrome",
       "request": "attach",
       "port": 9229,
@@ -50,7 +50,7 @@
       "timeout": 30000
     },
     {
-      "name": "Marid Desktop: Host",
+      "name": "Qodex Desktop: Host",
       "type": "pwa-node",
       "request": "attach",
       "port": 9230,
@@ -70,19 +70,19 @@
   ],
   "compounds": [
     {
-      "name": "Marid Desktop: F5",
+      "name": "Qodex Desktop: F5",
       "configurations": [
-        "Marid Desktop: Main",
-        "Marid Desktop: Renderer"
+        "Qodex Desktop: Main",
+        "Qodex Desktop: Renderer"
       ],
       "stopAll": true
     },
     {
-      "name": "Marid Desktop: F5 (with host inspect)",
+      "name": "Qodex Desktop: F5 (with host inspect)",
       "configurations": [
-        "Marid Desktop: Main (with host inspect)",
-        "Marid Desktop: Renderer",
-        "Marid Desktop: Host"
+        "Qodex Desktop: Main (with host inspect)",
+        "Qodex Desktop: Renderer",
+        "Qodex Desktop: Host"
       ],
       "stopAll": true
     }

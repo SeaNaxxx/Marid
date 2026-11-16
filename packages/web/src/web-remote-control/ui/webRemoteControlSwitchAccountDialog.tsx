@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { Button } from "@marid/ui/button";
+import { Button } from "@qodex/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@marid/ui/dialog";
+} from "@qodex/ui/dialog";
 import type { WebRemoteControlScreenLocale } from "#src/web-remote-control/domain/webRemoteControlScreenCopy.js";
 
 const copyByLocale = {

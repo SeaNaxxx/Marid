@@ -4,7 +4,7 @@
 
 `sessions-index/<workspaceId>` 是侧栏和任务列表的会话活性与实时详情数据源。持久 task 行集合由
 `tasks-index.sqlite` 决定；summary 缺失只表示实时详情尚不可用，不能据此删除左侧行。schema 位于
-`packages/shared/src/marid-protocol-v4/sessions-index.ts`；CLI projection/publisher 与 UI
+`packages/shared/src/qodex-protocol-v4/sessions-index.ts`；CLI projection/publisher 与 UI
 store/transport 已投入主链路。
 
 ## 定位
@@ -135,13 +135,13 @@ remote identity 解析必须 fail-closed：任何以 `remote:` 开头但不符�
 
 实现入口：
 
-- `packages/services/src/marid-agent/maridAgentService.ts`
-- `apps/marid-cli/packages/bootstrap/src/marid-protocol/v4-bridge.ts`
-- `apps/marid-cli/packages/adapters/src/storage/session-store/repositories/sessions.ts`
-- `apps/marid-cli/packages/bootstrap/src/marid-protocol-v4/sessions-index-projection.ts`
-- `apps/marid-cli/packages/bootstrap/src/marid-protocol-v4/sessions-index-publisher.ts`
-- `apps/marid-cli/packages/bootstrap/src/marid-protocol-v4/sessions-index-publisher-registry.ts`
-- `apps/marid-cli/packages/bootstrap/src/marid-protocol-v4/v4-gateway.ts`
+- `packages/services/src/qodex-agent/qodexAgentService.ts`
+- `apps/qodex-cli/packages/bootstrap/src/qodex-protocol/v4-bridge.ts`
+- `apps/qodex-cli/packages/adapters/src/storage/session-store/repositories/sessions.ts`
+- `apps/qodex-cli/packages/bootstrap/src/qodex-protocol-v4/sessions-index-projection.ts`
+- `apps/qodex-cli/packages/bootstrap/src/qodex-protocol-v4/sessions-index-publisher.ts`
+- `apps/qodex-cli/packages/bootstrap/src/qodex-protocol-v4/sessions-index-publisher-registry.ts`
+- `apps/qodex-cli/packages/bootstrap/src/qodex-protocol-v4/v4-gateway.ts`
 
 ## UI 读侧
 

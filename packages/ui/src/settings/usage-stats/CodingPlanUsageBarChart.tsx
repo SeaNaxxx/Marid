@@ -1,13 +1,13 @@
 import { type ComponentProps, useCallback, useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import type { CodingPlanUsageGranularity } from "@marid/shared";
+import type { CodingPlanUsageGranularity } from "@qodex/shared";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import {
   UsageEmptyState,
   formatCompactNumber,
@@ -107,7 +107,7 @@ function buildBarKeys({
   intl,
   series,
 }: {
-  intl: ReturnType<typeof useMaridIntl>["intl"];
+  intl: ReturnType<typeof useQodexIntl>["intl"];
   series: CodingPlanBarChartSeries[];
 }): CodingPlanBarKey[] {
   return series.flatMap((item, index) => {
@@ -242,7 +242,7 @@ export function CodingPlanUsageBarChart({
   valueKind?: "count" | "credit" | "speed" | "token";
   xTime: string[];
 }) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const tokenUnit = intl.formatMessage({ id: "settings.usage.tokenUnit" });
   const creditUnit = intl.formatMessage({ id: "settings.usage.creditUnit" });
   const visibleSeries = useMemo(() => series.slice(0, 6), [series]);

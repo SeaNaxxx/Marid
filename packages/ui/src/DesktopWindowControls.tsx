@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
-import { DesktopCommandIds } from "@marid/shared";
+import { DesktopCommandIds } from "@qodex/shared";
 import { MinusIcon, XIcon } from "lucide-react";
 import { WindowMaximizeIcon, WindowRestoreIcon } from "@/components/icons/windowIcons.js";
 import { Button } from "@/components/ui/button.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 
 export function DesktopWindowControls() {
   const platform = usePlatform();
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const [maximized, setMaximized] = useState(false);
   useEffect(() => {
     let disposed = false;

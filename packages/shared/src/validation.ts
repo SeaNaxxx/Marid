@@ -59,21 +59,21 @@ import { browserCommandSchema } from "./browser-use/commands.js";
 import { browserCommandResultSchema } from "./browser-use/result.js";
 import { modelSelectionSchema } from "./model-selection.js";
 import { localeSchema } from "./validationAppSettings.js";
-import { maridProcessDiagnosticSchema } from "./process-diagnostic.js";
+import { qodexProcessDiagnosticSchema } from "./process-diagnostic.js";
 import { PROCESS_RESOURCE_CLI_LANES } from "./processResourceTelemetry.js";
 import {
   providerProvisioningErrorCodeSchema,
   providerProvisioningLaneStatusSchema,
   providerProvisioningTriggerSchema,
 } from "./provider-provisioning.js";
-import { maridProviderSchema } from "./providers.js";
+import { qodexProviderSchema } from "./providers.js";
 import { REMOTE_ASSET_INSTALL_MODES } from "./remoteAssetInstallMode.js";
 import { isKnownRemoteResourcePackageId } from "./remoteResourcePackages.js";
 import type { WebRemoteControlAppPayload } from "./web-remote-control.js";
 import { webRemoteControlMobileLogAppPayloadSchemas } from "#src/web-remote-relay/index.js";
-import { PROTOCOL_V4_LIMITS } from "./marid-protocol-v4/core.js";
+import { PROTOCOL_V4_LIMITS } from "./qodex-protocol-v4/core.js";
 import { sourceServerArtifactPolicySchema } from "./source-server/release.js";
-import { sessionWorkflowActivitySchema } from "./marid-protocol-v4/sessions-index-workflow-activity.js";
+import { sessionWorkflowActivitySchema } from "./qodex-protocol-v4/sessions-index-workflow-activity.js";
 import {
   webRemoteControlRpcTransportAckSchema,
   webRemoteControlRpcTransportFrameSchema,
@@ -92,15 +92,15 @@ import {
   taskStreamMirrorTargetSchema,
 } from "./task-realtime-core.js";
 import { wslUserSchema } from "./wslUserValidation.js";
-import { legacyMaridProviderSchema } from "./marid-agent-policy.js";
-import { errorAttributionSchema } from "./marid-protocol-v4/snapshot.js";
+import { legacyQodexProviderSchema } from "./qodex-agent-policy.js";
+import { errorAttributionSchema } from "./qodex-protocol-v4/snapshot.js";
 import {
-  maridMcpResourceSamplesSchema,
-  maridMcpTelemetryEventSchema,
-  maridProcessResourceSampleSchema,
-  maridToolExecResourceSchema,
-} from "./marid-protocol/index.js";
-import { maridTaskModeSchema } from "./marid-task-mode-schema.js";
+  qodexMcpResourceSamplesSchema,
+  qodexMcpTelemetryEventSchema,
+  qodexProcessResourceSampleSchema,
+  qodexToolExecResourceSchema,
+} from "./qodex-protocol/index.js";
+import { qodexTaskModeSchema } from "./qodex-task-mode-schema.js";
 
 export {
   appSettingsOccupationEnum,
@@ -110,7 +110,7 @@ export {
   postUpdateReleaseNotesPayloadSchema,
 } from "./validationAppSettings.js";
 export { isValidWslUser, WSL_USER_MAX_LENGTH, wslUserSchema } from "./wslUserValidation.js";
-export { maridTaskModeSchema } from "./marid-task-mode-schema.js";
+export { qodexTaskModeSchema } from "./qodex-task-mode-schema.js";
 
 export function formatZodError(error: z.ZodError): string {
   return error.issues
@@ -312,12 +312,12 @@ export const webRemoteControlRendererActionResultSchema = z.union([
 
 const webRemoteControlActionPayloadSchemas = [
   z.object({
-    marid_type: z.literal("workspace-create-request"),
+    qodex_type: z.literal("workspace-create-request"),
     requestId: nonEmptyStringSchema,
     name: z.string(),
   }),
   z.object({
-    marid_type: z.literal("workspace-create-response"),
+    qodex_type: z.literal("workspace-create-response"),
     requestId: nonEmptyStringSchema,
     success: z.literal(true),
     workspacePath: nonEmptyStringSchema,
@@ -326,44 +326,44 @@ const webRemoteControlActionPayloadSchemas = [
     hostId: nonEmptyStringSchema.optional(),
   }),
   z.object({
-    marid_type: z.literal("workspace-create-response"),
+    qodex_type: z.literal("workspace-create-response"),
     requestId: nonEmptyStringSchema,
     success: z.literal(false),
     error: z.string(),
   }),
   z.object({
-    marid_type: z.literal("task-pin-request"),
+    qodex_type: z.literal("task-pin-request"),
     ...webRemoteControlTaskActionTargetShape,
     pinned: z.boolean(),
   }),
   z.object({
-    marid_type: z.literal("task-pin-response"),
+    qodex_type: z.literal("task-pin-response"),
     requestId: nonEmptyStringSchema,
     taskId: nonEmptyStringSchema,
     success: z.literal(true),
     pinned: z.boolean(),
   }),
   z.object({
-    marid_type: z.literal("task-pin-response"),
+    qodex_type: z.literal("task-pin-response"),
     requestId: nonEmptyStringSchema,
     taskId: nonEmptyStringSchema,
     success: z.literal(false),
     error: z.string(),
   }),
   z.object({
-    marid_type: z.literal("task-archive-request"),
+    qodex_type: z.literal("task-archive-request"),
     ...webRemoteControlTaskActionTargetShape,
     archived: z.boolean().optional(),
   }),
   z.object({
-    marid_type: z.literal("task-archive-response"),
+    qodex_type: z.literal("task-archive-response"),
     requestId: nonEmptyStringSchema,
     taskId: nonEmptyStringSchema,
     success: z.literal(true),
     archived: z.boolean(),
   }),
   z.object({
-    marid_type: z.literal("task-archive-response"),
+    qodex_type: z.literal("task-archive-response"),
     requestId: nonEmptyStringSchema,
     taskId: nonEmptyStringSchema,
     success: z.literal(false),
@@ -374,38 +374,38 @@ const webRemoteControlActionPayloadSchemas = [
 const webRemoteControlAppPayloadSchemas = [
   z
     .object({
-      marid_type: z.literal("telemetry-report"),
+      qodex_type: z.literal("telemetry-report"),
       event: z.union([sessionCreateTelemetrySchema, mobilePluginDiscoveryTelemetrySchema]),
     })
     .strict(),
   z.object({
-    marid_type: z.literal("bootstrap-request"),
+    qodex_type: z.literal("bootstrap-request"),
     terminalClientSessionId: webRemoteControlTransportIdSchema.optional(),
     requestId: nonEmptyStringSchema,
   }),
   z.object({
-    marid_type: z.literal("bootstrap-response"),
+    qodex_type: z.literal("bootstrap-response"),
     requestId: nonEmptyStringSchema,
     success: z.literal(true),
     result: webRemoteControlWindowBootstrapResultSchema,
   }),
   z.object({
-    marid_type: z.literal("workspace-list-request"),
+    qodex_type: z.literal("workspace-list-request"),
     requestId: nonEmptyStringSchema,
   }),
   z.object({
-    marid_type: z.literal("workspace-list-response"),
+    qodex_type: z.literal("workspace-list-response"),
     requestId: nonEmptyStringSchema,
     success: z.literal(true),
     result: webRemoteControlWorkspaceListResultSchema,
   }),
   z.object({
-    marid_type: z.literal("workspace-list-updated"),
+    qodex_type: z.literal("workspace-list-updated"),
     result: webRemoteControlWorkspaceListResultSchema,
   }),
   z
     .object({
-      marid_type: z.literal("workspace-bridge-open"),
+      qodex_type: z.literal("workspace-bridge-open"),
       terminalClientSessionId: webRemoteControlTransportIdSchema.optional(),
       requestId: nonEmptyStringSchema,
       bridgeSessionId: webRemoteControlTransportIdSchema,
@@ -440,7 +440,7 @@ const webRemoteControlAppPayloadSchemas = [
       "Project draft cannot target an existing task",
     ),
   z.object({
-    marid_type: z.literal("workspace-bridge-ready"),
+    qodex_type: z.literal("workspace-bridge-ready"),
     requestId: nonEmptyStringSchema,
     bridgeSessionId: webRemoteControlTransportIdSchema,
     bridgeGeneration: z.number().int().nonnegative().optional(),
@@ -448,7 +448,7 @@ const webRemoteControlAppPayloadSchemas = [
     bridge: webRemoteControlExternalWorkspaceBridgeSchema,
   }),
   z.object({
-    marid_type: z.literal("workspace-bridge-error"),
+    qodex_type: z.literal("workspace-bridge-error"),
     requestId: nonEmptyStringSchema,
     bridgeSessionId: webRemoteControlTransportIdSchema.optional(),
     bridgeGeneration: z.number().int().nonnegative().optional(),
@@ -457,31 +457,31 @@ const webRemoteControlAppPayloadSchemas = [
     error: z.string(),
   }),
   z.object({
-    marid_type: z.literal("workspace-reconnect-request"),
+    qodex_type: z.literal("workspace-reconnect-request"),
     requestId: nonEmptyStringSchema,
     workspaceKey: nonEmptyStringSchema,
   }),
   z.object({
-    marid_type: z.literal("workspace-reconnect-response"),
+    qodex_type: z.literal("workspace-reconnect-response"),
     requestId: nonEmptyStringSchema,
     workspaceKey: nonEmptyStringSchema,
     success: z.literal(true),
   }),
   z.object({
-    marid_type: z.literal("workspace-reconnect-response"),
+    qodex_type: z.literal("workspace-reconnect-response"),
     requestId: nonEmptyStringSchema,
     workspaceKey: nonEmptyStringSchema,
     success: z.literal(false),
     error: z.string(),
   }),
   z.object({
-    marid_type: z.literal("mobile-view-state-update"),
+    qodex_type: z.literal("mobile-view-state-update"),
     viewState: webRemoteControlMobileViewStateSchema,
     deviceInfo: webRemoteControlMobileDeviceInfoSchema.optional(),
   }),
   z
     .object({
-      marid_type: z.literal("mobile-task-view-update"),
+      qodex_type: z.literal("mobile-task-view-update"),
       epoch: webRemoteControlTransportIdSchema,
       seq: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
       bridgeSessionId: webRemoteControlTransportIdSchema,
@@ -491,25 +491,25 @@ const webRemoteControlAppPayloadSchemas = [
     .strict(),
   z
     .object({
-      marid_type: z.literal("mobile-task-view-request"),
+      qodex_type: z.literal("mobile-task-view-request"),
       epoch: webRemoteControlTransportIdSchema,
     })
     .strict(),
   z.object({
-    marid_type: z.literal("platform-request"),
+    qodex_type: z.literal("platform-request"),
     requestId: nonEmptyStringSchema,
     method: webRemoteControlPlatformMethodSchema,
     args: z.unknown().optional(),
   }),
   z.object({
-    marid_type: z.literal("platform-response"),
+    qodex_type: z.literal("platform-response"),
     requestId: nonEmptyStringSchema,
     method: webRemoteControlPlatformMethodSchema,
     success: z.literal(true),
     result: z.unknown(),
   }),
   z.object({
-    marid_type: z.literal("platform-response"),
+    qodex_type: z.literal("platform-response"),
     requestId: nonEmptyStringSchema,
     method: webRemoteControlPlatformMethodSchema,
     success: z.literal(false),
@@ -520,7 +520,7 @@ const webRemoteControlAppPayloadSchemas = [
   webRemoteControlRpcTransportFrameSchema,
   webRemoteControlRpcTransportAckSchema,
   z.object({
-    marid_type: z.literal("bridge-degraded"),
+    qodex_type: z.literal("bridge-degraded"),
     bridgeSessionId: webRemoteControlTransportIdSchema,
     bridgeGeneration: z.number().int().nonnegative().optional(),
     recoveryId: webRemoteControlTransportIdSchema.optional(),
@@ -537,14 +537,14 @@ const webRemoteControlAppPayloadSchemas = [
     droppedCount: z.number().int().nonnegative().optional(),
   }),
   z.object({
-    marid_type: z.literal("app-error"),
+    qodex_type: z.literal("app-error"),
     requestId: nonEmptyStringSchema.optional(),
     bridgeSessionId: webRemoteControlTransportIdSchema.optional(),
     reason: webRemoteControlFailureReasonSchema,
     error: z.string(),
   }),
   z.object({
-    marid_type: z.literal("mobile-diagnostic"),
+    qodex_type: z.literal("mobile-diagnostic"),
     event: z.enum([
       "state-transition",
       "socket-close",
@@ -573,8 +573,8 @@ const webRemoteControlAppPayloadSchemas = [
   ...webRemoteControlMobileLogAppPayloadSchemas,
 ] as const;
 
-// Bugfix: app payload 里多个消息共享 marid_type（例如 platform-response），
-// 不能直接用 z.discriminatedUnion("marid_type")，否则 schema 初始化会因重复值失败。
+// Bugfix: app payload 里多个消息共享 qodex_type（例如 platform-response），
+// 不能直接用 z.discriminatedUnion("qodex_type")，否则 schema 初始化会因重复值失败。
 // 这里保留同一批运行时约束，改用普通 union，让外部 relay 的不可信 payload
 // 在进入 desktop/web 路由前仍然先被机械校验。
 export const webRemoteControlAppPayloadSchema = z.union(webRemoteControlAppPayloadSchemas);
@@ -635,7 +635,7 @@ export const remoteTargetSchema = z.discriminatedUnion("kind", [
 ]);
 
 export const helloMessageSchema = z.object({
-  type: z.literal("marid-hello"),
+  type: z.literal("qodex-hello"),
   version: z.string(),
   platform: z.string(),
   arch: z.string(),
@@ -643,7 +643,7 @@ export const helloMessageSchema = z.object({
 });
 
 export const helloAckMessageSchema = z.object({
-  type: z.literal("marid-hello-ack"),
+  type: z.literal("qodex-hello-ack"),
   version: z.string(),
   clientId: nonEmptyStringSchema,
 });
@@ -732,7 +732,7 @@ export const hostInitLocalMessageSchema = z.object({
   remoteAssets: remoteAssetDirsSchema.optional(),
   /** spawn 时刻 Main 的实时界面语言；后续变化由 application-locale-changed 推送。 */
   locale: localeSchema.optional(),
-  maridBuiltinProviderConfigFilePath: nonEmptyStringSchema,
+  qodexBuiltinProviderConfigFilePath: nonEmptyStringSchema,
   runtimeProcessEnvPatch: z
     .record(z.string().regex(/^[A-Za-z_][A-Za-z0-9_]*$/), z.string())
     .optional(),
@@ -974,7 +974,7 @@ export const hostOffPeakRunMessageSchema = z.object({
   hostId: nonEmptyStringSchema.optional(),
   additionalDirectories: z.array(nonEmptyStringSchema).max(256).optional(),
   prompt: nonEmptyStringSchema,
-  // 权限四档映射现有 MaridTaskMode；与 cron-run 的 mode 同样按宽松 string 传输
+  // 权限四档映射现有 QodexTaskMode；与 cron-run 的 mode 同样按宽松 string 传输
   permissionMode: nonEmptyStringSchema,
   modelSelection: modelSelectionSchema,
   conversationId: z.string().optional(),
@@ -1299,16 +1299,16 @@ export const hostLogResponseSchema = z.object({
   message: z.string(),
 });
 
-export { maridProviderSchema };
+export { qodexProviderSchema };
 
-export const maridTaskMigrationSourceSchema = z.enum(["claudeCode"]);
+export const qodexTaskMigrationSourceSchema = z.enum(["claudeCode"]);
 
 export const hostAgentProcessSpawnedResponseSchema = z.object({
   type: z.literal("agent-process-spawned"),
   /** 进程泳道（mcp-status 等），旧 Host 不带该字段。 */
   lane: nonEmptyStringSchema.optional(),
   pid: z.number().int().positive(),
-  provider: maridProviderSchema,
+  provider: qodexProviderSchema,
   workspacePath: nonEmptyStringSchema,
   command: z.string(),
   args: z.array(z.string()),
@@ -1323,7 +1323,7 @@ export const hostAgentProcessReadyResponseSchema = z.object({
   /** 进程泳道（mcp-status 等），旧 Host 不带该字段。 */
   lane: nonEmptyStringSchema.optional(),
   pid: z.number().int().positive(),
-  provider: maridProviderSchema,
+  provider: qodexProviderSchema,
   workspacePath: nonEmptyStringSchema,
   readyAt: z.number().int().nonnegative(),
   startupDurationMs: z.number().int().nonnegative(),
@@ -1337,7 +1337,7 @@ export const hostAgentProcessExitedResponseSchema = z.object({
   /** 进程泳道（mcp-status 等），旧 Host 不带该字段。 */
   lane: nonEmptyStringSchema.optional(),
   pid: z.number().int().positive(),
-  provider: maridProviderSchema,
+  provider: qodexProviderSchema,
   workspacePath: nonEmptyStringSchema,
   exitCode: z.number().int().nullable(),
   signal: z.string().nullable(),
@@ -1360,7 +1360,7 @@ export const hostAgentProcessErrorResponseSchema = z.object({
   /** 进程泳道（mcp-status 等），旧 Host 不带该字段。 */
   lane: nonEmptyStringSchema.optional(),
   pid: z.number().int().positive().nullable(),
-  provider: maridProviderSchema,
+  provider: qodexProviderSchema,
   workspacePath: nonEmptyStringSchema,
   command: z.string(),
   args: z.array(z.string()),
@@ -1380,11 +1380,11 @@ export const hostAgentProcessExceptionResponseSchema = z
     type: z.literal("agent-process-exception"),
     lane: nonEmptyStringSchema.optional(),
     pid: z.number().int().positive(),
-    provider: maridProviderSchema,
+    provider: qodexProviderSchema,
     workspacePath: nonEmptyStringSchema,
     runtimeGeneration: z.number().int().positive(),
     runtimeInstanceId: nonEmptyStringSchema,
-    diagnostic: maridProcessDiagnosticSchema,
+    diagnostic: qodexProcessDiagnosticSchema,
   })
   .strict();
 export type HostAgentProcessExceptionResponse = z.infer<
@@ -1399,7 +1399,7 @@ export type HostAgentProcessExceptionResponse = z.infer<
  * 会被协议层直接拒绝。`lane` 可选是为了兼容版本落后、还没打标的远端 server。
  */
 export const processResourceCliLaneSchema = z.enum(PROCESS_RESOURCE_CLI_LANES);
-export const agentLaneResourceSampleSchema = maridProcessResourceSampleSchema
+export const agentLaneResourceSampleSchema = qodexProcessResourceSampleSchema
   .extend({ lane: processResourceCliLaneSchema.optional() })
   .strict();
 export type AgentLaneResourceSample = z.infer<typeof agentLaneResourceSampleSchema>;
@@ -1426,7 +1426,7 @@ export const nodeSelfResourceSampleSchema = z
   .object({
     /**
      * 整机归一化 CPU 百分比，100 表示所有逻辑核占满。
-     * 上限刻意放宽（与 CLI 的 `maridProcessResourceSampleSchema` 同口径）：读数异常时宁可让
+     * 上限刻意放宽（与 CLI 的 `qodexProcessResourceSampleSchema` 同口径）：读数异常时宁可让
      * 样本带着离谱数值上去、由平台侧数值异常规则暴露，也不在客户端静默丢样本。
      */
     cpuPercent: z.number().finite().nonnegative().max(100_000),
@@ -1462,7 +1462,7 @@ export const hostMcpResourceSamplesResponseSchema = z
     type: z.literal("mcp-resource-samples"),
     runtimeSurface: z.enum(["local", "remote"]),
     environmentKey: resourceTelemetryEnvironmentKeySchema.optional(),
-    samples: maridMcpResourceSamplesSchema,
+    samples: qodexMcpResourceSamplesSchema,
   })
   .strict();
 export type HostMcpResourceSamplesResponse = z.infer<typeof hostMcpResourceSamplesResponseSchema>;
@@ -1471,7 +1471,7 @@ export const hostToolExecResourceResponseSchema = z
   .object({
     type: z.literal("tool-exec-resource"),
     runtimeSurface: z.enum(["local", "remote"]),
-    sample: maridToolExecResourceSchema,
+    sample: qodexToolExecResourceSchema,
   })
   .strict();
 export type HostToolExecResourceResponse = z.infer<typeof hostToolExecResourceResponseSchema>;
@@ -1480,7 +1480,7 @@ export const hostMcpTelemetryResponseSchema = z
   .object({
     type: z.literal("mcp-telemetry"),
     runtimeSurface: z.enum(["local", "remote"]),
-    event: maridMcpTelemetryEventSchema,
+    event: qodexMcpTelemetryEventSchema,
   })
   .strict();
 export type HostMcpTelemetryResponse = z.infer<typeof hostMcpTelemetryResponseSchema>;
@@ -1717,7 +1717,7 @@ export const hostPluginSandboxRegisterRequestResponseSchema = z
       })
       .strict()
       .optional(),
-    // 资源级 `_meta["marid/csp"]` 放宽项；与 mcp-apps 的 mcpAppCspRelaxationsSchema 同步。
+    // 资源级 `_meta["qodex/csp"]` 放宽项；与 mcp-apps 的 mcpAppCspRelaxationsSchema 同步。
     cspRelaxations: z
       .object({ unsafeEval: z.boolean().optional(), wasmUnsafeEval: z.boolean().optional() })
       .strict()
@@ -1885,9 +1885,9 @@ export const hostResponseMessageSchema = z.discriminatedUnion("type", [
   hostOffPeakSchedulerWakeRequestResponseSchema,
 ]);
 
-export const maridTaskPersistStatusSchema = z.enum(["running", "completed", "error"]);
+export const qodexTaskPersistStatusSchema = z.enum(["running", "completed", "error"]);
 
-export const maridPromptImageAttachmentSchema = z.object({
+export const qodexPromptImageAttachmentSchema = z.object({
   kind: z.literal("image"),
   filename: z.string(),
   mimeType: z.string(),
@@ -1898,7 +1898,7 @@ export const maridPromptImageAttachmentSchema = z.object({
 
 // 附件 TypeScript 联合类型新增 video 后，手写的持久化运行时 schema 未同步，
 // session 恢复解析会拒绝含视频的用户消息。字段与 image 的 inline/local 引用语义保持一致。
-export const maridPromptVideoAttachmentSchema = z.object({
+export const qodexPromptVideoAttachmentSchema = z.object({
   kind: z.literal("video"),
   filename: z.string(),
   mimeType: z.string(),
@@ -1907,7 +1907,7 @@ export const maridPromptVideoAttachmentSchema = z.object({
   localPath: z.string().optional(),
 });
 
-export const maridPromptPdfAttachmentSchema = z.object({
+export const qodexPromptPdfAttachmentSchema = z.object({
   kind: z.literal("pdf"),
   filename: z.string(),
   mimeType: z.string(),
@@ -1916,7 +1916,7 @@ export const maridPromptPdfAttachmentSchema = z.object({
   localPath: z.string().optional(),
 });
 
-export const maridPromptFileAttachmentSchema = z.object({
+export const qodexPromptFileAttachmentSchema = z.object({
   kind: z.literal("file"),
   filename: z.string(),
   mimeType: z.string(),
@@ -1926,14 +1926,14 @@ export const maridPromptFileAttachmentSchema = z.object({
   localPath: z.string().optional(),
 });
 
-export const maridPromptAttachmentSchema = z.discriminatedUnion("kind", [
-  maridPromptImageAttachmentSchema,
-  maridPromptVideoAttachmentSchema,
-  maridPromptPdfAttachmentSchema,
-  maridPromptFileAttachmentSchema,
+export const qodexPromptAttachmentSchema = z.discriminatedUnion("kind", [
+  qodexPromptImageAttachmentSchema,
+  qodexPromptVideoAttachmentSchema,
+  qodexPromptPdfAttachmentSchema,
+  qodexPromptFileAttachmentSchema,
 ]);
 
-export const maridPersistedToolCallSchema = z.object({
+export const qodexPersistedToolCallSchema = z.object({
   toolName: z.string().optional(),
   title: z.string().optional(),
   kind: z.string().optional(),
@@ -1955,7 +1955,7 @@ export const maridPersistedToolCallSchema = z.object({
     .optional(),
 });
 
-const maridPersistedMessagePartSchema = z.discriminatedUnion("type", [
+const qodexPersistedMessagePartSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("content"), content: z.string() }),
   z.object({ type: z.literal("thought"), content: z.string() }),
   z.object({
@@ -1964,7 +1964,7 @@ const maridPersistedMessagePartSchema = z.discriminatedUnion("type", [
   }),
 ]);
 
-export const maridPersistedMessageSchema = z.object({
+export const qodexPersistedMessageSchema = z.object({
   id: z.string().optional(),
   role: z.enum(["user", "assistant"]),
   content: z.string(),
@@ -1977,10 +1977,10 @@ export const maridPersistedMessageSchema = z.object({
   durationMs: z.number().int().nonnegative().optional(),
   interrupted: z.boolean().optional(),
   feedback: z.enum(["like", "dislike"]).optional(),
-  attachments: z.array(maridPromptAttachmentSchema).optional(),
-  tools: z.array(maridPersistedToolCallSchema).optional(),
+  attachments: z.array(qodexPromptAttachmentSchema).optional(),
+  tools: z.array(qodexPersistedToolCallSchema).optional(),
   thought: z.string().optional(),
-  parts: z.array(maridPersistedMessagePartSchema).optional(),
+  parts: z.array(qodexPersistedMessagePartSchema).optional(),
   checkpointState: z.enum(["partial"]).optional(),
   checkpointReason: z.enum(["tool_completed", "part_boundary", "periodic"]).optional(),
   checkpointUpdatedAt: z.number().int().nonnegative().optional(),
@@ -2008,9 +2008,9 @@ export const maridPersistedMessageSchema = z.object({
     .optional(),
 });
 
-export const maridTaskGoalStatusSchema = z.enum(["active", "paused", "budget_limited", "complete"]);
+export const qodexTaskGoalStatusSchema = z.enum(["active", "paused", "budget_limited", "complete"]);
 
-export const maridTaskTargetChangedActionSchema = z.enum([
+export const qodexTaskTargetChangedActionSchema = z.enum([
   "set",
   "status_updated",
   "cleared",
@@ -2020,16 +2020,16 @@ export const maridTaskTargetChangedActionSchema = z.enum([
   "summary_updated",
 ]);
 
-export const maridTaskTargetChangedSourceSchema = z.enum(["command", "tool", "runtime"]);
+export const qodexTaskTargetChangedSourceSchema = z.enum(["command", "tool", "runtime"]);
 
-export const maridTaskGoalSchema = z.object({
+export const qodexTaskGoalSchema = z.object({
   sessionID: nonEmptyStringSchema,
   targetID: nonEmptyStringSchema,
   objective: nonEmptyStringSchema,
   // 2.15.0 之前的 /goal 历史任务没有写 summaryTitle。
   // 读取 task index 老数据时要补成 null，否则整个任务列表会被运行时 schema 拒绝。
   summaryTitle: z.string().min(1).nullable().default(null),
-  status: maridTaskGoalStatusSchema,
+  status: qodexTaskGoalStatusSchema,
   tokenBudget: z.number().int().positive().nullable(),
   tokensUsed: z.number().int().nonnegative(),
   timeUsedSeconds: z.number().int().nonnegative(),
@@ -2042,18 +2042,18 @@ export const maridTaskGoalSchema = z.object({
   }),
 });
 
-export const maridTaskGoalChangedPatchSchema = z.object({
-  action: maridTaskTargetChangedActionSchema,
-  source: maridTaskTargetChangedSourceSchema,
-  target: maridTaskGoalSchema.nullable(),
-  previousTarget: maridTaskGoalSchema.nullable().optional(),
+export const qodexTaskGoalChangedPatchSchema = z.object({
+  action: qodexTaskTargetChangedActionSchema,
+  source: qodexTaskTargetChangedSourceSchema,
+  target: qodexTaskGoalSchema.nullable(),
+  previousTarget: qodexTaskGoalSchema.nullable().optional(),
 });
 
-export const maridTaskTargetStatusSchema = maridTaskGoalStatusSchema;
-export const maridTaskTargetSchema = maridTaskGoalSchema;
-export const maridTaskTargetChangedPatchSchema = maridTaskGoalChangedPatchSchema;
+export const qodexTaskTargetStatusSchema = qodexTaskGoalStatusSchema;
+export const qodexTaskTargetSchema = qodexTaskGoalSchema;
+export const qodexTaskTargetChangedPatchSchema = qodexTaskGoalChangedPatchSchema;
 
-export const maridTaskMetaSchema = z.object({
+export const qodexTaskMetaSchema = z.object({
   taskId: nonEmptyStringSchema,
   traceId: nonEmptyStringSchema,
   title: z.string(),
@@ -2063,13 +2063,13 @@ export const maridTaskMetaSchema = z.object({
   workspacePurpose: z.enum(["project", "conversation"]).optional(),
   createdAt: z.number().int().nonnegative(),
   updatedAt: z.number().int().nonnegative(),
-  mode: maridTaskModeSchema,
+  mode: qodexTaskModeSchema,
   model: z.string().optional(),
   thoughtLevel: nonEmptyStringSchema.optional(),
   runtimeEpoch: z.number().int().nonnegative().optional(),
   // meta 直接解析自 tasks-index/旧 session 文件；历史 provider 值在此归一为 glm。
-  provider: legacyMaridProviderSchema.optional(),
-  migrationSource: maridTaskMigrationSourceSchema.optional(),
+  provider: legacyQodexProviderSchema.optional(),
+  migrationSource: qodexTaskMigrationSourceSchema.optional(),
   forkedFromTaskId: nonEmptyStringSchema.optional(),
   // cron automation 身份：随 meta_json 一起持久化（单一来源），同时在写入时投影到 tasks 表
   // cron_automation_id 索引列，供按 automation 反查 session。runId 属于 automation_runs /
@@ -2079,7 +2079,7 @@ export const maridTaskMetaSchema = z.object({
   // off_peak_task_id 索引投影列（兜底/反查）。
   offPeakTaskId: nonEmptyStringSchema.optional(),
   unreadAt: z.number().int().nonnegative().optional(),
-  status: maridTaskPersistStatusSchema.optional(),
+  status: qodexTaskPersistStatusSchema.optional(),
   lastError: z
     .object({
       code: z.string().optional(),
@@ -2112,10 +2112,10 @@ export const maridTaskMetaSchema = z.object({
       ),
     })
     .optional(),
-  target: maridTaskGoalSchema.nullable().optional(),
+  target: qodexTaskGoalSchema.nullable().optional(),
 });
 
-export const maridTaskSessionBindingStateSchema = z.enum([
+export const qodexTaskSessionBindingStateSchema = z.enum([
   "idle",
   "syncing",
   "ready",
@@ -2123,26 +2123,26 @@ export const maridTaskSessionBindingStateSchema = z.enum([
   "failed",
 ]);
 
-export const maridTaskSessionBindingSchema = z.object({
+export const qodexTaskSessionBindingSchema = z.object({
   // 绑定状态由 services 从持久化数据投影；旧绑定残留的历史 provider 值在此归一为 glm。
-  provider: legacyMaridProviderSchema,
+  provider: legacyQodexProviderSchema,
   sessionId: nonEmptyStringSchema,
   // 绑定锚点需要支持空 task 的 -1，所以这里不能套 nonnegative。
   lastSyncedTurnIndex: z.number().int(),
-  state: maridTaskSessionBindingStateSchema,
+  state: qodexTaskSessionBindingStateSchema,
 });
 
-export const maridTaskIndexEntrySchema = z.object({
+export const qodexTaskIndexEntrySchema = z.object({
   workspaceHash: nonEmptyStringSchema,
   taskId: nonEmptyStringSchema,
 });
 
-export const maridPinnedTasksFileSchema = z.object({
+export const qodexPinnedTasksFileSchema = z.object({
   version: z.literal("1"),
-  tasks: z.array(maridTaskIndexEntrySchema),
+  tasks: z.array(qodexTaskIndexEntrySchema),
 });
 
-const maridPersistedFileSnapshotSchema = z.object({
+const qodexPersistedFileSnapshotSchema = z.object({
   path: z.string(),
   beforeContent: z.string().nullable(),
   afterContent: z.string(),
@@ -2160,21 +2160,21 @@ const maridPersistedFileSnapshotSchema = z.object({
     .optional(),
 });
 
-const maridPersistedFileChangeSchema = z.object({
+const qodexPersistedFileChangeSchema = z.object({
   turnIndex: z.number().int().nonnegative(),
-  snapshots: z.array(maridPersistedFileSnapshotSchema),
+  snapshots: z.array(qodexPersistedFileSnapshotSchema),
   fileState: z.enum(["applied", "reverted"]).optional(),
 });
 
-const maridPersistedTurnCheckpointSchema = z.object({
+const qodexPersistedTurnCheckpointSchema = z.object({
   turnIndex: z.number().int().nonnegative(),
   baseFileCheckpointId: nonEmptyStringSchema,
   resultFileCheckpointId: nonEmptyStringSchema.optional(),
 });
 
-export const maridSessionFileSchema = z.object({
-  meta: maridTaskMetaSchema,
-  messages: z.array(maridPersistedMessageSchema),
-  fileChanges: z.array(maridPersistedFileChangeSchema).optional(),
-  turnCheckpoints: z.array(maridPersistedTurnCheckpointSchema).optional(),
+export const qodexSessionFileSchema = z.object({
+  meta: qodexTaskMetaSchema,
+  messages: z.array(qodexPersistedMessageSchema),
+  fileChanges: z.array(qodexPersistedFileChangeSchema).optional(),
+  turnCheckpoints: z.array(qodexPersistedTurnCheckpointSchema).optional(),
 });

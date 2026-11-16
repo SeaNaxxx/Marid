@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
-import { resolveLocalizedText } from "@marid/shared";
-import type { PluginInstallRequestPayload } from "@marid/shared/marid-protocol-v4";
+import { resolveLocalizedText } from "@qodex/shared";
+import type { PluginInstallRequestPayload } from "@qodex/shared/qodex-protocol-v4";
 import { Button } from "@/components/ui/button.js";
 import { PluginIcon } from "@/components/PluginIcon.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 export function PluginInstallCard({
   request,
@@ -13,7 +13,7 @@ export function PluginInstallCard({
   request: PluginInstallRequestPayload;
   onRespond: (choice: "install" | "skip") => Promise<boolean>;
 }) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const [submitting, setSubmitting] = useState(false);
   const [failed, setFailed] = useState(false);
   const name =

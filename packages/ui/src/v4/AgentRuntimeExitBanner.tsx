@@ -1,37 +1,37 @@
 import { memo, useCallback, useEffect, useState } from "react";
-import type { MaridAgentRuntimeExitedEvent } from "@marid/services";
-import { resolveWorkspaceKey } from "@marid/shared";
+import type { QodexAgentRuntimeExitedEvent } from "@qodex/services";
+import { resolveWorkspaceKey } from "@qodex/shared";
 import { useServices } from "@/hooks/useServices.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 /**
  * 当前 workspace 的后台 runtime（app-server）最近一次意外退出。
  *
  * 只是展示：进程崩溃时 CLI 来不及写下终态，回合、子代理的收口由重连后的 CLI 投影给出
- * （apps/marid-cli/docs/design/v2/tool/07-subagent.md「上一代 runtime 遗留的 Agent」），这里不改写会话
+ * （apps/qodex-cli/docs/design/v2/tool/07-subagent.md「上一代 runtime 遗留的 Agent」），这里不改写会话
  * 状态，只告诉用户发生了什么。手机远控的服务面没有该事件，不显示。
  */
 export function useAgentRuntimeExitNotice(target: {
   workspacePath: string;
   workspaceIdentity?: string;
-}): { exit: MaridAgentRuntimeExitedEvent | null; dismiss: () => void } {
-  const { maridAgentService } = useServices();
-  const [exit, setExit] = useState<MaridAgentRuntimeExitedEvent | null>(null);
+}): { exit: QodexAgentRuntimeExitedEvent | null; dismiss: () => void } {
+  const { qodexAgentService } = useServices();
+  const [exit, setExit] = useState<QodexAgentRuntimeExitedEvent | null>(null);
   // 与 services 发布事件时同一个口径：identity 优先，否则路径。
   const workspaceKey = resolveWorkspaceKey(target);
   useEffect(() => {
     setExit(null);
-    const subscription = maridAgentService.onAgentRuntimeExited?.((event) => {
+    const subscription = qodexAgentService.onAgentRuntimeExited?.((event) => {
       if (event.workspaceKey === workspaceKey) setExit(event);
     });
     return () => subscription?.dispose();
-  }, [workspaceKey, maridAgentService]);
+  }, [workspaceKey, qodexAgentService]);
   const dismiss = useCallback(() => setExit(null), []);
   return { exit, dismiss };
 }
 
 export interface AgentRuntimeExitBannerProps {
-  exit: MaridAgentRuntimeExitedEvent;
+  exit: QodexAgentRuntimeExitedEvent;
   onDismiss: () => void;
 }
 
@@ -43,7 +43,7 @@ export const AgentRuntimeExitBanner = memo(function AgentRuntimeExitBanner({
   exit,
   onDismiss,
 }: AgentRuntimeExitBannerProps) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   return (
     <div
       role="status"

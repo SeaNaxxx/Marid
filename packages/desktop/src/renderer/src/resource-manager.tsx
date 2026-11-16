@@ -3,15 +3,15 @@ import type {
   NetworkCaptureBridge,
   ResourceUsageSnapshot,
   StorageManagementBridge,
-} from "@marid/shared";
-import "@marid/ui/styles.css";
+} from "@qodex/shared";
+import "@qodex/ui/styles.css";
 import {
   ResourceManagerApp,
-  MaridIntlProvider,
+  QodexIntlProvider,
   applyUiFontSizePx,
   loadUiFontSizePx,
   subscribeToUiFontSizeStorageChanges,
-} from "@marid/ui";
+} from "@qodex/ui";
 
 declare global {
   interface Window {
@@ -34,7 +34,7 @@ function resolveTheme(theme: Theme): "light" | "dark" {
 }
 
 function applyResourceManagerTheme(): void {
-  const savedTheme = (localStorage.getItem("marid-theme") as Theme | null) ?? "zai-dark";
+  const savedTheme = (localStorage.getItem("qodex-theme") as Theme | null) ?? "zai-dark";
   const resolvedTheme = resolveTheme(savedTheme);
   const appliedTheme =
     savedTheme === "system"
@@ -61,7 +61,7 @@ const root = document.getElementById("root");
 if (root) {
   createRoot(root).render(
     // 语言沿用主窗口写入 localStorage 的偏好；不接 settingService，避免独立窗口再起一份 RPC。
-    <MaridIntlProvider>
+    <QodexIntlProvider>
       <ResourceManagerApp
         setSamplingActive={window.resourceManager?.setSamplingActive}
         getSnapshot={
@@ -70,6 +70,6 @@ if (root) {
         storage={window.resourceManager?.storage}
         network={window.resourceManager?.network}
       />
-    </MaridIntlProvider>,
+    </QodexIntlProvider>,
   );
 }

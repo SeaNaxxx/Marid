@@ -1,4 +1,4 @@
-import { createSystemCredentialCipher } from "@marid/shared/credential-security";
+import { createSystemCredentialCipher } from "@qodex/shared/credential-security";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -8,12 +8,12 @@ import {
   OAUTH_SESSION_REVISION_KEY,
   type ProviderProvisioningCredentialEntry,
   type ProviderProvisioningEnvelope,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type {
   PersonalProviderConfigRepository,
   ProviderConfigLayerSnapshot,
-} from "@marid/provider";
-import { decodeProviderConfigFile, encodeProviderConfigFile } from "@marid/provider-node";
+} from "@qodex/provider";
+import { decodeProviderConfigFile, encodeProviderConfigFile } from "@qodex/provider-node";
 import { type CredentialCipherProvider } from "../credential/providers/credentialCipherProvider.js";
 import type { ISettingService } from "../setting/setting.js";
 
@@ -26,7 +26,7 @@ export const PROVIDER_PROVISIONING_LEGACY_OAUTH_CREDENTIAL_KEYS = [
   "oauth:bigmodel:access_token",
   "oauth:bigmodel:refresh_token",
   "oauth:bigmodel:user_info",
-  "maridjwttoken",
+  "qodexjwttoken",
 ] as const;
 
 /** v3 的 OAuth 会话组；旧信封不允许声明新增字段。 */

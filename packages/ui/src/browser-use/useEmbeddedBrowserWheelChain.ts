@@ -2,7 +2,7 @@ import { useEffect, type RefObject } from "react";
 import {
   EmbeddedBrowserWebviewChannels,
   type EmbeddedBrowserWheelBoundaryPayload,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { logger } from "@/logger.js";
 
 function validatedDelta(value: unknown): number {

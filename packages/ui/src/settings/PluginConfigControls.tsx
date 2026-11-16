@@ -1,25 +1,25 @@
 import { Eye, EyeOff, RotateCcw, Save, Trash2 } from "lucide-react";
 import { useState } from "react";
-import type { MaridPluginInfo, MaridPluginScope, MaridPluginUserConfigOption } from "@marid/shared";
+import type { QodexPluginInfo, QodexPluginScope, QodexPluginUserConfigOption } from "@qodex/shared";
 import { Button } from "@/components/ui/button.js";
 import { Input } from "@/components/ui/input.js";
 import { Switch } from "@/components/ui/switch.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { SettingsScopeBadge } from "@/settings/SettingsScopeBadge.js";
 
 interface PluginConfigControlsProps {
   getValue: (
-    plugin: MaridPluginInfo,
+    plugin: QodexPluginInfo,
     key: string,
-    option: MaridPluginUserConfigOption,
+    option: QodexPluginUserConfigOption,
   ) => string | number | boolean;
   isOptionClearPending?: (pluginId: string, key: string) => boolean;
   onClearOption?: (pluginId: string, key: string, clear: boolean) => void;
-  onSave: (plugin: MaridPluginInfo) => void;
+  onSave: (plugin: QodexPluginInfo) => void;
   onSetDraft: (pluginId: string, key: string, value: string | number | boolean) => void;
   activeOperations: ReadonlyArray<{ id: string }>;
-  plugin: MaridPluginInfo;
-  scope: MaridPluginScope;
+  plugin: QodexPluginInfo;
+  scope: QodexPluginScope;
 }
 
 export function PluginConfigControls({
@@ -32,7 +32,7 @@ export function PluginConfigControls({
   plugin,
   scope,
 }: PluginConfigControlsProps) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const [revealedSecrets, setRevealedSecrets] = useState<Record<string, boolean>>({});
   const entries = Object.entries(plugin.userConfig ?? {});
   if (entries.length === 0) return null;

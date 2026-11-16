@@ -1,10 +1,10 @@
 import type {
   V4SessionDeletionPreview,
   V4SessionDeletionResult,
-} from "@marid/shared/marid-protocol-v4";
-import type { Event } from "@marid/rpc";
-import { ServiceChannels } from "@marid/shared";
-import type { MaridTaskMeta } from "@marid/shared";
+} from "@qodex/shared/qodex-protocol-v4";
+import type { Event } from "@qodex/rpc";
+import { ServiceChannels } from "@qodex/shared";
+import type { QodexTaskMeta } from "@qodex/shared";
 import type {
   ControllerResyncParams,
   ControllerResyncResult,
@@ -15,14 +15,14 @@ import type {
   WindowHostControllerTaskRow,
   WindowHostControllerWorkspaceFrame,
   WindowHostTaskAddress,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 import { createServiceDescriptor } from "../descriptors.js";
-import type { MaridArchivedTaskDeletionResult } from "#src/session/maridTaskService.js";
+import type { QodexArchivedTaskDeletionResult } from "#src/session/qodexTaskService.js";
 import type {
-  MaridTaskListItem,
-  MaridTaskListQuery,
-  MaridTaskListResult,
-} from "../session/maridTaskListTypes.js";
+  QodexTaskListItem,
+  QodexTaskListQuery,
+  QodexTaskListResult,
+} from "../session/qodexTaskListTypes.js";
 
 export type WindowHostControllerMutation =
   | { kind: "rename"; title: string }
@@ -35,7 +35,7 @@ export type WindowHostControllerMutation =
   | { kind: "open" }
   | { kind: "resume" };
 
-export type WindowHostControllerTaskListItem = MaridTaskListItem & {
+export type WindowHostControllerTaskListItem = QodexTaskListItem & {
   sourceServerId?: string;
   serverDisplayName?: string;
   remoteSessionId?: string;
@@ -44,7 +44,7 @@ export type WindowHostControllerTaskListItem = MaridTaskListItem & {
   activity?: WindowHostControllerTaskRow["activity"];
 };
 
-export interface WindowHostControllerTaskListResult extends Omit<MaridTaskListResult, "items"> {
+export interface WindowHostControllerTaskListResult extends Omit<QodexTaskListResult, "items"> {
   items: WindowHostControllerTaskListItem[];
 }
 
@@ -85,14 +85,14 @@ export interface IWindowControllerService {
   deleteArchivedTasks(params: {
     address: WindowHostTaskAddress;
     taskIds: string[];
-  }): Promise<MaridArchivedTaskDeletionResult>;
-  listTaskList(params: MaridTaskListQuery): Promise<WindowHostControllerTaskListResult>;
+  }): Promise<QodexArchivedTaskDeletionResult>;
+  listTaskList(params: QodexTaskListQuery): Promise<WindowHostControllerTaskListResult>;
   /** 直接读取所属 owner 的轻量 meta；未读 CAS 不得使用可能降级为旧快照的列表投影。 */
-  getTaskMeta(params: { address: WindowHostTaskAddress }): Promise<MaridTaskMeta | null>;
+  getTaskMeta(params: { address: WindowHostTaskAddress }): Promise<QodexTaskMeta | null>;
   mutateTask(params: {
     address: WindowHostTaskAddress;
     mutation: WindowHostControllerMutation;
-  }): Promise<MaridTaskMeta | null>;
+  }): Promise<QodexTaskMeta | null>;
   subscribeControllerV4(params: ControllerSubscribeParams): Promise<ControllerSubscribeResult>;
   resyncControllerV4(params: ControllerResyncParams): Promise<ControllerResyncResult>;
   unsubscribeControllerV4(params: ControllerUnsubscribeParams): Promise<void>;

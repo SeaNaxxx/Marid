@@ -1,5 +1,5 @@
-import type { WindowHostAttachmentScope } from "@marid/shared";
-import type { MaridAgentV4ClientMode } from "@marid/services";
+import type { WindowHostAttachmentScope } from "@qodex/shared";
+import type { QodexAgentV4ClientMode } from "@qodex/services";
 
 export interface WindowHostAttachmentPort {
   once(event: "close", listener: () => void): unknown;
@@ -18,7 +18,7 @@ export interface WindowHostResolvedAttachmentScope<TServices, TCapabilities = ne
 export interface WindowHostExposeAttachmentParams<TServices, TPort, TCapabilities = never> {
   requestId: string;
   attachmentId: string;
-  clientMode: MaridAgentV4ClientMode;
+  clientMode: QodexAgentV4ClientMode;
   terminalOwnerId?: string;
   scope: WindowHostAttachmentScope;
   services: TServices;
@@ -58,7 +58,7 @@ export function createWindowHostAttachmentRegistry<
   function attach(params: {
     requestId: string;
     attachmentId: string;
-    clientMode: MaridAgentV4ClientMode;
+    clientMode: QodexAgentV4ClientMode;
     terminalOwnerId?: string;
     scope: WindowHostAttachmentScope;
     port: TPort;

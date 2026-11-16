@@ -1,5 +1,5 @@
-import type { ToolProgress } from "@marid/shared/marid-protocol-v4";
-import { toolProgressSchema } from "@marid/shared/marid-protocol-v4";
+import type { ToolProgress } from "@qodex/shared/qodex-protocol-v4";
+import { toolProgressSchema } from "@qodex/shared/qodex-protocol-v4";
 
 export const TID_TOOL_CALL_PROGRESS = "tool-call-progress";
 

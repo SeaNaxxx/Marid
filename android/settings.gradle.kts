@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Marid"
+rootProject.name = "Qodex"
 include(":app")

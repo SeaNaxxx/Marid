@@ -1,4 +1,4 @@
-import type { CommandConfig } from "@marid/shared";
+import type { CommandConfig } from "@qodex/shared";
 
 export type CommandFileFormat = "markdown";
 

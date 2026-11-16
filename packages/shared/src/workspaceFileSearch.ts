@@ -1,4 +1,4 @@
-import type { WorkspaceFileEntry } from "@marid/shared";
+import type { WorkspaceFileEntry } from "@qodex/shared";
 
 /**
  * Safety-net cap for virtualized display. Large enough to never feel

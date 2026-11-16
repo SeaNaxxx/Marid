@@ -5,7 +5,7 @@ import {
   type RemoteTargetSnapshot,
   parseRemoteWorkspaceIdentity,
   buildRemoteHostWorkspaceIdentity,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { LEGACY_SINGLE_ROOT_PROJECT_PREFIX } from "#src/project-storage/contract.js";
 import type {
   IRemoteProjectService,

@@ -1,13 +1,13 @@
 import {
-  isMaridAgentProvider,
+  isQodexAgentProvider,
   resolveModelProviderFamilySpecByProviderId,
-  maridProviderAccountAccessSchema,
-  type MaridProviderAccountAccess,
-  type MaridProvider,
-} from "@marid/shared";
-import type { ModelSelectionView } from "@marid/services";
+  qodexProviderAccountAccessSchema,
+  type QodexProviderAccountAccess,
+  type QodexProvider,
+} from "@qodex/shared";
+import type { ModelSelectionView } from "@qodex/services";
 import type { ModelSelectGroup } from "@/ModelConfigSelect.js";
-import { decodeCustomModelValue, encodeCustomModelValue } from "@/lib/maridCustomModelValue.js";
+import { decodeCustomModelValue, encodeCustomModelValue } from "@/lib/qodexCustomModelValue.js";
 import { shouldShowModelVisionBadge } from "@/lib/modelVisionBadge.js";
 
 export interface ModelProviderGroupLabelOptions {
@@ -22,16 +22,16 @@ export interface ModelProviderGroupLabelOptions {
 }
 
 function supportsRegistryApiFormat(
-  selectedProvider: MaridProvider,
+  selectedProvider: QodexProvider,
   apiFormat: string | null | undefined,
 ): boolean {
   if (!apiFormat) return false;
-  // 仅剩 glm（Marid Agent）provider；三方 CLI 的 api format 差异已随 provider 下线。
-  return isMaridAgentProvider(selectedProvider);
+  // 仅剩 glm（Qodex Agent）provider；三方 CLI 的 api format 差异已随 provider 下线。
+  return isQodexAgentProvider(selectedProvider);
 }
 
 export function buildRegistryModelSelectGroups(
-  selectedProvider: MaridProvider,
+  selectedProvider: QodexProvider,
   view: ModelSelectionView,
   labels: ModelProviderGroupLabelOptions = {},
 ): ModelSelectGroup[] {
@@ -40,7 +40,7 @@ export function buildRegistryModelSelectGroups(
       return [];
     }
 
-    const accountAccess = maridProviderAccountAccessSchema.safeParse(provider.config.access);
+    const accountAccess = qodexProviderAccountAccessSchema.safeParse(provider.config.access);
     const accountPresentation = accountAccess.success
       ? getRegistryAccountProviderGroupPresentation(provider.providerId, accountAccess.data, labels)
       : null;
@@ -79,7 +79,7 @@ export function buildRegistryModelSelectGroups(
 
 function getRegistryAccountProviderGroupPresentation(
   providerId: string,
-  access: MaridProviderAccountAccess,
+  access: QodexProviderAccountAccess,
   labels: ModelProviderGroupLabelOptions,
 ): Pick<ModelSelectGroup, "label" | "labelBadge"> {
   const familySpec = resolveModelProviderFamilySpecByProviderId(providerId);

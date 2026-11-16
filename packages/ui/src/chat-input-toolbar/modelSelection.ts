@@ -1,5 +1,5 @@
 import type { ModelSelectGroup } from "@/ModelConfigSelect.js";
-import { decodeCustomModelValue } from "@/lib/maridCustomModelValue.js";
+import { decodeCustomModelValue } from "@/lib/qodexCustomModelValue.js";
 
 export function shouldShowManageModelsAction(
   onManageModels?: () => void,

@@ -1,4 +1,4 @@
-import type { WorkspaceFileEntry } from "@marid/shared";
+import type { WorkspaceFileEntry } from "@qodex/shared";
 import {
   getWorkspaceFileAncestorDirectories,
   isWorkspaceFilePathInside,

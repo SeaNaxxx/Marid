@@ -1,10 +1,10 @@
-import { IProjectService } from "@marid/services";
+import { IProjectService } from "@qodex/services";
 import {
   buildRemoteHostWorkspaceIdentity,
   buildServerRemoteWorkspaceIdentity,
   parseRemoteWorkspaceIdentity,
   remoteHostIdFromWorkspaceIdentity,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type {
   AppControlDiscoverySource,
   AppControlDiscoverySourceResolverOptions,

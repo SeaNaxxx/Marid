@@ -1,12 +1,12 @@
 import { ChevronLeft, Clock3, ListChecks } from "lucide-react";
-import type { FeedbackTicketDetail } from "@marid/shared";
-import type { IFeedbackService } from "@marid/services";
+import type { FeedbackTicketDetail } from "@qodex/shared";
+import type { IFeedbackService } from "@qodex/services";
 import { Button } from "@/components/ui/button.js";
 import { FeedbackProgress } from "@/feedback/feedbackProgress.js";
 import { FeedbackSupplementComposer } from "@/feedback/FeedbackSupplementComposer.js";
 import { FeedbackTimeline, getFeedbackTimelineItems } from "@/feedback/feedbackTimeline.js";
 import { formatRelativeTime } from "@/feedback/feedbackUserView.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 export function FeedbackProcessView({
   ticket,
@@ -19,7 +19,7 @@ export function FeedbackProcessView({
   onBack: () => void;
   onRefresh: () => Promise<void>;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const formatMessage = intl.formatMessage;
   const timelineItems = getFeedbackTimelineItems(ticket.events ?? [], ticket.comments, formatMessage);
   const latestItem = timelineItems.at(-1);

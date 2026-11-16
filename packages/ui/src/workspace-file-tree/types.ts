@@ -1,5 +1,5 @@
-import type { EditorInfo, OpenInEditorRemoteTarget } from "@marid/shared";
-import type { IDisposable } from "@marid/rpc";
+import type { EditorInfo, OpenInEditorRemoteTarget } from "@qodex/shared";
+import type { IDisposable } from "@qodex/rpc";
 import type { CodeViewerSource } from "@/lib/codeViewer.js";
 import type { WorkspaceFileGitStatus, WorkspaceFileTreeRow } from "@/workspace-file-tree/model.js";
 

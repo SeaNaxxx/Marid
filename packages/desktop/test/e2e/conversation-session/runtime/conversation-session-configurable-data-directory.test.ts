@@ -12,7 +12,7 @@ import {
   TID_SETTINGS_SECTION_NAV,
   TID_TASK_SETTINGS_BUTTON,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   clearAppData,
   clickTestIdByDom,
@@ -39,13 +39,13 @@ const APP_CANARY_CONTENT = "CDD01_APP_DATA_CANARY\n";
 const PROJECT_CANARY_CONTENT = "CDD01_PROJECT_DATA_CANARY\n";
 const paths = getE2EAppDataPaths();
 const customDataBaseDir = join(paths.homeDir, "cdd01-custom-data-root");
-const customAppDataDir = join(customDataBaseDir, ".marid", "v2");
+const customAppDataDir = join(customDataBaseDir, ".qodex", "v2");
 const oldTasksIndex = join(paths.appDataDir, "tasks-index.sqlite");
 const customTasksIndex = join(customAppDataDir, "tasks-index.sqlite");
 const bootstrapSettingsFile = join(paths.appDataDir, "setting.json");
-const cliDatabase = join(paths.homeDir, ".marid", "cli", "db", "db.sqlite");
-const customCliRoot = join(customDataBaseDir, ".marid", "cli");
-const projectCanary = join(paths.workspace, ".marid", "e2e-cdd01-project-canary.txt");
+const cliDatabase = join(paths.homeDir, ".qodex", "cli", "db", "db.sqlite");
+const customCliRoot = join(customDataBaseDir, ".qodex", "cli");
+const projectCanary = join(paths.workspace, ".qodex", "e2e-cdd01-project-canary.txt");
 
 describe("CDD01：修改数据存储路径后原任务仍可继续", () => {
   let showOpenDialogMock: ElectronMock | null = null;

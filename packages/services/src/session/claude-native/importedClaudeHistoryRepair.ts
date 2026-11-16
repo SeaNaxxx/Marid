@@ -1,10 +1,10 @@
 import { existsSync, readFileSync } from "node:fs";
 import type {
-  MaridAgentMcpServer,
-  MaridSessionImportHistory,
-  MaridSessionImportMessage,
-  MaridSessionStateSnapshot,
-} from "@marid/shared";
+  QodexAgentMcpServer,
+  QodexSessionImportHistory,
+  QodexSessionImportMessage,
+  QodexSessionStateSnapshot,
+} from "@qodex/shared";
 import {
   getLegacyDeletedTaskSessionSnapshotPath,
   getLegacyTaskSessionSnapshotPath,
@@ -24,29 +24,29 @@ export interface ImportedClaudeHistoryRepairResult {
   title?: string;
   createdAt?: number;
   updatedAt?: number;
-  messages: MaridSessionImportMessage[];
+  messages: QodexSessionImportMessage[];
   source: "legacySnapshot" | "nativeJsonl";
 }
 
 export interface ImportedClaudeSessionRepairTarget extends ImportedClaudeHistoryRepairTarget {
-  mcpServers?: MaridAgentMcpServer[];
+  mcpServers?: QodexAgentMcpServer[];
 }
 
 export interface ImportedClaudeSessionRepairCreateParams {
   workspacePath: string;
   workspaceIdentity?: string;
   sessionId: string;
-  mode: MaridSessionStateSnapshot["session"]["mode"];
-  model: MaridSessionStateSnapshot["settings"]["model"]["current"];
+  mode: QodexSessionStateSnapshot["session"]["mode"];
+  model: QodexSessionStateSnapshot["settings"]["model"]["current"];
   thoughtLevel?: string;
   persistence: "immediate";
-  mcpServers?: MaridAgentMcpServer[];
-  importedHistory: MaridSessionImportHistory;
+  mcpServers?: QodexAgentMcpServer[];
+  importedHistory: QodexSessionImportHistory;
 }
 
 function toImportMessages(
   messages: readonly { role: string; content: string; timestamp?: number }[],
-): MaridSessionImportMessage[] {
+): QodexSessionImportMessage[] {
   return messages
     .filter((message) => message.role === "user" || message.role === "assistant")
     .map((message) => ({
@@ -56,12 +56,12 @@ function toImportMessages(
     }));
 }
 
-function countAssistantMessages(messages: readonly MaridSessionImportMessage[]): number {
+function countAssistantMessages(messages: readonly QodexSessionImportMessage[]): number {
   return messages.filter((message) => message.role === "assistant").length;
 }
 
 export function shouldRepairImportedClaudeSnapshot(
-  snapshot: Pick<MaridSessionStateSnapshot, "messages" | "runtime" | "session">,
+  snapshot: Pick<QodexSessionStateSnapshot, "messages" | "runtime" | "session">,
 ): boolean {
   if (snapshot.session.status === "running" || snapshot.runtime.activeTurnId) {
     return false;
@@ -72,7 +72,7 @@ export function shouldRepairImportedClaudeSnapshot(
   if (!snapshot.session.sessionId.startsWith("claude-import-") && !hasLegacyFixedMessageIds) {
     // user-only / assistant-first 只是异常形态，不等于 Claude 导入。
     // 只有稳定导入 taskId 或旧版全局 msg_import_* 污染能证明它属于迁移修复边界，
-    // 避免普通 Marid session 被同名 legacy 备份误回填成 Claude 历史。
+    // 避免普通 Qodex session 被同名 legacy 备份误回填成 Claude 历史。
     return false;
   }
   const hasAssistant = snapshot.messages.some((message) => message.info.role === "assistant");
@@ -180,7 +180,7 @@ export async function resolveImportedClaudeHistoryForRepair(
 }
 
 export async function repairImportedClaudeSessionSnapshot<T>(params: {
-  snapshot: MaridSessionStateSnapshot;
+  snapshot: QodexSessionStateSnapshot;
   target: ImportedClaudeSessionRepairTarget;
   createSession(input: ImportedClaudeSessionRepairCreateParams): Promise<T>;
   onRepair?(history: ImportedClaudeHistoryRepairResult): void;
@@ -194,8 +194,8 @@ export async function repairImportedClaudeSessionSnapshot<T>(params: {
   }
 
   params.onRepair?.(history);
-  // 早期导入可能已经创建了真实 Marid session，但没有把 Claude 历史写入
-  // marid-cli sessionStore，或用了全局 msg_import_* 导致串会话。这里统一用同名 sessionId
+  // 早期导入可能已经创建了真实 Qodex session，但没有把 Claude 历史写入
+  // qodex-cli sessionStore，或用了全局 msg_import_* 导致串会话。这里统一用同名 sessionId
   // 幂等回填 importedHistory，让 session/read、task snapshot 和远控恢复路径走同一套修复。
   return params.createSession({
     workspacePath: params.target.workspacePath,

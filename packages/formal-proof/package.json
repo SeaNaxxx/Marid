@@ -1,5 +1,5 @@
 {
-  "name": "@marid/formal-proof",
+  "name": "@qodex/formal-proof",
   "private": true,
   "type": "module",
   "exports": {

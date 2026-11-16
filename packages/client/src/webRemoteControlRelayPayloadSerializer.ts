@@ -1,8 +1,8 @@
 import {
   WEB_REMOTE_CONTROL_RPC_TRANSPORT_LIMITS,
   type WebRemoteControlAppPayload,
-} from "@marid/shared";
-import { type WebRemoteControlRelayV2OutgoingData } from "@marid/shared/web-remote-relay";
+} from "@qodex/shared";
+import { type WebRemoteControlRelayV2OutgoingData } from "@qodex/shared/web-remote-relay";
 
 export type WebRemoteControlPayloadSendResult =
   | { kind: "sent"; bytes: number }

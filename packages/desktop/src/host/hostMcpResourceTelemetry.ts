@@ -1,9 +1,9 @@
-import type { IDisposable } from "@marid/rpc";
-import type { IMaridAgentService } from "@marid/services";
-import { HostResponseTypes, type ProcessResourceRuntimeSurface } from "@marid/shared";
+import type { IDisposable } from "@qodex/rpc";
+import type { IQodexAgentService } from "@qodex/services";
+import { HostResponseTypes, type ProcessResourceRuntimeSurface } from "@qodex/shared";
 
 export function registerHostMcpResourceTelemetry(options: {
-  agentService: Pick<IMaridAgentService, "onDynamicMcpResourceSamples">;
+  agentService: Pick<IQodexAgentService, "onDynamicMcpResourceSamples">;
   postMessage(message: unknown): void;
   runtimeSurface: ProcessResourceRuntimeSurface;
   environmentKey?: string;

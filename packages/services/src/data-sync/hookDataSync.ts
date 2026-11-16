@@ -6,14 +6,14 @@ import type {
   DataSyncImportResultItem,
   DataSyncListItem,
   HookDataSyncPayload,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   WORKSPACE_HOOK_EVENT_NAMES,
   workspaceHookMatcherConfigSchema,
   workspaceHooksConfigSchema,
   type WorkspaceHookDefinition,
   type WorkspaceHookEventName,
-} from "@marid/shared/workspace-hook-discovery";
+} from "@qodex/shared/workspace-hook-discovery";
 import { readJsonObjectFileForUpdate, updateJsonObjectFile } from "#src/fs/atomicFileUtils.js";
 import { checkRemoteSyncDirectoryWriteAccess } from "#src/remote-sync/remoteSyncWriteAccess.js";
 import { resolveUserHomeDir } from "#src/subagents/subagentStorage.js";
@@ -35,9 +35,9 @@ interface HookEntry {
   index: number;
 }
 
-/** 只同步用户级 `~/.marid/cli/config.json` 的 hooks；`~/.agents`、`~/.claude` 下的只读来源不读。 */
+/** 只同步用户级 `~/.qodex/cli/config.json` 的 hooks；`~/.agents`、`~/.claude` 下的只读来源不读。 */
 function userConfigPath(): string {
-  return join(resolveUserHomeDir(), ".marid", "cli", "config.json");
+  return join(resolveUserHomeDir(), ".qodex", "cli", "config.json");
 }
 
 function sha256(value: string): string {

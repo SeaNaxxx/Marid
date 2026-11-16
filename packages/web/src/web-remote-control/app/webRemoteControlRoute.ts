@@ -1,4 +1,4 @@
-import { resolveWebRemoteControlRoutePathFromBaseUrl } from "@marid/shared";
+import { resolveWebRemoteControlRoutePathFromBaseUrl } from "@qodex/shared";
 
 interface WebRemoteControlRouteEnv {
   readonly VITE_WEB_REMOTE_CONTROL_ROUTE_PATH?: string;

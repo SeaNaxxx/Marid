@@ -6,11 +6,11 @@ import {
   DEFAULT_LOCALE,
   toZhOrEnLocale,
   type Locale,
-  MARID_BUILD_TIME,
-  MARID_COMMIT,
-  MARID_ENV,
-  MARID_VERSION,
-} from "@marid/shared";
+  QODEX_BUILD_TIME,
+  QODEX_COMMIT,
+  QODEX_ENV,
+  QODEX_VERSION,
+} from "@qodex/shared";
 import { createCustomAboutDialogHtml } from "./aboutWindow.js";
 
 interface DesktopBuildMetadata {
@@ -53,7 +53,7 @@ interface AboutSnapshotOptions {
   };
 }
 
-const ABOUT_APPLICATION_NAME = "Marid Desktop App";
+const ABOUT_APPLICATION_NAME = "Qodex Desktop App";
 // 自定义 About 内容本体是 256x280；原生窗口如果同尺寸会让内容贴满透明窗口边界。
 // 这里给 BrowserWindow 额外留出背景呼吸空间，避免正式 About 看起来比 demo 更局促。
 const ABOUT_WINDOW_WIDTH = 256;
@@ -70,18 +70,18 @@ const ABOUT_MESSAGES: Record<
   }
 > = {
   "zh-CN": {
-    aboutTitle: "关于 Marid",
+    aboutTitle: "关于 Qodex",
     versionLabel: "版本",
     okButtonLabel: "确定",
     optimizedForAppleSilicon: "已针对 Apple Silicon 优化。",
-    copyright: (year) => `版权所有 © ${year} Marid。`,
+    copyright: (year) => `版权所有 © ${year} Qodex。`,
   },
   "en-US": {
-    aboutTitle: "About Marid",
+    aboutTitle: "About Qodex",
     versionLabel: "version",
     okButtonLabel: "OK",
     optimizedForAppleSilicon: "Optimized for Apple Silicon.",
-    copyright: (year) => `Copyright © ${year} Marid.`,
+    copyright: (year) => `Copyright © ${year} Qodex.`,
   },
 };
 
@@ -152,10 +152,10 @@ export function createAboutSnapshot(options: AboutSnapshotOptions = {}): AboutSn
   };
 
   return {
-    appVersion: normalizeValue(options.appVersion ?? buildMetadata?.appVersion ?? MARID_VERSION),
-    buildCommitId: normalizeValue(buildMetadata?.buildCommitId ?? MARID_COMMIT),
-    buildTime: normalizeValue(buildMetadata?.buildTime ?? MARID_BUILD_TIME),
-    environment: normalizeValue(options.environment ?? MARID_ENV),
+    appVersion: normalizeValue(options.appVersion ?? buildMetadata?.appVersion ?? QODEX_VERSION),
+    buildCommitId: normalizeValue(buildMetadata?.buildCommitId ?? QODEX_COMMIT),
+    buildTime: normalizeValue(buildMetadata?.buildTime ?? QODEX_BUILD_TIME),
+    environment: normalizeValue(options.environment ?? QODEX_ENV),
     electronVersion: normalizeValue(runtimeVersions.electron),
     electronBuilderVersion: resolveElectronBuilderVersion(buildMetadata),
     chromiumVersion: normalizeValue(runtimeVersions.chrome),

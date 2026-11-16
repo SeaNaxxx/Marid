@@ -121,7 +121,7 @@ for (const width of [390, 1200])
         const text = await popover.innerText();
         assert.match(
           text,
-          locale === "zh-CN" ? /请先登录 Marid/ : /Sign in to Marid before sharing/,
+          locale === "zh-CN" ? /请先登录 Qodex/ : /Sign in to Qodex before sharing/,
         );
         assert.match(text, locale === "zh-CN" ? /暂时无法检查分享/ : /Unable to check this share/);
         assert.doesNotMatch(

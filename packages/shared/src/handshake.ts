@@ -1,5 +1,5 @@
 export interface HelloMessage {
-  type: "marid-hello";
+  type: "qodex-hello";
   version: string;
   platform: string;
   arch: string;
@@ -7,7 +7,7 @@ export interface HelloMessage {
 }
 
 export interface HelloAckMessage {
-  type: "marid-hello-ack";
+  type: "qodex-hello-ack";
   version: string;
   clientId: string;
 }

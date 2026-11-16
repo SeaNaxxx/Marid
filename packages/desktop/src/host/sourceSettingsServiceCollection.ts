@@ -21,8 +21,8 @@ import {
   ISettingsSyncService,
   type IServiceAccessor,
   type ServiceDescriptor,
-} from "@marid/services";
-import type { SourceServerConnectionState } from "@marid/shared";
+} from "@qodex/services";
+import type { SourceServerConnectionState } from "@qodex/shared";
 
 export function shouldDetachSourceSettingsAttachment(state: SourceServerConnectionState): boolean {
   // 只有 online generation 可继续服务设置，updating 也可能已经 dispose 旧连接。

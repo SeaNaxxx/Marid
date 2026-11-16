@@ -24,7 +24,7 @@ describe("stdio tap credential boundary", () => {
       const child = spawn(
         process.execPath,
         [
-          resolve("scripts/dev/marid-stdio-tap.mjs"),
+          resolve("scripts/dev/qodex-stdio-tap.mjs"),
           "--workspace-key",
           "test",
           "--log-dir",

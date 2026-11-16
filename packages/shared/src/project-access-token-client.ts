@@ -8,7 +8,7 @@ import {
   projectAccessTokenRequestFailureCode,
   ProjectAccessTokenTransientError,
 } from "./project-access-token.js";
-import { MARID_VERSION } from "./version.js";
+import { QODEX_VERSION } from "./version.js";
 import { isCredentialDecryptError } from "./oauth.js";
 
 const MAX_TOKEN_ISSUE_ATTEMPTS = 2;
@@ -224,7 +224,7 @@ export class ProjectAccessTokenClient {
                 {
                   method: "POST",
                   headers,
-                  body: JSON.stringify({ clientType: "marid", clientVersion: MARID_VERSION }),
+                  body: JSON.stringify({ clientType: "qodex", clientVersion: QODEX_VERSION }),
                 },
               );
               break;
@@ -352,7 +352,7 @@ export class ProjectAccessTokenClient {
       };
     }
     const url = keyListUrl(origin, location);
-    const name = input.team ? "marid-team-api-key" : "marid-api-key";
+    const name = input.team ? "qodex-team-api-key" : "qodex-api-key";
     const keyHeaders = input.team
       ? {
           ...headers,

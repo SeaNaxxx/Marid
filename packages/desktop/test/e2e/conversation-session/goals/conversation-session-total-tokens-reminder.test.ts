@@ -1,10 +1,10 @@
 // TT01–TT10 token 预算提醒（docs/conversation-session-case-catalog.md「token 预算提醒」）。
-// 规格见 apps/marid-cli/docs/design/v2/loop/meta-user-context.md「Total-tokens reminder」。
+// 规格见 apps/qodex-cli/docs/design/v2/loop/meta-user-context.md「Total-tokens reminder」。
 // 所有断言读取上游请求体。fixture 的 usage 写死，期望数值按规格的计数规则逐个算出。
 // tail 指最后一条 assistant 之后的提醒：本请求新追加的一条，或 compaction 保留下来的那一条。
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { TID_V4_COMPOSER_INPUT } from "@marid/shared/test-ids";
+import { TID_V4_COMPOSER_INPUT } from "@qodex/shared/test-ids";
 import {
   clearAppData,
   DEFAULT_WORKSPACE,
@@ -316,9 +316,9 @@ function expectProjection(requests: Request[], mcs: boolean) {
 
 // 去掉快照 system 里的预算行。node:sqlite 只提供同步接口；调用时应用已退出，没有并发写入。
 function rewriteSnapshotWithoutLine(sessionId: string) {
-  const home = process.env.MARID_E2E_HOME_DIR;
-  if (!home) throw new Error("缺少 MARID_E2E_HOME_DIR");
-  const database = new DatabaseSync(join(home, ".marid", "cli", "db", "db.sqlite"));
+  const home = process.env.QODEX_E2E_HOME_DIR;
+  if (!home) throw new Error("缺少 QODEX_E2E_HOME_DIR");
+  const database = new DatabaseSync(join(home, ".qodex", "cli", "db", "db.sqlite"));
   try {
     const id = `${sessionId}:runtime-prompt-snapshot`;
     const row = database.prepare("select data from session_entry where id = ?").get(id) as

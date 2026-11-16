@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { Emitter, type Event } from "@marid/rpc";
+import { Emitter, type Event } from "@qodex/rpc";
 import {
   ExtensionError,
   type ExtensionGrant,
   type ExtensionGrantState,
-} from "@marid/shared/extension-host";
+} from "@qodex/shared/extension-host";
 import type { ServiceLogger } from "#src/logger/serviceLogger.js";
 import type {
   ExtensionGrantRequest,

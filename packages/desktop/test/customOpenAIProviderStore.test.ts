@@ -7,8 +7,8 @@ import {
   ProviderConfigMap,
   ProviderConfigResolver,
   ProviderRegistry,
-} from "@marid/provider";
-import { decodeProviderConfigFile } from "@marid/provider-node";
+} from "@qodex/provider";
+import { decodeProviderConfigFile } from "@qodex/provider-node";
 
 describe("custom OpenAI Provider E2E seed", () => {
   afterEach(() => {
@@ -17,13 +17,13 @@ describe("custom OpenAI Provider E2E seed", () => {
   });
 
   it("只写版本化 Personal Config，不再制造旧 Provider 事实来源", async () => {
-    const homeDir = await mkdtemp(join(tmpdir(), "marid-provider-seed-"));
-    const cliConfigFile = join(homeDir, ".marid", "cli", "config.json");
+    const homeDir = await mkdtemp(join(tmpdir(), "qodex-provider-seed-"));
+    const cliConfigFile = join(homeDir, ".qodex", "cli", "config.json");
     await writeFileWithParents(
       cliConfigFile,
       JSON.stringify({ mcp: { example: { command: "example" } } }),
     );
-    vi.stubEnv("MARID_E2E_HOME_DIR", homeDir);
+    vi.stubEnv("QODEX_E2E_HOME_DIR", homeDir);
     vi.stubEnv("E2E_PROVIDER_RUNTIME_BASE_URL", "http://127.0.0.1:43123");
 
     const { seedCustomOpenAIChatCompletionsProvider } =
@@ -36,13 +36,13 @@ describe("custom OpenAI Provider E2E seed", () => {
     });
 
     const personalConfig = JSON.parse(
-      await readFile(join(homeDir, ".marid", "v2", "provider_config.json"), "utf-8"),
+      await readFile(join(homeDir, ".qodex", "v2", "provider_config.json"), "utf-8"),
     ) as { config: { modelConfigRules: unknown } };
     const personal = decodeProviderConfigFile(personalConfig);
     const resolved = new ProviderConfigResolver().resolve({
-      maridBuiltinProviders: new ProviderConfigMap(),
+      qodexBuiltinProviders: new ProviderConfigMap(),
       accountProviders: new ProviderConfigMap(),
-      maridBuiltinModelRules: new ModelConfigRules(),
+      qodexBuiltinModelRules: new ModelConfigRules(),
       personalProviders: personal.providers,
       personalModels: personal.models,
     });
@@ -91,7 +91,7 @@ describe("custom OpenAI Provider E2E seed", () => {
       }),
     );
 
-    await expect(stat(join(homeDir, ".marid", "v2", "model-providers.json"))).rejects.toMatchObject(
+    await expect(stat(join(homeDir, ".qodex", "v2", "model-providers.json"))).rejects.toMatchObject(
       { code: "ENOENT" },
     );
     expect(JSON.parse(await readFile(cliConfigFile, "utf-8"))).toEqual({
@@ -118,10 +118,10 @@ describe("custom OpenAI Provider E2E seed", () => {
   });
 
   it("E2E 观察保留 Coding Plan API Key，而不把已保存凭据投影为空", async () => {
-    const homeDir = await mkdtemp(join(tmpdir(), "marid-provider-key-read-"));
-    vi.stubEnv("MARID_E2E_HOME_DIR", homeDir);
+    const homeDir = await mkdtemp(join(tmpdir(), "qodex-provider-key-read-"));
+    vi.stubEnv("QODEX_E2E_HOME_DIR", homeDir);
     await writeFileWithParents(
-      join(homeDir, ".marid", "v2", "provider_config.json"),
+      join(homeDir, ".qodex", "v2", "provider_config.json"),
       JSON.stringify({
         schemaVersion: 1,
         config: {
@@ -151,9 +151,9 @@ describe("custom OpenAI Provider E2E seed", () => {
   });
 
   it("E2E 诊断不再读取旧 Provider Store", async () => {
-    const homeDir = await mkdtemp(join(tmpdir(), "marid-provider-read-"));
+    const homeDir = await mkdtemp(join(tmpdir(), "qodex-provider-read-"));
     await writeFileWithParents(
-      join(homeDir, ".marid", "v2", "model-providers.json"),
+      join(homeDir, ".qodex", "v2", "model-providers.json"),
       JSON.stringify([
         {
           id: "legacy-provider",
@@ -162,7 +162,7 @@ describe("custom OpenAI Provider E2E seed", () => {
         },
       ]),
     );
-    vi.stubEnv("MARID_E2E_HOME_DIR", homeDir);
+    vi.stubEnv("QODEX_E2E_HOME_DIR", homeDir);
 
     const { readModelProviders } = await import("./e2e/helpers/desktop-app.js");
     expect(await readModelProviders()).toEqual([]);

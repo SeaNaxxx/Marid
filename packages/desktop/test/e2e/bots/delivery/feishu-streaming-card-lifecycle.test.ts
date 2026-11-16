@@ -1,8 +1,8 @@
 import { createBotProjectFixture } from "#e2e/bots/helpers/bots-service-harness";
 import { readFile } from "node:fs/promises";
 
-import type { BotsConfigFile, BotsStateFile, MaridStreamEvent } from "@marid/shared";
-import { createBotsService } from "@marid/services/node";
+import type { BotsConfigFile, BotsStateFile, QodexStreamEvent } from "@qodex/shared";
+import { createBotsService } from "@qodex/services/node";
 import { createBotModelSelectionView } from "#e2e/bots/helpers/bots-service-harness";
 import { resolveE2ERuntimePath } from "#e2e/helpers/e2e-runtime-paths";
 
@@ -13,7 +13,7 @@ type LifecycleFixture = {
   classification: "synthetic";
   syntheticReason: string;
   prompt: string;
-  events: Array<Record<string, unknown> & { type: MaridStreamEvent["type"] }>;
+  events: Array<Record<string, unknown> & { type: QodexStreamEvent["type"] }>;
   expectedTimeline: string[];
   forbiddenCardMarkers: string[];
 };
@@ -53,10 +53,10 @@ describe("BOT-E2E-SC-01 Feishu streaming card lifecycle", () => {
     const sendPromptCalls: unknown[] = [];
     const subscriptions: Array<{
       params: Record<string, unknown>;
-      listener: (event: MaridStreamEvent) => Promise<void> | void;
+      listener: (event: QodexStreamEvent) => Promise<void> | void;
     }> = [];
 
-    const maridTaskService = {
+    const qodexTaskService = {
       listTasks: async () => [],
       createTask: async (params: unknown) => {
         createTaskCalls.push(params);
@@ -99,7 +99,7 @@ describe("BOT-E2E-SC-01 Feishu streaming card lifecycle", () => {
       stopGeneration: async () => undefined,
       onDynamicTaskEvent:
         (params: Record<string, unknown>) =>
-        (listener: (event: MaridStreamEvent) => Promise<void> | void) => {
+        (listener: (event: QodexStreamEvent) => Promise<void> | void) => {
           subscriptions.push({ params, listener });
           return { dispose() {} };
         },
@@ -113,7 +113,7 @@ describe("BOT-E2E-SC-01 Feishu streaming card lifecycle", () => {
         save: async () => undefined,
         delete: async () => undefined,
       },
-      maridTaskService,
+      qodexTaskService,
       settingService: {
         get: async () => ({
           locale: "zh-CN",
@@ -186,7 +186,7 @@ describe("BOT-E2E-SC-01 Feishu streaming card lifecycle", () => {
         ...fixture.events[index],
         taskId: "task-e2e-bot-streaming-card",
         traceId: `trace-e2e-bot-${index}`,
-      } as MaridStreamEvent;
+      } as QodexStreamEvent;
       await listener?.(event);
     }
 

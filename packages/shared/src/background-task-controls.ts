@@ -1,4 +1,4 @@
-export type MaridBackgroundTaskControlStatus =
+export type QodexBackgroundTaskControlStatus =
   | "pending"
   | "running"
   | "completed"
@@ -6,14 +6,14 @@ export type MaridBackgroundTaskControlStatus =
   | "killed"
   | "lost";
 
-export interface MaridBackgroundTaskControlItem {
+export interface QodexBackgroundTaskControlItem {
   jobId: string;
   toolCallId?: string;
   command: string;
   taskKind: "agent" | "bash";
   cancellable?: boolean;
   title?: string;
-  status: MaridBackgroundTaskControlStatus;
+  status: QodexBackgroundTaskControlStatus;
   startedAt?: number;
   elapsedMs?: number;
   pid?: number;
@@ -23,7 +23,7 @@ export interface MaridBackgroundTaskControlItem {
   raw?: unknown;
 }
 
-const ACTIVE_BACKGROUND_TASK_CONTROL_STATUSES = new Set<MaridBackgroundTaskControlStatus>([
+const ACTIVE_BACKGROUND_TASK_CONTROL_STATUSES = new Set<QodexBackgroundTaskControlStatus>([
   "running",
 ]);
 
@@ -148,7 +148,7 @@ function normalizeToken(value: string | undefined): string {
   );
 }
 
-type BackgroundTaskControlKind = MaridBackgroundTaskControlItem["taskKind"];
+type BackgroundTaskControlKind = QodexBackgroundTaskControlItem["taskKind"];
 
 function taskKindFromToken(token: string): BackgroundTaskControlKind | undefined {
   if (
@@ -223,7 +223,7 @@ function resolveTaskKind(record: Record<string, unknown>): BackgroundTaskControl
  * 旧 background task 事件的唯一 kind 兼容入口。
  * 新协议应直接携带 taskKind；只有历史记录缺字段时才从工具名/类型别名恢复。
  */
-export function resolveMaridBackgroundTaskControlKind(
+export function resolveQodexBackgroundTaskControlKind(
   value: unknown,
 ): BackgroundTaskControlKind | undefined {
   return isPlainRecord(value) ? resolveTaskKind(value) : undefined;
@@ -243,7 +243,7 @@ function readDisplayCommand(
   );
 }
 
-function normalizeStatus(value: string | undefined): MaridBackgroundTaskControlStatus {
+function normalizeStatus(value: string | undefined): QodexBackgroundTaskControlStatus {
   const normalized = normalizeToken(value);
   if (
     normalized === "queued" ||
@@ -297,7 +297,7 @@ function normalizeStatus(value: string | undefined): MaridBackgroundTaskControlS
 
 function readJobId(record: Record<string, unknown>, command: string): string {
   const explicitId = readStringField(record, [
-    // Marid Protocol 后台任务取消入口按 taskId 查找 runtime task 记录；
+    // Qodex Protocol 后台任务取消入口按 taskId 查找 runtime task 记录；
     // 若这里落到 toolCallId，UI 会发送 call_*，后端只能返回 background_task_not_found。
     "taskId",
     "task_id",
@@ -317,18 +317,18 @@ function readJobId(record: Record<string, unknown>, command: string): string {
   return `background-task:${pid ?? "no-pid"}:${startedAt ?? "no-start"}:${command}`;
 }
 
-export function parseMaridBackgroundTaskControlItems(
+export function parseQodexBackgroundTaskControlItems(
   value: unknown,
-): MaridBackgroundTaskControlItem[] {
+): QodexBackgroundTaskControlItem[] {
   if (!Array.isArray(value)) {
     return [];
   }
-  const jobsById = new Map<string, MaridBackgroundTaskControlItem>();
+  const jobsById = new Map<string, QodexBackgroundTaskControlItem>();
   for (const item of value) {
     if (!isPlainRecord(item)) {
       continue;
     }
-    const taskKind = resolveMaridBackgroundTaskControlKind(item);
+    const taskKind = resolveQodexBackgroundTaskControlKind(item);
     if (!taskKind) {
       continue;
     }
@@ -352,7 +352,7 @@ export function parseMaridBackgroundTaskControlItems(
     const stdoutTail = readStringField(item, ["stdoutTail", "stdout_tail"]);
     const stderrTail = readStringField(item, ["stderrTail", "stderr_tail"]);
     const outputTail = readStringField(item, ["outputTail", "output_tail"]);
-    const job: MaridBackgroundTaskControlItem = {
+    const job: QodexBackgroundTaskControlItem = {
       jobId,
       ...(toolCallId ? { toolCallId } : {}),
       command,
@@ -373,14 +373,14 @@ export function parseMaridBackgroundTaskControlItems(
   return Array.from(jobsById.values());
 }
 
-export function isActiveMaridBackgroundTaskControlItem(
-  job: MaridBackgroundTaskControlItem,
+export function isActiveQodexBackgroundTaskControlItem(
+  job: QodexBackgroundTaskControlItem,
 ): boolean {
   return ACTIVE_BACKGROUND_TASK_CONTROL_STATUSES.has(job.status);
 }
 
-export function getMaridBackgroundTaskControlItemElapsedMs(
-  job: MaridBackgroundTaskControlItem,
+export function getQodexBackgroundTaskControlItemElapsedMs(
+  job: QodexBackgroundTaskControlItem,
   now = Date.now(),
 ): number {
   const elapsedFromStart =
@@ -388,16 +388,16 @@ export function getMaridBackgroundTaskControlItemElapsedMs(
   return Math.max(elapsedFromStart ?? 0, job.elapsedMs ?? 0);
 }
 
-export function collectVisibleMaridBackgroundTaskControlItems(
-  jobs: readonly MaridBackgroundTaskControlItem[],
+export function collectVisibleQodexBackgroundTaskControlItems(
+  jobs: readonly QodexBackgroundTaskControlItem[],
   now = Date.now(),
   thresholdMs = 30_000,
-): Array<MaridBackgroundTaskControlItem & { elapsedMs: number }> {
+): Array<QodexBackgroundTaskControlItem & { elapsedMs: number }> {
   return jobs
-    .filter(isActiveMaridBackgroundTaskControlItem)
+    .filter(isActiveQodexBackgroundTaskControlItem)
     .map((job) => ({
       ...job,
-      elapsedMs: getMaridBackgroundTaskControlItemElapsedMs(job, now),
+      elapsedMs: getQodexBackgroundTaskControlItemElapsedMs(job, now),
     }))
     .filter((job) => job.elapsedMs >= thresholdMs)
     .sort((left, right) => right.elapsedMs - left.elapsedMs);

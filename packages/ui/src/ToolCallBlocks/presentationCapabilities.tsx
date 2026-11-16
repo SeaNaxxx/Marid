@@ -1,5 +1,5 @@
 import { createContext, useContext, type ReactNode } from "react";
-import type { AgentColor, ApplicationIconRequest, FileMediaPreview } from "@marid/shared";
+import type { AgentColor, ApplicationIconRequest, FileMediaPreview } from "@qodex/shared";
 
 export interface ToolPresentationCapabilities {
   readMediaPreview?: (path: string) => Promise<FileMediaPreview>;

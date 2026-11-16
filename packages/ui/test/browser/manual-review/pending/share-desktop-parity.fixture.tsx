@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
-import type { ConversationRow } from "@marid/shared/marid-protocol-v4";
+import type { ConversationRow } from "@qodex/shared/qodex-protocol-v4";
 import { TooltipProvider } from "@/components/ui/tooltip.js";
-import { MaridIntlProvider } from "@/i18n/IntlProvider.js";
+import { QodexIntlProvider } from "@/i18n/IntlProvider.js";
 import { DEFAULT_CODE_PREVIEW_SETTINGS } from "@/lib/codePreviewSettings.js";
 import { ConversationShareReadonlyTimeline } from "@/v4/ConversationShareReadonlyTimeline.js";
 import { ConversationTurnGroup } from "@/v4/ConversationTurnGroup.js";
@@ -148,13 +148,13 @@ const context = {
 
 function DesktopColumn() {
   return (
-    <MaridIntlProvider initialLocale={locale}>
+    <QodexIntlProvider initialLocale={locale}>
       <div data-parity-column="desktop" className="@container/conversation flex flex-col">
         {desktopUnits.map((unit) => (
           <ConversationTurnGroup key={unit.key} unit={unit} context={context} />
         ))}
       </div>
-    </MaridIntlProvider>
+    </QodexIntlProvider>
   );
 }
 

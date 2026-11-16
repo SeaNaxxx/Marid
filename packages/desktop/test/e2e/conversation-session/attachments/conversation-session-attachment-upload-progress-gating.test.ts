@@ -7,7 +7,7 @@ import {
   TID_V4_ATTACHMENT_UPLOAD_PROGRESS,
   TID_V4_COMPOSER_INPUT,
   TID_V4_COMPOSER_SEND,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { clearAppData } from "#e2e/helpers/desktop-app";
 import {
   prepareV4ConversationE2E,

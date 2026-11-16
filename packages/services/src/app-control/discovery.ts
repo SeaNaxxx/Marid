@@ -6,7 +6,7 @@ import {
   type AppTrustedContext,
   type SessionSummary,
   type AppSessionControlDependencies,
-} from "@marid/session-control/contracts";
+} from "@qodex/session-control/contracts";
 import type { ProjectTask, ProjectTree } from "#src/project/contract.js";
 import type {
   AppControlCallerConnection,

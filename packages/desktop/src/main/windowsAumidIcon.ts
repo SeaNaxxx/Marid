@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { win32 } from "node:path";
-import type { ApplicationIconInfo } from "@marid/shared";
+import type { ApplicationIconInfo } from "@qodex/shared";
 import { createEncodedPowerShellArgs } from "../../scripts/powershell-command.mjs";
 
 const SAFE_AUMID = /^[^\\/\s!]+![^\\/\s!]+$/u;
@@ -17,7 +17,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 
-public static class MaridAumidIcon {
+public static class QodexAumidIcon {
   [StructLayout(LayoutKind.Sequential)]
   private struct SIZE { public int cx; public int cy; }
 
@@ -64,8 +64,8 @@ public static class MaridAumidIcon {
   }
 }
 '@;
-$maridIconBytes=[MaridAumidIcon]::Read($maridArg0);
-[Console]::Out.Write([Convert]::ToBase64String($maridIconBytes));
+$qodexIconBytes=[QodexAumidIcon]::Read($qodexArg0);
+[Console]::Out.Write([Convert]::ToBase64String($qodexIconBytes));
 `;
 
 interface WindowsAumidIconDependencies {

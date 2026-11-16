@@ -1,6 +1,6 @@
 import { FileOutputIcon } from "lucide-react";
 import { useCallback, useMemo } from "react";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { ToolSnapshotFieldNotice } from "@/ToolCallBlocks/ToolSnapshotFieldNotice.js";
 import { ToolLayout } from "@/ToolCallBlocks/ToolLayout.js";
 import type { ToolCallBlockRenderContext } from "@/ToolCallBlocks/shared.js";
@@ -42,7 +42,7 @@ function isStoppedTaskStatus(status: string | undefined): boolean {
 }
 
 export function TaskOutputToolCallBlock(context: ToolCallBlockRenderContext) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const { toolCall } = context.toolCallNode;
   const display = readToolResultDisplay(toolCall.raw);
   const taskOutputDisplay = display?.kind === "task_output" ? display : undefined;

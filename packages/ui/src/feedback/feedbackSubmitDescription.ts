@@ -1,13 +1,13 @@
-import { redactFeedbackText } from "@marid/shared";
+import { redactFeedbackText } from "@qodex/shared";
 import type { FeedbackAgentModelContext } from "@/feedback/feedbackSubmitModelContext.js";
 import type {
   FeedbackTicketModule,
   FeedbackTicketSeverity,
   FeedbackTicketType,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 const TITLE_MAX = 80;
-const FEEDBACK_MARID_AGENT_LABEL = "Marid Agent";
+const FEEDBACK_QODEX_AGENT_LABEL = "Qodex Agent";
 
 type MessageFormatter = (descriptor: { id: string }, values?: Record<string, string>) => string;
 
@@ -42,8 +42,8 @@ export function buildDeveloperFacingDescription({
     `反馈类型: ${ticketType}`,
     `产品模块: ${ticketModule}`,
     `严重程度: ${ticketSeverity}`,
-    "Agent 框架: marid-agent",
-    `当前 Agent: ${FEEDBACK_MARID_AGENT_LABEL}`,
+    "Agent 框架: qodex-agent",
+    `当前 Agent: ${FEEDBACK_QODEX_AGENT_LABEL}`,
     `当前模型型号: ${redactFeedbackText(modelContext.display || modelContext.model || notReported)}`,
     "处理方式: 用户提交轻量表单，客户端自动补齐上下文，后端可异步生成 AI 分析",
     "",

@@ -4,9 +4,9 @@ import {
   type ProjectAccessTokenMaterial,
   resolveBigModelApiOrigin,
   resolveZaiBusinessBaseUrl,
-  type MaridAccountAccess,
+  type QodexAccountAccess,
   type ProviderFamilyDomain,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   isSameOAuthAccountMaterial,
   type OAuthAccountMaterial,
@@ -25,7 +25,7 @@ interface TeamPlanRequestKeyDependencies {
   readonly loadOAuthAccountMaterial: (
     family: ProviderFamilyDomain,
   ) => Promise<OAuthAccountMaterial | null>;
-  readonly access: Extract<MaridAccountAccess, { planKind: "team-coding-plan" }>;
+  readonly access: Extract<QodexAccountAccess, { planKind: "team-coding-plan" }>;
 }
 
 export async function resolveAccountTeamPlanRuntimeApiKey(
@@ -48,10 +48,10 @@ export async function resolveAccountTeamPlanRuntimeMaterial(
     });
     return null;
   }
-  const maridJwtToken = account.maridJwtToken;
-  if (family === "bigmodel" && maridJwtToken && token === maridJwtToken) {
-    // BigModel /api/biz 只接受登录 access token，不能使用旧版本误存的 Marid JWT。
-    log.warn(undefined, "Team Plan runtime key projection skipped: stale marid JWT token", {
+  const qodexJwtToken = account.qodexJwtToken;
+  if (family === "bigmodel" && qodexJwtToken && token === qodexJwtToken) {
+    // BigModel /api/biz 只接受登录 access token，不能使用旧版本误存的 Qodex JWT。
+    log.warn(undefined, "Team Plan runtime key projection skipped: stale qodex JWT token", {
       family,
       projectId,
     });

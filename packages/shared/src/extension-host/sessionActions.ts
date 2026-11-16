@@ -12,7 +12,7 @@ export type {
   AppProjectRef,
   AppSessionRef,
   AppWorkspaceRef,
-} from "@marid/session-control/contracts";
+} from "@qodex/session-control/contracts";
 
 type SessionCallId = {
   [K in CapabilityId]: K extends `sessions.${string}`

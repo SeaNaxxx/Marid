@@ -31,6 +31,6 @@ Edit 工具的 provider-visible `tool_result` 是模型判断编辑是否生效�
 
 ## 验证
 
-- `apps/marid-cli/packages/core/tests/edit-tool-contract.test.ts`
+- `apps/qodex-cli/packages/core/tests/edit-tool-contract.test.ts`
 - `pnpm typecheck`
 - `pnpm lint`

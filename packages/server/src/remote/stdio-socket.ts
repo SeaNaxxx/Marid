@@ -1,4 +1,4 @@
-import { Emitter, VSBuffer, type ISocket } from "@marid/rpc";
+import { Emitter, VSBuffer, type ISocket } from "@qodex/rpc";
 import type { StdioStream } from "./backend.js";
 
 /**

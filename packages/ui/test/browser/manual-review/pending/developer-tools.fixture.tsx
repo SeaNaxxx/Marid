@@ -2,15 +2,15 @@ import { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { DeveloperToolsPane } from "@/DeveloperToolsPane.js";
 import { ServiceProvider } from "@/hooks/useServices.js";
-import { MaridIntlProvider } from "@/i18n/IntlProvider.js";
-import type { IServiceAccessor } from "@marid/services";
+import { QodexIntlProvider } from "@/i18n/IntlProvider.js";
+import type { IServiceAccessor } from "@qodex/services";
 import "@/styles.css";
 const params = new URLSearchParams(location.search);
 document.documentElement.classList.add(
   params.get("theme") === "light" ? "theme-zai-light" : "theme-zai-dark",
 );
 const services = {
-  maridAgentService: {
+  qodexAgentService: {
     readSessionDebug: async (target: unknown) => {
       const response = await fetch("/debug", { method: "POST", body: JSON.stringify(target) });
       if (!response.ok) throw new Error("debug failed");
@@ -38,8 +38,8 @@ function Fixture() {
 }
 createRoot(document.getElementById("root")!).render(
   <ServiceProvider services={services}>
-    <MaridIntlProvider initialLocale={params.get("locale") === "en-US" ? "en-US" : "zh-CN"}>
+    <QodexIntlProvider initialLocale={params.get("locale") === "en-US" ? "en-US" : "zh-CN"}>
       <Fixture />
-    </MaridIntlProvider>
+    </QodexIntlProvider>
   </ServiceProvider>,
 );

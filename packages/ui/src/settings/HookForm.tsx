@@ -12,8 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select.js";
 import { Switch } from "@/components/ui/switch.js";
-import type { Hook, HookConfig, HookEvent, HookType } from "@marid/shared";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import type { Hook, HookConfig, HookEvent, HookType } from "@qodex/shared";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { SettingsFormTextarea } from "@/settings/SettingsFormTextarea.js";
 import { SettingsFormActions } from "@/settings/SettingsFormActions.js";
 import { PluginScopeMenu, getPluginWorkspaceKey } from "@/settings/PluginScopeMenu.js";
@@ -57,7 +57,7 @@ function HookScopeMenu({
   workspaceTabs: ConfigWorkspaceTarget[];
   onChange: (scopeKey: string) => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   return (
     <label className="flex min-w-0 flex-wrap items-center justify-end gap-2">
       <span className="shrink-0 text-ui-base text-foreground-subtle">
@@ -86,7 +86,7 @@ export function HookForm({
   selectedScopeKey,
   onScopeKeyChange,
 }: HookFormProps) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const initialStorageLevel = hook?.location?.scope === "project" ? "project" : "user";
   const [storageLevel, setStorageLevel] = useState<"user" | "project">(
     workspaceAvailable ? (hook ? initialStorageLevel : defaultStorageLevel) : "user",

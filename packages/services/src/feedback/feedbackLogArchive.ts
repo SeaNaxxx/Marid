@@ -6,13 +6,13 @@ import { pipeline } from "node:stream/promises";
 import { ZipFile } from "yazl";
 import {
   redactFeedbackText,
-  MARID_VERSION,
-  MARID_COMMIT,
+  QODEX_VERSION,
+  QODEX_COMMIT,
   CLI_MEMORY_FILE_PATTERN,
   CLI_MEMORY_MAX_FILE_BYTES,
   CLI_MEMORY_MAX_FILES,
   sanitizeCliMemoryDiagnostic,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
 const MAX_TOTAL_BYTES = 32 * 1024 * 1024;
@@ -186,7 +186,7 @@ export async function createFeedbackDiagnosticArchive(options: {
   const isToday = (mtimeMs: number) => mtimeMs >= dayStart && mtimeMs < dayEnd;
   await mkdir(options.outputRootDir, { recursive: true });
   const outputDir = await mkdtemp(join(options.outputRootDir, "archive-"));
-  const path = join(outputDir, "marid-diagnostic-logs.zip");
+  const path = join(outputDir, "qodex-diagnostic-logs.zip");
   const entries: Array<{ name: string; data: Buffer }> = [];
   const skippedLogFilesByReason: Record<string, number> = {};
   const skipLogFile = (reason: string) => {
@@ -333,10 +333,10 @@ export async function createFeedbackDiagnosticArchive(options: {
     zip.addBuffer(
       Buffer.from(
         [
-          "Marid diagnostic logs",
+          "Qodex diagnostic logs",
           `timestamp: ${now.toISOString()}`,
-          `appVersion: ${MARID_VERSION}`,
-          `commit: ${MARID_COMMIT}`,
+          `appVersion: ${QODEX_VERSION}`,
+          `commit: ${QODEX_COMMIT}`,
           `node: ${process.version}`,
           `os: ${platform()} ${release()} (${arch()})`,
           `includedLogFiles: ${entries.length}`,

@@ -10,7 +10,7 @@ import { chromium } from "playwright-core";
 import {
   observeSessionDebug,
   readSessionDebug,
-} from "../../../../../../apps/marid-cli/packages/bootstrap/src/marid-protocol/session-debug.ts";
+} from "../../../../../../apps/qodex-cli/packages/bootstrap/src/qodex-protocol/session-debug.ts";
 const root = fileURLToPath(new URL("../../../../../../", import.meta.url));
 const entry = "/packages/ui/test/browser/manual-review/pending/developer-tools.fixture.tsx";
 const record = { app: { sessionId: "session-1" } };

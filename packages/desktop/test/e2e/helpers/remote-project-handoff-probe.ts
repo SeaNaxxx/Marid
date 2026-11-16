@@ -1,6 +1,6 @@
-import { BufferReader, BufferWriter, deserialize, serialize, VSBuffer } from "@marid/rpc";
-import { PlatformChannels, ServiceChannels } from "@marid/shared";
-import type { RemoteProjectDirectory } from "@marid/services";
+import { BufferReader, BufferWriter, deserialize, serialize, VSBuffer } from "@qodex/rpc";
+import { PlatformChannels, ServiceChannels } from "@qodex/shared";
+import type { RemoteProjectDirectory } from "@qodex/services";
 
 interface HandoffRpcProbe {
   ready: boolean;

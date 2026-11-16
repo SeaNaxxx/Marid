@@ -6,7 +6,7 @@ import { dirname } from "node:path";
 
 const requireFromMcpAdapter = createRequire(
   new URL(
-    "../../../../../../apps/marid-cli/packages/adapters/package.json",
+    "../../../../../../apps/qodex-cli/packages/adapters/package.json",
     import.meta.url,
   ),
 );

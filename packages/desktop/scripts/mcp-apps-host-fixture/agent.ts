@@ -3,8 +3,8 @@ import { createServer, type Socket } from "node:net";
 import { createInterface } from "node:readline";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { MaridProtocolClient } from "../../../services/src/marid-agent/maridProtocolClient.js";
-import { MaridStdioTransport } from "../../../services/src/marid-agent/maridStdioTransport.js";
+import { QodexProtocolClient } from "../../../services/src/qodex-agent/qodexProtocolClient.js";
+import { QodexStdioTransport } from "../../../services/src/qodex-agent/qodexStdioTransport.js";
 
 export class Events<T> {
   readonly history: T[] = [];
@@ -71,19 +71,19 @@ export async function startAgent(
       // 正式回归隔离用户配置，不能读取本机 MCP、认证或把日志写入真实用户目录。
       HOME: data,
       USERPROFILE: data,
-      MARID_LOG_DIR: join(data, "logs"),
-      MARID_DATA_BASE_DIR: data,
-      MARID_SESSION_DB: join(data, "session.sqlite"),
-      MARID_STORAGE_DIR: data,
+      QODEX_LOG_DIR: join(data, "logs"),
+      QODEX_DATA_BASE_DIR: data,
+      QODEX_SESSION_DB: join(data, "session.sqlite"),
+      QODEX_STORAGE_DIR: data,
       LANG: "en_US.UTF-8",
       ...providerEnv,
     },
     stdio: ["pipe", "pipe", "pipe"],
   });
-  const transport = new MaridStdioTransport(child, {
+  const transport = new QodexStdioTransport(child, {
     onStderrLine: (line) => process.stderr.write(line + "\n"),
   });
-  const client = new MaridProtocolClient(transport, {
+  const client = new QodexProtocolClient(transport, {
     requireStorageStartup: true,
     requestTimeoutMs: 15_000,
   });
@@ -172,9 +172,9 @@ export async function startAgent(
       demo?: { serverScript: string; resourceUri: string; surface: string },
     ) {
       const pluginRoot = join(workspacePath, "editor-plugin");
-      await mkdir(join(pluginRoot, ".marid-plugin"), { recursive: true });
+      await mkdir(join(pluginRoot, ".qodex-plugin"), { recursive: true });
       await writeFile(
-        join(pluginRoot, ".marid-plugin", "plugin.json"),
+        join(pluginRoot, ".qodex-plugin", "plugin.json"),
         JSON.stringify({
           name: "background-editor",
           mcpServers: {
@@ -188,7 +188,7 @@ export async function startAgent(
         }),
       );
       await writeFile(
-        join(workspacePath, "marid.json"),
+        join(workspacePath, "qodex.json"),
         JSON.stringify({ plugins: { dirs: [pluginRoot] } }),
       );
       const workspace = { workspacePath, workspaceKey: workspacePath };

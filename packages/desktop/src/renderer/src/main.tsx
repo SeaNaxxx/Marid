@@ -8,7 +8,7 @@ import {
   Root,
   GlobalDatabaseStartupLoading,
   UpdateStatusWindowRoot,
-  MaridIntlProvider,
+  QodexIntlProvider,
   getRemoteWorkspaceSession,
   registerBaseWorkspaceServices,
   registerRemoteWorkspaceSession,
@@ -17,9 +17,9 @@ import {
   playTaskNotificationSound,
   setStreamClientId,
   setReactErrorArmsReporter,
-} from "@marid/ui";
-import "@marid/ui/styles.css";
-import { connectViaMessagePort, createMessagePortServiceConnection } from "@marid/client";
+} from "@qodex/ui";
+import "@qodex/ui/styles.css";
+import { connectViaMessagePort, createMessagePortServiceConnection } from "@qodex/client";
 import {
   InternalChannels,
   databaseStartupStateSchema,
@@ -29,9 +29,9 @@ import {
   type LaunchMarks,
   DEFAULT_LOCALE,
   isLocale,
-} from "@marid/shared";
-import type { Locale } from "@marid/shared";
-import type { IServiceAccessor } from "@marid/services";
+} from "@qodex/shared";
+import type { Locale } from "@qodex/shared";
+import type { IServiceAccessor } from "@qodex/services";
 import { createDesktopPlatform } from "./desktopPlatform.js";
 import { startPerformanceTimelineCleanup } from "./performanceTimelineCleanup.js";
 import { initializeDesktopUserActionTrace } from "./userActionTraceBootstrap.js";
@@ -45,7 +45,7 @@ import {
 } from "./remoteWorkspaceServicePortBridge.js";
 
 type DesktopRendererImportMetaEnv = {
-  VITE_MARID_E2E_STORE_BRIDGE?: string;
+  VITE_QODEX_E2E_STORE_BRIDGE?: string;
 };
 
 startPerformanceTimelineCleanup();
@@ -57,29 +57,29 @@ const launchMarks: LaunchMarks | null = parseLaunchMarks(
 );
 (
   window as Window & {
-    __MARID_RENDERER_START__?: number;
-    __MARID_LAUNCH_MARKS__?: LaunchMarks | null;
+    __QODEX_RENDERER_START__?: number;
+    __QODEX_LAUNCH_MARKS__?: LaunchMarks | null;
   }
-).__MARID_RENDERER_START__ = rendererStartedAt;
-(window as Window & { __MARID_LAUNCH_MARKS__?: LaunchMarks | null }).__MARID_LAUNCH_MARKS__ =
+).__QODEX_RENDERER_START__ = rendererStartedAt;
+(window as Window & { __QODEX_LAUNCH_MARKS__?: LaunchMarks | null }).__QODEX_LAUNCH_MARKS__ =
   launchMarks;
 registerE2EStoreBridgesIfEnabled();
 
 function registerE2EStoreBridgesIfEnabled() {
   const env = ((import.meta as ImportMeta & { env?: DesktopRendererImportMetaEnv }).env ??
     {}) as DesktopRendererImportMetaEnv;
-  if (env.VITE_MARID_E2E_STORE_BRIDGE !== "1") {
+  if (env.VITE_QODEX_E2E_STORE_BRIDGE !== "1") {
     return;
   }
 
-  void import("@marid/ui/e2e-store-bridge").then(({ registerE2EStoreBridges }) => {
+  void import("@qodex/ui/e2e-store-bridge").then(({ registerE2EStoreBridges }) => {
     registerE2EStoreBridges();
   });
 }
 
 // 初始化主题：默认 Zai dark，后续由 useTheme hook 接管
 {
-  const saved = localStorage.getItem("marid-theme") || "zai-dark";
+  const saved = localStorage.getItem("qodex-theme") || "zai-dark";
   const resolved =
     saved === "system"
       ? window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -118,9 +118,9 @@ document.documentElement.classList.toggle("platform-linux-desktop", isLinuxDeskt
 const isLocalDevelopmentRuntime =
   (
     globalThis as typeof globalThis & {
-      __MARID_LOCAL_DEVELOPMENT_RUNTIME__?: boolean;
+      __QODEX_LOCAL_DEVELOPMENT_RUNTIME__?: boolean;
     }
-  ).__MARID_LOCAL_DEVELOPMENT_RUNTIME__ === true;
+  ).__QODEX_LOCAL_DEVELOPMENT_RUNTIME__ === true;
 
 function readBooleanFlag(name: string, defaultValue: boolean): boolean {
   const value = new URLSearchParams(window.location.search).get(name);
@@ -171,7 +171,7 @@ const sendStartupControl = (control: DatabaseStartupControl) =>
 function renderDatabaseStartup(): void {
   appRoot?.render(
     <AppErrorBoundary isDesktop isMacDesktop={isMacDesktop} isWindowsDesktop={isWindowsDesktop}>
-      <MaridIntlProvider
+      <QodexIntlProvider
         initialLocale={initialLocaleFlag ? initialLocale : undefined}
         resolveSystemLocale={desktopPlatform.getSystemLocale}
       >
@@ -189,7 +189,7 @@ function renderDatabaseStartup(): void {
           onExportLogs={() => desktopPlatform.exportLogs()}
           onExit={() => sendStartupControl({ action: "exit" })}
         />
-      </MaridIntlProvider>
+      </QodexIntlProvider>
     </AppErrorBoundary>,
   );
 }
@@ -271,11 +271,11 @@ function flushPendingRemoteWorkspaceServicePorts(): void {
 function StartupReadyNotifier() {
   useEffect(() => {
     // T5:React 首次 commit。供启动分阶段耗时计算 react_commit 段。
-    (window as Window & { __MARID_REACT_COMMIT_AT__?: number }).__MARID_REACT_COMMIT_AT__ =
+    (window as Window & { __QODEX_REACT_COMMIT_AT__?: number }).__QODEX_REACT_COMMIT_AT__ =
       Date.now();
     // HTML 启动壳的弹出动画结束时，React 首屏可能还没 commit，直接移除壳会露出空白。
     // 这里在 React commit 后通知 index.html，再由启动壳统一判断动画和 React ready 两个条件后退场。
-    window.dispatchEvent(new Event("marid-react-startup-ready"));
+    window.dispatchEvent(new Event("qodex-react-startup-ready"));
   }, []);
 
   return null;
@@ -355,7 +355,7 @@ function initializeBusinessRoot(port: MessagePort): void {
 
   appRoot?.render(
     <AppErrorBoundary isDesktop isMacDesktop={isMacDesktop} isWindowsDesktop={isWindowsDesktop}>
-      <MaridIntlProvider
+      <QodexIntlProvider
         settingService={settingService}
         broadcastService={services.broadcastService}
         resolveSystemLocale={desktopPlatform.getSystemLocale}
@@ -376,7 +376,7 @@ function initializeBusinessRoot(port: MessagePort): void {
           }
           unavailableWorkspacePath={unavailableWorkspacePath}
         />
-      </MaridIntlProvider>
+      </QodexIntlProvider>
     </AppErrorBoundary>,
   );
 }

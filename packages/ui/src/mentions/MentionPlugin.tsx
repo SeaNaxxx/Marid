@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import type { MaridProvider } from "@marid/shared";
+import type { QodexProvider } from "@qodex/shared";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { createPortal } from "react-dom";
 import { PaletteIcon, WandSparkles } from "lucide-react";
@@ -15,7 +15,7 @@ import {
   KEY_ESCAPE_COMMAND,
   KEY_TAB_COMMAND,
 } from "lexical";
-import { useMaridIntl } from "../i18n/IntlProvider.js";
+import { useQodexIntl } from "../i18n/IntlProvider.js";
 import {
   extractActivePromptInputTrigger,
   getActivePromptInputTokenTailLength,
@@ -58,7 +58,7 @@ import {
   type ActivePromptInputTokenSnapshot,
 } from "./activePromptInputToken.js";
 import { getCurrentTextNodeSelection } from "./mentionHelpers.js";
-import { useMaridSessionStore } from "@/store/maridSessionStore.js";
+import { useQodexSessionStore } from "@/store/qodexSessionStore.js";
 
 interface MentionPluginProps {
   container?: HTMLElement | null;
@@ -147,10 +147,10 @@ export function MentionPlugin({
   container,
   disabled = false,
   onWhiteboardMentionSelected,
-}: MentionPluginProps & { provider: MaridProvider }) {
+}: MentionPluginProps & { provider: QodexProvider }) {
   const [editor] = useLexicalComposerContext();
-  const { intl } = useMaridIntl();
-  const draftProjectId = useMaridSessionStore(
+  const { intl } = useQodexIntl();
+  const draftProjectId = useQodexSessionStore(
     (state) => state.getWorkspaceState(workspacePath, workspaceIdentity).draftProjectId,
   );
   const [activeTrigger, setActiveTrigger] = useState<ActivePromptInputTrigger | null>(null);

@@ -1,4 +1,4 @@
-import type { ConversationRow } from "@marid/shared/marid-protocol-v4";
+import type { ConversationRow } from "@qodex/shared/qodex-protocol-v4";
 import type { PluginUiRowDisposition } from "./pluginUiInstancePolicy.js";
 
 /** 渲染层提供的按 toolCallId 的裁决：推导结果 + 用户手动固定 / 收起。 */

@@ -2,29 +2,29 @@ import {
   createServerHostServices,
   createTopicResourcePeers,
   getAppConfigDir,
-} from "@marid/services/node";
+} from "@qodex/services/node";
 import {
-  materializeBundledMaridBuiltinProviderConfig,
-  readBundledMaridBuiltinProviderConfig,
-} from "./bundledMaridBuiltinProviderConfig.js";
+  materializeBundledQodexBuiltinProviderConfig,
+  readBundledQodexBuiltinProviderConfig,
+} from "./bundledQodexBuiltinProviderConfig.js";
 import { createHttpServer, resolveHttpServerId } from "./http.js";
 
 async function main(): Promise<void> {
-  const maridBuiltinProviderConfigFilePath = await materializeBundledMaridBuiltinProviderConfig({
+  const qodexBuiltinProviderConfigFilePath = await materializeBundledQodexBuiltinProviderConfig({
     environmentConfigRoot: getAppConfigDir(),
-    content: readBundledMaridBuiltinProviderConfig(),
+    content: readBundledQodexBuiltinProviderConfig(),
   });
   const port = Number(process.env["PORT"]) || 3030;
-  const host = process.env["MARID_SERVER_HOST"]?.trim() || process.env["HOST"]?.trim() || undefined;
-  const staticRoot = process.env["MARID_WEB_STATIC_ROOT"]?.trim() || undefined;
-  const authToken = process.env["MARID_SERVER_AUTH_TOKEN"]?.trim() || undefined;
+  const host = process.env["QODEX_SERVER_HOST"]?.trim() || process.env["HOST"]?.trim() || undefined;
+  const staticRoot = process.env["QODEX_WEB_STATIC_ROOT"]?.trim() || undefined;
+  const authToken = process.env["QODEX_SERVER_AUTH_TOKEN"]?.trim() || undefined;
   const topicResourcePeers = createTopicResourcePeers();
   const serverId = resolveHttpServerId();
   const { services, workspaceIdentityMapper, migrationFailedPathCount } =
     await createServerHostServices({
       topicResourceRelayChannel: (request) => topicResourcePeers.getChannel(request),
       sourceServerId: serverId,
-      maridBuiltinProviderConfigFilePath,
+      qodexBuiltinProviderConfigFilePath,
       providerProvisioningTargetEnabled: Boolean(authToken),
     });
 
@@ -41,6 +41,6 @@ async function main(): Promise<void> {
 }
 
 void main().catch((error: unknown) => {
-  console.error("[marid-server:http] startup failed", error);
+  console.error("[qodex-server:http] startup failed", error);
   process.exitCode = 1;
 });

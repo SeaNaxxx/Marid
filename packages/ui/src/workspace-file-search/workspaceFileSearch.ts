@@ -1,1 +1,1 @@
-export * from "@marid/shared/workspaceFileSearch";
+export * from "@qodex/shared/workspaceFileSearch";

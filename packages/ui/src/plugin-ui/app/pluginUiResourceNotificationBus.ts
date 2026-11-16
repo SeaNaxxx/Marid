@@ -1,5 +1,5 @@
-import type { McpAppInstance } from "@marid/shared/mcp-apps";
-import type { PluginUiInstanceDelta } from "@marid/shared/marid-protocol-v4";
+import type { McpAppInstance } from "@qodex/shared/mcp-apps";
+import type { PluginUiInstanceDelta } from "@qodex/shared/qodex-protocol-v4";
 import type { PluginUiResourceNotificationTarget } from "../contract.js";
 import { buildPluginUiSessionKey } from "../contract.js";
 import type { PluginUiHostControllerDeps, PluginUiHostScope } from "./pluginUiHostController.js";

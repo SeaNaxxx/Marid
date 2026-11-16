@@ -1,4 +1,4 @@
-import type { IDisposable, Event } from "@marid/rpc";
+import type { IDisposable, Event } from "@qodex/rpc";
 
 export interface RemoteEnvironment {
   platform: string; // "linux" | "darwin"

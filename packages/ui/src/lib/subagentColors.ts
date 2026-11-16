@@ -1,5 +1,5 @@
 import { FACE_COLORS } from "@/components/workflow-timeline/WorkflowAgentFace.js";
-import type { AgentColor } from "@marid/shared";
+import type { AgentColor } from "@qodex/shared";
 
 export const SUBAGENT_COLORS: AgentColor[] = [
   "yellow",

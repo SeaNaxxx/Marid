@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useMaridSessionStore } from "@/store/maridSessionStore.js";
+import { useQodexSessionStore } from "@/store/qodexSessionStore.js";
 
 export function useComposerTextInsertApplied(workspacePath: string, workspaceIdentity?: string) {
   return useCallback(
@@ -15,18 +15,18 @@ export function useComposerTextInsertApplied(workspacePath: string, workspaceIde
           resolve(applied);
         };
         const handleAbort = () => {
-          const request = useMaridSessionStore
+          const request = useQodexSessionStore
             .getState()
             .getWorkspaceState(workspacePath, workspaceIdentity).composerTextInsertRequest;
           finish(false);
           if (request?.requestId === requestId) {
-            useMaridSessionStore
+            useQodexSessionStore
               .getState()
               .clearComposerTextInsertRequest(workspacePath, requestId, workspaceIdentity);
           }
         };
         const inspect = () => {
-          const state = useMaridSessionStore
+          const state = useQodexSessionStore
             .getState()
             .getWorkspaceState(workspacePath, workspaceIdentity);
           if (state.composerTextInsertVersion > requestId) {
@@ -42,7 +42,7 @@ export function useComposerTextInsertApplied(workspacePath: string, workspaceIde
           resolve(false);
           return;
         }
-        unsubscribe = useMaridSessionStore.subscribe(inspect);
+        unsubscribe = useQodexSessionStore.subscribe(inspect);
         signal.addEventListener("abort", handleAbort, { once: true });
         inspect();
       }),

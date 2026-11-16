@@ -1,5 +1,5 @@
 import { buildTaskWorkspaceKey } from "@/lib/taskQueryCache.js";
-import type { ProjectTask as MaridTaskMeta } from "@/project-sidebar/contract.js";
+import type { ProjectTask as QodexTaskMeta } from "@/project-sidebar/contract.js";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
@@ -62,23 +62,23 @@ export function VirtualizedGroupedTaskList({
   activeDragTaskKey,
   tooltipsDisabled,
 }: {
-  tasks: MaridTaskMeta[];
+  tasks: QodexTaskMeta[];
   groupId: string;
   groups: TaskGroupMenuItem[];
   activeWorkspacePath: string;
   activeWorkspaceIdentity?: string;
   activeTaskId: string | null;
   mobileActiveTaskKey?: string | null;
-  getTaskRemoteSessionId: (task: MaridTaskMeta) => string | undefined;
-  getTaskWorkspaceLabel: (task: MaridTaskMeta) => string;
+  getTaskRemoteSessionId: (task: QodexTaskMeta) => string | undefined;
+  getTaskWorkspaceLabel: (task: QodexTaskMeta) => string;
   onSelectTask: (workspacePath: string, taskId: string, workspaceIdentity?: string) => void;
-  onCloseTask: (task: MaridTaskMeta) => void;
-  onOpenFileTree?: (task: MaridTaskMeta) => void;
-  onMoveTaskToGroup: (task: MaridTaskMeta, groupId: string | null) => void;
-  onMoveTaskToTop: (task: MaridTaskMeta) => void;
-  onStartRenameTask: (task: MaridTaskMeta) => void;
-  onArchiveTask: (task: MaridTaskMeta) => void;
-  onMarkTaskAsUnread: (task: MaridTaskMeta) => void;
+  onCloseTask: (task: QodexTaskMeta) => void;
+  onOpenFileTree?: (task: QodexTaskMeta) => void;
+  onMoveTaskToGroup: (task: QodexTaskMeta, groupId: string | null) => void;
+  onMoveTaskToTop: (task: QodexTaskMeta) => void;
+  onStartRenameTask: (task: QodexTaskMeta) => void;
+  onArchiveTask: (task: QodexTaskMeta) => void;
+  onMarkTaskAsUnread: (task: QodexTaskMeta) => void;
   activeDragTaskKey?: string | null;
   tooltipsDisabled?: boolean;
 }) {
@@ -153,7 +153,7 @@ export function VirtualizedGroupedTaskList({
   const measureElement = rowVirtualizer.measureElement;
 
   const renderTask = useCallback(
-    (task: MaridTaskMeta) => (
+    (task: QodexTaskMeta) => (
       <GroupedTaskItem
         key={taskKey(task)}
         task={task}

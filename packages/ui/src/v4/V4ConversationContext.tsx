@@ -30,8 +30,8 @@ import type {
   V4ConversationWorkflowRunsParams,
   V4ConversationWorkflowRunEventsResult,
   V4ConversationWorkflowRunsResult,
-} from "@marid/shared/marid-protocol-v4";
-import type { IServiceAccessor } from "@marid/services";
+} from "@qodex/shared/qodex-protocol-v4";
+import type { IServiceAccessor } from "@qodex/services";
 import { ServiceProvider } from "@/hooks/useServices.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
 import {
@@ -159,14 +159,14 @@ function ReadyV4ConversationProvider({
   services: IServiceAccessor;
   remoteSessionId: string | null;
 }) {
-  const { maridAgentService } = services;
+  const { qodexAgentService } = services;
   const platform = usePlatform();
   const bundle = useMemo(() => {
-    const transport = createAgentConversationTransport(maridAgentService, {
+    const transport = createAgentConversationTransport(qodexAgentService, {
       workspacePath,
       workspaceIdentity,
       // 主 workspace resolver 已识别远端 endpoint，但这里曾丢弃
-      // remoteSessionId，导致远端绝对路径被交给本机 marid-media。仅本地 endpoint 注入转换器。
+      // remoteSessionId，导致远端绝对路径被交给本机 qodex-media。仅本地 endpoint 注入转换器。
       ...(remoteSessionId === null && platform.createLocalMediaPreviewUrl
         ? { createLocalMediaPreviewUrl: platform.createLocalMediaPreviewUrl }
         : {}),
@@ -209,7 +209,7 @@ function ReadyV4ConversationProvider({
     remoteSessionId,
     workspacePath,
     workspaceIdentity,
-    maridAgentService,
+    qodexAgentService,
   ]);
 
   useEffect(() => {
@@ -346,7 +346,7 @@ function ReadyV4PaneConversationProvider({
 }: Pick<V4PaneConversationProviderProps, "scope" | "children"> & {
   services: IServiceAccessor;
 }) {
-  const agentService = services.maridAgentService;
+  const agentService = services.qodexAgentService;
   const platform = usePlatform();
 
   // 与 V4ConversationProvider 相同的 useMemo 同步建连模式（renderer 无 StrictMode，

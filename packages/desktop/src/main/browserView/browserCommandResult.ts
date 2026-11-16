@@ -1,4 +1,4 @@
-import type { BrowserCommandResult } from "@marid/shared";
+import type { BrowserCommandResult } from "@qodex/shared";
 
 export type BrowserCommandDone = (
   partial: Omit<BrowserCommandResult, "elapsedMs">,

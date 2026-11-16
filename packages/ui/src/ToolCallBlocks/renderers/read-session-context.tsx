@@ -1,7 +1,7 @@
 import { BookOpenTextIcon } from "lucide-react";
 import { useCallback, useMemo } from "react";
 import { MessageResponse } from "@/components/ai-elements/message.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { ToolSnapshotFieldNotice } from "@/ToolCallBlocks/ToolSnapshotFieldNotice.js";
 import { ToolLayout } from "@/ToolCallBlocks/ToolLayout.js";
 import type { ToolCallBlockRenderContext } from "@/ToolCallBlocks/shared.js";
@@ -175,7 +175,7 @@ function extractResultContent(
 }
 
 export function ReadSessionContextToolCallBlock(context: ToolCallBlockRenderContext) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const { toolCallNode, isRunning, statusLabel, errorText } = context;
   const { toolCall } = toolCallNode;
   const query = extractQuery(toolCall);

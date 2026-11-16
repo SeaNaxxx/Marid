@@ -1,5 +1,5 @@
-import { BufferReader, BufferWriter, deserialize, serialize, VSBuffer } from "@marid/rpc";
-import { ServiceChannels } from "@marid/shared";
+import { BufferReader, BufferWriter, deserialize, serialize, VSBuffer } from "@qodex/rpc";
+import { ServiceChannels } from "@qodex/shared";
 
 interface ProjectUnreadProbe {
   held: number[] | null;

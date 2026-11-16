@@ -6,8 +6,8 @@
 
 ## 本次改动
 
-- `IMaridTaskService.getTaskSnapshot` 支持可选参数：`messageLimit?: number`
-- 服务端在 Marid task snapshot 组装时对 `messages` 做尾部裁剪：
+- `IQodexTaskService.getTaskSnapshot` 支持可选参数：`messageLimit?: number`
+- 服务端在 Qodex task snapshot 组装时对 `messages` 做尾部裁剪：
   - 不传 `messageLimit`：保持现有全量行为
   - `messageLimit <= 0`：返回空消息数组
   - `messageLimit > 0`：返回最近 `messageLimit` 条消息

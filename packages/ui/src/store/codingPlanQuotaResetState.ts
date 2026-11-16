@@ -1,5 +1,5 @@
-import type { BroadcastClaimLease, BroadcastMessage, IBroadcastService } from "@marid/services";
-import type { CodingPlanResetType } from "@marid/shared";
+import type { BroadcastClaimLease, BroadcastMessage, IBroadcastService } from "@qodex/services";
+import type { CodingPlanResetType } from "@qodex/shared";
 import type {
   CodingPlanQuotaResetUiEntries,
   CodingPlanQuotaResetUiEntry,

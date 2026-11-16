@@ -5,7 +5,7 @@ import {
   TID_TASK_ITEM,
   TID_V4_SESSION_PANE,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { clearAppData } from "#e2e/helpers/desktop-app";
 import { seedArchiveAutomations } from "#e2e/helpers/archive-automations";
 import {
@@ -88,14 +88,14 @@ describe("任务列表归档二次确认 E2E", () => {
 async function useProjectConversationTaskView() {
   await browser.execute(() => {
     localStorage.setItem(
-      "marid-sidebar-task-preferences",
+      "qodex-sidebar-task-preferences",
       JSON.stringify({
         organizeBy: "project",
         sortBy: "updated",
       }),
     );
     localStorage.setItem(
-      "marid-sidebar-purpose-section-preferences",
+      "qodex-sidebar-purpose-section-preferences",
       JSON.stringify({
         projectsExpanded: true,
         conversationsExpanded: true,

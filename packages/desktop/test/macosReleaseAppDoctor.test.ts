@@ -3,7 +3,7 @@ import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { HELPER_APP_NAME, HELPER_DISPLAY_NAME } from "@marid/marid-cua/broker/helperConstants";
+import { HELPER_APP_NAME, HELPER_DISPLAY_NAME } from "@qodex/qodex-cua/broker/helperConstants";
 import { afterEach, describe, expect, it } from "vitest";
 
 const isWindows = process.platform === "win32";
@@ -39,11 +39,11 @@ for arg in "$@"; do
   printf '\\t%s' "$arg" >> "${logPath}"
 done
 printf '\\n' >> "${logPath}"
-if [[ "${toolName}" == "codesign" && "\${MARID_FAKE_CODESIGN_FAIL_HELPER:-0}" == "1" && "$*" == *"${HELPER_APP_NAME}"* ]]; then
+if [[ "${toolName}" == "codesign" && "\${QODEX_FAKE_CODESIGN_FAIL_HELPER:-0}" == "1" && "$*" == *"${HELPER_APP_NAME}"* ]]; then
   echo "fake helper codesign rejection" >&2
   exit 7
 fi
-if [[ "${toolName}" == "xcrun" && "\${MARID_FAKE_STAPLER_FAIL_HELPER:-0}" == "1" && "$*" == *"${HELPER_APP_NAME}"* ]]; then
+if [[ "${toolName}" == "xcrun" && "\${QODEX_FAKE_STAPLER_FAIL_HELPER:-0}" == "1" && "$*" == *"${HELPER_APP_NAME}"* ]]; then
   echo "fake helper stapler rejection" >&2
   exit 8
 fi
@@ -51,7 +51,7 @@ fi
   );
 }
 
-function createReleaseApp(rootDir: string, productName = "Marid") {
+function createReleaseApp(rootDir: string, productName = "Qodex") {
   const appPath = join(rootDir, `${productName}.app`);
 
   writeExecutable(join(appPath, "Contents", "MacOS", productName), "#!/bin/bash\n");
@@ -59,9 +59,9 @@ function createReleaseApp(rootDir: string, productName = "Marid") {
   return { appPath };
 }
 
-function createMaridHomeHelper(maridHome: string, variant?: string) {
+function createQodexHomeHelper(qodexHome: string, variant?: string) {
   const helperAppPath = join(
-    maridHome,
+    qodexHome,
     "computer-use",
     ...(variant ? [variant] : []),
     HELPER_APP_NAME,
@@ -75,9 +75,9 @@ function runDoctor(appPath: string, binDir: string, extraEnv: NodeJS.ProcessEnv 
     cwd: REPO_ROOT,
     env: {
       ...process.env,
-      MARID_ENV: "production",
+      QODEX_ENV: "production",
       // Test selection must not inherit a developer's active dev/preview helper variant.
-      MARID_CUA_HELPER_INSTALL_VARIANT: "",
+      QODEX_CUA_HELPER_INSTALL_VARIANT: "",
       ...extraEnv,
       PATH: `${binDir}:${process.env.PATH ?? ""}`,
     },
@@ -94,12 +94,12 @@ afterEach(() => {
 
 describe.skipIf(isWindows)("doctor-macos-release-app.sh", () => {
   it("Preview 自动按 bundle 名推导主可执行，并验收 preview Helper 目录", () => {
-    const workspaceDir = makeTempDir("marid-macos-preview-doctor-");
+    const workspaceDir = makeTempDir("qodex-macos-preview-doctor-");
     const binDir = join(workspaceDir, "bin");
     const toolLog = join(workspaceDir, "tool.log");
-    const { appPath } = createReleaseApp(workspaceDir, "Marid Preview");
-    const maridHome = join(workspaceDir, ".marid");
-    const helperAppPath = createMaridHomeHelper(maridHome, "preview");
+    const { appPath } = createReleaseApp(workspaceDir, "Qodex Preview");
+    const qodexHome = join(workspaceDir, ".qodex");
+    const helperAppPath = createQodexHomeHelper(qodexHome, "preview");
 
     mkdirSync(binDir, { recursive: true });
     writeFakeTool(binDir, "codesign", toolLog);
@@ -107,29 +107,29 @@ describe.skipIf(isWindows)("doctor-macos-release-app.sh", () => {
     writeFakeTool(binDir, "xcrun", toolLog);
 
     const output = runDoctor(appPath, binDir, {
-      MARID_ENV: "test",
-      MARID_CUA_REQUIRE_HELPER: "1",
-      MARID_HOME: maridHome,
+      QODEX_ENV: "test",
+      QODEX_CUA_REQUIRE_HELPER: "1",
+      QODEX_HOME: qodexHome,
     });
 
-    expect(output).toContain(`validating Marid Preview.app: ${appPath}`);
+    expect(output).toContain(`validating Qodex Preview.app: ${appPath}`);
     const log = readFileSync(toolLog, "utf-8");
     expect(log).toContain(`codesign\t--verify\t--deep\t--strict\t${appPath}`);
     expect(log).toContain(`codesign\t--verify\t--deep\t--strict\t${helperAppPath}`);
   });
 
-  it("默认只验收安装后的 Marid.app，不强绑 Computer Use Helper 发布", () => {
-    const workspaceDir = makeTempDir("marid-macos-release-doctor-");
+  it("默认只验收安装后的 Qodex.app，不强绑 Computer Use Helper 发布", () => {
+    const workspaceDir = makeTempDir("qodex-macos-release-doctor-");
     const binDir = join(workspaceDir, "bin");
     const toolLog = join(workspaceDir, "tool.log");
     const { appPath } = createReleaseApp(workspaceDir);
-    const maridHome = join(workspaceDir, ".marid");
+    const qodexHome = join(workspaceDir, ".qodex");
 
     mkdirSync(binDir, { recursive: true });
     writeFakeTool(binDir, "codesign", toolLog);
     writeFakeTool(binDir, "spctl", toolLog);
 
-    const output = runDoctor(appPath, binDir, { MARID_HOME: maridHome });
+    const output = runDoctor(appPath, binDir, { QODEX_HOME: qodexHome });
 
     expect(output).toContain("[macos-release-doctor] done");
     const log = readFileSync(toolLog, "utf-8");
@@ -139,13 +139,13 @@ describe.skipIf(isWindows)("doctor-macos-release-app.sh", () => {
     expect(output).toContain("standalone Computer Use Helper.app not required");
   });
 
-  it("CUA release gate 验收外置 Marid Computer Use.app", () => {
-    const workspaceDir = makeTempDir("marid-macos-release-doctor-helper-");
+  it("CUA release gate 验收外置 Qodex Computer Use.app", () => {
+    const workspaceDir = makeTempDir("qodex-macos-release-doctor-helper-");
     const binDir = join(workspaceDir, "bin");
     const toolLog = join(workspaceDir, "tool.log");
     const { appPath } = createReleaseApp(workspaceDir);
-    const maridHome = join(workspaceDir, ".marid");
-    const helperAppPath = createMaridHomeHelper(maridHome);
+    const qodexHome = join(workspaceDir, ".qodex");
+    const helperAppPath = createQodexHomeHelper(qodexHome);
 
     mkdirSync(binDir, { recursive: true });
     writeFakeTool(binDir, "codesign", toolLog);
@@ -153,8 +153,8 @@ describe.skipIf(isWindows)("doctor-macos-release-app.sh", () => {
     writeFakeTool(binDir, "xcrun", toolLog);
 
     const output = runDoctor(appPath, binDir, {
-      MARID_CUA_REQUIRE_HELPER: "1",
-      MARID_HOME: maridHome,
+      QODEX_CUA_REQUIRE_HELPER: "1",
+      QODEX_HOME: qodexHome,
     });
 
     expect(output).toContain("[macos-release-doctor] done");
@@ -167,12 +167,12 @@ describe.skipIf(isWindows)("doctor-macos-release-app.sh", () => {
   });
 
   it("CUA release gate 在 Helper staple 无效时应 fail-closed", () => {
-    const workspaceDir = makeTempDir("marid-macos-release-doctor-stapler-fail-");
+    const workspaceDir = makeTempDir("qodex-macos-release-doctor-stapler-fail-");
     const binDir = join(workspaceDir, "bin");
     const toolLog = join(workspaceDir, "tool.log");
     const { appPath } = createReleaseApp(workspaceDir);
-    const maridHome = join(workspaceDir, ".marid");
-    const helperAppPath = createMaridHomeHelper(maridHome);
+    const qodexHome = join(workspaceDir, ".qodex");
+    const helperAppPath = createQodexHomeHelper(qodexHome);
 
     mkdirSync(binDir, { recursive: true });
     writeFakeTool(binDir, "codesign", toolLog);
@@ -181,19 +181,19 @@ describe.skipIf(isWindows)("doctor-macos-release-app.sh", () => {
 
     expect(() =>
       runDoctor(appPath, binDir, {
-        MARID_CUA_REQUIRE_HELPER: "1",
-        MARID_CUA_HELPER_APP_PATH: helperAppPath,
-        MARID_FAKE_STAPLER_FAIL_HELPER: "1",
+        QODEX_CUA_REQUIRE_HELPER: "1",
+        QODEX_CUA_HELPER_APP_PATH: helperAppPath,
+        QODEX_FAKE_STAPLER_FAIL_HELPER: "1",
       }),
     ).toThrow(/fake helper stapler rejection/);
   });
 
   it("CUA release gate 缺少外置 Helper.app 时应 fail-closed", () => {
-    const workspaceDir = makeTempDir("marid-macos-release-doctor-missing-helper-");
+    const workspaceDir = makeTempDir("qodex-macos-release-doctor-missing-helper-");
     const binDir = join(workspaceDir, "bin");
     const toolLog = join(workspaceDir, "tool.log");
     const { appPath } = createReleaseApp(workspaceDir);
-    const maridHome = join(workspaceDir, ".marid");
+    const qodexHome = join(workspaceDir, ".qodex");
 
     mkdirSync(binDir, { recursive: true });
     writeFakeTool(binDir, "codesign", toolLog);
@@ -201,14 +201,14 @@ describe.skipIf(isWindows)("doctor-macos-release-app.sh", () => {
 
     expect(() =>
       runDoctor(appPath, binDir, {
-        MARID_CUA_REQUIRE_HELPER: "1",
-        MARID_HOME: maridHome,
+        QODEX_CUA_REQUIRE_HELPER: "1",
+        QODEX_HOME: qodexHome,
       }),
     ).toThrow(/Computer Use Helper\.app missing/);
   });
 
-  it("CUA release gate 在没有 MARID_HOME/HOME 时应 fail-closed", () => {
-    const workspaceDir = makeTempDir("marid-macos-release-doctor-no-home-");
+  it("CUA release gate 在没有 QODEX_HOME/HOME 时应 fail-closed", () => {
+    const workspaceDir = makeTempDir("qodex-macos-release-doctor-no-home-");
     const binDir = join(workspaceDir, "bin");
     const toolLog = join(workspaceDir, "tool.log");
     const { appPath } = createReleaseApp(workspaceDir);
@@ -219,20 +219,20 @@ describe.skipIf(isWindows)("doctor-macos-release-app.sh", () => {
 
     expect(() =>
       runDoctor(appPath, binDir, {
-        MARID_CUA_REQUIRE_HELPER: "1",
-        MARID_HOME: "",
+        QODEX_CUA_REQUIRE_HELPER: "1",
+        QODEX_HOME: "",
         HOME: "",
       }),
     ).toThrow(/no product helper path/);
   });
 
   it("helper codesign 失败时不应继续判定 release app 验收成功", () => {
-    const workspaceDir = makeTempDir("marid-macos-release-doctor-fail-helper-");
+    const workspaceDir = makeTempDir("qodex-macos-release-doctor-fail-helper-");
     const binDir = join(workspaceDir, "bin");
     const toolLog = join(workspaceDir, "tool.log");
     const { appPath } = createReleaseApp(workspaceDir);
-    const maridHome = join(workspaceDir, ".marid");
-    const helperAppPath = createMaridHomeHelper(maridHome);
+    const qodexHome = join(workspaceDir, ".qodex");
+    const helperAppPath = createQodexHomeHelper(qodexHome);
 
     mkdirSync(binDir, { recursive: true });
     writeFakeTool(binDir, "codesign", toolLog);
@@ -240,9 +240,9 @@ describe.skipIf(isWindows)("doctor-macos-release-app.sh", () => {
 
     expect(() =>
       runDoctor(appPath, binDir, {
-        MARID_CUA_REQUIRE_HELPER: "1",
-        MARID_HOME: maridHome,
-        MARID_FAKE_CODESIGN_FAIL_HELPER: "1",
+        QODEX_CUA_REQUIRE_HELPER: "1",
+        QODEX_HOME: qodexHome,
+        QODEX_FAKE_CODESIGN_FAIL_HELPER: "1",
       }),
     ).toThrow(/fake helper codesign rejection/);
 
@@ -252,12 +252,12 @@ describe.skipIf(isWindows)("doctor-macos-release-app.sh", () => {
   });
 
   it("helper 主可执行仍是 shell wrapper 时应 fail-closed", () => {
-    const workspaceDir = makeTempDir("marid-macos-release-doctor-helper-wrapper-");
+    const workspaceDir = makeTempDir("qodex-macos-release-doctor-helper-wrapper-");
     const binDir = join(workspaceDir, "bin");
     const toolLog = join(workspaceDir, "tool.log");
     const { appPath } = createReleaseApp(workspaceDir);
-    const maridHome = join(workspaceDir, ".marid");
-    const helperAppPath = createMaridHomeHelper(maridHome);
+    const qodexHome = join(workspaceDir, ".qodex");
+    const helperAppPath = createQodexHomeHelper(qodexHome);
     writeExecutable(join(helperAppPath, "Contents", "MacOS", HELPER_DISPLAY_NAME), "#!/bin/bash\n");
 
     mkdirSync(binDir, { recursive: true });
@@ -266,8 +266,8 @@ describe.skipIf(isWindows)("doctor-macos-release-app.sh", () => {
 
     expect(() =>
       runDoctor(appPath, binDir, {
-        MARID_CUA_REQUIRE_HELPER: "1",
-        MARID_HOME: maridHome,
+        QODEX_CUA_REQUIRE_HELPER: "1",
+        QODEX_HOME: qodexHome,
       }),
     ).toThrow(/not a Mach-O executable/);
     const log = existsSync(toolLog) ? readFileSync(toolLog, "utf-8") : "";

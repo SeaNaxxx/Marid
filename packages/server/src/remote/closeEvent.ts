@@ -1,5 +1,5 @@
 import { constants } from "node:os";
-import { Emitter, type Event } from "@marid/rpc";
+import { Emitter, type Event } from "@qodex/rpc";
 
 interface CloseEventController {
   event: Event<number>;

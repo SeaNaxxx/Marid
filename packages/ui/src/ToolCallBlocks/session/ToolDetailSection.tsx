@@ -1,6 +1,6 @@
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useState, type ReactNode } from "react";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { Button } from "@/components/ui/button.js";
 
 export function ToolDetailSection({
@@ -12,7 +12,7 @@ export function ToolDetailSection({
   value?: string;
   children: ReactNode;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const [copiedValue, setCopiedValue] = useState<string | null>(null);
   const [copyFailed, setCopyFailed] = useState(false);
   const copied = value !== undefined && copiedValue === value;

@@ -1,4 +1,4 @@
-import { formatMaridAgentProcessName } from "@marid/shared";
+import { formatQodexAgentProcessName } from "@qodex/shared";
 import { startDraftFromProject, waitForProjectRow } from "./project-sidebar.js";
 import {
   countAgentProcessRows,
@@ -27,11 +27,11 @@ export async function waitForActiveWorkspacePath(
         return await browser.execute((expectedPath) => {
           const tabStore = (
             window as Window & {
-              __maridTabStoreE2E?: {
+              __qodexTabStoreE2E?: {
                 getState?: () => { activeWorkspacePath?: string | null };
               };
             }
-          ).__maridTabStoreE2E;
+          ).__qodexTabStoreE2E;
           return tabStore?.getState?.().activeWorkspacePath === expectedPath;
         }, expectedWorkspacePath);
       } catch {
@@ -75,9 +75,9 @@ export async function assertStableAgentSelection(
   expect(identities).toHaveLength(expectedWorkspacePaths.length);
 
   const expected = new Set(expectedWorkspacePaths);
-  const placeholderPrefix = formatMaridAgentProcessName("placeholder");
+  const placeholderPrefix = formatQodexAgentProcessName("placeholder");
   for (const workspacePath of allWorkspacePaths) {
-    const formatted = formatMaridAgentProcessName("placeholder", workspacePath);
+    const formatted = formatQodexAgentProcessName("placeholder", workspacePath);
     const workspaceNameSuffix = formatted.slice(placeholderPrefix.length);
     const actual = await countAgentProcessRows({ workspaceNameSuffix });
     expect(actual).toBe(expected.has(workspacePath) ? 1 : 0);

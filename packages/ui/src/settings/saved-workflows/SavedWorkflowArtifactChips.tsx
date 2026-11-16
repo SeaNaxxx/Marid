@@ -1,4 +1,4 @@
-import { TID_WORKFLOW_ARTIFACT_CHIP, type MaridSavedWorkflowRun } from "@marid/shared";
+import { TID_WORKFLOW_ARTIFACT_CHIP, type QodexSavedWorkflowRun } from "@qodex/shared";
 import type { ArtifactPillSize } from "@/components/workflow-timeline/WorkflowArtifactPill.js";
 import { WorkflowArtifactStrip } from "@/components/workflow-timeline/WorkflowArtifactStrip.js";
 
@@ -18,7 +18,7 @@ export function SavedWorkflowArtifactChips({
   className,
   size = "sm",
 }: {
-  artifacts: NonNullable<MaridSavedWorkflowRun["artifacts"]>;
+  artifacts: NonNullable<QodexSavedWorkflowRun["artifacts"]>;
   /** 缺席即药丸禁用（老行没有 `parentSessionId`，或宿主没注入打开能力）。 */
   onOpenArtifact?: (artifactId: string) => void;
   size?: ArtifactPillSize;

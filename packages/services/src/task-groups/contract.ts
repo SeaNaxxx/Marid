@@ -1,4 +1,4 @@
-import { ServiceChannels, type MaridTaskMeta } from "@marid/shared";
+import { ServiceChannels, type QodexTaskMeta } from "@qodex/shared";
 import { createServiceDescriptor } from "#src/descriptors.js";
 
 export type TaskGroupColor = "gray" | "red" | "orange" | "yellow" | "green" | "blue" | "purple";
@@ -29,7 +29,7 @@ export interface MoveGroupNode {
   anchor?: { node: GroupNode; side: "before" | "after" };
 }
 export type GroupTaskFact = GroupTaskRef &
-  Pick<MaridTaskMeta, "cronAutomationId" | "offPeakTaskId"> & {
+  Pick<QodexTaskMeta, "cronAutomationId" | "offPeakTaskId"> & {
     createdAt?: number;
     archived?: boolean;
     deleted?: boolean;

@@ -1,4 +1,4 @@
-import { LOCAL_TTFT_TTL_MS } from "@marid/shared";
+import { LOCAL_TTFT_TTL_MS } from "@qodex/shared";
 
 const MAX_OBSERVATIONS = 1024;
 const MAX_FACTS_PER_OBSERVATION = 512;

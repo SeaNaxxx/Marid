@@ -6,8 +6,8 @@ import {
   type PersonalProviderConfigRepository,
   type ProviderConfigLayerSnapshot,
   type ProviderConfigLayerUpdate,
-} from "@marid/provider";
-import { atomicWritePrivateTextFile, withFileLock } from "@marid/shared/node";
+} from "@qodex/provider";
+import { atomicWritePrivateTextFile, withFileLock } from "@qodex/shared/node";
 import {
   decodeProviderConfigFile,
   encodeProviderConfigFile,

@@ -1,91 +1,91 @@
 // 平台能力面收敛：设置页「插件管理」的薄服务接口。
 //
-// 背景：pluginManagementStore / usePluginUninstall 过去直接注入 IMaridAgentService，
+// 背景：pluginManagementStore / usePluginUninstall 过去直接注入 IQodexAgentService，
 // UI 层因此散布 13 个 plugins/* 旧协议词的消费点。收敛为独立薄 service 后，UI 只依赖
 // 本接口；plugins/* 词表的 host 侧消费点收拢到 pluginManagementService 一处（插件的
-// 事实源在 marid-cli 进程，服务实现仍经 agent 协议往返——plugins 词表的收口归属
+// 事实源在 qodex-cli 进程，服务实现仍经 agent 协议往返——plugins 词表的收口归属
 // 插件能力面自身的协议演进，不在会话 v4 词表范围内）。
 // 注意与既有 IPluginsService（已 retired 的 marketplace pluginStore 通道）区分：
 // 那套接口按 pluginName+marketplace 寻址且方法语义过时，不复用避免签名冲突。
-import type { Event } from "@marid/rpc";
+import type { Event } from "@qodex/rpc";
 import type {
-  MaridPluginOperationProgressNotification,
-  MaridPluginsConfigureResult,
-  MaridPluginsCancelOperationResult,
-  MaridPluginsDescribeResult,
-  MaridPluginsInstallResult,
-  MaridPluginsListResult,
-  MaridPluginsMarketplaceMutationResult,
-  MaridPluginsOverviewResult,
-  MaridPluginsReferenceCatalogResult,
-  MaridPluginsRestoreBuiltinResult,
-  MaridPluginsSetEnabledResult,
-  MaridPluginsUninstallResult,
-  MaridPluginsValidateResult,
-} from "@marid/shared";
-import { ServiceChannels } from "@marid/shared";
+  QodexPluginOperationProgressNotification,
+  QodexPluginsConfigureResult,
+  QodexPluginsCancelOperationResult,
+  QodexPluginsDescribeResult,
+  QodexPluginsInstallResult,
+  QodexPluginsListResult,
+  QodexPluginsMarketplaceMutationResult,
+  QodexPluginsOverviewResult,
+  QodexPluginsReferenceCatalogResult,
+  QodexPluginsRestoreBuiltinResult,
+  QodexPluginsSetEnabledResult,
+  QodexPluginsUninstallResult,
+  QodexPluginsValidateResult,
+} from "@qodex/shared";
+import { ServiceChannels } from "@qodex/shared";
 import { createServiceDescriptor } from "../descriptors.js";
 import type {
-  MaridAgentAddPluginMarketplaceParams,
-  MaridAgentConfigurePluginParams,
-  MaridAgentCancelPluginOperationParams,
-  MaridAgentDescribePluginParams,
-  MaridAgentInstallPluginParams,
-  MaridAgentPluginReferenceCatalogParams,
-  MaridAgentResolveSuggestedPluginReferenceParams,
-  MaridAgentResetPluginConfigParams,
-  MaridAgentPluginViewParams,
-  MaridAgentRemovePluginMarketplaceParams,
-  MaridAgentRestoreBuiltinPluginParams,
-  MaridAgentSetPluginEnabledParams,
-  MaridAgentUninstallPluginParams,
-  MaridAgentUpdatePluginMarketplaceParams,
-  MaridAgentUpdatePluginParams,
-  MaridAgentValidatePluginParams,
-} from "../marid-agent/maridAgentPluginParams.js";
+  QodexAgentAddPluginMarketplaceParams,
+  QodexAgentConfigurePluginParams,
+  QodexAgentCancelPluginOperationParams,
+  QodexAgentDescribePluginParams,
+  QodexAgentInstallPluginParams,
+  QodexAgentPluginReferenceCatalogParams,
+  QodexAgentResolveSuggestedPluginReferenceParams,
+  QodexAgentResetPluginConfigParams,
+  QodexAgentPluginViewParams,
+  QodexAgentRemovePluginMarketplaceParams,
+  QodexAgentRestoreBuiltinPluginParams,
+  QodexAgentSetPluginEnabledParams,
+  QodexAgentUninstallPluginParams,
+  QodexAgentUpdatePluginMarketplaceParams,
+  QodexAgentUpdatePluginParams,
+  QodexAgentValidatePluginParams,
+} from "../qodex-agent/qodexAgentPluginParams.js";
 
 export interface IPluginManagementService {
-  listPlugins(params: MaridAgentPluginViewParams): Promise<MaridPluginsListResult>;
+  listPlugins(params: QodexAgentPluginViewParams): Promise<QodexPluginsListResult>;
   /**
    * Plugin 对话引用 catalog：
    * 带 sessionId → session-owned 冻结 catalog；不带 → workspace 当前 catalog。
    * 实现路由到 workspace 级 agent client，不走插件管理独立进程。
    */
   getPluginReferenceCatalog(
-    params: MaridAgentPluginReferenceCatalogParams,
-  ): Promise<MaridPluginsReferenceCatalogResult>;
+    params: QodexAgentPluginReferenceCatalogParams,
+  ): Promise<QodexPluginsReferenceCatalogResult>;
   resolveSuggestedPluginReference(
-    params: MaridAgentResolveSuggestedPluginReferenceParams,
-  ): Promise<import("@marid/shared").MaridPluginsResolveSuggestedReferenceResult>;
+    params: QodexAgentResolveSuggestedPluginReferenceParams,
+  ): Promise<import("@qodex/shared").QodexPluginsResolveSuggestedReferenceResult>;
   onDynamicPluginOperationProgress(
     operationId: string,
-  ): Event<MaridPluginOperationProgressNotification>;
-  getPluginsOverview(params: MaridAgentPluginViewParams): Promise<MaridPluginsOverviewResult>;
+  ): Event<QodexPluginOperationProgressNotification>;
+  getPluginsOverview(params: QodexAgentPluginViewParams): Promise<QodexPluginsOverviewResult>;
   addPluginMarketplace(
-    params: MaridAgentAddPluginMarketplaceParams,
-  ): Promise<MaridPluginsMarketplaceMutationResult>;
+    params: QodexAgentAddPluginMarketplaceParams,
+  ): Promise<QodexPluginsMarketplaceMutationResult>;
   removePluginMarketplace(
-    params: MaridAgentRemovePluginMarketplaceParams,
-  ): Promise<MaridPluginsMarketplaceMutationResult>;
+    params: QodexAgentRemovePluginMarketplaceParams,
+  ): Promise<QodexPluginsMarketplaceMutationResult>;
   updatePluginMarketplace(
-    params: MaridAgentUpdatePluginMarketplaceParams,
-  ): Promise<MaridPluginsMarketplaceMutationResult>;
-  installPlugin(params: MaridAgentInstallPluginParams): Promise<MaridPluginsInstallResult>;
+    params: QodexAgentUpdatePluginMarketplaceParams,
+  ): Promise<QodexPluginsMarketplaceMutationResult>;
+  installPlugin(params: QodexAgentInstallPluginParams): Promise<QodexPluginsInstallResult>;
   cancelPluginOperation(
-    params: MaridAgentCancelPluginOperationParams,
-  ): Promise<MaridPluginsCancelOperationResult>;
-  uninstallPlugin(params: MaridAgentUninstallPluginParams): Promise<MaridPluginsUninstallResult>;
-  updatePlugin(params: MaridAgentUpdatePluginParams): Promise<MaridPluginsInstallResult>;
+    params: QodexAgentCancelPluginOperationParams,
+  ): Promise<QodexPluginsCancelOperationResult>;
+  uninstallPlugin(params: QodexAgentUninstallPluginParams): Promise<QodexPluginsUninstallResult>;
+  updatePlugin(params: QodexAgentUpdatePluginParams): Promise<QodexPluginsInstallResult>;
   restoreBuiltinPlugin(
-    params: MaridAgentRestoreBuiltinPluginParams,
-  ): Promise<MaridPluginsRestoreBuiltinResult>;
-  configurePlugin(params: MaridAgentConfigurePluginParams): Promise<MaridPluginsConfigureResult>;
+    params: QodexAgentRestoreBuiltinPluginParams,
+  ): Promise<QodexPluginsRestoreBuiltinResult>;
+  configurePlugin(params: QodexAgentConfigurePluginParams): Promise<QodexPluginsConfigureResult>;
   resetPluginConfig(
-    params: MaridAgentResetPluginConfigParams,
-  ): Promise<MaridPluginsConfigureResult>;
-  validatePlugin(params: MaridAgentValidatePluginParams): Promise<MaridPluginsValidateResult>;
-  describePlugin(params: MaridAgentDescribePluginParams): Promise<MaridPluginsDescribeResult>;
-  setPluginEnabled(params: MaridAgentSetPluginEnabledParams): Promise<MaridPluginsSetEnabledResult>;
+    params: QodexAgentResetPluginConfigParams,
+  ): Promise<QodexPluginsConfigureResult>;
+  validatePlugin(params: QodexAgentValidatePluginParams): Promise<QodexPluginsValidateResult>;
+  describePlugin(params: QodexAgentDescribePluginParams): Promise<QodexPluginsDescribeResult>;
+  setPluginEnabled(params: QodexAgentSetPluginEnabledParams): Promise<QodexPluginsSetEnabledResult>;
 }
 
 export const IPluginManagementService = createServiceDescriptor<IPluginManagementService>(
@@ -95,7 +95,7 @@ export const IPluginManagementService = createServiceDescriptor<IPluginManagemen
 /** 入口只附加观测上下文；RPC 方法由 Proxy 动态提供，不能通过对象展开复制。 */
 export function withPluginTelemetry(
   service: IPluginManagementService,
-  telemetry: NonNullable<MaridAgentInstallPluginParams["telemetry"]>,
+  telemetry: NonNullable<QodexAgentInstallPluginParams["telemetry"]>,
 ): IPluginManagementService {
   const mutations = new Set<PropertyKey>([
     "addPluginMarketplace",
@@ -114,7 +114,7 @@ export function withPluginTelemetry(
       const method = Reflect.get(target, property, target);
       if (typeof method !== "function") return method;
       if (!mutations.has(property)) return method.bind(target);
-      return (params: MaridAgentInstallPluginParams) =>
+      return (params: QodexAgentInstallPluginParams) =>
         method.call(target, { ...params, telemetry });
     },
   });

@@ -1,15 +1,15 @@
-import type { MaridContextCompactionTimelineMeta } from "@marid/shared";
+import type { QodexContextCompactionTimelineMeta } from "@qodex/shared";
 
 const RUNNING_CONTEXT_COMPACTION_STATUSES = new Set(["started", "retrying"]);
 
 export function isRunningContextCompactionTimeline(
-  timeline: MaridContextCompactionTimelineMeta,
+  timeline: QodexContextCompactionTimelineMeta,
 ): boolean {
   return RUNNING_CONTEXT_COMPACTION_STATUSES.has(timeline.status);
 }
 
 export function shouldContextCompactionTimelineCompleteTask(
-  timeline: MaridContextCompactionTimelineMeta,
+  timeline: QodexContextCompactionTimelineMeta,
 ): boolean {
   if (isRunningContextCompactionTimeline(timeline)) {
     return false;

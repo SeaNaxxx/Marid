@@ -1,4 +1,4 @@
-import type { SessionLifecycleSnapshot } from "@marid/shared";
+import type { SessionLifecycleSnapshot } from "@qodex/shared";
 import { logger } from "@/logger.js";
 import type { ConversationTransport } from "@/v4/transport.js";
 

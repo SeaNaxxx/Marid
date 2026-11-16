@@ -11,16 +11,16 @@ import type {
   AccountProviderConnectionResult,
   ProviderConfigSnapshot,
   ProviderSource,
-} from "@marid/provider";
-import { AccountProviderService, createAccountProviderConfigResolver } from "@marid/provider";
+} from "@qodex/provider";
+import { AccountProviderService, createAccountProviderConfigResolver } from "@qodex/provider";
 import {
   resolveStartPlanFamilyFromOAuthProvider,
   type ApiClient,
   type ProviderFamilyConnectionSelectionSettings,
   type ProviderFamilyDomain,
-  type MaridAccountAccess,
-  type MaridProviderAccountAccess,
-} from "@marid/shared";
+  type QodexAccountAccess,
+  type QodexProviderAccountAccess,
+} from "@qodex/shared";
 import type {
   CodingPlanAvailabilityProvider,
   CodingPlanAvailabilityResult,
@@ -407,13 +407,13 @@ export function createCodingPlanFamilyAvailabilityResolver(
  * 每次请求重新读取当前选择；只有 family 与 mode 兼容时才返回动态访问事实。
  */
 export async function resolveCurrentAccountAccess(input: {
-  readonly access: MaridProviderAccountAccess;
+  readonly access: QodexProviderAccountAccess;
   readonly readSettings: () => Promise<AccountProviderConnectionSettings>;
   readonly loadAccountIdentity: (family: ProviderFamilyDomain) => Promise<string | null>;
   readonly loadStartPlanMaterial: (
     family: ProviderFamilyDomain,
   ) => Promise<OAuthStartPlanMaterial | null>;
-}): Promise<MaridAccountAccess | null> {
+}): Promise<QodexAccountAccess | null> {
   const settings = await input.readSettings();
   const { accountType, mode } = input.access;
   if (mode === "start-plan") {

@@ -22,7 +22,7 @@ describe("web Vite config", () => {
         webRoot,
         "silent",
       );
-      expect(result?.config.define?.__MARID_VERSION__).toBe(
+      expect(result?.config.define?.__QODEX_VERSION__).toBe(
         JSON.stringify(override?.trim() || version),
       );
     },
@@ -56,13 +56,13 @@ describe("web Vite config", () => {
       "silent",
     );
 
-    expect(result?.config.plugins?.some((plugin) => plugin.name === "marid:pdfjs-cmaps")).toBe(
+    expect(result?.config.plugins?.some((plugin) => plugin.name === "qodex:pdfjs-cmaps")).toBe(
       true,
     );
   });
 
-  it("显式 MARID_ENV=production 时注入生产 ZAI OAuth 和 API 链接", async () => {
-    vi.stubEnv("MARID_ENV", "production");
+  it("显式 QODEX_ENV=production 时注入生产 ZAI OAuth 和 API 链接", async () => {
+    vi.stubEnv("QODEX_ENV", "production");
     const webRoot = resolve(import.meta.dirname, "..");
     const configFile = resolve(webRoot, "vite.config.ts");
     const result = await loadConfigFromFile(
@@ -79,7 +79,7 @@ describe("web Vite config", () => {
 
     expect(result?.config.define).toMatchObject({
       "import.meta.env.VITE_ZAI_OAUTH_CLIENT_ID": JSON.stringify("client_P8X5CMWmlaRO9gyO-KSqtg"),
-      "import.meta.env.VITE_MARID_BASE_URL": JSON.stringify("https://marid.z.ai"),
+      "import.meta.env.VITE_QODEX_BASE_URL": JSON.stringify("https://qodex.z.ai"),
     });
   });
 
@@ -87,7 +87,7 @@ describe("web Vite config", () => {
     ["test", "https://bigmodel.cn"],
     ["production", "https://bigmodel.cn"],
   ])("%s 构建向远控登录页注入对应 BigModel 授权域名", async (environment, origin) => {
-    vi.stubEnv("MARID_ENV", environment);
+    vi.stubEnv("QODEX_ENV", environment);
     const webRoot = resolve(import.meta.dirname, "..");
     const result = await loadConfigFromFile(
       { command: "build", mode: "production", isPreview: false, isSsrBuild: false },
@@ -106,8 +106,8 @@ describe("web Vite config", () => {
   (isWindows ? it.skip : it)(
     "uses the same public ZAI OAuth origin in local development mode",
     async () => {
-      vi.stubEnv("MARID_ENV", "");
-      vi.stubEnv("MARID_BASE_URL", "");
+      vi.stubEnv("QODEX_ENV", "");
+      vi.stubEnv("QODEX_BASE_URL", "");
       vi.stubEnv("ZAI_OAUTH_ORIGIN", "");
       vi.stubEnv("ZAI_OAUTH_CLIENT_ID", "");
       const webRoot = resolve(import.meta.dirname, "..");
@@ -126,15 +126,15 @@ describe("web Vite config", () => {
 
       expect(result?.config.define).toMatchObject({
         "import.meta.env.VITE_ZAI_OAUTH_CLIENT_ID": JSON.stringify("client_P8X5CMWmlaRO9gyO-KSqtg"),
-        "import.meta.env.VITE_MARID_BASE_URL": JSON.stringify("https://marid.z.ai"),
+        "import.meta.env.VITE_QODEX_BASE_URL": JSON.stringify("https://qodex.z.ai"),
         "import.meta.env.VITE_ZAI_OAUTH_ORIGIN": JSON.stringify("https://chat.z.ai"),
       });
     },
   );
 
-  it("uses shared Marid endpoint env override for renderer injection", async () => {
-    vi.stubEnv("MARID_ENV", "test");
-    vi.stubEnv("MARID_BASE_URL", "https://marid.z.ai/custom/path");
+  it("uses shared Qodex endpoint env override for renderer injection", async () => {
+    vi.stubEnv("QODEX_ENV", "test");
+    vi.stubEnv("QODEX_BASE_URL", "https://qodex.z.ai/custom/path");
     const webRoot = resolve(import.meta.dirname, "..");
     const configFile = resolve(webRoot, "vite.config.ts");
     const result = await loadConfigFromFile(
@@ -150,8 +150,8 @@ describe("web Vite config", () => {
     );
 
     expect(result?.config.define).toMatchObject({
-      "import.meta.env.VITE_MARID_BASE_URL": JSON.stringify("https://marid.z.ai"),
-      "import.meta.env.VITE_MARID_ENDPOINT_ORIGIN": JSON.stringify("https://marid.z.ai"),
+      "import.meta.env.VITE_QODEX_BASE_URL": JSON.stringify("https://qodex.z.ai"),
+      "import.meta.env.VITE_QODEX_ENDPOINT_ORIGIN": JSON.stringify("https://qodex.z.ai"),
     });
   });
 });

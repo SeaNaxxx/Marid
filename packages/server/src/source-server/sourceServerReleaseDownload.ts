@@ -1,7 +1,7 @@
-import type { IRemoteBackend } from "@marid/server/remote/backend.js";
-import { buildRemoteArtifactDownloadCommand } from "@marid/server/remote/remoteAssetInstaller.js";
-import { detectRemoteAssetTools } from "@marid/server/remote/remoteAssetPreflight.js";
-import type { ServerReleaseAsset } from "@marid/server/source-server/transportAdapter.js";
+import type { IRemoteBackend } from "@qodex/server/remote/backend.js";
+import { buildRemoteArtifactDownloadCommand } from "@qodex/server/remote/remoteAssetInstaller.js";
+import { detectRemoteAssetTools } from "@qodex/server/remote/remoteAssetPreflight.js";
+import type { ServerReleaseAsset } from "@qodex/server/source-server/transportAdapter.js";
 
 export async function buildSourceServerReleaseDownloadCommand(options: {
   backend: IRemoteBackend;

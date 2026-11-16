@@ -1,4 +1,4 @@
-import { BUILTIN_MODEL_PROVIDER_IDS, type UsageEntitlementSnapshot } from "@marid/shared";
+import { BUILTIN_MODEL_PROVIDER_IDS, type UsageEntitlementSnapshot } from "@qodex/shared";
 
 const startIds: readonly string[] = [
   BUILTIN_MODEL_PROVIDER_IDS.bigmodelStartPlan,

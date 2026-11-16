@@ -1,5 +1,5 @@
-import type { IServiceAccessor } from "@marid/services";
-import { Event, ProxyChannel, type IChannel } from "@marid/rpc";
+import type { IServiceAccessor } from "@qodex/services";
+import { Event, ProxyChannel, type IChannel } from "@qodex/rpc";
 import { useMemo } from "react";
 import { useOptionalServices, useServices } from "@/hooks/useServices.js";
 import {

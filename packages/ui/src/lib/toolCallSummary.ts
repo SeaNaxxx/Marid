@@ -3,10 +3,10 @@ export {
   getCompactToolCallSummary,
   isCompactToolCallFinishedState,
   isCompactToolCallRunningState,
-} from "@marid/shared";
+} from "@qodex/shared";
 export type {
   CompactToolCallState,
   ToolCallChangeStat,
   ToolCallSummary,
   ToolCallSummarySource,
-} from "@marid/shared";
+} from "@qodex/shared";

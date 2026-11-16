@@ -1,27 +1,27 @@
-import { maridProtocolTraceSchema, type MaridProtocolTrace } from "./marid-protocol/trace.js";
+import { qodexProtocolTraceSchema, type QodexProtocolTrace } from "./qodex-protocol/trace.js";
 import { channelContentPartsSchema, type ChannelContentPart } from "./channel-mention.js";
 /* oxlint-disable eslint(max-lines) -- Bot 共享合约集中维护 provider、状态和 schema，保持类型与校验就近。 */
 import { z } from "zod";
 import { modelSelectionSchema, type ModelSelection } from "./model-selection.js";
 import { conversationQuotesSchema } from "./conversationSelection.js";
-import { MARID_AGENT_PROVIDER, MARID_AGENT_PROVIDER_LABEL } from "./marid-agent-policy.js";
+import { QODEX_AGENT_PROVIDER, QODEX_AGENT_PROVIDER_LABEL } from "./qodex-agent-policy.js";
 import type {
-  MaridConfigOption,
-  MaridElicitationRequest,
-  MaridElicitationQuestion,
-  MaridPermissionRequest,
-  MaridPromptAttachment,
-  MaridProvider,
-  MaridStreamEvent,
-  MaridTaskMeta,
-  MaridTaskRuntimeStatus,
-} from "./marid-task-types-core.js";
+  QodexConfigOption,
+  QodexElicitationRequest,
+  QodexElicitationQuestion,
+  QodexPermissionRequest,
+  QodexPromptAttachment,
+  QodexProvider,
+  QodexStreamEvent,
+  QodexTaskMeta,
+  QodexTaskRuntimeStatus,
+} from "./qodex-task-types-core.js";
 import {
-  maridInteractionRequestOriginSchema,
-  maridPermissionResponseSchema,
-  type MaridInteractionRequestOrigin,
-  type MaridPermissionResponse,
-} from "./marid-protocol-legacy-types.js";
+  qodexInteractionRequestOriginSchema,
+  qodexPermissionResponseSchema,
+  type QodexInteractionRequestOrigin,
+  type QodexPermissionResponse,
+} from "./qodex-protocol-legacy-types.js";
 import type { Locale } from "./protocol.js";
 
 export const botProviders = [
@@ -41,7 +41,7 @@ export type FeishuBotProvider = Extract<BotProvider, "feishu" | "lark">;
  * 定时任务完成后的 Bot 回推目标。只保留未来仍稳定的会话地址；当前消息 id/context token
  * 属于一次入站交互，不能持久化后复用。该字段由 Host 注入，模型工具参数不直接暴露。
  */
-export const maridAutomationBotDeliveryTargetSchema = z
+export const qodexAutomationBotDeliveryTargetSchema = z
   .object({
     provider: z.enum(["feishu", "lark", "weixin"]),
     botId: z.string().trim().min(1),
@@ -52,8 +52,8 @@ export const maridAutomationBotDeliveryTargetSchema = z
   })
   .strict();
 
-export type MaridAutomationBotDeliveryTarget = z.infer<
-  typeof maridAutomationBotDeliveryTargetSchema
+export type QodexAutomationBotDeliveryTarget = z.infer<
+  typeof qodexAutomationBotDeliveryTargetSchema
 >;
 
 export function isFeishuBotProvider(provider: BotProvider): provider is FeishuBotProvider {
@@ -133,7 +133,7 @@ export interface BotPendingPermissionOption {
   optionId: string;
   command: "approve" | "deny";
   label: string;
-  response: MaridPermissionResponse;
+  response: QodexPermissionResponse;
   handledAt?: number;
 }
 
@@ -141,10 +141,10 @@ export interface BotPendingElicitation {
   taskId: string;
   requestId: string;
   runId: string;
-  origin?: MaridInteractionRequestOrigin;
+  origin?: QodexInteractionRequestOrigin;
   actorKey?: string;
   currentQuestionIndex: number;
-  questions: MaridElicitationQuestion[];
+  questions: QodexElicitationQuestion[];
   answers: Record<string, string[]>;
   renderContext?: {
     kind: "plan_approval";
@@ -165,7 +165,7 @@ export interface BotOutboundElicitationRequest {
   taskId: string;
   runId: string;
   currentQuestionIndex: number;
-  questions: MaridElicitationQuestion[];
+  questions: QodexElicitationQuestion[];
   answers?: Record<string, string[]>;
   status?: "pending" | "completed" | "cancelled";
   expandedCustomAnswerQuestionIndexes?: number[];
@@ -173,7 +173,7 @@ export interface BotOutboundElicitationRequest {
 }
 
 export interface BotDraftOptions {
-  provider: MaridProvider;
+  provider: QodexProvider;
   modelSelection?: ModelSelection;
   mode?: string;
 }
@@ -218,7 +218,7 @@ export const botGroupDeliverySchema = z
       .regex(/^[a-f0-9]{64}$/u)
       .optional(),
     appId: z.string().optional(),
-    trace: maridProtocolTraceSchema.optional(),
+    trace: qodexProtocolTraceSchema.optional(),
     authorizationId: z.string().optional(),
     id: z.string().min(1),
     taskId: z.string().min(1),
@@ -615,7 +615,7 @@ export interface BotInboundMessage {
 }
 
 export interface BotOutboundMessage {
-  trace?: MaridProtocolTrace;
+  trace?: QodexProtocolTrace;
   contentParts?: ChannelContentPart[];
   groupCard?: BotGroupCard;
   threadId?: string;
@@ -646,10 +646,10 @@ export interface BotOutboundMessage {
 export interface BotTaskSummary {
   taskId: string;
   title: string;
-  status: MaridTaskRuntimeStatus | "persisted-completed" | "persisted-error" | "unknown";
+  status: QodexTaskRuntimeStatus | "persisted-completed" | "persisted-error" | "unknown";
   workspacePath: string;
   workspaceIdentity?: string;
-  provider?: MaridProvider;
+  provider?: QodexProvider;
   model?: string;
 }
 
@@ -675,17 +675,17 @@ export interface BotTaskBroadcastPayload {
   taskId: string;
   event: BotTaskBroadcastEvent;
   updatedAt: number;
-  task?: MaridTaskMeta;
-  provider?: MaridProvider;
-  configOptions?: MaridConfigOption[];
+  task?: QodexTaskMeta;
+  provider?: QodexProvider;
+  configOptions?: QodexConfigOption[];
   prompt?: {
     content: string;
-    attachments?: MaridPromptAttachment[];
+    attachments?: QodexPromptAttachment[];
     messageId: string;
     sentAt: number;
   };
-  permissionRequest?: MaridPermissionRequest;
-  elicitationRequest?: MaridElicitationRequest;
+  permissionRequest?: QodexPermissionRequest;
+  elicitationRequest?: QodexElicitationRequest;
   requestId?: string;
   error?: string;
 }
@@ -694,7 +694,7 @@ export interface BotTaskStreamBroadcastPayload {
   workspacePath: string;
   workspaceIdentity?: string;
   taskId: string;
-  event: MaridStreamEvent;
+  event: QodexStreamEvent;
   updatedAt: number;
 }
 
@@ -730,12 +730,12 @@ export const botAllowedCommandsSchema = z
 
 export const botCommandPolicySchema = botAllowedCommandsSchema;
 
-// 修复原因：第三方 CLI provider 已移除，MaridProvider 只剩 glm，但旧 bot 配置与状态文件里可能仍存有
+// 修复原因：第三方 CLI provider 已移除，QodexProvider 只剩 glm，但旧 bot 配置与状态文件里可能仍存有
 // 已移除 provider 的历史值。改成严格 literal 会让整份文件 parse 失败、Bot 全部不可用；
 // 因此解析时继续接受这些历史值，并统一归一到当前唯一的 agent provider。
 const legacyBotAgentProviderSchema = z
   .enum(["codex", "claude", "opencode", "gemini", "glm"])
-  .transform((): typeof MARID_AGENT_PROVIDER => MARID_AGENT_PROVIDER);
+  .transform((): typeof QODEX_AGENT_PROVIDER => QODEX_AGENT_PROVIDER);
 
 export const botCurrentOptionsSchema = z
   .object({
@@ -743,7 +743,7 @@ export const botCurrentOptionsSchema = z
     mode: z.string().min(1).optional(),
     sandboxMode: z.string().min(1).optional(),
     approvalPolicy: z.string().min(1).optional(),
-    // 兼容旧 bot-config.json；CLI provider 现在统一由 Marid Protocol 侧配置决定。
+    // 兼容旧 bot-config.json；CLI provider 现在统一由 Qodex Protocol 侧配置决定。
     cli: legacyBotAgentProviderSchema.optional(),
   })
   .strict();
@@ -778,7 +778,7 @@ const botPendingElicitationSchema = z
     taskId: z.string().min(1),
     requestId: z.string().min(1),
     runId: z.string().min(1),
-    origin: maridInteractionRequestOriginSchema.optional(),
+    origin: qodexInteractionRequestOriginSchema.optional(),
     actorKey: z.string().min(1).optional(),
     currentQuestionIndex: z.number().int().min(0),
     questions: z.array(botElicitationQuestionSchema),
@@ -904,7 +904,7 @@ export const botsStateFileSchema = z
               optionId: z.string().min(1),
               command: z.enum(["approve", "deny"]),
               label: z.string().min(1),
-              response: maridPermissionResponseSchema,
+              response: qodexPermissionResponseSchema,
               handledAt: z.number().optional(),
             }),
           )
@@ -953,7 +953,7 @@ export function normalizeBotReplyGranularity(
   return supported.includes(candidate) ? candidate : supported[0]!;
 }
 
-export const BOT_MARID_PROVIDER_OPTIONS: Array<{
-  id: MaridProvider;
+export const BOT_QODEX_PROVIDER_OPTIONS: Array<{
+  id: QodexProvider;
   label: string;
-}> = [{ id: MARID_AGENT_PROVIDER, label: MARID_AGENT_PROVIDER_LABEL }];
+}> = [{ id: QODEX_AGENT_PROVIDER, label: QODEX_AGENT_PROVIDER_LABEL }];

@@ -1,5 +1,5 @@
 {
-  "name": "@marid/provider-node",
+  "name": "@qodex/provider-node",
   "private": true,
   "type": "module",
   "exports": {
@@ -11,13 +11,13 @@
     "lint": "oxlint"
   },
   "dependencies": {
-    "@marid/provider": "workspace:*",
-    "@marid/shared": "workspace:*",
+    "@qodex/provider": "workspace:*",
+    "@qodex/shared": "workspace:*",
     "zod": "4.6.5"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
-    "@marid/model-option-map": "workspace:*",
+    "@qodex/model-option-map": "workspace:*",
     "typescript": "^6.0.2"
   }
 }

@@ -1,4 +1,4 @@
-import { resolveWorkspaceKey } from "@marid/shared";
+import { resolveWorkspaceKey } from "@qodex/shared";
 import type {
   ConversationWorkspaceTab,
   ConversationWorkspaceTarget,

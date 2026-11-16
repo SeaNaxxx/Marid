@@ -3,7 +3,7 @@ import { readFile, readdir, realpath, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import { basename, dirname, join, relative } from "node:path";
 import { parse as parseYaml } from "yaml";
-import { SKILL_DATA_SYNC_MAX_ITEM_BYTES } from "@marid/shared";
+import { SKILL_DATA_SYNC_MAX_ITEM_BYTES } from "@qodex/shared";
 import type { ISkillSyncService } from "./skillSync.js";
 import {
   MAX_SKILL_SCAN_DEPTH,
@@ -33,8 +33,8 @@ export function resolveUserHomeDir(): string {
   return process.env.HOME?.trim() || process.env.USERPROFILE?.trim() || homedir();
 }
 
-export function getUserMaridSkillRoot(): string {
-  return join(resolveUserHomeDir(), ".marid", "skills");
+export function getUserQodexSkillRoot(): string {
+  return join(resolveUserHomeDir(), ".qodex", "skills");
 }
 
 function getUserAgentsSkillRoot(): string {
@@ -42,31 +42,31 @@ function getUserAgentsSkillRoot(): string {
 }
 
 /**
- * 用户级技能候选：`~/.marid/skills` 优先，`~/.agents/skills` 中同目录名或同 name 的项剔除，再按 realpath 去重。
+ * 用户级技能候选：`~/.qodex/skills` 优先，`~/.agents/skills` 中同目录名或同 name 的项剔除，再按 realpath 去重。
  * 文件数与字节签名由数据同步的 list 自己计算。
  */
 export async function collectUserSkillCandidates(): Promise<UserSkillCandidate[]> {
   const seenSkillRealpaths = new Set<string>();
-  const userMaridSkillRoot = getUserMaridSkillRoot();
-  const rawMaridCandidates = await collectUserSkillCandidatesInRoot(userMaridSkillRoot);
-  const maridDirectoryNames = await collectCoveredSkillDirectoryNamesInRoot(userMaridSkillRoot);
-  const maridSkillNameKeys = new Set(
-    rawMaridCandidates.map((candidate) => normalizeSkillNameKey(candidate.name)),
+  const userQodexSkillRoot = getUserQodexSkillRoot();
+  const rawQodexCandidates = await collectUserSkillCandidatesInRoot(userQodexSkillRoot);
+  const qodexDirectoryNames = await collectCoveredSkillDirectoryNamesInRoot(userQodexSkillRoot);
+  const qodexSkillNameKeys = new Set(
+    rawQodexCandidates.map((candidate) => normalizeSkillNameKey(candidate.name)),
   );
-  const maridCandidates = await dedupeCandidatesByCanonicalSkillPath(
-    rawMaridCandidates,
+  const qodexCandidates = await dedupeCandidatesByCanonicalSkillPath(
+    rawQodexCandidates,
     seenSkillRealpaths,
   );
   const agentsCandidates = await dedupeCandidatesByCanonicalSkillPath(
     (await collectUserSkillCandidatesInRoot(getUserAgentsSkillRoot())).filter(
       (candidate) =>
-        !maridDirectoryNames.has(candidate.directoryName) &&
-        !maridSkillNameKeys.has(normalizeSkillNameKey(candidate.name)),
+        !qodexDirectoryNames.has(candidate.directoryName) &&
+        !qodexSkillNameKeys.has(normalizeSkillNameKey(candidate.name)),
     ),
     seenSkillRealpaths,
   );
 
-  return [...maridCandidates, ...agentsCandidates].sort((left, right) =>
+  return [...qodexCandidates, ...agentsCandidates].sort((left, right) =>
     left.directoryName.localeCompare(right.directoryName),
   );
 }

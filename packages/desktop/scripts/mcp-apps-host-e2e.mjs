@@ -19,15 +19,15 @@ const options = parseMcpAppsHostOptions(process.argv.slice(2));
 const { modes } = options;
 const output = options.outputDir
   ? resolve(options.outputDir)
-  : await mkdtemp(join(tmpdir(), "marid-mcp-host-e2e-"));
+  : await mkdtemp(join(tmpdir(), "qodex-mcp-host-e2e-"));
 await mkdir(output, { recursive: true });
 process.stdout.write(`[mcp-apps-host-e2e] artifacts: ${output}\n`);
 const fixture = join(desktop, "scripts/mcp-apps-host-fixture");
-const showcaseServer = process.env.MARID_SHOWCASE_SERVER;
+const showcaseServer = process.env.QODEX_SHOWCASE_SERVER;
 if (process.argv.includes("--showcase-only")) {
   if (!showcaseServer)
     throw new Error(
-      "Set MARID_SHOWCASE_SERVER to the built Showcase dist/server.mjs from marid-plugins",
+      "Set QODEX_SHOWCASE_SERVER to the built Showcase dist/server.mjs from qodex-plugins",
     );
   await access(showcaseServer);
 }
@@ -60,9 +60,9 @@ if (
       const runtimeOptions = resolveSpawnRuntimeOptions("pnpm");
       const args = [
         "--dir",
-        join(root, "apps/marid-cli"),
+        join(root, "apps/qodex-cli"),
         "--filter",
-        `@marid/${name}`,
+        `@qodex/${name}`,
         name === "cli" ? "build:desktop-agent" : "build",
       ];
       const child = spawn("pnpm", runtimeOptions.shell ? quoteArgsForWindowsShell(args) : args, {
@@ -82,7 +82,7 @@ const alias = {
   "@": join(root, "packages/ui/src"),
   ...Object.fromEntries(
     Object.entries(sharedExports).map(([key, value]) => [
-      key === "." ? "@marid/shared" : `@marid/shared/${key.slice(2)}`,
+      key === "." ? "@qodex/shared" : `@qodex/shared/${key.slice(2)}`,
       resolve(shared, "..", value),
     ]),
   ),
@@ -191,9 +191,9 @@ for (const mode of modes) {
   await new Promise((accept, reject) => {
     const env = { ...process.env };
     if (process.argv.includes("--photocraft-background-only")) {
-      if (!env.MARID_PHOTOCRAFT_SERVER)
-        throw new Error("Set MARID_PHOTOCRAFT_SERVER to the built PhotoCraft dist/server.mjs");
-      env.MARID_PHOTOCRAFT_ONLY = "1";
+      if (!env.QODEX_PHOTOCRAFT_SERVER)
+        throw new Error("Set QODEX_PHOTOCRAFT_SERVER to the built PhotoCraft dist/server.mjs");
+      env.QODEX_PHOTOCRAFT_ONLY = "1";
     }
     delete env.ELECTRON_RUN_AS_NODE;
     const launch = resolveMcpAppsHostLaunch(
@@ -211,7 +211,7 @@ for (const mode of modes) {
             output,
             join(output, `${mode}-profile`),
             process.execPath,
-            join(root, "apps/marid-cli/packages/cli/dist/marid.cjs"),
+            join(root, "apps/qodex-cli/packages/cli/dist/qodex.cjs"),
             showcaseServer ?? "",
           ]
         : mode === "managed-empty"
@@ -229,7 +229,7 @@ for (const mode of modes) {
         reject(new Error(`Electron fixture timed out (${mode})`));
       },
       mode === "background"
-        ? process.env.MARID_PHOTOCRAFT_SERVER
+        ? process.env.QODEX_PHOTOCRAFT_SERVER
           ? 300_000
           : 180_000
         : mode === "managed"

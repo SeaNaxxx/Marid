@@ -2,7 +2,7 @@
  * MCP 用户目录模块 - OpenCode 格式转换
  */
 
-import type { McpServerConfig } from "@marid/shared";
+import type { McpServerConfig } from "@qodex/shared";
 import type { OpenCodeMcpServerConfig } from "./types.js";
 
 /**

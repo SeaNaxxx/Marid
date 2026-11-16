@@ -1,8 +1,8 @@
 import { useCallback } from "react";
-import type { OpenInEditorRemoteTarget } from "@marid/shared";
+import type { OpenInEditorRemoteTarget } from "@qodex/shared";
 import { toast } from "@/components/ui/toast.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { getContainingDirectoryPath } from "@/lib/path.js";
 import { logger } from "@/logger.js";
 import { getSystemFileLocatorEditorId } from "@/workspace-file-tree/helpers.js";
@@ -34,7 +34,7 @@ function resolveFileManagerOpenPath(target: FileContextActionTarget): string {
 
 export function useFileContextActions(options: FileContextActionOptions = {}) {
   const platform = usePlatform();
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const canOpenLocalFileManager = Boolean(options.canOpenLocalFileManager);
   const isRemoteWorkspace = Boolean(options.isRemoteWorkspace);
   const remoteTarget = options.remoteTarget;

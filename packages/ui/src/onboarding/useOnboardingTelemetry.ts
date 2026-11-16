@@ -1,5 +1,5 @@
 import { useCallback, useLayoutEffect, useRef } from "react";
-import type { IPlatformService } from "@marid/shared";
+import type { IPlatformService } from "@qodex/shared";
 import type { InterfaceMode } from "@/lib/interfaceMode.js";
 import type { OccupationValue } from "@/onboarding/occupationOptions.js";
 import { reportAppTelemetryEvent } from "@/lib/appTelemetry.js";

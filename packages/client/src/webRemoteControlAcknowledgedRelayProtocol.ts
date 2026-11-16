@@ -1,4 +1,4 @@
-import { Emitter, VSBuffer, type IMessagePassingProtocol } from "@marid/rpc";
+import { Emitter, VSBuffer, type IMessagePassingProtocol } from "@qodex/rpc";
 import {
   WebRemoteControlRpcTransportAssembler,
   WebRemoteControlRpcTransportEncodingError,
@@ -9,7 +9,7 @@ import {
   type WebRemoteControlRpcTransportFramePayload,
   type WebRemoteControlRpcTransportIdentity,
   type WebRemoteControlRpcTransportPayload,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { AcknowledgedRelayBatchQueue } from "./webRemoteControlAcknowledgedRelayBatchQueue.js";
 import { AcknowledgedRelayDeadline } from "./webRemoteControlAcknowledgedRelayDeadline.js";
 import {
@@ -203,7 +203,7 @@ class AcknowledgedRelayProtocol implements AcknowledgedWebRemoteControlRelayProt
         if (this.pendingAckMessageSeq !== null) {
           const ackMessageSeq = this.pendingAckMessageSeq;
           const accepted = this.invokeSend({
-            marid_type: "rpc-frame-ack",
+            qodex_type: "rpc-frame-ack",
             ...this.identity,
             ackMessageSeq,
           });
@@ -272,7 +272,7 @@ class AcknowledgedRelayProtocol implements AcknowledgedWebRemoteControlRelayProt
       this.enterDegraded({ reasonCode: "remote.rpcFrame.invalidPayload", terminal: true });
       return;
     }
-    if (payload.marid_type === "rpc-frame-ack") {
+    if (payload.qodex_type === "rpc-frame-ack") {
       this.processAck(payload.ackMessageSeq);
       return;
     }

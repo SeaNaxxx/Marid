@@ -2,7 +2,7 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { DEFAULT_WORKSPACE } from "#e2e/helpers/desktop-app";
 
-const FIXTURE_DIR_RELATIVE = ".marid-e2e/continue-markdown-otc10";
+const FIXTURE_DIR_RELATIVE = ".qodex-e2e/continue-markdown-otc10";
 const FIXTURE_DIR = join(DEFAULT_WORKSPACE, FIXTURE_DIR_RELATIVE);
 const LINK_TARGET_RELATIVE = `${FIXTURE_DIR_RELATIVE}/link-target.md`;
 const IMAGE_ONE_RELATIVE = `${FIXTURE_DIR_RELATIVE}/one.svg`;
@@ -44,7 +44,7 @@ export type MarkdownContinueCaseId =
   | "inline-math"
   | "display-math"
   | "mermaid"
-  | "marid-file-citation";
+  | "qodex-file-citation";
 
 export interface MarkdownContinueCaseDefinition {
   finalAnchor: string;
@@ -211,10 +211,10 @@ export const MARKDOWN_CONTINUE_CASES: readonly MarkdownContinueCaseDefinition[] 
     finalAnchor: "MERMAID_DONE",
   },
   {
-    id: "marid-file-citation",
-    partial: `::marid-file-citation{path="${FIXTURE_DIR_RELATIVE}/cita`,
-    continuation: 'tion.txt" purpose="output"}\n\nMARID_FILE_CITATION_DONE',
-    finalAnchor: "MARID_FILE_CITATION_DONE",
+    id: "qodex-file-citation",
+    partial: `::qodex-file-citation{path="${FIXTURE_DIR_RELATIVE}/cita`,
+    continuation: 'tion.txt" purpose="output"}\n\nQODEX_FILE_CITATION_DONE',
+    finalAnchor: "QODEX_FILE_CITATION_DONE",
   },
 ];
 

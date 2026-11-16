@@ -6,8 +6,8 @@ import type {
   GitCheckpointRestoreQuery,
   GitCheckpointRestoreResult,
   GitRepositoryRequest,
-} from "@marid/shared";
-import { ServiceChannels } from "@marid/shared";
+} from "@qodex/shared";
+import { ServiceChannels } from "@qodex/shared";
 import { createServiceDescriptor } from "../descriptors.js";
 
 export interface IGitCheckpointService {

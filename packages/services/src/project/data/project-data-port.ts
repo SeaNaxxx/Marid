@@ -6,7 +6,7 @@ import type {
   V4SessionDataMeasureResult,
   V4SessionDataParams,
   V4SessionDataPurgeResult,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 import { createServiceLogger } from "#src/logger/serviceLogger.js";
 import type { ProjectDataPort, ProjectDataSession } from "#src/project/data/contract.js";
 

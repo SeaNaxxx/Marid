@@ -6,7 +6,7 @@
 
 ## 已确认的问题
 
-以 `origin/staging_backup` 为旧格式基线。旧配置保存 Provider 外层 `enabled`，读取器也能从外层或旧 `marid.enabled` 正确读出它。当前 `importLegacyPersonalProviderConfig()` 创建新 Provider 规则时没有复制该字段，而公共 Resolver 使用 `rule.enabled ?? true`。
+以 `origin/staging_backup` 为旧格式基线。旧配置保存 Provider 外层 `enabled`，读取器也能从外层或旧 `qodex.enabled` 正确读出它。当前 `importLegacyPersonalProviderConfig()` 创建新 Provider 规则时没有复制该字段，而公共 Resolver 使用 `rule.enabled ?? true`。
 
 ```text
 旧配置 enabled=false
@@ -20,7 +20,7 @@
 
 相关入口：
 
-- `packages/services/src/model-provider/legacyMaridConfigProviderReader.ts`
+- `packages/services/src/model-provider/legacyQodexConfigProviderReader.ts`
 - `packages/services/src/model-provider/legacyPersonalProviderConfigImporter.ts`
 - `packages/provider/src/resolver.ts`
 - `packages/services/test/legacyPersonalProviderConfigImporter.test.ts`

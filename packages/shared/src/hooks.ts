@@ -1,5 +1,5 @@
 import type { SettingsDirectoryLocation } from "./settings-source.js";
-import type { WorkspaceHookReviewTrustState } from "./marid-protocol-v4/workspace-hook-review.js";
+import type { WorkspaceHookReviewTrustState } from "./qodex-protocol-v4/workspace-hook-review.js";
 
 export type HookEvent =
   | "SessionStart"
@@ -81,7 +81,7 @@ export interface ToolCallHookMeta {
   hookFeedback?: string;
   hookStderr?: string;
   /** Skill-related metadata */
-  "marid/isSkill"?: boolean;
-  "marid/skillName"?: string;
+  "qodex/isSkill"?: boolean;
+  "qodex/skillName"?: string;
   [key: string]: unknown;
 }

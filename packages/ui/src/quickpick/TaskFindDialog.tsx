@@ -17,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { useIsOfficeMode } from "@/hooks/useInterfaceMode.js";
 import {
   getConversationFindState,
@@ -65,7 +65,7 @@ export function TaskFindDialog({
   onOpenFileChanges,
 }: TaskFindDialogProps) {
   const isOfficeMode = useIsOfficeMode();
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const titleId = useId();
   const descriptionId = useId();
   const [query, setQuery] = useState("");

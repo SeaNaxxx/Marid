@@ -1,18 +1,18 @@
 # Runtime Environment Sanitization
 
-Marid runtime processes must not let ambient shell variables silently change app, agent, CLI, or tool behavior. The runtime boundary treats the parent shell as untrusted defaults and re-injects only explicit Marid-owned configuration.
+Qodex runtime processes must not let ambient shell variables silently change app, agent, CLI, or tool behavior. The runtime boundary treats the parent shell as untrusted defaults and re-injects only explicit Qodex-owned configuration.
 
 ## Environment Roles
 
 | Variable                          | Role                                                                     | Inheritance                                                            |
 | --------------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
-| `MARID_ENV`                       | Product environment for API/OAuth endpoints (`test` / `production`)      | Explicitly injected by app/build/runtime config                        |
-| `MARID_RUNTIME_ENV`               | Runtime shape for Marid behavior (`development` / `production` / `test`) | Explicitly injected by app/CLI runtime setup                           |
-| `MARID_HTTP_PROXY`                | Explicit Marid proxy override                                            | Preserved and used by app/provider/network adapters                    |
-| `MARID_NO_PROXY`                  | Explicit Marid proxy bypass rules                                        | Preserved and used by app/provider/network adapters                    |
-| `MARID_AGENT_CA_CERT`             | Explicit Marid CA file for agent/model egress                            | Preserved and used by app/provider/network adapters                    |
-| `MARID_TOOL_ENV_PASSTHROUGH_JSON` | Internal envelope for captured user proxy/CA env                         | Preserved across app/agent/CLI, expanded only when spawning user tools |
-| `NODE_ENV`                        | Node ecosystem/build convention                                          | Not used for Marid runtime decisions and not inherited by default      |
+| `QODEX_ENV`                       | Product environment for API/OAuth endpoints (`test` / `production`)      | Explicitly injected by app/build/runtime config                        |
+| `QODEX_RUNTIME_ENV`               | Runtime shape for Qodex behavior (`development` / `production` / `test`) | Explicitly injected by app/CLI runtime setup                           |
+| `QODEX_HTTP_PROXY`                | Explicit Qodex proxy override                                            | Preserved and used by app/provider/network adapters                    |
+| `QODEX_NO_PROXY`                  | Explicit Qodex proxy bypass rules                                        | Preserved and used by app/provider/network adapters                    |
+| `QODEX_AGENT_CA_CERT`             | Explicit Qodex CA file for agent/model egress                            | Preserved and used by app/provider/network adapters                    |
+| `QODEX_TOOL_ENV_PASSTHROUGH_JSON` | Internal envelope for captured user proxy/CA env                         | Preserved across app/agent/CLI, expanded only when spawning user tools |
+| `NODE_ENV`                        | Node ecosystem/build convention                                          | Not used for Qodex runtime decisions and not inherited by default      |
 
 ## Sanitized Ambient Variables
 
@@ -26,34 +26,34 @@ The following variables are removed from inherited runtime environments before h
 - `REQUESTS_CA_BUNDLE`, `CURL_CA_BUNDLE`, `GIT_SSL_CAINFO`
 - npm/yarn/pnpm proxy and CA variables such as `npm_config_proxy`, `npm_config_https_proxy`, `npm_config_cafile`
 
-Before removal, network-related user variables are captured into the Marid-owned `MARID_TOOL_ENV_PASSTHROUGH_JSON` envelope. The app, provider HTTP layer, and runtime mode checks never read that envelope. It is expanded back to the original standard variable names at user tool boundaries such as Bash, background terminal commands, and stdio MCP server processes.
+Before removal, network-related user variables are captured into the Qodex-owned `QODEX_TOOL_ENV_PASSTHROUGH_JSON` envelope. The app, provider HTTP layer, and runtime mode checks never read that envelope. It is expanded back to the original standard variable names at user tool boundaries such as Bash, background terminal commands, and stdio MCP server processes.
 
-`WebFetch` is the exception among in-process agent tools: it may read the captured proxy/no-proxy values from `MARID_TOOL_ENV_PASSTHROUGH_JSON` when no explicit `network.httpProxy`, `MARID_HTTP_PROXY`, `network.noProxy`, or `MARID_NO_PROXY` value is configured. This keeps WebFetch aligned with the user's browser/system egress path while preserving the sanitized default for model/provider requests. The WebFetch handler uses a direct fetch path and does not add a separate transient network retry loop; final errors must still preserve the deepest network code when available, for example `aborted (ECONNRESET)`.
+`WebFetch` is the exception among in-process agent tools: it may read the captured proxy/no-proxy values from `QODEX_TOOL_ENV_PASSTHROUGH_JSON` when no explicit `network.httpProxy`, `QODEX_HTTP_PROXY`, `network.noProxy`, or `QODEX_NO_PROXY` value is configured. This keeps WebFetch aligned with the user's browser/system egress path while preserving the sanitized default for model/provider requests. The WebFetch handler uses a direct fetch path and does not add a separate transient network retry loop; final errors must still preserve the deepest network code when available, for example `aborted (ECONNRESET)`.
 
 ## Explicit Re-Injection
 
-Desktop app settings remain authoritative for app-managed proxy behavior. When `AppSettings.httpProxy` is configured, services inject `MARID_HTTP_PROXY` and the standard proxy variables only into the agent process. When `AppSettings.httpProxyNoProxy` is configured, services inject `MARID_NO_PROXY` and the standard no-proxy variables only from that explicit setting. If the app CA exists, services also inject `MARID_AGENT_CA_CERT` and `NODE_EXTRA_CA_CERTS` so Node can trust the CA during process startup.
+Desktop app settings remain authoritative for app-managed proxy behavior. When `AppSettings.httpProxy` is configured, services inject `QODEX_HTTP_PROXY` and the standard proxy variables only into the agent process. When `AppSettings.httpProxyNoProxy` is configured, services inject `QODEX_NO_PROXY` and the standard no-proxy variables only from that explicit setting. If the app CA exists, services also inject `QODEX_AGENT_CA_CERT` and `NODE_EXTRA_CA_CERTS` so Node can trust the CA during process startup.
 
-Inside the CLI/agent runtime, standard inherited proxy/CA variables are sanitized again. The provider and HTTP adapter layers read only explicit Marid network keys or config (`network.httpProxy`, `MARID_HTTP_PROXY`, `network.noProxy`, `MARID_NO_PROXY`, `network.caCertFile`, `MARID_AGENT_CA_CERT`).
+Inside the CLI/agent runtime, standard inherited proxy/CA variables are sanitized again. The provider and HTTP adapter layers read only explicit Qodex network keys or config (`network.httpProxy`, `QODEX_HTTP_PROXY`, `network.noProxy`, `QODEX_NO_PROXY`, `network.caCertFile`, `QODEX_AGENT_CA_CERT`).
 
-Tool subprocess environments are built in a narrower boundary. They start from the sanitized runtime env, expand `MARID_TOOL_ENV_PASSTHROUGH_JSON` back to the user's original proxy/CA variable names, then let explicit Marid network config override the same proxy/CA targets when present.
+Tool subprocess environments are built in a narrower boundary. They start from the sanitized runtime env, expand `QODEX_TOOL_ENV_PASSTHROUGH_JSON` back to the user's original proxy/CA variable names, then let explicit Qodex network config override the same proxy/CA targets when present.
 
 Command-level environment overlays are applied last. A user command can still intentionally set or delete `NODE_ENV`, proxy, or CA variables for that command only. Ambient runtime variables such as `NODE_ENV` still do not leak in by default; only the captured network passthrough set is restored for inherited tool subprocesses.
 
 ## Runtime Mode Rules
 
-Marid-owned runtime decisions must use `MARID_RUNTIME_ENV`.
+Qodex-owned runtime decisions must use `QODEX_RUNTIME_ENV`.
 
 - `development`: local app/CLI debug behavior, debug logging, model-IO debug directory.
 - `production`: packaged app and normal CLI behavior.
 - `test`: test harness behavior; model-IO recording is disabled.
 
-`NODE_ENV` is intentionally ignored for Marid runtime decisions. It may still be used by build tools or third-party packages outside Marid's runtime boundary.
+`NODE_ENV` is intentionally ignored for Qodex runtime decisions. It may still be used by build tools or third-party packages outside Qodex's runtime boundary.
 
 ## Protocol Server Dotenv Boundary
 
 `app-server` and `agent-server` are protocol runtimes owned by their current Environment. In packaged `production` and test-harness `test` runtime modes they must not scan the current workspace or parent directories for `.env` files. Their configuration should come from the sanitized process environment, explicit app/service settings, and that Environment's Config/Credential Sources. Provider Registry objects and credentials are not supplied by another Environment over the protocol.
 
-Only `MARID_RUNTIME_ENV=development` may load the nearest upward `.env` before starting the protocol server. This keeps local source debugging convenient while preventing packaged desktop sessions from inheriting project or user-home `.env` files.
+Only `QODEX_RUNTIME_ENV=development` may load the nearest upward `.env` before starting the protocol server. This keeps local source debugging convenient while preventing packaged desktop sessions from inheriting project or user-home `.env` files.
 
-Reason: protocol startup happens before any session request can return a structured Marid error. If a workspace or home `.env` is unreadable, malformed, or injects unexpected runtime variables in packaged mode, the helper process can exit before the stdio protocol is established. The renderer then only sees the secondary failure `Marid agent transport closed`, which hides the real bootstrap error and makes workspace behavior non-deterministic.
+Reason: protocol startup happens before any session request can return a structured Qodex error. If a workspace or home `.env` is unreadable, malformed, or injects unexpected runtime variables in packaged mode, the helper process can exit before the stdio protocol is established. The renderer then only sees the secondary failure `Qodex agent transport closed`, which hides the real bootstrap error and makes workspace behavior non-deterministic.

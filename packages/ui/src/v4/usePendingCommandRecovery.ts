@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { ConversationSnapshot } from "@marid/shared/marid-protocol-v4";
+import type { ConversationSnapshot } from "@qodex/shared/qodex-protocol-v4";
 import { logger } from "@/logger.js";
 import { pendingCommandRegistry, type PendingCommandEntry } from "@/v4/pendingCommandRegistry.js";
 import { isPendingCommandForWorkspace } from "@/v4/pendingCommandWorkspace.js";

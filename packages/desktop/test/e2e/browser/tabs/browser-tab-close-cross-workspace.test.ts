@@ -1,6 +1,6 @@
 import { dirname } from "node:path";
-import { PlatformChannels } from "@marid/shared";
-import type { BrowserViewCloseTabNotification } from "@marid/shared";
+import { PlatformChannels } from "@qodex/shared";
+import type { BrowserViewCloseTabNotification } from "@qodex/shared";
 import { DEFAULT_WORKSPACE, clearAppData, waitForWorkspaceApp } from "#e2e/helpers/desktop-app";
 import {
   SMALL_AGENT_WARMUP_SCENARIO,

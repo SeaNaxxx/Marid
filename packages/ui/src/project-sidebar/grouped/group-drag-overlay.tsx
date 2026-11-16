@@ -1,11 +1,11 @@
-import type { MaridGroupedTaskViewNode } from "@/project-sidebar/grouped/types.js";
+import type { QodexGroupedTaskViewNode } from "@/project-sidebar/grouped/types.js";
 import type { CSSProperties } from "react";
 
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { TaskGroupColorMark } from "@/project-sidebar/grouped/colors.js";
 import { getTaskGroupDisplayTitle } from "@/project-sidebar/grouped/group-title.js";
 
-type GroupNode = Extract<MaridGroupedTaskViewNode, { type: "group" }>;
+type GroupNode = Extract<QodexGroupedTaskViewNode, { type: "group" }>;
 
 function GroupDragOverlay({
   node,
@@ -16,7 +16,7 @@ function GroupDragOverlay({
   className?: string;
   style?: CSSProperties;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   // cron 在存储层使用 `cron` 占位名；拖拽浮层曾绕过普通 header 的本地化逻辑，
   // 导致拖动时从“定时任务”闪回内部值。三种 header 统一走同一个标题格式化入口。
   const displayTitle = getTaskGroupDisplayTitle(node.group, {

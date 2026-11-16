@@ -1,7 +1,7 @@
 import type { KeyboardEvent, MouseEvent } from "react";
 import { ARTIFACT_CHIP_MAX_VISIBLE } from "@/app-shell/workflow-artifacts/artifactPresentation.js";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { PILL_STAGGER_MS } from "./WorkflowTimeline.js";
 import {
   WorkflowArtifactPill,
@@ -48,7 +48,7 @@ export function WorkflowArtifactStrip({
   moreTestId?: string;
   className?: string;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   if (artifacts.length === 0) return null;
   const visible = artifacts.slice(0, ARTIFACT_CHIP_MAX_VISIBLE);
   const overflow = artifacts.length - visible.length;

@@ -1,11 +1,11 @@
-import type { MaridProvider } from "@marid/shared";
-import type { WorkspaceMaridUIState } from "@/store/maridSessionStore.js";
+import type { QodexProvider } from "@qodex/shared";
+import type { WorkspaceQodexUIState } from "@/store/qodexSessionStore.js";
 
 interface ResolveWorkspaceSwitchDraftProviderOptions {
-  currentSelectedProvider: MaridProvider;
+  currentSelectedProvider: QodexProvider;
   targetWorkspacePath: string;
   targetWorkspaceIdentity?: string;
-  workspaces: Record<string, WorkspaceMaridUIState | undefined>;
+  workspaces: Record<string, WorkspaceQodexUIState | undefined>;
 }
 
 export function resolveWorkspaceSwitchDraftProvider({
@@ -13,7 +13,7 @@ export function resolveWorkspaceSwitchDraftProvider({
   targetWorkspacePath,
   targetWorkspaceIdentity,
   workspaces,
-}: ResolveWorkspaceSwitchDraftProviderOptions): MaridProvider {
+}: ResolveWorkspaceSwitchDraftProviderOptions): QodexProvider {
   const workspaceKey = targetWorkspaceIdentity?.trim() || targetWorkspacePath;
   const targetWorkspaceState = workspaces[workspaceKey] ?? workspaces[targetWorkspacePath];
 

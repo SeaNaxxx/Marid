@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { shareToolPresentationPayloadSchema } from "./conversation-share-tool-presentation.js";
-import { toolCallCreateWorkflowDisplaySchema } from "./marid-protocol-v4/create-workflow-display.js";
+import { toolCallCreateWorkflowDisplaySchema } from "./qodex-protocol-v4/create-workflow-display.js";
 import {
   workflowRunActorSchema,
   workflowRunNodeSchema,
   workflowRunSchema,
-} from "./marid-protocol-v4/workflow-runs.js";
+} from "./qodex-protocol-v4/workflow-runs.js";
 
 export const CONVERSATION_SHARE_CONTENT_VERSIONS = { workflow: 2, "tool-presentation": 1 } as const;
 export const SHARE_CONTENT_LIMITS = {
@@ -52,7 +52,7 @@ function safeJson(value: unknown, depth = 0): boolean {
   if (value === null || typeof value === "boolean") return true;
   if (typeof value === "number") return Number.isFinite(value);
   if (typeof value === "string")
-    return value.length <= 32768 && !/^(?:javascript|marid-artifact):/iu.test(value);
+    return value.length <= 32768 && !/^(?:javascript|qodex-artifact):/iu.test(value);
   if (Array.isArray(value))
     return value.length <= 1024 && value.every((entry) => safeJson(entry, depth + 1));
   if (value && typeof value === "object")

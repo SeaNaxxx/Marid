@@ -95,10 +95,10 @@ async function runtime() {
       update: async () => {},
     },
   });
-  ipcMain.handle("marid:open-update-status-window", () => openUpdateStatusWindow());
+  ipcMain.handle("qodex:open-update-status-window", () => openUpdateStatusWindow());
   let holdNextSnapshot = false;
   let releaseSnapshot;
-  ipcMain.handle("marid:get-update-state", () => {
+  ipcMain.handle("qodex:get-update-state", () => {
     const state = getAutoUpdaterState();
     if (!holdNextSnapshot) return state;
     holdNextSnapshot = false;
@@ -109,10 +109,10 @@ async function runtime() {
       };
     });
   });
-  ipcMain.handle("marid:get-auto-update-preferences", () => ({
+  ipcMain.handle("qodex:get-auto-update-preferences", () => ({
     autoDownloadAndInstallUpdates: false,
   }));
-  ipcMain.handle("marid:get-desktop-session-activity", () => ({ runningAgentSessionCount: 0 }));
+  ipcMain.handle("qodex:get-desktop-session-activity", () => ({ runningAgentSessionCount: 0 }));
   const main = new BrowserWindow({
     width: 1100,
     height: 760,
@@ -235,16 +235,16 @@ test("普通更新窗口关闭、后台下载、快照恢复和退出", { timeou
         'const {contextBridge,ipcRenderer}=require("electron");',
         "const on=(channel,fn)=>{const handler=(_event,value)=>fn(value);ipcRenderer.on(channel,handler);return()=>ipcRenderer.removeListener(channel,handler)};",
         'contextBridge.exposeInMainWorld("updateFixture",{',
-        'getUpdateState:()=>ipcRenderer.invoke("marid:get-update-state"),',
-        'onUpdateStateChanged:fn=>on("marid:update-state-changed",fn),',
-        'onUpdateReady:fn=>on("marid:update-ready",fn),',
-        'onApplicationLocaleChanged:fn=>on("marid:application-locale-changed",fn),',
-        'getAutoUpdatePreferences:()=>ipcRenderer.invoke("marid:get-auto-update-preferences"),',
-        'getDesktopSessionActivity:()=>ipcRenderer.invoke("marid:get-desktop-session-activity"),',
-        'downloadUpdate:()=>ipcRenderer.invoke("marid:download-update"),',
-        'cancelUpdateDownload:()=>ipcRenderer.invoke("marid:cancel-update-download"),',
-        'quitAndInstallUpdate:()=>ipcRenderer.invoke("marid:quit-and-install-update"),',
-        'openUpdateStatusWindow:()=>ipcRenderer.invoke("marid:open-update-status-window"),',
+        'getUpdateState:()=>ipcRenderer.invoke("qodex:get-update-state"),',
+        'onUpdateStateChanged:fn=>on("qodex:update-state-changed",fn),',
+        'onUpdateReady:fn=>on("qodex:update-ready",fn),',
+        'onApplicationLocaleChanged:fn=>on("qodex:application-locale-changed",fn),',
+        'getAutoUpdatePreferences:()=>ipcRenderer.invoke("qodex:get-auto-update-preferences"),',
+        'getDesktopSessionActivity:()=>ipcRenderer.invoke("qodex:get-desktop-session-activity"),',
+        'downloadUpdate:()=>ipcRenderer.invoke("qodex:download-update"),',
+        'cancelUpdateDownload:()=>ipcRenderer.invoke("qodex:cancel-update-download"),',
+        'quitAndInstallUpdate:()=>ipcRenderer.invoke("qodex:quit-and-install-update"),',
+        'openUpdateStatusWindow:()=>ipcRenderer.invoke("qodex:open-update-status-window"),',
         "openExternal:()=>{},",
         "});",
       ].join("\n"),
@@ -259,11 +259,11 @@ test("普通更新窗口关闭、后台下载、快照恢复和退出", { timeou
         'import React,{useEffect,useState} from "react";import {createRoot} from "react-dom/client";',
         'import {UpdateStatusButton} from "@/UpdateStatusButton";import {TooltipProvider} from "@/components/ui/tooltip";',
         'import {UpdateStatusWindowRoot} from "@/UpdateStatusWindowRoot";',
-        'import {MaridIntlProvider} from "@/i18n/IntlProvider";import "@/styles.css";',
+        'import {QodexIntlProvider} from "@/i18n/IntlProvider";import "@/styles.css";',
         'const params=new URLSearchParams(location.search);const locale=params.get("locale")||"zh-CN";',
         'document.documentElement.classList.add("theme-"+(params.get("theme")||"zai-light"));',
         'document.body.style.background="var(--color-background)";const platform=window.updateFixture;',
-        'function Main(){const[state,setState]=useState(null);useEffect(()=>{platform.getUpdateState().then(setState);return platform.onUpdateStateChanged(setState)},[]);return <MaridIntlProvider initialLocale={locale}><TooltipProvider><main style={{padding:32}}><UpdateStatusButton platform={platform} updateState={state} version={null}/><button id="workspace">Workspace</button></main></TooltipProvider></MaridIntlProvider>}',
+        'function Main(){const[state,setState]=useState(null);useEffect(()=>{platform.getUpdateState().then(setState);return platform.onUpdateStateChanged(setState)},[]);return <QodexIntlProvider initialLocale={locale}><TooltipProvider><main style={{padding:32}}><UpdateStatusButton platform={platform} updateState={state} version={null}/><button id="workspace">Workspace</button></main></TooltipProvider></QodexIntlProvider>}',
         'createRoot(document.getElementById("root")!).render(params.get("windowKind")==="update-status"?<UpdateStatusWindowRoot platform={platform} initialLocale={locale} onRequestClose={()=>window.close()}/>:<Main/>);',
       ].join("\n"),
     );
@@ -310,7 +310,7 @@ test("普通更新窗口关闭、后台下载、快照恢复和退出", { timeou
         PRELOAD_PATH: JSON.stringify(preload),
         RENDERER_URL: JSON.stringify(vite.resolvedUrls.local[0]),
       },
-      alias: { "@marid/shared": resolve(root, "packages/shared/src/index.ts") },
+      alias: { "@qodex/shared": resolve(root, "packages/shared/src/index.ts") },
       plugins: [
         {
           name: "isolated-logger",

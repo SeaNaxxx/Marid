@@ -1,5 +1,5 @@
 {
-  "name": "@marid/services",
+  "name": "@qodex/services",
   "private": true,
   "type": "module",
   "imports": {
@@ -19,12 +19,12 @@
   "dependencies": {
     "@agentclientprotocol/sdk": "^0.21.1",
     "@larksuiteoapi/node-sdk": "1.64.0",
-    "@marid/provider": "workspace:*",
-    "@marid/provider-node": "workspace:*",
-    "@marid/rpc": "workspace:*",
-    "@marid/session-control": "workspace:*",
-    "@marid/shared": "workspace:*",
-    "@marid/marid-cua": "workspace:*",
+    "@qodex/provider": "workspace:*",
+    "@qodex/provider-node": "workspace:*",
+    "@qodex/rpc": "workspace:*",
+    "@qodex/session-control": "workspace:*",
+    "@qodex/shared": "workspace:*",
+    "@qodex/qodex-cua": "workspace:*",
     "chokidar": "4.0.3",
     "croner": "^10.0.1",
     "ignore": "^5.3.2",

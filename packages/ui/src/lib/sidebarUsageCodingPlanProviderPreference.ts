@@ -1,6 +1,6 @@
 import {
   BUILTIN_MODEL_PROVIDER_IDS,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { logger } from "@/logger.js";
 
 export type SidebarUsageCodingPlanProviderId =
@@ -13,7 +13,7 @@ export type SidebarUsageCodingPlanSourceId =
   | `team:${string}`;
 
 const SIDEBAR_USAGE_CODING_PLAN_PROVIDER_STORAGE_KEY =
-  "marid:sidebar-usage-coding-plan-provider";
+  "qodex:sidebar-usage-coding-plan-provider";
 
 const SIDEBAR_USAGE_CODING_PLAN_PROVIDER_IDS: SidebarUsageCodingPlanProviderId[] = [
   BUILTIN_MODEL_PROVIDER_IDS.zaiIndividualCodingPlan,

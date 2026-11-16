@@ -170,12 +170,12 @@ public static class NativeFileApps {
   }
 }
 '@
-if ($env:MARID_FILE_APP_ACTION -eq 'open') {
-  [NativeFileApps]::Open($env:MARID_FILE_APP_PATH, $env:MARID_FILE_APP_HANDLER)
+if ($env:QODEX_FILE_APP_ACTION -eq 'open') {
+  [NativeFileApps]::Open($env:QODEX_FILE_APP_PATH, $env:QODEX_FILE_APP_HANDLER)
 } else {
-  $maridQuery = [NativeFileApps]::Query($env:MARID_FILE_APP_PATH, ($env:MARID_FILE_APP_INCLUDE_ICONS -ne '0'))
+  $qodexQuery = [NativeFileApps]::Query($env:QODEX_FILE_APP_PATH, ($env:QODEX_FILE_APP_INCLUDE_ICONS -ne '0'))
   ${WINDOWS_SUITE_ICON_SCRIPT}
-  ConvertTo-Json -InputObject $maridQuery -Depth 6 -Compress
+  ConvertTo-Json -InputObject $qodexQuery -Depth 6 -Compress
 }
 `
   // 增加原生资源解析后，UTF-16 Base64 接近 Windows 命令行上限；不传输排版缩进和独立注释。

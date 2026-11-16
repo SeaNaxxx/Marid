@@ -1,24 +1,24 @@
-import { InternalChannels } from "@marid/shared";
+import { InternalChannels } from "@qodex/shared";
 import type {
   PluginSandboxPlatformPort,
   PluginSandboxPortsEvent,
   PluginSandboxTransportPort,
-} from "@marid/shared/mcp-apps";
+} from "@qodex/shared/mcp-apps";
 
 /**
  * 桌面 renderer 的插件沙箱平台端口：原生操作委托 preload 命名空间，那条 JSON-RPC 端口从 preload 经
  * window.postMessage transfer 到来（MessagePort 不能过 contextBridge，同 remoteWorkspaceServicePortBridge）。
- * 旧 preload 没有 maridPluginSandbox 时返回 undefined，UI 按"不支持插件 UI"回退。
+ * 旧 preload 没有 qodexPluginSandbox 时返回 undefined，UI 按"不支持插件 UI"回退。
  */
 export function createDesktopPluginSandboxPlatform(): PluginSandboxPlatformPort | undefined {
-  const bridge = window.maridPluginSandbox;
+  const bridge = window.qodexPluginSandbox;
   if (!bridge) return undefined;
   return {
     supportsRetainedMove: bridge.supportsRetainedMove,
     ...(bridge.setExecutionActive ? { setExecutionActive: bridge.setExecutionActive } : {}),
     ...(bridge.copyImage
       ? {
-          copyImage: (input: import("@marid/shared/mcp-apps").PluginSandboxCaptureRequest) =>
+          copyImage: (input: import("@qodex/shared/mcp-apps").PluginSandboxCaptureRequest) =>
             bridge.copyImage!(input),
         }
       : {}),

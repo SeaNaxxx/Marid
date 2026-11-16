@@ -1,4 +1,4 @@
-import type { EditorInfo, OpenInEditorRemoteTarget, RemoteTarget } from "@marid/shared";
+import type { EditorInfo, OpenInEditorRemoteTarget, RemoteTarget } from "@qodex/shared";
 import { sortInstalledEditorsForOpenWith } from "@/lib/openWithEditors.js";
 
 const REMOTE_SSH_EDITOR_IDS = ["vscode", "vscode-insiders"];

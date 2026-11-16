@@ -17,24 +17,24 @@ export function resolveUserHomeDir(options?: SubagentStorageOptions): string {
 }
 
 export async function resolveUserSubagentRoot(options?: SubagentStorageOptions): Promise<string> {
-  return join(await resolveMaridStorageRoot(options), "agents");
+  return join(await resolveQodexStorageRoot(options), "agents");
 }
 
 export function resolveWorkspaceSubagentRoot(workspacePath: string): string {
-  return join(workspacePath, ".marid", "agents");
+  return join(workspacePath, ".qodex", "agents");
 }
 
 export async function resolveSubagentStateFile(options?: SubagentStorageOptions): Promise<string> {
-  return join(await resolveMaridStorageRoot(options), "v2", "agents-state.json");
+  return join(await resolveQodexStorageRoot(options), "v2", "agents-state.json");
 }
 
-export async function resolveMaridStorageRoot(options?: SubagentStorageOptions): Promise<string> {
+export async function resolveQodexStorageRoot(options?: SubagentStorageOptions): Promise<string> {
   const config = await readUserCliConfig(options);
   const storage = isObjectRecord(config.storage) ? config.storage : {};
   const storageDir =
     typeof storage.dir === "string" && storage.dir.trim().length > 0
       ? storage.dir.trim()
-      : "~/.marid";
+      : "~/.qodex";
   return resolveConfigPath(storageDir, options);
 }
 
@@ -50,7 +50,7 @@ async function readUserCliConfig(
 ): Promise<Record<string, unknown>> {
   try {
     const raw = await readFile(
-      join(resolveUserHomeDir(options), ".marid", "cli", "config.json"),
+      join(resolveUserHomeDir(options), ".qodex", "cli", "config.json"),
       "utf8",
     );
     const parsed = JSON.parse(raw) as unknown;

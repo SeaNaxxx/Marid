@@ -8,7 +8,7 @@ import {
   type WorkspacePurpose,
   type WindowHostAttachmentScope,
   type WindowHostRemoteWorkspaceDescriptor,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export interface WindowRemoteAssetDirs {
   mockCdnDir?: string;

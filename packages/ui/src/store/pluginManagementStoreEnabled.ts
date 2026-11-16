@@ -1,5 +1,5 @@
-import type { IPluginManagementService } from "@marid/services";
-import type { MaridPluginScope } from "@marid/shared";
+import type { IPluginManagementService } from "@qodex/services";
+import type { QodexPluginScope } from "@qodex/shared";
 import { logger } from "@/logger.js";
 import {
   buildWorkspaceKey,
@@ -19,7 +19,7 @@ function buildToggleRequestKey(input: {
   workspacePath: string;
   workspaceIdentity: string | null;
   authorityKey: string | null;
-  configScope: MaridPluginScope | null;
+  configScope: QodexPluginScope | null;
   pluginId: string;
 }): string {
   const workspaceKey = buildWorkspaceKey(
@@ -36,7 +36,7 @@ export async function setPluginEnabledOptimistically(
   pluginId: string,
   enabled: boolean,
   pluginService: IPluginManagementService,
-  scope: MaridPluginScope = "user",
+  scope: QodexPluginScope = "user",
 ): Promise<boolean> {
   const { workspacePath, workspaceIdentity, authorityKey, configScope } = get();
   if (!workspacePath) return false;

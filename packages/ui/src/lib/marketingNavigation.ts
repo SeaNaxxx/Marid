@@ -1,6 +1,6 @@
 import { createStore } from "zustand/vanilla";
 import { logger } from "@/logger.js";
-import type { MarketingAction } from "@marid/shared";
+import type { MarketingAction } from "@qodex/shared";
 import type { SettingsSectionId } from "@/lib/settingsNavigation.js";
 
 export type MarketingNavigationTarget = Extract<MarketingAction, { type: "navigate" }>["args"];

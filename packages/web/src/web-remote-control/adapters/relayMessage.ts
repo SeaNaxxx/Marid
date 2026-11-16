@@ -1,12 +1,12 @@
 import {
   WEB_REMOTE_CONTROL_RPC_TRANSPORT_LIMITS,
   type WebRemoteControlFailure,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   parseWebRemoteControlRelayV2IncomingMessage,
   type WebRemoteControlRelayV2IncomingMessage,
   type WebRemoteControlRelayV2OutgoingMessage,
-} from "@marid/shared/web-remote-relay";
+} from "@qodex/shared/web-remote-relay";
 
 export async function readWebSocketData(data: unknown): Promise<string | null> {
   if (typeof data === "string") {
@@ -72,7 +72,7 @@ export function safePayloadMetadata(payload: unknown): Record<string, string | u
   }
   const record = payload as Record<string, unknown>;
   return {
-    marid_type: typeof record.marid_type === "string" ? record.marid_type : undefined,
+    qodex_type: typeof record.qodex_type === "string" ? record.qodex_type : undefined,
     requestId: typeof record.requestId === "string" ? record.requestId : undefined,
     bridgeSessionId:
       typeof record.bridgeSessionId === "string" ? record.bridgeSessionId : undefined,
@@ -81,7 +81,7 @@ export function safePayloadMetadata(payload: unknown): Record<string, string | u
 
 export function isRawTransportCandidate(payload: unknown): boolean {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return false;
-  const type = (payload as { marid_type?: unknown }).marid_type;
+  const type = (payload as { qodex_type?: unknown }).qodex_type;
   return type === "rpc-frame" || type === "rpc-frame-ack";
 }
 

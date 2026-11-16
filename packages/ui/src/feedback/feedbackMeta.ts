@@ -3,7 +3,7 @@ import type {
   FeedbackTicketSeverity,
   FeedbackTicketStatus,
   FeedbackTicketType,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type { ComponentType, SVGProps } from "react";
 import {
   FeedbackBugIcon,

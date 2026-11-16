@@ -1,6 +1,6 @@
 import { Save } from "lucide-react";
 import { useMemo } from "react";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { ToolSnapshotFieldNotice } from "@/ToolCallBlocks/ToolSnapshotFieldNotice.js";
 import { ToolLayout } from "../ToolLayout.js";
 import type { ToolCallBlockRenderContext } from "../shared.js";
@@ -133,7 +133,7 @@ function SaveWorkflowScopeBadge({ label }: { label: string }) {
  * 之后的一行记录。
  */
 export function SaveWorkflowToolCallBlock(context: ToolCallBlockRenderContext) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const { toolCall } = context.toolCallNode;
 
   const saved = useMemo(() => readSaveWorkflowInput(toolCall.input), [toolCall.input]);

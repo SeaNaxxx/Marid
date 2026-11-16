@@ -1,42 +1,42 @@
 import {
-  collectVisibleMaridBackgroundTaskControlItems,
-  getMaridBackgroundTaskControlItemElapsedMs,
-  isActiveMaridBackgroundTaskControlItem,
-  parseMaridBackgroundTaskControlItems,
-  type MaridBackgroundTaskControlItem,
-  type MaridBackgroundTaskControlStatus,
+  collectVisibleQodexBackgroundTaskControlItems,
+  getQodexBackgroundTaskControlItemElapsedMs,
+  isActiveQodexBackgroundTaskControlItem,
+  parseQodexBackgroundTaskControlItems,
+  type QodexBackgroundTaskControlItem,
+  type QodexBackgroundTaskControlStatus,
 } from "./background-task-controls.js";
 
-export type MaridBackgroundBashJobStatus = MaridBackgroundTaskControlStatus;
-export type MaridBackgroundBashJob = MaridBackgroundTaskControlItem & {
+export type QodexBackgroundBashJobStatus = QodexBackgroundTaskControlStatus;
+export type QodexBackgroundBashJob = QodexBackgroundTaskControlItem & {
   taskKind: "bash";
 };
 
-export function parseMaridBackgroundBashJobs(value: unknown): MaridBackgroundBashJob[] {
-  return parseMaridBackgroundTaskControlItems(value).filter(isBackgroundBashJob);
+export function parseQodexBackgroundBashJobs(value: unknown): QodexBackgroundBashJob[] {
+  return parseQodexBackgroundTaskControlItems(value).filter(isBackgroundBashJob);
 }
 
-export function isActiveMaridBackgroundBashJob(job: MaridBackgroundBashJob): boolean {
-  return isActiveMaridBackgroundTaskControlItem(job);
+export function isActiveQodexBackgroundBashJob(job: QodexBackgroundBashJob): boolean {
+  return isActiveQodexBackgroundTaskControlItem(job);
 }
 
-export function getMaridBackgroundBashJobElapsedMs(
-  job: MaridBackgroundBashJob,
+export function getQodexBackgroundBashJobElapsedMs(
+  job: QodexBackgroundBashJob,
   now = Date.now(),
 ): number {
-  return getMaridBackgroundTaskControlItemElapsedMs(job, now);
+  return getQodexBackgroundTaskControlItemElapsedMs(job, now);
 }
 
-export function collectVisibleMaridBackgroundBashJobs(
-  jobs: readonly MaridBackgroundBashJob[],
+export function collectVisibleQodexBackgroundBashJobs(
+  jobs: readonly QodexBackgroundBashJob[],
   now = Date.now(),
   thresholdMs = 30_000,
-): Array<MaridBackgroundBashJob & { elapsedMs: number }> {
-  return collectVisibleMaridBackgroundTaskControlItems(jobs, now, thresholdMs) as Array<
-    MaridBackgroundBashJob & { elapsedMs: number }
+): Array<QodexBackgroundBashJob & { elapsedMs: number }> {
+  return collectVisibleQodexBackgroundTaskControlItems(jobs, now, thresholdMs) as Array<
+    QodexBackgroundBashJob & { elapsedMs: number }
   >;
 }
 
-function isBackgroundBashJob(job: MaridBackgroundTaskControlItem): job is MaridBackgroundBashJob {
+function isBackgroundBashJob(job: QodexBackgroundTaskControlItem): job is QodexBackgroundBashJob {
   return job.taskKind === "bash";
 }

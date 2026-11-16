@@ -1,4 +1,4 @@
-import type { HostApiNetworkTransport } from "@marid/services/node";
+import type { HostApiNetworkTransport } from "@qodex/services/node";
 import { runHostShutdownPhases } from "./hostShutdownPhases.js";
 
 const DEFAULT_UNOWNED_TRANSPORT_DISPOSE_TIMEOUT_MS = 3_500;

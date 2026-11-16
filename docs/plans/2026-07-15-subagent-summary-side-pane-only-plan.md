@@ -478,12 +478,12 @@ pnpm vitest run \
 **E2E checks:**
 
 ```bash
-pnpm --filter @marid/desktop typecheck:e2e
+pnpm --filter @qodex/desktop typecheck:e2e
 
-pnpm --filter @marid/desktop e2e:fixture:check -- \
+pnpm --filter @qodex/desktop e2e:fixture:check -- \
   --spec ./test/e2e/conversation-session/background/conversation-session-background-subagent-rate-limit.test.ts
 
-pnpm --filter @marid/desktop exec wdio run wdio.conf.ts --spec \
+pnpm --filter @qodex/desktop exec wdio run wdio.conf.ts --spec \
   './test/e2e/conversation-session/background/conversation-session-background-subagent-rate-limit.test.ts'
 ```
 

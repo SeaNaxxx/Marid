@@ -1,7 +1,7 @@
-import { parseRemoteWorkspaceIdentity } from "@marid/shared";
+import { parseRemoteWorkspaceIdentity } from "@qodex/shared";
 import type {
   ProjectTaskRef,
-  IMaridTaskService,
+  IQodexTaskService,
   IWindowControllerService,
   WindowHostControllerMutation,
   WindowHostTaskAddress,
@@ -11,7 +11,7 @@ export type ProjectTaskMutation = Exclude<
   { kind: "open" | "resume" }
 >;
 interface ProjectTaskPorts {
-  service: IMaridTaskService;
+  service: IQodexTaskService;
   controller?: IWindowControllerService;
 }
 function taskAddress(task: ProjectTaskRef, remoteSessionId?: string | null): WindowHostTaskAddress {

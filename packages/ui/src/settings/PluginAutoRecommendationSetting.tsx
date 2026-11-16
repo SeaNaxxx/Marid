@@ -3,12 +3,12 @@ import { Switch } from "@/components/ui/switch.js";
 import { toast } from "@/components/ui/toast.js";
 import { useSettings } from "@/hooks/useSettingService.js";
 import { useBaseWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 import { SettingsRow } from "@/settings/SettingsPageParts.js";
 
 export function PluginAutoRecommendationSetting() {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const services = useBaseWorkspaceServices();
   const { settings, loading, update } = useSettings({ services });
   const [saving, setSaving] = useState(false);

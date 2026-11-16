@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { MaridSessionEndedSubagent, MaridSessionSubagentsResult } from "@marid/shared";
+import type { QodexSessionEndedSubagent, QodexSessionSubagentsResult } from "@qodex/shared";
 import { useServices } from "@/hooks/useServices.js";
 import { logger } from "@/logger.js";
 
@@ -8,7 +8,7 @@ const MAX_PAGE_SIZE = 100;
 
 export interface SessionSubagentsViewState {
   revision: number;
-  ended: MaridSessionSubagentsResult["ended"];
+  ended: QodexSessionSubagentsResult["ended"];
   error: string | null;
   loading: boolean;
 }
@@ -23,9 +23,9 @@ function emptyState(): SessionSubagentsViewState {
 }
 
 export function mergeEndedSubagentPages(
-  current: readonly MaridSessionEndedSubagent[],
-  incoming: readonly MaridSessionEndedSubagent[],
-): MaridSessionEndedSubagent[] {
+  current: readonly QodexSessionEndedSubagent[],
+  incoming: readonly QodexSessionEndedSubagent[],
+): QodexSessionEndedSubagent[] {
   const currentIds = new Set(current.map((item) => item.childSessionId));
   return [...current, ...incoming.filter((item) => !currentIds.has(item.childSessionId))];
 }
@@ -51,7 +51,7 @@ export function useSessionSubagents(options: {
   workspacePath: string;
 }) {
   const services = useServices();
-  const maridAgentService = services.maridAgentService;
+  const qodexAgentService = services.qodexAgentService;
   const [state, setState] = useState<SessionSubagentsViewState>(emptyState);
   const requestVersionRef = useRef(0);
   const requestInFlightRef = useRef(false);
@@ -61,9 +61,9 @@ export function useSessionSubagents(options: {
   const enabled = options.enabled !== false && Boolean(options.sessionId);
 
   const requestPage = useCallback(
-    (endedLimit: number, endedCursor?: string): Promise<MaridSessionSubagentsResult> => {
+    (endedLimit: number, endedCursor?: string): Promise<QodexSessionSubagentsResult> => {
       if (!options.sessionId) return Promise.reject(new Error("session_id_missing"));
-      if (typeof maridAgentService?.listSessionSubagents !== "function") {
+      if (typeof qodexAgentService?.listSessionSubagents !== "function") {
         return Promise.resolve({
           revision: 0,
           childSessionIds: [],
@@ -71,7 +71,7 @@ export function useSessionSubagents(options: {
           ended: { total: 0, items: [] },
         });
       }
-      return maridAgentService.listSessionSubagents({
+      return qodexAgentService.listSessionSubagents({
         workspacePath: options.workspacePath,
         ...(options.workspaceIdentity ? { workspaceIdentity: options.workspaceIdentity } : {}),
         ...(options.remoteSessionId ? { remoteSessionId: options.remoteSessionId } : {}),
@@ -85,7 +85,7 @@ export function useSessionSubagents(options: {
       options.sessionId,
       options.workspaceIdentity,
       options.workspacePath,
-      maridAgentService,
+      qodexAgentService,
     ],
   );
 

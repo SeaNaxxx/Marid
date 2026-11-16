@@ -1,4 +1,4 @@
-const FEEDBACK_CONTACT_STORAGE_KEY = "marid.feedback.contact";
+const FEEDBACK_CONTACT_STORAGE_KEY = "qodex.feedback.contact";
 
 function getStorage(): Storage | null {
   try {

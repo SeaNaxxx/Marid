@@ -3,12 +3,12 @@
 ## 状态
 
 - 当前事实 spec，日期：2026-09-09。
-- 目标场景：先执行 `pnpm dev:desktop:test`，再从线上测试 Share 页面点击“去 Marid 继续”。
-- 线上 Share 页面和 `marid://share/import` 协议保持不变。
+- 目标场景：先执行 `pnpm dev:desktop:test`，再从线上测试 Share 页面点击“去 Qodex 继续”。
+- 线上 Share 页面和 `qodex://share/import` 协议保持不变。
 
 ## 问题边界
 
-线上 Share CTA 只能生成稳定的 `marid://share/import?code=...`。macOS 的协议处理由
+线上 Share CTA 只能生成稳定的 `qodex://share/import?code=...`。macOS 的协议处理由
 LaunchServices 决定，不能感知哪个终端通过 pnpm 启动了项目。
 
 当前 `pnpm dev:desktop:test` 直接启动 `node_modules/electron/dist/Electron.app`。这个 raw
@@ -17,17 +17,17 @@ Electron bundle 的 `Info.plist` 没有 `CFBundleURLTypes`，系统登记后得�
 
 ## 方案
 
-仅在 macOS Dev 启动脚本中准备一个本地 `Marid Dev.app` bundle：
+仅在 macOS Dev 启动脚本中准备一个本地 `Qodex Dev.app` bundle：
 
 1. 以当前 checkout 的 Electron runtime 为源，在 `.codex-runtime/desktop-dev/` 下准备副本。
 2. 只修改副本的 `Info.plist`，写入：
-   - `CFBundleIdentifier=dev.marid.app.development`；
-   - `CFBundleName/CFBundleDisplayName=Marid Dev`；
-   - `CFBundleURLTypes` 中的 `marid` scheme。
+   - `CFBundleIdentifier=dev.qodex.app.development`；
+   - `CFBundleName/CFBundleDisplayName=Qodex Dev`；
+   - `CFBundleURLTypes` 中的 `qodex` scheme。
 3. 仍以 `packages/desktop` 目录作为 Electron 的开发入口启动副本，保留 Vite、HMR、
-   `ELECTRON_RENDERER_URL`、`MARID_ENV` 和现有单实例锁语义。
+   `ELECTRON_RENDERER_URL`、`QODEX_ENV` 和现有单实例锁语义。
 4. 现有 main process 继续调用 `registerDeepLinkProtocol`；由于当前进程已经来自带
-   `marid` 声明的 Dev bundle，LaunchServices 注册的是 Dev bundle，而不是 raw Electron。
+   `qodex` 声明的 Dev bundle，LaunchServices 注册的是 Dev bundle，而不是 raw Electron。
 5. `open-url`、`second-instance`、ShareImport 投递和导入持久化逻辑不变。
 
 ## 事件顺序
@@ -35,10 +35,10 @@ Electron bundle 的 `Info.plist` 没有 `CFBundleURLTypes`，系统登记后得�
 ```text
 pnpm dev:desktop:test
   -> dev.mjs 等待 main/host/preload/Vite 就绪
-  -> 准备 Marid Dev.app + Info.plist(marid)
+  -> 准备 Qodex Dev.app + Info.plist(qodex)
   -> 从 Dev.app 启动 Electron packages/desktop
-  -> main 注册 marid 默认 handler
-  -> 浏览器点击 marid://share/import?code=...
+  -> main 注册 qodex 默认 handler
+  -> 浏览器点击 qodex://share/import?code=...
   -> macOS open-url / second-instance
   -> 现有 Desktop ShareImport 路由
 ```
@@ -54,10 +54,10 @@ pnpm dev:desktop:test
 
 ## 验收标准
 
-1. `pnpm dev:desktop:test` 启动日志记录 Dev bundle 路径和 `marid` 注册成功。
-2. macOS LaunchServices 的 `marid` handler 指向 `dev.marid.app.development`，而不是
+1. `pnpm dev:desktop:test` 启动日志记录 Dev bundle 路径和 `qodex` 注册成功。
+2. macOS LaunchServices 的 `qodex` handler 指向 `dev.qodex.app.development`，而不是
    `com.github.electron`。
-3. 线上 Share 页面仍显示原 CTA 和原 `marid://share/import` href。
+3. 线上 Share 页面仍显示原 CTA 和原 `qodex://share/import` href。
 4. Dev 已运行时点击 CTA，不出现 Electron 默认页，现有 Dev 窗口收到 `ShareImport`。
-5. Dev endpoint 为 `https://marid.z.ai`，导入请求与页面环境一致。
+5. Dev endpoint 为 `https://qodex.z.ai`，导入请求与页面环境一致。
 6. 原有 deep-link parser/route 单测继续通过。

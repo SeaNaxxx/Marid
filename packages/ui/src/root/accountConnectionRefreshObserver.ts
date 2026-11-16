@@ -1,5 +1,5 @@
-import { isBuiltinModelProviderId, isStartPlanModelProviderId } from "@marid/shared";
-import type { ProviderSettingsView } from "@marid/services";
+import { isBuiltinModelProviderId, isStartPlanModelProviderId } from "@qodex/shared";
+import type { ProviderSettingsView } from "@qodex/services";
 import { logger } from "@/logger.js";
 
 export interface AccountConnectionLoss {

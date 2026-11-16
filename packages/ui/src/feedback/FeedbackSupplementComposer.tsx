@@ -1,12 +1,12 @@
 import { useCallback, useRef, useState, type ClipboardEvent } from "react";
 import { FileText, ImageIcon, LoaderCircle, Paperclip, Send, X } from "lucide-react";
-import type { FeedbackAttachmentKind } from "@marid/shared";
-import type { IFeedbackService } from "@marid/services";
+import type { FeedbackAttachmentKind } from "@qodex/shared";
+import type { IFeedbackService } from "@qodex/services";
 import { Button } from "@/components/ui/button.js";
 import { Textarea } from "@/components/ui/textarea.js";
 import { FeedbackErrorTip } from "@/feedback/feedbackBadges.js";
 import { getErrorMessage } from "@/lib/errorMessage.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 export const MAX_SUPPLEMENT_ATTACHMENTS = 6;
 export const MAX_SUPPLEMENT_ATTACHMENT_BYTES = 100 * 1024 * 1024;
@@ -68,7 +68,7 @@ export function FeedbackSupplementComposer({
   title?: string;
   description?: string;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const formatMessage = intl.formatMessage;
   const displayTitle = title ?? formatMessage({ id: "feedback.supplement.title" });
   const displayDescription =

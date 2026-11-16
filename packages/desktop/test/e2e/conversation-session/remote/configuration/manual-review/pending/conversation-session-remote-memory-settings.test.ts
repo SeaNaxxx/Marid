@@ -1,6 +1,6 @@
 import { mkdir, readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { parseRemoteWorkspaceIdentity } from "@marid/shared";
+import { parseRemoteWorkspaceIdentity } from "@qodex/shared";
 import {
   TID_SETTINGS_BACK_BUTTON,
   TID_SETTINGS_MEMORY_SWITCH,
@@ -8,7 +8,7 @@ import {
   TID_SETTINGS_SECTION_NAV,
   TID_TASK_SETTINGS_BUTTON,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   clearAppData,
   clickTestIdByDom,
@@ -34,7 +34,7 @@ import { prepareV4ConversationE2E } from "#e2e/helpers/v4-conversation";
 
 const CASE_MARKER = "E2E_REMOTE_MEMORY_SETTINGS";
 const DEVICE_TRIGGER = "settings-memory-device-trigger";
-const REMOTE_SETTINGS_DIR = "/home/dev/.marid/v2";
+const REMOTE_SETTINGS_DIR = "/home/dev/.qodex/v2";
 const REMOTE_SETTINGS = `${REMOTE_SETTINGS_DIR}/setting.json`;
 
 async function openSection(section: string): Promise<void> {
@@ -111,7 +111,7 @@ async function setMemory(enabled: boolean, read: () => Promise<boolean>): Promis
 }
 
 async function captureLayouts(): Promise<void> {
-  const root = process.env.MARID_E2E_ARTIFACT_DIR;
+  const root = process.env.QODEX_E2E_ARTIFACT_DIR;
   if (!root) throw new Error(`${CASE_MARKER}: 缺少工件目录`);
   const dir = resolve(root, "memory-devices");
   await mkdir(dir, { recursive: true });

@@ -1,5 +1,5 @@
 import type { ImageFilePreviewContext } from "@/hooks/useImageFilePreview.js";
-import type { ChannelContentPart } from "@marid/shared";
+import type { ChannelContentPart } from "@qodex/shared";
 import { ChannelMentionContent } from "@/v4/ChannelMentionContent.js";
 import { ConversationUserInputEpilogue } from "@/v4/ConversationUserInputEpilogue.js";
 import { ConversationUserInputBody } from "@/v4/ConversationUserInputBody.js";

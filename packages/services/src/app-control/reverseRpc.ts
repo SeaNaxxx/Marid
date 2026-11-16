@@ -3,15 +3,15 @@ import {
   appControlCancelMethod,
   appControlCancelParamsSchema,
   type AppControlAction,
-  type MaridProtocolRequest,
-} from "@marid/shared";
-import { SessionControlError } from "@marid/session-control/contracts";
+  type QodexProtocolRequest,
+} from "@qodex/shared";
+import { SessionControlError } from "@qodex/session-control/contracts";
 import type { AppControlBinding, AppControlService } from "#src/app-control/contract.js";
 
 interface ReverseClient {
-  respond(id: MaridProtocolRequest["id"], result: unknown): Promise<void>;
+  respond(id: QodexProtocolRequest["id"], result: unknown): Promise<void>;
   respondError(
-    id: MaridProtocolRequest["id"],
+    id: QodexProtocolRequest["id"],
     error: { code: number; message: string },
   ): Promise<void>;
 }
@@ -95,7 +95,7 @@ export function createAppControlReverseRpc(options: {
     callerSessionId: string;
     callId: string;
     turnId?: string;
-    trace?: MaridProtocolRequest["trace"];
+    trace?: QodexProtocolRequest["trace"];
     signal: AbortSignal;
   }) => Promise<AppControlBinding>;
   onResponseError: (error: unknown) => void;
@@ -103,7 +103,7 @@ export function createAppControlReverseRpc(options: {
   const pending = new Map<string, { controller: AbortController; binding?: AppControlBinding }>();
   let disposed = false;
   return {
-    handle(request: MaridProtocolRequest): boolean {
+    handle(request: QodexProtocolRequest): boolean {
       if (request.method === appControlCancelMethod) {
         const parsed = appControlCancelParamsSchema.safeParse(request.params);
         if (!parsed.success) {

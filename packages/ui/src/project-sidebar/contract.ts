@@ -1,4 +1,4 @@
-import type { Locale, RemoteTarget, UserInfo } from "@marid/shared";
+import type { Locale, RemoteTarget, UserInfo } from "@qodex/shared";
 import type { LucideIcon } from "lucide-react";
 import type {
   AppProps,
@@ -6,8 +6,8 @@ import type {
   RemoteWorkspaceRecoveryStatus,
 } from "@/app-shell/types.js";
 import type { Theme } from "@/useTheme.js";
-export { LEGACY_SINGLE_ROOT_PROJECT_PREFIX } from "@marid/services";
-export type { WebRemoteControlMobileTaskView, WebRemoteControlStatus } from "@marid/shared";
+export { LEGACY_SINGLE_ROOT_PROJECT_PREFIX } from "@qodex/services";
+export type { WebRemoteControlMobileTaskView, WebRemoteControlStatus } from "@qodex/shared";
 export interface ProjectDevice {
   id: string;
   label: string;
@@ -31,11 +31,11 @@ export {
   buildRemoteWorkspaceIdentity,
   buildServerRemoteWorkspaceIdentity,
   remoteHostIdFromWorkspaceIdentity,
-} from "@marid/shared";
+} from "@qodex/shared";
 export type {
   WindowHostTaskAddress,
   WindowHostControllerTaskActivity,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 export type {
   TaskGroup,
   TaskGroupColor,
@@ -50,7 +50,7 @@ export type {
   SaveProjectInput,
   IProjectService,
   IWindowControllerService,
-  IMaridTaskService,
+  IQodexTaskService,
   WindowHostControllerMutation,
   WindowHostControllerFrame,
   WindowHostTaskUnreadSignal,
@@ -60,11 +60,11 @@ export type {
   RemoteProjectHost,
   IManagedWorktreeService,
   ManagedWorktreeGroup,
-} from "@marid/services";
+} from "@qodex/services";
 export type {
   ManagedWorktreeEntry,
   ManagedWorktreeTaskRef as ManagedWorktreeTask,
-} from "@marid/shared";
+} from "@qodex/shared";
 export interface ProjectAvailability {
   entryId?: string;
   /** 仅首次升级入口用于替换旧排序键，不改变项目身份。 */
@@ -86,7 +86,7 @@ export interface SidebarFileTreeOpenRequest {
   id: number;
   target: SidebarFileTreeTarget;
 }
-export type { AppNavigationTarget, AppNavigationHandler } from "@marid/shared";
+export type { AppNavigationTarget, AppNavigationHandler } from "@qodex/shared";
 
 export type ProjectTaskNavigationResult =
   | { status: "opened" }

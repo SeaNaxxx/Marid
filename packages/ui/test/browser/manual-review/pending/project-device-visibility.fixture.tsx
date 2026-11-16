@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { Emitter } from "@marid/rpc";
-import type { IBroadcastService, VirtualProject } from "@marid/services";
-import { createMaridStore } from "@/store/index.js";
-import { StoreContext, useMaridStore } from "@/store/StoreProvider.js";
+import { Emitter } from "@qodex/rpc";
+import type { IBroadcastService, VirtualProject } from "@qodex/services";
+import { createQodexStore } from "@/store/index.js";
+import { StoreContext, useQodexStore } from "@/store/StoreProvider.js";
 import { TabStoreProvider } from "@/store/TabStoreProvider.js";
 import { ProjectSidebarNode } from "@/project-sidebar/ProjectSidebarNode.js";
 import { ProjectComposerMenu } from "@/project-sidebar/ProjectComposerMenu.js";
 import type { ProjectNodeProps } from "@/project-sidebar/ProjectNodeContent.js";
 import { projectKey } from "@/project-sidebar/view.js";
 import { SourceServerManagementPanel } from "@/settings/SourceServerManagementPanel.js";
-import { MaridIntlProvider } from "@/i18n/IntlProvider.js";
+import { QodexIntlProvider } from "@/i18n/IntlProvider.js";
 import { TooltipProvider } from "@/components/ui/tooltip.js";
 import { ServiceProvider } from "@/hooks/useServices.js";
 import "@/styles.css";
@@ -33,7 +33,7 @@ const broadcast: IBroadcastService = {
   releaseClaim: async () => {},
   tryClaim: async () => false,
 };
-const store = createMaridStore(broadcast);
+const store = createQodexStore(broadcast);
 document.documentElement.className = `${theme} theme-zai-${theme}`;
 const rows = (["online", "offline", "needs-upgrade"] as const).map((state, i) => {
   const project: VirtualProject = {
@@ -91,8 +91,8 @@ Object.assign(window, {
 });
 function Fixture() {
   const [expandedProjects, setExpandedProjects] = useState<string[]>([]);
-  const hidden = useMaridStore((state) => state.hideProjectDeviceNames);
-  const setHidden = useMaridStore((state) => state.setHideProjectDeviceNames);
+  const hidden = useQodexStore((state) => state.hideProjectDeviceNames);
+  const setHidden = useQodexStore((state) => state.setHideProjectDeviceNames);
   return (
     <main className="min-h-screen bg-background p-4 text-foreground">
       <section className="w-64 max-w-full bg-sidebar" aria-label="Projects">
@@ -143,13 +143,13 @@ function Fixture() {
 createRoot(document.getElementById("root")!).render(
   <StoreContext.Provider value={store}>
     <ServiceProvider services={{} as never}>
-      <MaridIntlProvider initialLocale={locale}>
+      <QodexIntlProvider initialLocale={locale}>
         <TooltipProvider>
           <TabStoreProvider>
             <Fixture />
           </TabStoreProvider>
         </TooltipProvider>
-      </MaridIntlProvider>
+      </QodexIntlProvider>
     </ServiceProvider>
   </StoreContext.Provider>,
 );

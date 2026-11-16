@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
-import { createSessionTraceId } from "@marid/shared";
-import type { ConversationOpenTiming, ConversationSnapshot } from "@marid/shared/marid-protocol-v4";
+import { createSessionTraceId } from "@qodex/shared";
+import type { ConversationOpenTiming, ConversationSnapshot } from "@qodex/shared/qodex-protocol-v4";
 import {
   reportSessionOpenResult,
   reportSessionOpenStart,

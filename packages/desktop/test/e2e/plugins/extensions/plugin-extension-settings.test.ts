@@ -1,5 +1,5 @@
 // PLM-EXT-P2D：插件设置与扩展的 settings 能力（docs/plugins/extension-host.md §16.7；存储见 CLI spec
-// apps/marid-cli/docs/design/v2/plugin-compat.md「Sensitive Option Storage」）。
+// apps/qodex-cli/docs/design/v2/plugin-compat.md「Sensitive Option Storage」）。
 // 隔离 HOME：两个纯 JS fixture 扩展（test/e2e/fixtures/fs/plugins/plugin-extension-settings/）经 plugins.dirs 加载：
 // - e2e-ext-settings：userConfig 有敏感键 token 与普通键 region（默认 eu）。env.onDidChange 时调 settings.get，
 //   另订阅 settings.onDidChange。日志只有 hasToken、token 长度、region 与键名。
@@ -16,7 +16,7 @@ import {
   TID_NAV_PRIMARY_ITEM,
   TID_SETTINGS_BACK_BUTTON,
   TID_SIDE_PANE_EXTENSION_VIEW_ITEM,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   DEFAULT_WORKSPACE,
   clearAppData,
@@ -63,7 +63,7 @@ const evidence: Record<string, unknown> = {};
 const log = createExtensionLog();
 
 function cliPath(...segments: string[]): string {
-  return join(getE2EAppDataPaths().homeDir, ".marid", "cli", ...segments);
+  return join(getE2EAppDataPaths().homeDir, ".qodex", "cli", ...segments);
 }
 
 async function seedFixtures(): Promise<void> {
@@ -82,14 +82,14 @@ async function readJson(path: string): Promise<Record<string, unknown>> {
   return JSON.parse(await readFile(path, "utf8").catch(() => "{}")) as Record<string, unknown>;
 }
 
-/** `~/.marid/cli/config.json` 里本插件 user 层的选项。 */
+/** `~/.qodex/cli/config.json` 里本插件 user 层的选项。 */
 async function readConfigOptions(): Promise<Record<string, unknown>> {
   const config = await readJson(cliPath("config.json"));
   const plugins = (config.plugins ?? {}) as { options?: Record<string, Record<string, unknown>> };
   return plugins.options?.[PLUGIN_ID] ?? {};
 }
 
-/** `~/.marid/cli/plugin-secrets.json` 里本插件 user 层的敏感值。 */
+/** `~/.qodex/cli/plugin-secrets.json` 里本插件 user 层的敏感值。 */
 async function readSecretOptions(): Promise<Record<string, unknown>> {
   const secrets = (await readJson(cliPath("plugin-secrets.json"))) as {
     user?: Record<string, Record<string, unknown>>;
@@ -215,13 +215,13 @@ async function findFilesContaining(root: string, needle: string): Promise<string
 async function scanLeaks(needle: string): Promise<{ roots: string[]; hits: string[] }> {
   const { homeDir, appDataDir } = getE2EAppDataPaths();
   const roots = [
-    ...new Set([homeDir, appDataDir, process.env.MARID_E2E_RUNTIME_LOG_DIR ?? ""]),
+    ...new Set([homeDir, appDataDir, process.env.QODEX_E2E_RUNTIME_LOG_DIR ?? ""]),
   ].filter(Boolean);
   const hits = (await Promise.all(roots.map((root) => findFilesContaining(root, needle)))).flat();
   return { roots, hits: [...new Set(hits)] };
 }
 
-/** `~/.marid/cli/config.json` 里另一个插件 user 层的选项。 */
+/** `~/.qodex/cli/config.json` 里另一个插件 user 层的选项。 */
 async function readOtherConfigOptions(): Promise<Record<string, unknown>> {
   const config = await readJson(cliPath("config.json"));
   const plugins = (config.plugins ?? {}) as { options?: Record<string, Record<string, unknown>> };
@@ -245,8 +245,8 @@ async function callAccountTool(name: string, args: Record<string, unknown>): Pro
   );
   const raw = await evaluateInViewPage<string>(
     pane.sandbox!,
-    `window.marid.ready()
-      .then(() => window.marid.callTool(${JSON.stringify(name)}, ${JSON.stringify(args)}))
+    `window.qodex.ready()
+      .then(() => window.qodex.callTool(${JSON.stringify(name)}, ${JSON.stringify(args)}))
       .then((result) => JSON.stringify(result))`,
   );
   if (!raw) throw new Error(`the account view did not answer the ${name} tool call`);
@@ -256,7 +256,7 @@ async function callAccountTool(name: string, args: Record<string, unknown>): Pro
 describe("PLM-EXT-P2D 插件设置与扩展的 settings 能力", () => {
   after(async () => {
     await writeFile(
-      join(process.env.MARID_E2E_ARTIFACT_DIR ?? process.cwd(), "plm-ext-p2d-evidence.json"),
+      join(process.env.QODEX_E2E_ARTIFACT_DIR ?? process.cwd(), "plm-ext-p2d-evidence.json"),
       JSON.stringify(evidence, null, 2),
     ).catch(() => undefined);
     await clearAppData();

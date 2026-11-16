@@ -6,21 +6,21 @@ import {
   type SessionResolveInteractionResult,
   type SessionSetPermissionModeInput,
   type SessionSetPermissionModeResult,
-} from "@marid/shared/extension-host";
+} from "@qodex/shared/extension-host";
 import {
   PERMISSION_FULL_ACCESS_OPTION_ID,
   type CommandAck,
   type PendingInteraction,
-} from "@marid/shared/marid-protocol-v4";
-import type { AppSessionRef } from "@marid/session-control/contracts";
+} from "@qodex/shared/qodex-protocol-v4";
+import type { AppSessionRef } from "@qodex/session-control/contracts";
 import type { ServiceLogger } from "#src/logger/serviceLogger.js";
-import type { IMaridAgentService } from "#src/marid-agent/maridAgent.js";
-import { withTrustedMaridAgentV4Connection } from "#src/marid-agent/maridAgentConnectionScope.js";
+import type { IQodexAgentService } from "#src/qodex-agent/qodexAgent.js";
+import { withTrustedQodexAgentV4Connection } from "#src/qodex-agent/qodexAgentConnectionScope.js";
 import {
   assertV4CommandAckOk,
   createHostCommandEnvelope,
   sendHostCasCommandV4,
-} from "#src/marid-agent/maridV4HostCommand.js";
+} from "#src/qodex-agent/qodexV4HostCommand.js";
 import type { CapabilityCallContext } from "#src/extensions/capabilityTypes.js";
 import type { PluginProjects } from "#src/extensions/pluginProjects.js";
 import type { SessionInteractionsRead, SessionReads } from "#src/extensions/sessionReads.js";
@@ -40,7 +40,7 @@ import type { SessionAuditDetails, SessionsBackend } from "#src/extensions/sessi
 export type FullAccessState = "granted" | "not-declared" | "not-granted";
 
 export interface SessionControlsDeps {
-  agent: IMaridAgentService | undefined;
+  agent: IQodexAgentService | undefined;
   reads: SessionReads;
   sessions: SessionsBackend;
   pluginProjects: Pick<PluginProjects, "projectIds">;
@@ -163,7 +163,7 @@ export function createSessionControls(deps: SessionControlsDeps): SessionControl
           }
           details.choice = choiceOf(interaction, input.answer);
           const ack = await agentOf().sendConversationCommandV4(
-            withTrustedMaridAgentV4Connection(
+            withTrustedQodexAgentV4Connection(
               {
                 workspacePath: target.workspacePath,
                 ...(target.workspaceIdentity
@@ -216,7 +216,7 @@ export function createSessionControls(deps: SessionControlsDeps): SessionControl
             await sendHostCasCommandV4({
               send: (envelope) =>
                 agent.sendConversationCommandV4(
-                  withTrustedMaridAgentV4Connection(
+                  withTrustedQodexAgentV4Connection(
                     {
                       workspacePath: target.workspacePath,
                       ...(target.workspaceIdentity

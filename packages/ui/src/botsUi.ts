@@ -1,5 +1,5 @@
-import type { BotConfig, BotProvider, BotReplyGranularity } from "@marid/shared";
-import { getSupportedBotReplyGranularities } from "@marid/shared";
+import type { BotConfig, BotProvider, BotReplyGranularity } from "@qodex/shared";
+import { getSupportedBotReplyGranularities } from "@qodex/shared";
 
 export type BotProviderEntryId = BotProvider | "dingding";
 

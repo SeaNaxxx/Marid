@@ -7,7 +7,7 @@ import { logger } from "@/logger.js";
 import { WorkspaceSettingsLayer } from "@/root/WorkspaceSettingsLayer.js";
 import type { AppProps } from "@/app-shell/types.js";
 import type { RootProps, WorkspaceSettingsLayerProps } from "@/root/types.js";
-import type { IFeedbackService, IServiceAccessor } from "@marid/services";
+import type { IFeedbackService, IServiceAccessor } from "@qodex/services";
 import { ConversationTelemetryWorkspaceAttachment } from "@/v4/telemetry/ConversationTelemetryAttachment.js";
 
 const StableWorkspaceApp = memo(App);

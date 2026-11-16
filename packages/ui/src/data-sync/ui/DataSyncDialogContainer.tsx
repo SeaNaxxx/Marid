@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import type { DeviceSyncResult, SourceServerWorkspaceHistoryEntry } from "@marid/shared";
+import type { DeviceSyncResult, SourceServerWorkspaceHistoryEntry } from "@qodex/shared";
 import {
   formatRemoteConnectionDescription,
   formatRemoteDeviceName,

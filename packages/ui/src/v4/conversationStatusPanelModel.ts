@@ -1,4 +1,4 @@
-import type { GitRepositorySummary } from "@marid/shared";
+import type { GitRepositorySummary } from "@qodex/shared";
 import type {
   BackgroundWorkSummary,
   GoalState,
@@ -6,12 +6,12 @@ import type {
   RunningSubagentSummary,
   ToolCallRow,
   WorkflowRunState,
-} from "@marid/shared/marid-protocol-v4";
-import type { SessionWorkflowPhaseSummary } from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
+import type { SessionWorkflowPhaseSummary } from "@qodex/shared/qodex-protocol-v4";
 import {
   deriveSessionWorkflowPhases,
   workflowRunStepCounts,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 import { extractPlanToolCallContent, getPlanDirectoryTitle } from "@/lib/planToolCall.js";
 import { workflowRunParallelPhaseLabel } from "@/lib/workflowRunLine.js";
 
@@ -253,7 +253,7 @@ function buildRunningWorkflowRuns(
     if (run.status !== "pending" && run.status !== "running") continue;
     const work = workflowWorkByWorkId.get(run.runId);
     if (work) joinedWorkIds.add(run.runId);
-    // 计数与聊天紧凑卡同源（唯一实现在 @marid/shared 的 workflowRunStepCounts：表内 + 表外）。
+    // 计数与聊天紧凑卡同源（唯一实现在 @qodex/shared 的 workflowRunStepCounts：表内 + 表外）。
     const steps = workflowRunStepCounts(run);
     rows.push({
       runId: run.runId,

@@ -1,5 +1,5 @@
-import { ServiceChannels } from "@marid/shared";
-import type { McpAppsAppToolCallResult, McpAppsAppToolDescriptor } from "@marid/shared/mcp-apps";
+import { ServiceChannels } from "@qodex/shared";
+import type { McpAppsAppToolCallResult, McpAppsAppToolDescriptor } from "@qodex/shared/mcp-apps";
 import { createServiceDescriptor } from "../descriptors.js";
 import type { PluginUiPluginScope } from "./contract.js";
 

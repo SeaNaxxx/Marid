@@ -1,4 +1,4 @@
-import type { MaridGroupedTaskViewNode } from "@/project-sidebar/grouped/types.js";
+import type { QodexGroupedTaskViewNode } from "@/project-sidebar/grouped/types.js";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -18,7 +18,7 @@ function shouldVirtualizeGroupedTopLevelNodes(nodeCount: number): boolean {
   return nodeCount > GROUPED_TOP_LEVEL_VIRTUALIZATION_THRESHOLD;
 }
 
-function getTopLevelNodeKey(node: MaridGroupedTaskViewNode | undefined, index: number): string {
+function getTopLevelNodeKey(node: QodexGroupedTaskViewNode | undefined, index: number): string {
   if (!node) {
     return `missing:${index}`;
   }
@@ -26,7 +26,7 @@ function getTopLevelNodeKey(node: MaridGroupedTaskViewNode | undefined, index: n
 }
 
 function estimateTopLevelNodeSize(
-  node: MaridGroupedTaskViewNode | undefined,
+  node: QodexGroupedTaskViewNode | undefined,
   isGroupCollapsed: (groupId: string) => boolean,
 ): number {
   if (!node || node.type === "task") {
@@ -68,9 +68,9 @@ function VirtualizedGroupedTopLevelList({
   isGroupCollapsed,
   renderNode,
 }: {
-  nodes: MaridGroupedTaskViewNode[];
+  nodes: QodexGroupedTaskViewNode[];
   isGroupCollapsed: (groupId: string) => boolean;
-  renderNode: (node: MaridGroupedTaskViewNode, index: number) => ReactNode;
+  renderNode: (node: QodexGroupedTaskViewNode, index: number) => ReactNode;
 }) {
   const listRef = useRef<HTMLDivElement | null>(null);
   const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null);

@@ -5,7 +5,7 @@ import {
   TID_TASK_ITEM,
   TID_TASK_SETTINGS_BUTTON,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { clearAppData, clickTestIdByDom, waitForWorkspaceApp } from "#e2e/helpers/desktop-app";
 import {
   getUpstreamRequestRecordCount,

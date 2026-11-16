@@ -59,34 +59,34 @@ import type {
   UpdateCheckResultPayload,
   UpdateStatePayload,
   OpenInEditorOptions,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 /**
- * window.marid 类型定义 —— 仅包含需要 main 进程参与的平台操作
+ * window.qodex 类型定义 —— 仅包含需要 main 进程参与的平台操作
  *
  * 凭据管理已迁移到 ICredentialService（通过 RPC），不再经过此接口。
  */
 declare global {
   interface Window {
     /** 插件 UI 沙箱 preload 命名空间；旧 preload 下为 undefined。 */
-    maridPluginSandbox?: {
+    qodexPluginSandbox?: {
       supportsRetainedMove?: boolean;
       setExecutionActive?(sandboxId: string, initId: number, active: boolean): Promise<void>;
       copyImage?(
-        input: import("@marid/shared/mcp-apps").PluginSandboxCaptureRequest,
+        input: import("@qodex/shared/mcp-apps").PluginSandboxCaptureRequest,
       ): Promise<void>;
       getOwnerWebContentsId(): Promise<number>;
       disposeSandbox(sandboxId: string, initId?: number): Promise<void>;
       consumeUserGesture(sandboxId: string): Promise<boolean>;
     };
-    marid: {
+    qodex: {
       connectRemote(
         options: RemoteTarget,
         requestId?: string,
         context?: {
           workspacePath: string;
           workspaceIdentity?: string;
-          connectTrigger?: import("@marid/shared").RemoteWorkspaceConnectTrigger;
+          connectTrigger?: import("@qodex/shared").RemoteWorkspaceConnectTrigger;
         },
       ): Promise<{ success: boolean; error?: string; sessionId?: string }>;
       requestSourceSettingsAttachment?(sourceServerId: string): Promise<{ attachmentId: string }>;
@@ -101,7 +101,7 @@ declare global {
         remoteSessionId: string;
         workspacePath: string;
         workspaceIdentity?: string;
-      }): Promise<import("@marid/shared").BindRemoteWorkspaceSessionContextIpcResult>;
+      }): Promise<import("@qodex/shared").BindRemoteWorkspaceSessionContextIpcResult>;
       /** 为当前 workspace 开启 Web 远程控制 */
       startWebRemoteControl(
         context: WebRemoteControlContext,
@@ -136,20 +136,20 @@ declare global {
       selectFiles?(): Promise<string[]>;
       /** 通过系统原生另存为对话框保存文件 */
       saveFile?(
-        payload: import("@marid/shared").SaveFileRequest,
-      ): Promise<import("@marid/shared").SaveFileResult>;
+        payload: import("@qodex/shared").SaveFileRequest,
+      ): Promise<import("@qodex/shared").SaveFileResult>;
       /** 将当前页面的 print 媒体版面导出为 PDF（Chromium 打印引擎，矢量文本） */
-      printPageToPdf?(): Promise<import("@marid/shared").PrintPageToPdfResult>;
+      printPageToPdf?(): Promise<import("@qodex/shared").PrintPageToPdfResult>;
       /** 在 main 截取内置浏览器 guest 当前视口为 PNG（renderer 侧 <webview>.capturePage 会崩溃） */
       captureBrowserGuestPage?(
-        payload: import("@marid/shared").CaptureBrowserGuestPageRequest,
-      ): Promise<import("@marid/shared").CaptureBrowserGuestPageResult>;
+        payload: import("@qodex/shared").CaptureBrowserGuestPageRequest,
+      ): Promise<import("@qodex/shared").CaptureBrowserGuestPageResult>;
       /** 从系统拖拽/文件输入得到的 Web File 解析真实本地路径 */
       getPathForFile?(file: File): string | null;
       /** dwf 产物「作为文件打开」：把某一版的字节落成本机副本，返回其路径 */
       materializeWorkflowArtifactFile(
-        payload: import("@marid/shared").MaterializeWorkflowArtifactFileRequest,
-      ): Promise<import("@marid/shared").MaterializeWorkflowArtifactFileResult>;
+        payload: import("@qodex/shared").MaterializeWorkflowArtifactFileRequest,
+      ): Promise<import("@qodex/shared").MaterializeWorkflowArtifactFileResult>;
       /** 订阅当前窗口内远程连接过程日志，返回 disposer */
       onRemoteConnectionLog(handler: (entry: RemoteConnectionRuntimeLog) => void): () => void;
       /** 订阅远程 workspace session 关闭事件，返回 disposer */
@@ -179,7 +179,7 @@ declare global {
       /** 同步需要 main 进程即时感知的应用设置 */
       syncAppSettings?(patch: Partial<AppSettings>): void;
       /** 查询关闭驻留托盘能力（Linux 置灰判断；spec：docs/desktop/linux-close-to-tray.md） */
-      getCloseToTrayCapability?(): Promise<import("@marid/shared").DesktopCloseToTrayCapability>;
+      getCloseToTrayCapability?(): Promise<import("@qodex/shared").DesktopCloseToTrayCapability>;
       /** 注册 main 进程要求聚焦指定 workspace tab 的回调，返回 disposer */
       onFocusTab(handler: (path: string) => void): () => void;
       /** 注册 main 进程触发新建 tab 的回调，返回 disposer */
@@ -275,7 +275,7 @@ declare global {
       openInFileManager(path: string): Promise<{ success: boolean; error?: string }>;
       /** 使用系统默认应用打开本地文件 */
       openExternalFile(path: string): Promise<{ success: boolean; error?: string }>;
-      /** 打开 Marid Computer Use 完整权限引导 */
+      /** 打开 Qodex Computer Use 完整权限引导 */
       openCuaPermissionOnboarding?(
         options?: OpenCuaPermissionOnboardingOptions,
       ): Promise<CuaAccessibilitySettingsResult>;
@@ -310,7 +310,7 @@ declare global {
       reportRendererHeapSample?(sample: RendererHeapSample): void;
       /** 触发任务状态对应的系统通知 */
       showTaskNotification(payload: TaskNotificationPayload): void;
-      /** 导出日志：打包 ~/.marid/v2 及外部 agent 日志为 zip 并在 Finder 中显示 */
+      /** 导出日志：打包 ~/.qodex/v2 及外部 agent 日志为 zip 并在 Finder 中显示 */
       exportLogs(): Promise<{
         success: boolean;
         path?: string;
@@ -344,7 +344,7 @@ declare global {
       }): Promise<void>;
       /** 从自动发现的 Chrome Profile 一次性导入内置浏览器数据。 */
       importChromeBrowserData?(
-        options?: import("@marid/shared").ChromeBrowserDataImportOptions,
+        options?: import("@qodex/shared").ChromeBrowserDataImportOptions,
       ): Promise<ChromeBrowserDataImportResult>;
       /** 清理内置浏览器缓存或全部站点数据。 */
       clearEmbeddedBrowserData?(mode: "cache" | "all"): Promise<EmbeddedBrowserDataClearResult>;

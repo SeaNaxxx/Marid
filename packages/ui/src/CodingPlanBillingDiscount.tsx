@@ -2,9 +2,9 @@ import type {
   CodingPlanBillingDiscountConfig,
   CodingPlanBillingDiscountLocaleCopy,
   Locale,
-} from "@marid/shared";
-import { toZhOrEnLocale } from "@marid/shared";
-import type { ICodingPlanSubscriptionService } from "@marid/services";
+} from "@qodex/shared";
+import { toZhOrEnLocale } from "@qodex/shared";
+import type { ICodingPlanSubscriptionService } from "@qodex/services";
 import { InfoIcon, SparklesIcon, TrendingUpIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/components/lib/utils.js";
@@ -14,9 +14,9 @@ import {
   DialogContent,
   DialogTrigger,
 } from "@/components/ui/dialog.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { useOptionalServices } from "@/hooks/useServices.js";
-import { useMaridStoreWithDefault } from "@/store/StoreProvider.js";
+import { useQodexStoreWithDefault } from "@/store/StoreProvider.js";
 import { DEFAULT_CODE_PREVIEW_SETTINGS } from "@/lib/codePreviewSettings.js";
 import { logger } from "@/logger.js";
 
@@ -55,7 +55,7 @@ export function useCodingPlanBillingDiscountFromService(
   loading: boolean;
   refresh: () => Promise<void>;
 } {
-  const { locale } = useMaridIntl();
+  const { locale } = useQodexIntl();
   const [state, setState] = useState({
     active: hasLocaleCopy(billingDiscountCache?.value, locale, ["badgeBody"]),
     config: billingDiscountCache?.value,
@@ -136,7 +136,7 @@ export function CodingPlanBillingDiscountBadgePill({
   size = "default",
   variant = "gradient",
 }: CodingPlanBillingDiscountBadgePillProps) {
-  const { locale } = useMaridIntl();
+  const { locale } = useQodexIntl();
   const copy = resolveCodingPlanBillingDiscountCopy(config, locale);
   if (!copy.badgeBody) {
     return null;
@@ -170,7 +170,7 @@ export function CodingPlanBillingDiscountBadgePill({
 export function CodingPlanBillingDiscountBadge(
   props: CodingPlanBillingDiscountBadgePillProps,
 ) {
-  const { locale } = useMaridIntl();
+  const { locale } = useQodexIntl();
   const copy = resolveCodingPlanBillingDiscountCopy(props.config, locale);
   if (!copy.badgeBody) {
     return null;
@@ -192,7 +192,7 @@ export function CodingPlanBillingDiscountBanner({
 }: {
   config?: CodingPlanBillingDiscountConfig;
 }) {
-  const { locale } = useMaridIntl();
+  const { locale } = useQodexIntl();
   const copy = resolveCodingPlanBillingDiscountCopy(config, locale);
   if (!copy.cardTitle || !copy.cardBody) {
     return null;
@@ -228,11 +228,11 @@ export function CodingPlanBillingDiscountInfoDialog({
   config?: CodingPlanBillingDiscountConfig;
   tone?: "default" | "onGradient";
 }) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const copy = resolveCodingPlanBillingDiscountCopy(config, locale);
   // M5②.5 store 耦合剥离：MessageResponse 不再自取 store，主题/代码预览设置由调用方传入。
-  const theme = useMaridStoreWithDefault((state) => state.theme, "system");
-  const codePreviewSettings = useMaridStoreWithDefault(
+  const theme = useQodexStoreWithDefault((state) => state.theme, "system");
+  const codePreviewSettings = useQodexStoreWithDefault(
     (state) => state.codePreviewSettings,
     DEFAULT_CODE_PREVIEW_SETTINGS,
   );

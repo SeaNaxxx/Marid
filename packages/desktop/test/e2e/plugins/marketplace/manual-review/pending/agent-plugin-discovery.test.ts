@@ -5,7 +5,7 @@ import {
   TID_SETTINGS_SECTION_NAV,
   TID_SETTINGS_BACK_BUTTON,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   clearAppData,
   getE2EAppDataPaths,
@@ -58,9 +58,9 @@ async function startWorkspaceDraft() {
 async function seedDisabledPlugin() {
   const { homeDir, workspace } = getE2EAppDataPaths();
   const paths = [
-    join(homeDir, ".marid", "cli", "config.json"),
-    join(workspace, ".marid", "config.json"),
-    join(homeDir, "other-workspace", ".marid", "config.json"),
+    join(homeDir, ".qodex", "cli", "config.json"),
+    join(workspace, ".qodex", "config.json"),
+    join(homeDir, "other-workspace", ".qodex", "config.json"),
   ];
   for (const path of paths) {
     const raw = await readFile(path, "utf8").catch((error) => {

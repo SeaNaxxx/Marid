@@ -5,18 +5,18 @@ export const GEN_UI_HTML_MAX_BYTES = 5_000_000;
 export const GEN_UI_STATE_MAX_BYTES = 16 * 1024;
 export const GEN_UI_STATE_MAX_ENTRIES = 100;
 export const GEN_UI_CONTEXT_MAX_BYTES = 64 * 1024;
-export const GEN_UI_GLOBALS_EVENT = "marid:set_globals";
-export const GEN_UI_STATE_CONTEXT_KEY = "marid/genUiState";
-export const GEN_UI_TWEAK_CONTEXT_KEY = "marid/genUiTweaks";
-export const GEN_UI_STYLE_CONTEXT_KEY = "marid/genUiStyles";
+export const GEN_UI_GLOBALS_EVENT = "qodex:set_globals";
+export const GEN_UI_STATE_CONTEXT_KEY = "qodex/genUiState";
+export const GEN_UI_TWEAK_CONTEXT_KEY = "qodex/genUiTweaks";
+export const GEN_UI_STYLE_CONTEXT_KEY = "qodex/genUiStyles";
 export const genUiStyleVariablesSchema = z.record(
   z.string().regex(/^--gen-ui-[a-z-]+$/),
   z.string(),
 );
-export const GEN_UI_STATE_METHOD = "marid/gen-ui/state";
-export const GEN_UI_FOLLOW_UP_METHOD = "marid/gen-ui/follow-up";
-export const GEN_UI_TWEAK_METHOD = "marid/gen-ui/tweak";
-export const GEN_UI_PRESENTATION_METHOD = "marid/gen-ui/presentation";
+export const GEN_UI_STATE_METHOD = "qodex/gen-ui/state";
+export const GEN_UI_FOLLOW_UP_METHOD = "qodex/gen-ui/follow-up";
+export const GEN_UI_TWEAK_METHOD = "qodex/gen-ui/tweak";
+export const GEN_UI_PRESENTATION_METHOD = "qodex/gen-ui/presentation";
 export const GEN_UI_STATIC_DOMAINS = [
   "cdnjs.cloudflare.com",
   "esm.sh",
@@ -25,9 +25,9 @@ export const GEN_UI_STATIC_DOMAINS = [
   "fonts.googleapis.com",
   "fonts.gstatic.com",
   "fonts.bunny.net",
-  // 自有 CDN：visualize/gen-ui 页面引用 marid.z.ai 上的图片等静态资源（与上面公共 CDN 同走 resourceDomains，
+  // 自有 CDN：visualize/gen-ui 页面引用 qodex.z.ai 上的图片等静态资源（与上面公共 CDN 同走 resourceDomains，
   // 会同时进 img/script/style/media/font 五类 src，可控性高于公共 CDN）
-  "marid.z.ai",
+  "qodex.z.ai",
 ] as const;
 
 /** This is a wire-format check. The executor owns normalization and filesystem authorization. */

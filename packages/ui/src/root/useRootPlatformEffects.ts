@@ -1,9 +1,9 @@
 /* oxlint-disable eslint(max-lines) -- 平台事件和分享导入共用同一生命周期。 */
 import { getConversationShareErrorDetails } from "@/lib/conversationShareError.js";
 import { useEffect, useRef, useState } from "react";
-import { useMaridSessionStore } from "@/store/maridSessionStore.js";
+import { useQodexSessionStore } from "@/store/qodexSessionStore.js";
 import type { CreateTaskOptions } from "@/app-shell/types.js";
-import type { IPlatformService, MaridTaskClientMode } from "@marid/shared";
+import type { IPlatformService, QodexTaskClientMode } from "@qodex/shared";
 import { readV4ComposerDraft, V4_DRAFT_SCOPE_ROOT } from "@/v4/composer/composerDraftStore.js";
 import { readComposerWorkspaceScope } from "@/v4/composer/composerDraftStore.js";
 import { useComposerClientNamespace } from "@/hooks/useServices.js";
@@ -60,16 +60,16 @@ export function useRootPlatformEffects({
 }: {
   initialWorkspaceAbsPath?: string;
   initialWorkspaceIdentity?: string;
-  initialWorkspacePurpose?: import("@marid/shared").WorkspacePurpose;
+  initialWorkspacePurpose?: import("@qodex/shared").WorkspacePurpose;
   initialTaskId?: string;
   initialTaskDraft?: CreateTaskOptions;
-  clientMode?: MaridTaskClientMode;
+  clientMode?: QodexTaskClientMode;
   canBootstrapInitialWorkspace?: boolean;
   addTab: (
     workspacePath: string,
     options?: {
       workspaceIdentity?: string;
-      workspacePurpose?: import("@marid/shared").WorkspacePurpose;
+      workspacePurpose?: import("@qodex/shared").WorkspacePurpose;
     },
   ) => void;
   setIsBootstrappingInitialWorkspace: (value: boolean) => void;
@@ -86,7 +86,7 @@ export function useRootPlatformEffects({
   setWorkspaceActionError: (message: string | null) => void;
   allowOpenWorkspace?: boolean;
   isDesktop?: boolean;
-  locale: ReturnType<typeof import("@/i18n/IntlProvider.js").useMaridIntl>["locale"];
+  locale: ReturnType<typeof import("@/i18n/IntlProvider.js").useQodexIntl>["locale"];
   /** IntlProvider 是否已从持久化设置确定语言；未确定前 locale 只是占位初值。 */
   localeResolved?: boolean;
   tabs: WindowTabState[];
@@ -96,7 +96,7 @@ export function useRootPlatformEffects({
   remoteWorkspaceErrorByWorkspaceKey?: Record<string, string>;
   webRemoteControlFeatureEnabled?: boolean;
   hasCompletedFullTabRestore?: boolean;
-  intl: ReturnType<typeof import("@/i18n/IntlProvider.js").useMaridIntl>["intl"];
+  intl: ReturnType<typeof import("@/i18n/IntlProvider.js").useQodexIntl>["intl"];
   isRestoringOAuthSession: boolean;
 }) {
   const didBootstrapInitialWorkspaceRef = useRef(false);
@@ -168,7 +168,7 @@ export function useRootPlatformEffects({
           : undefined,
       );
       if (initialTaskId) {
-        useMaridSessionStore
+        useQodexSessionStore
           .getState()
           .setActiveTaskId(initialWorkspaceAbsPath, initialTaskId, initialWorkspaceIdentity);
       } else if (draftIntent || !isRendererReloadNavigation()) {
@@ -268,7 +268,7 @@ export function useRootPlatformEffects({
     const disposeNotificationClick = platform.onTaskNotificationClick((taskId: string) => {
       logger.info("[Root] onTaskNotificationClick:", taskId);
       // 遍历所有 workspace 找到 taskId 所属的 workspace，然后激活对应 tab 并切换任务
-      const workspaces = useMaridSessionStore.getState().workspaces;
+      const workspaces = useQodexSessionStore.getState().workspaces;
       for (const [workspacePath, workspaceState] of Object.entries(workspaces)) {
         const taskMeta = workspaceState.taskListCache?.find((task) => task.taskId === taskId);
         const hasTask = workspaceState.activeTaskId === taskId || Boolean(taskMeta);
@@ -281,7 +281,7 @@ export function useRootPlatformEffects({
             targetWorkspacePath,
             targetWorkspaceIdentity ? { workspaceIdentity: targetWorkspaceIdentity } : undefined,
           );
-          useMaridSessionStore
+          useQodexSessionStore
             .getState()
             .setActiveTaskId(targetWorkspacePath, taskId, targetWorkspaceIdentity);
           return;
@@ -447,7 +447,7 @@ export function useRootPlatformEffects({
             workspacePurpose: "conversation",
           });
         }
-        const sessionStore = useMaridSessionStore.getState();
+        const sessionStore = useQodexSessionStore.getState();
         sessionStore.setActiveTaskId(
           result.workspacePath,
           result.sessionId,
@@ -670,7 +670,7 @@ export function useRootPlatformEffects({
     const workspaceIdentity = activeTab?.workspaceIdentity;
     const syncActiveSession = (): void => {
       const nextSessionId = workspacePath
-        ? (useMaridSessionStore.getState().getWorkspaceState(workspacePath, workspaceIdentity)
+        ? (useQodexSessionStore.getState().getWorkspaceState(workspacePath, workspaceIdentity)
             .activeTaskId ?? null)
         : null;
       if (nextSessionId === lastSyncedSessionIdRef.current) return;
@@ -678,6 +678,6 @@ export function useRootPlatformEffects({
       platform.syncActiveTaskSession(nextSessionId);
     };
     syncActiveSession();
-    return useMaridSessionStore.subscribe(syncActiveSession);
+    return useQodexSessionStore.subscribe(syncActiveSession);
   }, [activeTab, activeTabId, isDesktop, platform]);
 }

@@ -5,8 +5,8 @@ import type {
   RemoteTarget,
   RemoteTargetSnapshot,
   RemoteWorkspaceSessionEntry,
-} from "@marid/shared";
-import { buildServerRemoteWorkspaceIdentity, parseRemoteWorkspaceIdentity } from "@marid/shared";
+} from "@qodex/shared";
+import { buildServerRemoteWorkspaceIdentity, parseRemoteWorkspaceIdentity } from "@qodex/shared";
 import type { WindowTabState } from "@/store/tabStore.js";
 import { isWorkspaceTab } from "@/store/tabStore.js";
 

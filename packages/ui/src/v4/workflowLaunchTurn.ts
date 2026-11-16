@@ -3,7 +3,7 @@ import type {
   TurnHeaderRow,
   UserInputRow,
   WorkflowLaunchMeta,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 
 /**
  * 中枢直接启动轮在转写里的规则。

@@ -1,5 +1,5 @@
 import { SidebarNativeTooltip } from "@/ControlHintTooltip.js";
-import type { ProjectTask as MaridTaskMeta } from "@/project-sidebar/contract.js";
+import type { ProjectTask as QodexTaskMeta } from "@/project-sidebar/contract.js";
 
 import {
   ContextMenuContent,
@@ -33,7 +33,7 @@ export function GroupedTaskContextMenuContent({
   disabledReason,
   archiveDisabledReason,
 }: {
-  task: MaridTaskMeta;
+  task: QodexTaskMeta;
   currentGroupId?: string;
   groups: TaskGroupMenuItem[];
   intl: {
@@ -43,11 +43,11 @@ export function GroupedTaskContextMenuContent({
   taskSessionFile: { loading: boolean; path: string | null };
   taskNativeSessionLogFile: { loading: boolean; path: string | null };
   providerConfigFile: { loading: boolean; path: string | null };
-  onMoveTaskToGroup: (task: MaridTaskMeta, groupId: string | null) => void;
-  onMoveTaskToTop: (task: MaridTaskMeta) => void;
-  onStartRenameTask: (task: MaridTaskMeta) => void;
-  onArchiveTask: (task: MaridTaskMeta) => void;
-  onMarkTaskAsUnread: (task: MaridTaskMeta) => void;
+  onMoveTaskToGroup: (task: QodexTaskMeta, groupId: string | null) => void;
+  onMoveTaskToTop: (task: QodexTaskMeta) => void;
+  onStartRenameTask: (task: QodexTaskMeta) => void;
+  onArchiveTask: (task: QodexTaskMeta) => void;
+  onMarkTaskAsUnread: (task: QodexTaskMeta) => void;
   onOpenTaskPathInFileManager: () => void;
   onCopyText: (label: string, text: string | null) => void;
   onOpenProviderConfig: () => void;

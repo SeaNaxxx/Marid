@@ -1,4 +1,4 @@
-import { TID_TOOL_SUMMARY_TRIGGER, testId } from "@marid/shared/test-ids";
+import { TID_TOOL_SUMMARY_TRIGGER, testId } from "@qodex/shared/test-ids";
 
 export const PERMISSION_INTERACTION_PREFIX = testId(TID_TOOL_SUMMARY_TRIGGER, "permission:");
 

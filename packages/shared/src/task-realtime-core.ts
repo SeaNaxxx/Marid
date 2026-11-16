@@ -5,16 +5,16 @@
 // task-realtime.ts 保留旧协议兼容接口；本文件集中定义对应的运行时 schema。
 
 import { z } from "zod";
-import type { MaridTaskMigrationSource, MaridTaskMode } from "./marid-task-types-core.js";
-import { legacyMaridProviderSchema } from "./marid-agent-policy.js";
-import { maridPermissionResponseSchema } from "./marid-protocol-legacy-types.js";
+import type { QodexTaskMigrationSource, QodexTaskMode } from "./qodex-task-types-core.js";
+import { legacyQodexProviderSchema } from "./qodex-agent-policy.js";
+import { qodexPermissionResponseSchema } from "./qodex-protocol-legacy-types.js";
 // merge 冲突解决：两侧分别在相邻行新增独立 import（本分支 hook trust review
 // 决策 schema、staging telemetry error attribution schema），二者无语义交集，均保留。
-import { workspaceHookReviewDecisionSchema } from "./marid-protocol-v4/workspace-hook-review.js";
-import { errorAttributionSchema } from "./marid-protocol-v4/snapshot.js";
+import { workspaceHookReviewDecisionSchema } from "./qodex-protocol-v4/workspace-hook-review.js";
+import { errorAttributionSchema } from "./qodex-protocol-v4/snapshot.js";
 
 const nonEmptyString = z.string().trim().min(1);
-const maridTaskModeRealtimeValues = [
+const qodexTaskModeRealtimeValues = [
   "default",
   "yolo",
   "guarded",
@@ -26,11 +26,11 @@ const maridTaskModeRealtimeValues = [
   "bypassPermissions",
   "autoEdit",
   "build",
-] as const satisfies readonly MaridTaskMode[];
-const maridTaskMigrationSourceRealtimeValues = [
+] as const satisfies readonly QodexTaskMode[];
+const qodexTaskMigrationSourceRealtimeValues = [
   "claudeCode",
-] as const satisfies readonly MaridTaskMigrationSource[];
-const maridTaskChangeSummaryRealtimeSchema = z
+] as const satisfies readonly QodexTaskMigrationSource[];
+const qodexTaskChangeSummaryRealtimeSchema = z
   .object({
     fileCount: z.number().int().nonnegative(),
     added: z.number().int().nonnegative(),
@@ -58,13 +58,13 @@ const taskMetaRealtimeSchema = z.object({
   createdAt: z.number().int().nonnegative(),
   updatedAt: z.number().int().nonnegative(),
   // realtime deliver 的运行时 schema 之前把 mode 放宽成 string，
-  // schema 推导类型因此无法回到 MaridTaskMeta，host typecheck 也就无法覆盖这条链路。
-  mode: z.enum(maridTaskModeRealtimeValues),
+  // schema 推导类型因此无法回到 QodexTaskMeta，host typecheck 也就无法覆盖这条链路。
+  mode: z.enum(qodexTaskModeRealtimeValues),
   model: z.string().optional(),
   runtimeEpoch: z.number().int().nonnegative().optional(),
   // relay payload 可能由旧版本桌面投影；历史 provider 值在此归一为 glm。
-  provider: legacyMaridProviderSchema.optional(),
-  migrationSource: z.enum(maridTaskMigrationSourceRealtimeValues).optional(),
+  provider: legacyQodexProviderSchema.optional(),
+  migrationSource: z.enum(qodexTaskMigrationSourceRealtimeValues).optional(),
   forkedFromTaskId: nonEmptyString.optional(),
   unreadAt: z.number().int().nonnegative().optional(),
   status: z.enum(["running", "completed", "error"]).optional(),
@@ -79,7 +79,7 @@ const taskMetaRealtimeSchema = z.object({
       attribution: errorAttributionSchema.optional(),
     })
     .optional(),
-  changeSummary: maridTaskChangeSummaryRealtimeSchema.optional(),
+  changeSummary: qodexTaskChangeSummaryRealtimeSchema.optional(),
 });
 export function resolveWorkspaceKey(params: {
   workspacePath: string;
@@ -164,7 +164,7 @@ export const workspaceTaskListInvalidatedEventSchema = taskRealtimeInvalidationB
     taskMeta: taskMetaRealtimeSchema.optional(),
   })
   .strict();
-const maridPromptAttachmentSchema = z.discriminatedUnion("kind", [
+const qodexPromptAttachmentSchema = z.discriminatedUnion("kind", [
   z
     .object({
       kind: z.literal("image"),
@@ -229,7 +229,7 @@ const taskStreamMirrorUserMessagePublishOpSchema = z
     kind: z.literal("user_message"),
     messageId: nonEmptyString,
     content: z.string(),
-    attachments: z.array(maridPromptAttachmentSchema).optional(),
+    attachments: z.array(qodexPromptAttachmentSchema).optional(),
     timestamp: z.number().finite(),
   })
   .strict();
@@ -334,7 +334,7 @@ const taskRespondPermissionOwnerCommandRequestSchema = taskOwnerCommandBaseSchem
     type: z.literal("respond_permission"),
     permissionRequestId: nonEmptyString,
     optionId: nonEmptyString,
-    response: maridPermissionResponseSchema,
+    response: qodexPermissionResponseSchema,
   })
   .strict();
 const taskRespondElicitationOwnerCommandRequestSchema = taskOwnerCommandBaseSchema
@@ -366,7 +366,7 @@ const taskRespondWorkspaceHookReviewOwnerCommandRequestSchema = taskOwnerCommand
       });
     }
   });
-const maridTaskRuntimeCommandBaseSchema = z
+const qodexTaskRuntimeCommandBaseSchema = z
   .object({
     commandId: nonEmptyString,
     taskId: nonEmptyString,
@@ -382,12 +382,12 @@ const maridTaskRuntimeCommandBaseSchema = z
     error: z.string().optional(),
   })
   .strict();
-const maridTaskRuntimeCommandSchema = z.discriminatedUnion("type", [
-  maridTaskRuntimeCommandBaseSchema
+const qodexTaskRuntimeCommandSchema = z.discriminatedUnion("type", [
+  qodexTaskRuntimeCommandBaseSchema
     .extend({
       type: z.literal("send_prompt"),
       content: z.string(),
-      attachments: z.array(maridPromptAttachmentSchema).optional(),
+      attachments: z.array(qodexPromptAttachmentSchema).optional(),
       automationId: nonEmptyString.optional(),
     })
     .strict(),
@@ -395,7 +395,7 @@ const maridTaskRuntimeCommandSchema = z.discriminatedUnion("type", [
 const taskEnqueueCommandOwnerCommandRequestSchema = taskOwnerCommandBaseSchema
   .extend({
     type: z.literal("enqueue_task_command"),
-    taskCommand: maridTaskRuntimeCommandSchema,
+    taskCommand: qodexTaskRuntimeCommandSchema,
   })
   .strict();
 const taskPromoteCommandOwnerCommandRequestSchema = taskOwnerCommandBaseSchema
@@ -476,7 +476,7 @@ export const taskOwnerCommandResultSchema = z.discriminatedUnion("success", [
     .object({
       commandRequestId: nonEmptyString,
       success: z.literal(true),
-      taskCommand: maridTaskRuntimeCommandSchema.optional(),
+      taskCommand: qodexTaskRuntimeCommandSchema.optional(),
     })
     .strict(),
   z

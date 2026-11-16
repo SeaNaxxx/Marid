@@ -1,4 +1,4 @@
-const MARID_PROCESS_PREFIX = "marid";
+const QODEX_PROCESS_PREFIX = "qodex";
 const MAX_PROCESS_NAME_SEGMENT_LENGTH = 24;
 
 function sanitizeProcessNameSegment(value: string | null | undefined): string | null {
@@ -18,11 +18,11 @@ function sanitizeProcessNameSegment(value: string | null | undefined): string | 
   return normalized.slice(0, MAX_PROCESS_NAME_SEGMENT_LENGTH);
 }
 
-function joinMaridProcessName(...segments: Array<string | null | undefined>): string {
+function joinQodexProcessName(...segments: Array<string | null | undefined>): string {
   const sanitizedSegments = segments
     .map((segment) => sanitizeProcessNameSegment(segment))
     .filter((segment): segment is string => Boolean(segment));
-  return [MARID_PROCESS_PREFIX, ...sanitizedSegments].join("-");
+  return [QODEX_PROCESS_PREFIX, ...sanitizedSegments].join("-");
 }
 
 function pickWorkspaceTag(workspacePath: string | null | undefined): string | undefined {
@@ -35,44 +35,44 @@ function pickWorkspaceTag(workspacePath: string | null | undefined): string | un
   return parts.at(-1) ?? trimmedPath;
 }
 
-export function formatMaridMainProcessName(): string {
-  return joinMaridProcessName("main");
+export function formatQodexMainProcessName(): string {
+  return joinQodexProcessName("main");
 }
 
-export function formatMaridGpuProcessName(): string {
-  return joinMaridProcessName("gpu");
+export function formatQodexGpuProcessName(): string {
+  return joinQodexProcessName("gpu");
 }
 
-export function formatMaridHostProcessName(label?: string): string {
-  return joinMaridProcessName("host", label);
+export function formatQodexHostProcessName(label?: string): string {
+  return joinQodexProcessName("host", label);
 }
 
-export function formatMaridRendererProcessName(windowTitle?: string): string {
+export function formatQodexRendererProcessName(windowTitle?: string): string {
   const normalizedTitle = windowTitle?.trim();
-  if (!normalizedTitle || normalizedTitle === "Marid") {
-    return joinMaridProcessName("renderer", "main");
+  if (!normalizedTitle || normalizedTitle === "Qodex") {
+    return joinQodexProcessName("renderer", "main");
   }
 
   if (normalizedTitle === "Resource Manager") {
-    return joinMaridProcessName("renderer", "resource-manager");
+    return joinQodexProcessName("renderer", "resource-manager");
   }
 
-  const remoteWindowPrefix = "Marid - ";
+  const remoteWindowPrefix = "Qodex - ";
   if (normalizedTitle.startsWith(remoteWindowPrefix)) {
-    return joinMaridProcessName(
+    return joinQodexProcessName(
       "renderer",
       "remote",
       normalizedTitle.slice(remoteWindowPrefix.length),
     );
   }
 
-  return joinMaridProcessName("renderer", normalizedTitle);
+  return joinQodexProcessName("renderer", normalizedTitle);
 }
 
-export function formatMaridAgentProcessName(provider: string, workspacePath?: string): string {
-  return joinMaridProcessName("agent", provider, pickWorkspaceTag(workspacePath));
+export function formatQodexAgentProcessName(provider: string, workspacePath?: string): string {
+  return joinQodexProcessName("agent", provider, pickWorkspaceTag(workspacePath));
 }
 
-export function formatMaridUtilityProcessName(name?: string, type = "utility"): string {
-  return joinMaridProcessName(type, name);
+export function formatQodexUtilityProcessName(name?: string, type = "utility"): string {
+  return joinQodexProcessName(type, name);
 }

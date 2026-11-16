@@ -1,7 +1,7 @@
-import { API_KEY_USAGE_SCENE, type ApiClient } from "@marid/shared";
+import { API_KEY_USAGE_SCENE, type ApiClient } from "@qodex/shared";
 import { readApiJson } from "#src/providers/api/apiJson.js";
 
-const BIGMODEL_TEAM_PLAN_API_KEY_NAME = "marid-team-api-key";
+const BIGMODEL_TEAM_PLAN_API_KEY_NAME = "qodex-team-api-key";
 const BIGMODEL_TEAM_PLAN_API_KEY_TYPE = 2;
 
 export interface BigModelTeamPlanBizContext {

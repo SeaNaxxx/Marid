@@ -3,7 +3,7 @@ import {
   type ProjectAccessTokenMaterial,
   resolveBigModelApiOrigin,
   ZAI_PROVIDER_ID,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { createServiceLogger } from "../logger/serviceLogger.js";
 import { ZAI_API_HOST } from "../providers/api/apiEndpoints.js";
 import {

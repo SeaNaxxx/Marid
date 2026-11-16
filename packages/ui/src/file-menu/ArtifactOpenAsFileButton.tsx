@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { FileApplicationInfo, IPlatformService } from "@marid/shared";
+import type { FileApplicationInfo, IPlatformService } from "@qodex/shared";
 import { ChevronDownIcon, CopyIcon, DownloadIcon, FolderOpenIcon } from "lucide-react";
 import { Button } from "@/components/ui/button.js";
 import {
@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu.js";
 import { toast } from "@/components/ui/toast.js";
 import { useOptionalPlatform } from "@/hooks/usePlatform.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { fileSaveSuccessMessageId, MAX_FILE_COPY_BYTES } from "@/file-menu/fileCopy.js";
 import { logger } from "@/logger.js";
 import { DefaultFileApplicationLabel } from "@/file-menu/DefaultFileApplicationLabel.js";
@@ -79,7 +79,7 @@ function OpenAsFileSplitButton({
   onReveal,
   platform,
 }: ArtifactOpenAsFileButtonProps & { platform: MaterializeCapablePlatform }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const key = `${runId}\u0000${artifactId}\u0000${version}\u0000${fileName}`;
   const currentKey = useRef(key);
   currentKey.current = key;
@@ -278,7 +278,7 @@ function ArtifactSaveButton({
   platform,
   menu = false,
 }: ArtifactOpenAsFileButtonProps & { platform: IPlatformService; menu?: boolean }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const pending = useRef(false);
   const [saving, setSaving] = useState(false);
   const save = async () => {

@@ -9,16 +9,16 @@ export function useSelectionCommentSupport(
   workspaceIdentity: string | undefined,
   enabled: boolean,
 ): boolean {
-  const { maridAgentService } = useServices();
+  const { qodexAgentService } = useServices();
   const key = `${workspaceIdentity?.trim() ?? ""}\0${workspacePath}`;
   const [state, setState] = useState<{ key: string; supported: boolean } | null>(null);
   useEffect(() => {
     if (!enabled) return;
     let disposed = false;
-    const query = maridAgentService.supportsConversationQuoteComment;
+    const query = qodexAgentService.supportsConversationQuoteComment;
     if (typeof query !== "function") return;
     query
-      .call(maridAgentService, {
+      .call(qodexAgentService, {
         workspacePath,
         ...(workspaceIdentity ? { workspaceIdentity } : {}),
       })
@@ -34,6 +34,6 @@ export function useSelectionCommentSupport(
     return () => {
       disposed = true;
     };
-  }, [enabled, key, workspaceIdentity, workspacePath, maridAgentService]);
+  }, [enabled, key, workspaceIdentity, workspacePath, qodexAgentService]);
   return enabled && state?.key === key && state.supported;
 }

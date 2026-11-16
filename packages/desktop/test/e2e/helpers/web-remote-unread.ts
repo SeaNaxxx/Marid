@@ -1,8 +1,8 @@
 import { once } from "node:events";
 import { createServer } from "node:http";
 import type { BrowserContext, Page } from "playwright-core";
-import { parseWebRemoteControlAppPayload, type WebRemoteControlStatus } from "@marid/shared";
-import { parseWebRemoteControlRelayV2IncomingMessage } from "@marid/shared/web-remote-relay";
+import { parseWebRemoteControlAppPayload, type WebRemoteControlStatus } from "@qodex/shared";
+import { parseWebRemoteControlRelayV2IncomingMessage } from "@qodex/shared/web-remote-relay";
 
 /** 只延迟真实回包和丢弃重申；不改 epoch、Reporter 或 Main 查看事实。 */
 export async function replayStaleBootstrapAfterReconnect(context: BrowserContext) {
@@ -14,7 +14,7 @@ export async function replayStaleBootstrapAfterReconnect(context: BrowserContext
     route.onMessage((message) => {
       const frame = JSON.parse(String(message)) as { type?: string; payload?: unknown };
       const payload = parseWebRemoteControlAppPayload(frame.payload);
-      if (payload?.marid_type === "mobile-task-view-update" && payload.epoch === oldEpoch)
+      if (payload?.qodex_type === "mobile-task-view-update" && payload.epoch === oldEpoch)
         evidence.staleReports += 1;
       server.send(message);
     });
@@ -22,11 +22,11 @@ export async function replayStaleBootstrapAfterReconnect(context: BrowserContext
       const frame = parseWebRemoteControlRelayV2IncomingMessage(JSON.parse(String(message)));
       const payload =
         frame?.type === "data" ? parseWebRemoteControlAppPayload(frame.payload) : null;
-      if (payload?.marid_type === "mobile-task-view-request") {
+      if (payload?.qodex_type === "mobile-task-view-request") {
         evidence.droppedRequests += 1;
         return;
       }
-      if (payload?.marid_type === "bootstrap-response") {
+      if (payload?.qodex_type === "bootstrap-response") {
         if (!held) {
           held = message;
           oldEpoch = payload.result.mobileTaskViewEpoch;
@@ -66,9 +66,9 @@ export async function readMobileTaskView() {
   return browser.execute(async () => {
     const bridge = (
       window as Window & {
-        marid?: { getWebRemoteControlStatus(): Promise<WebRemoteControlStatus> };
+        qodex?: { getWebRemoteControlStatus(): Promise<WebRemoteControlStatus> };
       }
-    ).marid;
+    ).qodex;
     if (!bridge) throw new Error("MRO03 desktop platform missing");
     const status = await bridge.getWebRemoteControlStatus();
     return {

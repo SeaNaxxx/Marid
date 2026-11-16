@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { isApiKeyAccess } from "@marid/provider";
+import { isApiKeyAccess } from "@qodex/provider";
 import { LoaderCircle, TriangleAlertIcon } from "lucide-react";
-import { BIGMODEL_PROVIDER_ID, ZAI_PROVIDER_ID } from "@marid/shared";
+import { BIGMODEL_PROVIDER_ID, ZAI_PROVIDER_ID } from "@qodex/shared";
 import {
   TID_LOGIN_API_KEY_CANCEL_BUTTON,
   TID_LOGIN_API_KEY_CONTINUE_BUTTON,
@@ -11,7 +11,7 @@ import {
   TID_LOGIN_API_KEY_PROVIDER_TRIGGER,
   TID_LOGIN_API_KEY_SKIP_BUTTON,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { Alert, AlertDescription } from "@/components/ui/alert.js";
 import { Button } from "@/components/ui/button.js";
 import { Input } from "@/components/ui/input.js";
@@ -25,7 +25,7 @@ import {
 import { usePlatform } from "@/hooks/usePlatform.js";
 import { useProviderSettingsView } from "@/hooks/useProviderSettingsView.js";
 import { useServices } from "@/hooks/useServices.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 import { renderOAuthProviderIcon } from "@/lib/oauthProviderIcon.js";
 import {
@@ -37,7 +37,7 @@ import {
   shouldShowLoginApiKeyLink,
   type ApiKeyProviderChoice,
 } from "@/login/LoginApiKeyForm.helpers.js";
-import { useMaridStore } from "@/store/StoreProvider.js";
+import { useQodexStore } from "@/store/StoreProvider.js";
 
 interface LoginApiKeyFormProps {
   onCancel: () => void;
@@ -46,10 +46,10 @@ interface LoginApiKeyFormProps {
 }
 
 export function LoginApiKeyForm({ onCancel, onSaved, onSkipped }: LoginApiKeyFormProps) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const platform = usePlatform();
   const { modelSelectionService, providerSettingsService, settingService } = useServices();
-  const markApiKeyLoginSuccess = useMaridStore((state) => state.markApiKeyLoginSuccess);
+  const markApiKeyLoginSuccess = useQodexStore((state) => state.markApiKeyLoginSuccess);
   const [providerChoice, setProviderChoice] = useState<ApiKeyProviderChoice>(() =>
     resolveLoginApiKeyDefaultProvider(locale),
   );

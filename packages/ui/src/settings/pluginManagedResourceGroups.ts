@@ -3,14 +3,14 @@ import type {
   McpServerStatus,
   SkillSummary,
   UserCommand,
-  MaridCommand,
-  MaridMcpServer,
-  MaridMcpServerStatusSnapshot,
-  MaridPluginInfo,
-  MaridPluginComponentKind,
-  MaridPluginsDescribeResult,
-} from "@marid/shared";
-import { isPluginCommand, isUserCommand, MARID_COMMAND_AGENT_SOURCE } from "@marid/shared";
+  QodexCommand,
+  QodexMcpServer,
+  QodexMcpServerStatusSnapshot,
+  QodexPluginInfo,
+  QodexPluginComponentKind,
+  QodexPluginsDescribeResult,
+} from "@qodex/shared";
+import { isPluginCommand, isUserCommand, QODEX_COMMAND_AGENT_SOURCE } from "@qodex/shared";
 import type { PluginComponentDisplayGroup } from "@/settings/PluginComponentGroups.js";
 
 export interface ResourceGroups<TLocal, TPlugin> {
@@ -19,7 +19,7 @@ export interface ResourceGroups<TLocal, TPlugin> {
 }
 
 /** 详情分组的展示顺序，与 describeResultToDisplayGroups / buildInstalledPluginDisplayGroups 一致。 */
-const COMPONENT_KIND_ORDER: MaridPluginComponentKind[] = [
+const COMPONENT_KIND_ORDER: QodexPluginComponentKind[] = [
   "agent",
   "command",
   "skill",
@@ -32,9 +32,9 @@ const COMPONENT_KIND_ORDER: MaridPluginComponentKind[] = [
  * 省略空分组。数量取 items.length（describe 已是权威枚举）。
  */
 export function describeResultToDisplayGroups(
-  result: MaridPluginsDescribeResult,
+  result: QodexPluginsDescribeResult,
 ): PluginComponentDisplayGroup[] {
-  const byKind = new Map<MaridPluginComponentKind, PluginComponentDisplayGroup>();
+  const byKind = new Map<QodexPluginComponentKind, PluginComponentDisplayGroup>();
   for (const group of result.components) {
     if (group.items.length === 0) continue;
     byKind.set(group.kind, {
@@ -61,9 +61,9 @@ export function describeResultToDisplayGroups(
  * 这里直接用它，彻底去掉脆弱的 join。
  */
 export function buildInstalledPluginDisplayGroups(
-  plugin: MaridPluginInfo,
+  plugin: QodexPluginInfo,
 ): PluginComponentDisplayGroup[] {
-  const byKind = new Map<MaridPluginComponentKind, PluginComponentDisplayGroup>();
+  const byKind = new Map<QodexPluginComponentKind, PluginComponentDisplayGroup>();
   for (const group of plugin.components ?? []) {
     if (group.items.length === 0) continue;
     byKind.set(group.kind, {
@@ -82,9 +82,9 @@ export function buildInstalledPluginDisplayGroups(
 
 export interface PluginMcpServerItem {
   active: boolean;
-  authorization?: MaridMcpServerStatusSnapshot["authorization"];
+  authorization?: QodexMcpServerStatusSnapshot["authorization"];
   error?: string;
-  failureKind?: MaridMcpServerStatusSnapshot["failureKind"];
+  failureKind?: QodexMcpServerStatusSnapshot["failureKind"];
   id: string;
   name: string;
   pluginEnabled: boolean;
@@ -173,7 +173,7 @@ export function groupSkillsByPlugin(
 }
 
 export function groupCommandsByPlugin(
-  commands: MaridCommand[],
+  commands: QodexCommand[],
   query: string,
 ): ResourceGroups<UserCommand, PluginCommand> {
   const local: UserCommand[] = [];
@@ -181,7 +181,7 @@ export function groupCommandsByPlugin(
   for (const command of commands) {
     if (
       isUserCommand(command) &&
-      command.agentSource === MARID_COMMAND_AGENT_SOURCE &&
+      command.agentSource === QODEX_COMMAND_AGENT_SOURCE &&
       normalizedQueryMatches(query, [command.name, command.description, command.prompt])
     ) {
       local.push(command);
@@ -202,9 +202,9 @@ export function groupCommandsByPlugin(
   return { local, plugin };
 }
 
-export function filterLocalMcpServers(servers: MaridMcpServer[], query: string): MaridMcpServer[] {
+export function filterLocalMcpServers(servers: QodexMcpServer[], query: string): QodexMcpServer[] {
   return servers.filter((server) => {
-    if (server.source !== "maridagentmcp") {
+    if (server.source !== "qodexagentmcp") {
       return false;
     }
     return normalizedQueryMatches(query, [server.name, server.config.url, server.config.command]);
@@ -212,9 +212,9 @@ export function filterLocalMcpServers(servers: MaridMcpServer[], query: string):
 }
 
 export function buildPluginMcpServerItems(
-  plugins: MaridPluginInfo[],
+  plugins: QodexPluginInfo[],
   query: string,
-  statusSnapshots: Record<string, MaridMcpServerStatusSnapshot> = {},
+  statusSnapshots: Record<string, QodexMcpServerStatusSnapshot> = {},
 ): PluginMcpServerItem[] {
   return plugins.flatMap((plugin) => {
     const activeNames = new Set(plugin.mcpServerNames);
@@ -260,14 +260,14 @@ export function buildPluginMcpServerItems(
   });
 }
 
-function toPluginMcpServerDisplayName(plugin: MaridPluginInfo, serverName: string): string {
+function toPluginMcpServerDisplayName(plugin: QodexPluginInfo, serverName: string): string {
   const namespacePrefix = `plugin:${plugin.name}:`;
   return serverName.startsWith(namespacePrefix)
     ? serverName.slice(namespacePrefix.length)
     : serverName;
 }
 
-function resolvePluginMcpRuntimeServerName(plugin: MaridPluginInfo, displayName: string): string {
+function resolvePluginMcpRuntimeServerName(plugin: QodexPluginInfo, displayName: string): string {
   const activeName = plugin.mcpServerNames.find(
     (serverName) =>
       serverName === displayName ||
@@ -277,7 +277,7 @@ function resolvePluginMcpRuntimeServerName(plugin: MaridPluginInfo, displayName:
 }
 
 function mapPluginRuntimeStatus(
-  snapshot: MaridMcpServerStatusSnapshot | undefined,
+  snapshot: QodexMcpServerStatusSnapshot | undefined,
 ): Pick<
   PluginMcpServerItem,
   "authorization" | "error" | "failureKind" | "serverRequestId" | "status" | "toolCount"

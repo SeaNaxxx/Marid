@@ -44,7 +44,7 @@ timeout / abort / disconnect / deactivate
 
 ### R1 — hydration 持久读取失败被静默变成空 projection（高优先级）
 
-位置：`apps/marid-cli/packages/bootstrap/src/marid-protocol-v4/v4-gateway.ts` 的 `performHydration`。
+位置：`apps/qodex-cli/packages/bootstrap/src/qodex-protocol-v4/v4-gateway.ts` 的 `performHydration`。
 
 当前代码对 `host.loadPersistedEvents` 使用 `catch`，上报 `v4.hydrate` 后返回
 `{ events: [], synthesized: false, sourceEventSeq: 0 }`。因此 cold subscribe 在磁盘读取失败时仍能返回
@@ -70,7 +70,7 @@ await expect(gateway.subscribe(subscribeParams())).rejects.toThrow("persisted re
 
 ### R2 — 并发 legacy `session/resume` 创建重复 runtime（高优先级）
 
-位置：`apps/marid-cli/packages/bootstrap/src/marid-protocol/server-operations.ts` 的
+位置：`apps/qodex-cli/packages/bootstrap/src/qodex-protocol/server-operations.ts` 的
 `activateSessionForResume`。
 
 当前只有 `await waitForDeactivation`，没有 per-session activation flight。两个请求都可能在
@@ -78,13 +78,13 @@ await expect(gateway.subscribe(subscribeParams())).rejects.toThrow("persisted re
 `materializeSessionRecord`，最后后写入的 record 覆盖先写入的 record；两个 app 都可能继续
 `resume()`，但只有一个仍在 registry 中。
 
-真 sqlite + `MaridProtocolAgentServer` 探针（已运行，当前实现失败）：
+真 sqlite + `QodexProtocolAgentServer` 探针（已运行，当前实现失败）：
 
 ```ts
 await Promise.all([
-  requestResult(server, { id: "resume-a", method: maridProtocolMethods.sessionResume,
+  requestResult(server, { id: "resume-a", method: qodexProtocolMethods.sessionResume,
     params: { workspace, sessionId } }),
-  requestResult(server, { id: "resume-b", method: maridProtocolMethods.sessionResume,
+  requestResult(server, { id: "resume-b", method: qodexProtocolMethods.sessionResume,
     params: { workspace, sessionId } }),
 ]);
 expect(createdAppOptions.filter((o) => o.sessionId === sessionId)).toHaveLength(1);
@@ -98,14 +98,14 @@ expect(createdAppOptions.filter((o) => o.sessionId === sessionId)).toHaveLength(
 
 ### R3 — V4 query timeout 契约未接线（高优先级）
 
-`packages/shared/src/marid-protocol-v4/core.ts` 定义了
+`packages/shared/src/qodex-protocol-v4/core.ts` 定义了
 `PROTOCOL_V4_LIMITS.conversationQueryTimeoutMs = 10_000`，但仓库中没有任何消费点。
-`packages/services/src/marid-agent/maridAgentService.ts` 的
+`packages/services/src/qodex-agent/qodexAgentService.ts` 的
 `commandsQuery`、`conversationUsage`、`rowsRange`、`plans`、`fileChanges`、
 `fileRewindPreview`、attachment read/preview 等调用均未传 per-request `timeoutMs`，因此实际使用
-`MaridProtocolClient` 的默认 3 分钟。
+`QodexProtocolClient` 的默认 3 分钟。
 
-超时还会触发 `MaridAgentProcessManager.onRequestTimeout`，除
+超时还会触发 `QodexAgentProcessManager.onRequestTimeout`，除
 `workspace/cancelGenerateText` 外会淘汰整个 client/process。需要验证：
 
 - query 是否应当 10 秒失败而不是 180 秒；
@@ -141,8 +141,8 @@ READY 在 record 入册后失败、第二次 subscribe/query/command 的结果�
 
 ### R7 — legacy resume / UI restore 缺少 per-session generation（中）
 
-`packages/ui/src/lib/maridSessionRestore.ts` 的 desktop restore 是 `resumeSession → readSession` 两个
-独立 RPC；`packages/services/src/marid-session/maridSessionService.ts` 的 resume 还可能追加
+`packages/ui/src/lib/qodexSessionRestore.ts` 的 desktop restore 是 `resumeSession → readSession` 两个
+独立 RPC；`packages/services/src/qodex-session/qodexSessionService.ts` 的 resume 还可能追加
 thought/model 修正和广播。并发打开、重连、切 workspace 时，较早 snapshot 可能晚到并广播覆盖较新状态。
 需以两个 deferred restore 调用验证“迟到旧结果不能成为 UI/task-index 的最终事实”。
 
@@ -196,7 +196,7 @@ usage query 测试，确认是否有明确的 active-client 选择/重试规则�
 
 1. 把 R1 探针加入 `v4-gateway.test.ts`，先以 `it.fails` 或隔离审计 fixture 记录现状，避免把
      “空 projection”误当正常回归。
-2. 把 R2 探针加入 `v4-cold-resume.test.ts`，断言同 session `createMaridApp` 次数和最终 registry
+2. 把 R2 探针加入 `v4-cold-resume.test.ts`，断言同 session `createQodexApp` 次数和最终 registry
    owner；该测试应先失败，再讨论 per-session activation owner 的修复设计。
 
 ### Phase B：补齐 timeout / cancellation harness
@@ -272,7 +272,7 @@ client  = desktop-continuous | web-remote-replayable
 | C20 | 暴露低风险选择问题 | usage 绑定任意第一个 active client；该 client 在请求中被 dispose 时请求失败，不自动切换第二个健康 client。 |
 
 额外 timeout 检查：`PROTOCOL_V4_LIMITS.conversationQueryTimeoutMs=10_000` 仍无消费点；
-`MaridProtocolClient` 的默认请求 watchdog 测试确认实际默认值为 180 秒。因此 R3 是静态确认的
+`QodexProtocolClient` 的默认请求 watchdog 测试确认实际默认值为 180 秒。因此 R3 是静态确认的
 契约缺口，还没有用真实 10 秒等待做慢 query 集成测试。
 
 本轮实际测试汇总：

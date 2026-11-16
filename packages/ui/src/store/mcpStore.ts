@@ -4,7 +4,7 @@
  */
 import { create } from "zustand";
 import type {
-  MaridAgentMcpServer,
+  QodexAgentMcpServer,
   CliMcpSource,
   McpConfig,
   McpScope,
@@ -12,11 +12,11 @@ import type {
   McpServerStatus,
   McpSource,
   NativeMcpServerRecord,
-  MaridMcpListMode,
-  MaridMcpServerStatusSnapshot,
-  MaridMcpServer,
-} from "@marid/shared";
-import { convertToMaridAgentMcpServer } from "@marid/shared";
+  QodexMcpListMode,
+  QodexMcpServerStatusSnapshot,
+  QodexMcpServer,
+} from "@qodex/shared";
+import { convertToQodexAgentMcpServer } from "@qodex/shared";
 import { logger } from "@/logger.js";
 import {
   fetchNativeMcpServers,
@@ -27,8 +27,8 @@ import {
   type MigrateLegacyResult,
 } from "@/store/mcpStoreDesktop.js";
 import {
-  importLegacyCommonServersToMaridAgent,
-  migrateStoredCommonMcpToMaridAgent,
+  importLegacyCommonServersToQodexAgent,
+  migrateStoredCommonMcpToQodexAgent,
 } from "@/store/mcpStoreMigration.js";
 import {
   buildServerList,
@@ -56,8 +56,8 @@ interface UpdateServerStatusOptions {
 interface McpStoreState {
   config: McpConfig;
   nativeServers: NativeMcpServerRecord[];
-  servers: MaridMcpServer[];
-  statusSnapshots: Record<string, MaridMcpServerStatusSnapshot>;
+  servers: QodexMcpServer[];
+  statusSnapshots: Record<string, QodexMcpServerStatusSnapshot>;
   currentProjectPath: string;
   currentWorkspaceIdentity?: string;
   currentAuthorityKey?: string;
@@ -96,9 +96,9 @@ interface McpStoreState {
     projectPath?: string,
   ) => Promise<void>;
   deleteScopedMcpServer: (source: McpSource, name: string, projectPath?: string) => void;
-  addMaridAgentMcpServer: (name: string, config: McpServerConfig, projectPath?: string) => void;
-  updateMaridAgentMcpServer: (name: string, config: McpServerConfig, projectPath?: string) => void;
-  deleteMaridAgentMcpServer: (name: string, projectPath?: string) => void;
+  addQodexAgentMcpServer: (name: string, config: McpServerConfig, projectPath?: string) => void;
+  updateQodexAgentMcpServer: (name: string, config: McpServerConfig, projectPath?: string) => void;
+  deleteQodexAgentMcpServer: (name: string, projectPath?: string) => void;
   addClaudeCliMcpServer: (name: string, config: McpServerConfig, projectPath?: string) => void;
   updateClaudeCliMcpServer: (name: string, config: McpServerConfig, projectPath?: string) => void;
   deleteClaudeCliMcpServer: (name: string, projectPath?: string) => void;
@@ -118,25 +118,25 @@ interface McpStoreState {
     error?: string,
     options?: UpdateServerStatusOptions,
   ) => void;
-  beginServerStatusListRefresh: (mode?: MaridMcpListMode) => number;
+  beginServerStatusListRefresh: (mode?: QodexMcpListMode) => number;
   markServerStatusListRefreshFailed: (
     error: string,
     requestEpoch: number,
-    mode?: MaridMcpListMode,
+    mode?: QodexMcpListMode,
   ) => void;
   mergeServerStatusSnapshots: (
-    statuses: Record<string, MaridMcpServerStatusSnapshot>,
+    statuses: Record<string, QodexMcpServerStatusSnapshot>,
     requestEpoch: number,
     mode?: "connect" | "status",
   ) => void;
-  getServer: (id: string) => MaridMcpServer | undefined;
+  getServer: (id: string) => QodexMcpServer | undefined;
   setCurrentProjectPath: (
     path: string,
     workspaceIdentity?: string,
     directoryService?: McpDirectoryService | null,
     authorityKey?: string,
   ) => void;
-  getEnabledMcpServersForMarid: (provider: string) => MaridAgentMcpServer[];
+  getEnabledMcpServersForQodex: (provider: string) => QodexAgentMcpServer[];
   checkAllServerStatus: (
     tester: (config: McpServerConfig) => Promise<{ success: boolean; error?: string }>,
   ) => Promise<void>;
@@ -149,7 +149,7 @@ interface McpStoreState {
 export const useMcpStore = create<McpStoreState>((set, get) => {
   let loadMcpPromise: Promise<boolean> | null = null;
   let loadMcpWorkspaceKey: string | null = null;
-  const statusListEpochs: Record<MaridMcpListMode, number> = {
+  const statusListEpochs: Record<QodexMcpListMode, number> = {
     connect: 0,
     status: 0,
   };
@@ -281,8 +281,8 @@ export const useMcpStore = create<McpStoreState>((set, get) => {
 
     loadConfig: () => {
       const config = loadPersistedConfig();
-      // MCP 启停状态已经迁移到 ~/.marid/cli/config.json，不能再读取旧 localStorage，
-      // 否则旧的本地开关会覆盖新的 Marid Agent 配置来源。
+      // MCP 启停状态已经迁移到 ~/.qodex/cli/config.json，不能再读取旧 localStorage，
+      // 否则旧的本地开关会覆盖新的 Qodex Agent 配置来源。
       const enabledStates: Record<string, boolean> = {};
       const deletedPreload = new Set<string>(safeReadJson<string[]>(MCP_DELETED_PRELOAD_KEY, []));
       const servers = buildServerList(config, [], enabledStates, deletedPreload, []);
@@ -335,7 +335,7 @@ export const useMcpStore = create<McpStoreState>((set, get) => {
             activeDirectoryService,
           );
           if (!activeDirectoryService) {
-            servers = await migrateStoredCommonMcpToMaridAgent(
+            servers = await migrateStoredCommonMcpToQodexAgent(
               mcpPlatformService,
               servers,
               latestWorkspacePath,
@@ -403,12 +403,12 @@ export const useMcpStore = create<McpStoreState>((set, get) => {
       safeWriteJson(MCP_DELETED_PRELOAD_KEY, Array.from(deletedPreloadMcpServers));
     },
 
-    addMcpServer: (name, config) => get().addMaridAgentMcpServer(name, config),
-    updateMcpServer: (name, config) => get().updateMaridAgentMcpServer(name, config),
-    deleteMcpServer: (name) => get().deleteMaridAgentMcpServer(name),
+    addMcpServer: (name, config) => get().addQodexAgentMcpServer(name, config),
+    updateMcpServer: (name, config) => get().updateQodexAgentMcpServer(name, config),
+    deleteMcpServer: (name) => get().deleteQodexAgentMcpServer(name),
     addScopedMcpServer: async (source, name, config, projectPath) => {
       invalidateStatusListRequests();
-      const targetSource: CliMcpSource = source === "mcp" ? "maridagentmcp" : source;
+      const targetSource: CliMcpSource = source === "mcp" ? "qodexagentmcp" : source;
       // 设置页保存后会马上触发 agent 侧 mcp/list 重连。
       // 先等配置落盘，再更新本地 store，避免 agent 读到旧 timeoutMs 后展示旧健康状态。
       await persistScopedChange(targetSource, {
@@ -422,7 +422,7 @@ export const useMcpStore = create<McpStoreState>((set, get) => {
     },
     updateScopedMcpServer: async (source, name, config, projectPath) => {
       invalidateStatusListRequests();
-      const targetSource: CliMcpSource = source === "mcp" ? "maridagentmcp" : source;
+      const targetSource: CliMcpSource = source === "mcp" ? "qodexagentmcp" : source;
       // 修复原因同新增：本地状态变化会驱动健康状态刷新，必须在磁盘配置更新后发生。
       await persistScopedChange(targetSource, {
         action: "upsert",
@@ -435,7 +435,7 @@ export const useMcpStore = create<McpStoreState>((set, get) => {
     },
     deleteScopedMcpServer: (source, name, projectPath) => {
       invalidateStatusListRequests();
-      const targetSource: CliMcpSource = source === "mcp" ? "maridagentmcp" : source;
+      const targetSource: CliMcpSource = source === "mcp" ? "qodexagentmcp" : source;
       persistScopedChange(targetSource, {
         action: "delete",
         source: targetSource,
@@ -479,12 +479,12 @@ export const useMcpStore = create<McpStoreState>((set, get) => {
       get().updateScopedMcpServer("opencodemcp", name, config, projectPath),
     deleteOpenCodeMcpServer: (name, projectPath) =>
       get().deleteScopedMcpServer("opencodemcp", name, projectPath),
-    addMaridAgentMcpServer: (name, config, projectPath) =>
-      get().addScopedMcpServer("maridagentmcp", name, config, projectPath),
-    updateMaridAgentMcpServer: (name, config, projectPath) =>
-      get().updateScopedMcpServer("maridagentmcp", name, config, projectPath),
-    deleteMaridAgentMcpServer: (name, projectPath) =>
-      get().deleteScopedMcpServer("maridagentmcp", name, projectPath),
+    addQodexAgentMcpServer: (name, config, projectPath) =>
+      get().addScopedMcpServer("qodexagentmcp", name, config, projectPath),
+    updateQodexAgentMcpServer: (name, config, projectPath) =>
+      get().updateScopedMcpServer("qodexagentmcp", name, config, projectPath),
+    deleteQodexAgentMcpServer: (name, projectPath) =>
+      get().deleteScopedMcpServer("qodexagentmcp", name, projectPath),
 
     toggleServer: async (id, enabled) => {
       invalidateStatusListRequests();
@@ -556,7 +556,7 @@ export const useMcpStore = create<McpStoreState>((set, get) => {
         servers: state.servers.map((server) => {
           const enabled = state.enabledStates[server.id] ?? server.enabled;
           if (
-            server.source !== "maridagentmcp" ||
+            server.source !== "qodexagentmcp" ||
             !enabled ||
             (!server.changed && server.status !== "unknown")
           ) {
@@ -586,7 +586,7 @@ export const useMcpStore = create<McpStoreState>((set, get) => {
         statusSnapshots: {},
         servers: state.servers.map((server) => {
           const enabled = state.enabledStates[server.id] ?? server.enabled;
-          if (server.source !== "maridagentmcp" || !enabled || server.status !== "connecting") {
+          if (server.source !== "qodexagentmcp" || !enabled || server.status !== "connecting") {
             return server;
           }
           return {
@@ -664,14 +664,14 @@ export const useMcpStore = create<McpStoreState>((set, get) => {
       }
     },
 
-    getEnabledMcpServersForMarid: (_provider) => {
+    getEnabledMcpServersForQodex: (_provider) => {
       const { servers, enabledStates, currentProjectPath } = get();
-      const candidates = new Map<string, MaridMcpServer>();
+      const candidates = new Map<string, QodexMcpServer>();
 
       for (const server of servers) {
         const isEnabled = enabledStates[server.id] ?? server.enabled;
         if (!isEnabled) continue;
-        if (server.source !== "maridagentmcp") continue;
+        if (server.source !== "qodexagentmcp") continue;
         if (server.scope === "workspace" && server.projectPath !== currentProjectPath) continue;
 
         const existing = candidates.get(server.name);
@@ -680,14 +680,14 @@ export const useMcpStore = create<McpStoreState>((set, get) => {
         }
       }
 
-      const result: MaridAgentMcpServer[] = [];
+      const result: QodexAgentMcpServer[] = [];
       for (const server of candidates.values()) {
-        const maridAgentServer = convertToMaridAgentMcpServer(
+        const qodexAgentServer = convertToQodexAgentMcpServer(
           server.name,
           server.config,
           server.scope === "workspace" ? "workspace" : "user",
         );
-        if (maridAgentServer) result.push(maridAgentServer);
+        if (qodexAgentServer) result.push(qodexAgentServer);
       }
       return result;
     },
@@ -713,7 +713,7 @@ export const useMcpStore = create<McpStoreState>((set, get) => {
 
     mergePreloadedMcpServers: (preloaded) => {
       const { deletedPreloadMcpServers, nativeServers } = get();
-      const targetSource: CliMcpSource = "maridagentmcp";
+      const targetSource: CliMcpSource = "qodexagentmcp";
       const nextNativeServers = nativeServers.slice();
       let changed = false;
 
@@ -744,7 +744,7 @@ export const useMcpStore = create<McpStoreState>((set, get) => {
     },
 
     deletePreloadedMcpServer: (source, name) => {
-      const targetSource: CliMcpSource = source === "mcp" ? "maridagentmcp" : source;
+      const targetSource: CliMcpSource = source === "mcp" ? "qodexagentmcp" : source;
       const key = makeServerId(targetSource, name);
       persistScopedChange(targetSource, { action: "delete", source: targetSource, name });
       set((state) => {
@@ -778,7 +778,7 @@ export const useMcpStore = create<McpStoreState>((set, get) => {
         get().nativeServers.length > 0
           ? get().nativeServers
           : await fetchNativeMcpServers(mcpPlatformService, { workspacePath: latestWorkspacePath });
-      const migration = await importLegacyCommonServersToMaridAgent(
+      const migration = await importLegacyCommonServersToQodexAgent(
         mcpPlatformService,
         result.servers ?? {},
         currentNativeServers,

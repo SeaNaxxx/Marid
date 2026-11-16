@@ -3,7 +3,7 @@ import type {
   GitBranchMutationResult,
   GitLocalBranchListResult,
   GitRepositorySummary,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { toast } from "@/components/ui/toast.js";
 import {
   buildGitBranchAutoCommitMessage,
@@ -20,7 +20,7 @@ import {
   type GitBranchSwitchAssistState,
 } from "@/git-branch-switcher/switchAssist.js";
 import { useServices } from "@/hooks/useServices.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { getErrorMessage } from "@/lib/errorMessage.js";
 import { logger } from "@/logger.js";
 
@@ -40,7 +40,7 @@ export function useGitBranchSwitcher({
   onRefreshGit,
 }: UseGitBranchSwitcherOptions) {
   const { gitService } = useServices();
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const numberFormatter = new Intl.NumberFormat(locale);
   const [open, setOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);

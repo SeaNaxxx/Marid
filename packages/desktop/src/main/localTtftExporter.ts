@@ -10,7 +10,7 @@ import {
   PeriodicExportingMetricReader,
 } from "@opentelemetry/sdk-metrics";
 import type { ReadableSpan, SpanExporter } from "@opentelemetry/sdk-trace-base";
-import { LOCAL_TTFT_BUCKETS_MS, localTtftBatchSchema, type LocalTtftBatch } from "@marid/shared";
+import { LOCAL_TTFT_BUCKETS_MS, localTtftBatchSchema, type LocalTtftBatch } from "@qodex/shared";
 import {
   createRendererActionTraceExporter,
   parseRendererActionTraceHeaders,
@@ -36,10 +36,10 @@ export function createLocalTtftExporter(options: {
         : undefined,
     );
   const resource = resourceFromAttributes({
-    "service.name": "marid-local-ttft",
+    "service.name": "qodex-local-ttft",
     "service.version": options.version,
     "os.type": process.platform,
-    "marid.telemetry.schema_version": 1,
+    "qodex.telemetry.schema_version": 1,
   });
   const meterProvider = new MeterProvider({
     resource,
@@ -62,7 +62,7 @@ export function createLocalTtftExporter(options: {
       : [],
     views: [
       {
-        instrumentName: "marid.local_ttft.*",
+        instrumentName: "qodex.local_ttft.*",
         aggregation: {
           type: AggregationType.EXPLICIT_BUCKET_HISTOGRAM,
           options: { boundaries: LOCAL_TTFT_BUCKETS_MS },
@@ -71,38 +71,38 @@ export function createLocalTtftExporter(options: {
         aggregationCardinalityLimit: 256,
       },
       {
-        instrumentName: "marid.local_ttft.*",
+        instrumentName: "qodex.local_ttft.*",
         instrumentType: InstrumentType.COUNTER,
         aggregationCardinalityLimit: 256,
       },
     ],
   });
-  const meter = meterProvider.getMeter("@marid/local-ttft", "1");
-  const duration = meter.createHistogram("marid.local_ttft.duration", { unit: "ms" });
-  const stageDuration = meter.createHistogram("marid.local_ttft.stage.duration", { unit: "ms" });
-  const stageObservation = meter.createHistogram("marid.local_ttft.stage.observation.duration", {
+  const meter = meterProvider.getMeter("@qodex/local-ttft", "1");
+  const duration = meter.createHistogram("qodex.local_ttft.duration", { unit: "ms" });
+  const stageDuration = meter.createHistogram("qodex.local_ttft.stage.duration", { unit: "ms" });
+  const stageObservation = meter.createHistogram("qodex.local_ttft.stage.observation.duration", {
     unit: "ms",
   });
   const preparationObservation = meter.createHistogram(
-    "marid.local_ttft.preparation.observation.duration",
+    "qodex.local_ttft.preparation.observation.duration",
     { unit: "ms" },
   );
-  const systemDuration = meter.createHistogram("marid.local_ttft.system.duration", { unit: "ms" });
-  const preparationDuration = meter.createHistogram("marid.local_ttft.preparation.duration", {
+  const systemDuration = meter.createHistogram("qodex.local_ttft.system.duration", { unit: "ms" });
+  const preparationDuration = meter.createHistogram("qodex.local_ttft.preparation.duration", {
     unit: "ms",
   });
-  const attemptDuration = meter.createHistogram("marid.local_ttft.attempt.duration", {
+  const attemptDuration = meter.createHistogram("qodex.local_ttft.attempt.duration", {
     unit: "ms",
   });
-  const executionDuration = meter.createHistogram("marid.local_ttft.execution.duration", {
+  const executionDuration = meter.createHistogram("qodex.local_ttft.execution.duration", {
     unit: "ms",
   });
-  const failureWait = meter.createHistogram("marid.local_ttft.no_output.wait", { unit: "ms" });
-  const textDuration = meter.createHistogram("marid.local_ttft.first_text.duration", {
+  const failureWait = meter.createHistogram("qodex.local_ttft.no_output.wait", { unit: "ms" });
+  const textDuration = meter.createHistogram("qodex.local_ttft.first_text.duration", {
     unit: "ms",
   });
-  const outcomes = meter.createCounter("marid.local_ttft.records");
-  const drops = meter.createCounter("marid.local_ttft.dropped");
+  const outcomes = meter.createCounter("qodex.local_ttft.records");
+  const drops = meter.createCounter("qodex.local_ttft.dropped");
   const queue: LocalTtftBatch[] = [];
   const dedupe = new LocalTtftExportDedupe(options.now);
   const modelLabels = new Set<string>();

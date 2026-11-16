@@ -1,15 +1,15 @@
-import { Event as RpcEvent } from "@marid/rpc";
+import { Event as RpcEvent } from "@qodex/rpc";
 import type { IConversationShareService } from "#src/conversation-share/conversationShare.js";
-import type { IMaridAgentService } from "#src/marid-agent/maridAgent.js";
+import type { IQodexAgentService } from "#src/qodex-agent/qodexAgent.js";
 import {
-  readTrustedMaridAgentV4Connection,
-  withTrustedMaridAgentV4Connection,
-  type MaridAgentV4ConnectionContext,
-} from "#src/marid-agent/maridAgentConnectionScope.js";
+  readTrustedQodexAgentV4Connection,
+  withTrustedQodexAgentV4Connection,
+  type QodexAgentV4ConnectionContext,
+} from "#src/qodex-agent/qodexAgentConnectionScope.js";
 import { conversationShareConnectionScopeFactory } from "#src/conversation-share/conversationShareService.js";
 
 type ConversationShareAgentService = Pick<
-  IMaridAgentService,
+  IQodexAgentService,
   | "conversationRowsRangeV4"
   | "conversationFileChangesV4"
   | "conversationAttachmentReadV4"
@@ -50,14 +50,14 @@ export function scopeConversationShareServiceForAttachment(
   service: IConversationShareService,
   clientMode: "desktop-continuous" | "web-remote-replayable",
   agentService?: ConversationShareAgentService,
-  connection?: MaridAgentV4ConnectionContext,
+  connection?: QodexAgentV4ConnectionContext,
 ): IConversationShareService {
   if (clientMode === "desktop-continuous") {
     // R3 Share 运行在 Source：沿同一受信 transport 传递 Desktop attachment 身份，
     // 不读取控制端 JWT，也不为 Share 另建 hello/connection/subscription。
     if (connection?.role === "trusted-host-relay") {
       const forInput = (input: unknown) => {
-        const downstream = readTrustedMaridAgentV4Connection(input);
+        const downstream = readTrustedQodexAgentV4Connection(input);
         if (
           !downstream ||
           downstream.clientMode !== "desktop-continuous" ||
@@ -71,19 +71,19 @@ export function scopeConversationShareServiceForAttachment(
         const scopedAgent: ConversationShareAgentService = {
           conversationRowsRangeV4: (params) =>
             agentService.conversationRowsRangeV4(
-              withTrustedMaridAgentV4Connection(params, downstream),
+              withTrustedQodexAgentV4Connection(params, downstream),
             ),
           conversationFileChangesV4: (params) =>
             agentService.conversationFileChangesV4(
-              withTrustedMaridAgentV4Connection(params, downstream),
+              withTrustedQodexAgentV4Connection(params, downstream),
             ),
           conversationAttachmentReadV4: (params) =>
             agentService.conversationAttachmentReadV4(
-              withTrustedMaridAgentV4Connection(params, downstream),
+              withTrustedQodexAgentV4Connection(params, downstream),
             ),
           conversationAttachmentStatV4: (params) =>
             agentService.conversationAttachmentStatV4(
-              withTrustedMaridAgentV4Connection(params, downstream),
+              withTrustedQodexAgentV4Connection(params, downstream),
             ),
         };
         return service[conversationShareConnectionScopeFactory](scopedAgent);
@@ -106,17 +106,17 @@ export function scopeConversationShareServiceForAttachment(
       return {
         getCapabilities: () => service.getCapabilities(),
         preflight: (input) =>
-          service.preflight(withTrustedMaridAgentV4Connection(input, connection)),
+          service.preflight(withTrustedQodexAgentV4Connection(input, connection)),
         publish: (input, id) =>
-          service.publish(withTrustedMaridAgentV4Connection(input, connection), id),
+          service.publish(withTrustedQodexAgentV4Connection(input, connection), id),
         onDynamicPublishProgress: (id) => service.onDynamicPublishProgress(id),
         importShare: (input, id) =>
-          service.importShare(withTrustedMaridAgentV4Connection(input, connection), id),
+          service.importShare(withTrustedQodexAgentV4Connection(input, connection), id),
         onDynamicImportProgress: (id) => service.onDynamicImportProgress(id),
         getImportedConversation: (input) => service.getImportedConversation(input),
         getPreview: (code) => service.getPreview(code),
         getContinuation: (input) =>
-          service.getContinuation(withTrustedMaridAgentV4Connection(input, connection)),
+          service.getContinuation(withTrustedQodexAgentV4Connection(input, connection)),
         ...managedShareMethods(service),
       };
     }

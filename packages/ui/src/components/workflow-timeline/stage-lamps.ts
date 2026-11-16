@@ -1,4 +1,4 @@
-import type { WorkflowRunState } from "@marid/shared/marid-protocol-v4";
+import type { WorkflowRunState } from "@qodex/shared/qodex-protocol-v4";
 import { phaseNameMatches } from "@/components/workflow-graph/phase-name.js";
 import type { StepRunStatus } from "@/components/workflow-graph/types.js";
 import type { StreamSpec } from "./timeline-bands.js";

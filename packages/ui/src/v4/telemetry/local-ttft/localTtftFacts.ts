@@ -1,4 +1,4 @@
-import { LOCAL_TTFT_MAX_DETAILS, type LocalTtftFacts } from "@marid/shared";
+import { LOCAL_TTFT_MAX_DETAILS, type LocalTtftFacts } from "@qodex/shared";
 
 export function mergeLocalTtftFacts(
   prior: LocalTtftFacts | undefined,

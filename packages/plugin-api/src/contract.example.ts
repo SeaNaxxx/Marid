@@ -4,10 +4,10 @@ import type {
   ExtensionContext,
   ExtensionModule,
   ExtensionCapabilityOutput,
-} from "@marid-dev/plugin-api";
-import type { ManifestSlots } from "@marid-dev/plugin-api/manifest";
-import type { ConversationRow } from "@marid-dev/plugin-api/protocol-v4";
-import type { SessionActionInput, SessionRowsEvent } from "@marid-dev/plugin-api/sessions";
+} from "@qodex-dev/plugin-api";
+import type { ManifestSlots } from "@qodex-dev/plugin-api/manifest";
+import type { ConversationRow } from "@qodex-dev/plugin-api/protocol-v4";
+import type { SessionActionInput, SessionRowsEvent } from "@qodex-dev/plugin-api/sessions";
 
 // 清单顶层 slots：输入框状态位的一个条目，点击执行命令。
 export const exampleSlots = {

@@ -1,5 +1,5 @@
-import type { IServiceAccessor } from "@marid/services";
-import { createUuid } from "@marid/shared";
+import type { IServiceAccessor } from "@qodex/services";
+import { createUuid } from "@qodex/shared";
 
 export interface TerminalSessionDescriptor {
   id: string;

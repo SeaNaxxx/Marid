@@ -1,23 +1,23 @@
 import {
   createLocalServices,
   getAppConfigDir,
-  type MaridAgentCommandResolver,
-} from "@marid/services/node";
-import { createServerCredentialCipher } from "@marid/shared/credential-security";
+  type QodexAgentCommandResolver,
+} from "@qodex/services/node";
+import { createServerCredentialCipher } from "@qodex/shared/credential-security";
 import { join } from "node:path";
-import type { IChannel } from "@marid/rpc";
+import type { IChannel } from "@qodex/rpc";
 import {
   parseServiceAuthorityMode,
-  MARID_REMOTE_HTTP_PROXY_ENV_KEY,
-  MARID_REMOTE_NO_PROXY_ENV_KEY,
-  MARID_REMOTE_RUNTIME_NETWORK_AUTHORITY_ENV_KEY,
-} from "@marid/shared";
+  QODEX_REMOTE_HTTP_PROXY_ENV_KEY,
+  QODEX_REMOTE_NO_PROXY_ENV_KEY,
+  QODEX_REMOTE_RUNTIME_NETWORK_AUTHORITY_ENV_KEY,
+} from "@qodex/shared";
 
 export interface CreateStdioServicesOptions {
   topicResourceRelayChannel?: () => IChannel;
   env?: Record<string, string | undefined>;
-  maridBuiltinProviderConfigFilePath: string;
-  maridAgentCommandResolver?: MaridAgentCommandResolver;
+  qodexBuiltinProviderConfigFilePath: string;
+  qodexAgentCommandResolver?: QodexAgentCommandResolver;
 }
 
 export interface RemoteAgentNetworkOptions {
@@ -28,12 +28,12 @@ export interface RemoteAgentNetworkOptions {
 export function resolveRemoteAgentNetworkFromEnv(
   env: Record<string, string | undefined>,
 ): RemoteAgentNetworkOptions | undefined {
-  if (env[MARID_REMOTE_RUNTIME_NETWORK_AUTHORITY_ENV_KEY]?.trim() !== "1") {
+  if (env[QODEX_REMOTE_RUNTIME_NETWORK_AUTHORITY_ENV_KEY]?.trim() !== "1") {
     return undefined;
   }
   return {
-    httpProxy: env[MARID_REMOTE_HTTP_PROXY_ENV_KEY]?.trim() || undefined,
-    noProxy: env[MARID_REMOTE_NO_PROXY_ENV_KEY]?.trim() || undefined,
+    httpProxy: env[QODEX_REMOTE_HTTP_PROXY_ENV_KEY]?.trim() || undefined,
+    noProxy: env[QODEX_REMOTE_NO_PROXY_ENV_KEY]?.trim() || undefined,
   };
 }
 
@@ -50,10 +50,10 @@ export async function createStdioServices(options: CreateStdioServicesOptions) {
   // 测试注入 resolver 只用于在 spawn 前观察最终命令，不改变生产默认 resolver。
   const services = createLocalServices({
     credentialCipherProvider,
-    maridBuiltinProviderConfigFilePath: options.maridBuiltinProviderConfigFilePath,
+    qodexBuiltinProviderConfigFilePath: options.qodexBuiltinProviderConfigFilePath,
     topicResourceRelayChannel: options.topicResourceRelayChannel,
     serviceAuthorityMode: authorityModeParseResult.mode,
-    maridAgentCommandResolver: options.maridAgentCommandResolver,
+    qodexAgentCommandResolver: options.qodexAgentCommandResolver,
     remoteAgentNetwork,
   });
 

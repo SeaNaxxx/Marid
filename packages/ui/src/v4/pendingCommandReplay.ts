@@ -1,4 +1,4 @@
-import type { CommandEnvelope } from "@marid/shared/marid-protocol-v4";
+import type { CommandEnvelope } from "@qodex/shared/qodex-protocol-v4";
 
 export type PendingCommandReplay =
   | {

@@ -1,18 +1,18 @@
-import type { MaridModelTrajectoryMessage } from "@marid/services";
+import type { QodexModelTrajectoryMessage } from "@qodex/services";
 
-export function trajectoryToolOutputs(message: MaridModelTrajectoryMessage): string[] {
+export function trajectoryToolOutputs(message: QodexModelTrajectoryMessage): string[] {
   return message.parts.flatMap((part) =>
     part.kind === "tool-result" ? [formatTrajectoryToolPayload(part.output)] : [],
   );
 }
 
-export function trajectoryToolCallInputs(message: MaridModelTrajectoryMessage): string[] {
+export function trajectoryToolCallInputs(message: QodexModelTrajectoryMessage): string[] {
   return message.parts.flatMap((part) =>
     part.kind === "tool-call" ? [formatTrajectoryToolPayload(part.input)] : [],
   );
 }
 
-export function trajectoryToolHasError(message: MaridModelTrajectoryMessage): boolean {
+export function trajectoryToolHasError(message: QodexModelTrajectoryMessage): boolean {
   return message.parts.some(
     (part) =>
       (part.kind === "tool-result" && isErrorTextObject(part.output)) ||
@@ -20,7 +20,7 @@ export function trajectoryToolHasError(message: MaridModelTrajectoryMessage): bo
   );
 }
 
-export function trajectoryToolMetadata(message: MaridModelTrajectoryMessage): {
+export function trajectoryToolMetadata(message: QodexModelTrajectoryMessage): {
   names: string;
   ids: string;
 } {

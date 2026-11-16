@@ -1,11 +1,11 @@
 import { setImmediate } from "node:timers/promises";
-import type { WorkspaceFileEntry } from "@marid/shared";
-import { unpackWorkspaceFileEntries } from "@marid/shared/workspaceFileEntriesCodec";
+import type { WorkspaceFileEntry } from "@qodex/shared";
+import { unpackWorkspaceFileEntries } from "@qodex/shared/workspaceFileEntriesCodec";
 import {
   filterWorkspaceFileSearchCandidates,
   mapWorkspaceFileEntriesToSearchCandidates,
   type WorkspaceFileSearchCandidate,
-} from "@marid/shared/workspaceFileSearch";
+} from "@qodex/shared/workspaceFileSearch";
 
 /** 分批解码已有 packed 索引，防止把 Renderer 的长任务简单搬到共享 Host。 */
 export async function buildHostFileSearchCandidates(packed: string, rootPath: string) {

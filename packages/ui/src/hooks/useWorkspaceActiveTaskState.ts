@@ -1,19 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import type { MaridProvider, MaridTaskMeta } from "@marid/shared";
-import { useMaridTaskService } from "@/hooks/useMaridTaskService.js";
+import type { QodexProvider, QodexTaskMeta } from "@qodex/shared";
+import { useQodexTaskService } from "@/hooks/useQodexTaskService.js";
 import { useBaseWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
 import { useTaskNativeSessionLogFile } from "@/hooks/useTaskNativeSessionLogFile.js";
 import { useTaskSessionFilePath } from "@/hooks/useTaskSessionFilePath.js";
 import { logger } from "@/logger.js";
 import { resolveWorkspaceHeaderProvider } from "@/lib/workspaceHeaderProvider.js";
-import { selectWorkspaceMaridState, useMaridSessionStore } from "@/store/maridSessionStore.js";
+import { selectWorkspaceQodexState, useQodexSessionStore } from "@/store/qodexSessionStore.js";
 
 interface UseWorkspaceActiveTaskStateParams {
   workspaceAbsPath: string;
   activeTaskId: string | null;
   workspaceRemoteSessionId?: string | null;
   workspaceIdentity?: string;
-  selectedProvider: MaridProvider;
+  selectedProvider: QodexProvider;
   intl: {
     formatMessage(descriptor: { id: string }): string;
   };
@@ -23,7 +23,7 @@ function areTaskMetaJsonFieldsEqual(left: unknown, right: unknown) {
   return JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
 }
 
-function areResolvedTaskMetasEqual(left: MaridTaskMeta | null, right: MaridTaskMeta | null) {
+function areResolvedTaskMetasEqual(left: QodexTaskMeta | null, right: QodexTaskMeta | null) {
   if (left === right) {
     return true;
   }
@@ -71,16 +71,16 @@ export function useIndexedTaskMeta({
   workspaceIdentity?: string;
   remoteSessionId?: string | null;
   taskId: string | null;
-}): MaridTaskMeta | null {
-  const service = useMaridTaskService(
+}): QodexTaskMeta | null {
+  const service = useQodexTaskService(
     workspaceAbsPath,
     workspaceRemoteSessionId,
     workspaceIdentity,
   );
   const { broadcastService } = useBaseWorkspaceServices();
-  const version = useMaridSessionStore(
+  const version = useQodexSessionStore(
     (state) =>
-      selectWorkspaceMaridState(state, workspaceAbsPath, workspaceIdentity).taskListVersion,
+      selectWorkspaceQodexState(state, workspaceAbsPath, workspaceIdentity).taskListVersion,
   );
   const targetKey = JSON.stringify([
     workspaceIdentity?.trim() || workspaceAbsPath,
@@ -90,7 +90,7 @@ export function useIndexedTaskMeta({
   const [indexed, setIndexed] = useState<{
     service: typeof service;
     targetKey: string;
-    meta: MaridTaskMeta | null;
+    meta: QodexTaskMeta | null;
   } | null>(null);
   useEffect(() => {
     if (!activeTaskId) return;
@@ -137,8 +137,8 @@ export function useIndexedTaskMeta({
   return indexedMeta;
 }
 
-export function useStableResolvedActiveTaskMeta(taskMeta: MaridTaskMeta | null) {
-  const stableTaskMetaRef = useRef<MaridTaskMeta | null>(null);
+export function useStableResolvedActiveTaskMeta(taskMeta: QodexTaskMeta | null) {
+  const stableTaskMetaRef = useRef<QodexTaskMeta | null>(null);
   const stableTaskMeta = stableTaskMetaRef.current;
   // stream chunk 只更新消息流时，active task meta 经列表/乐观层重新合成后可能字段相同但引用变了。
   // Header/Shell 依赖 memo props；这里复用等价 meta 的旧引用，避免连续流式更新拖动标题栏重渲。
@@ -156,8 +156,8 @@ export function useWorkspaceActiveTaskState({
   selectedProvider,
   intl,
 }: UseWorkspaceActiveTaskStateParams) {
-  const optimisticMeta = useMaridSessionStore((state) => {
-    const workspace = selectWorkspaceMaridState(state, workspaceAbsPath, workspaceIdentity);
+  const optimisticMeta = useQodexSessionStore((state) => {
+    const workspace = selectWorkspaceQodexState(state, workspaceAbsPath, workspaceIdentity);
     return activeTaskId ? (workspace.optimisticTaskListByTaskId[activeTaskId] ?? null) : null;
   });
   const indexedMeta = useIndexedTaskMeta({

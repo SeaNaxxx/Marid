@@ -3,7 +3,7 @@ import type {
   OffPeakControlResult,
   OffPeakLifecycleNotification,
   OffPeakOutcome,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 type RequestAuth = Extract<OffPeakControlParams, { action: "replace_ticket" }>["requestAuth"];
 interface TicketDelivery {

@@ -1,1 +1,1 @@
-export * from "@marid/shared/conversation-telemetry/messageTelemetry";
+export * from "@qodex/shared/conversation-telemetry/messageTelemetry";

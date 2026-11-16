@@ -1,4 +1,4 @@
-import type { UsageQuotaLimit } from "@marid/shared";
+import type { UsageQuotaLimit } from "@qodex/shared";
 import { StartPlanBalanceCard } from "@/settings/model-provider-section/StartPlanBalanceCard.js";
 
 export function StartPlanQuotaStatusCard({

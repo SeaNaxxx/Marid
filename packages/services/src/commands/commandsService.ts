@@ -4,8 +4,8 @@ import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import {
-  MARID_COMMAND_AGENT_SOURCE,
-  MARID_COMMAND_AGENT_SOURCES,
+  QODEX_COMMAND_AGENT_SOURCE,
+  QODEX_COMMAND_AGENT_SOURCES,
   type CommandAgentSource,
   type CommandCreateParams,
   type CommandDeleteParams,
@@ -17,9 +17,9 @@ import {
   type SettingsDirectoryLocation,
   type SettingsDirectorySource,
   type UserCommand,
-  type MaridCommand,
-} from "@marid/shared";
-import { DEFAULT_ENABLED_OFFICIAL_PLUGIN_IDS } from "@marid/shared";
+  type QodexCommand,
+} from "@qodex/shared";
+import { DEFAULT_ENABLED_OFFICIAL_PLUGIN_IDS } from "@qodex/shared";
 import type { ICommandsService } from "./commands.js";
 import { CommandFileParser, type CommandFileFormat } from "./commandFileParser.js";
 import { readInstalledPluginRoots } from "#src/plugins/installedPluginRoots.js";
@@ -41,20 +41,20 @@ interface CommandAgentSourceDescriptor {
   supportsArgumentHint: boolean;
 }
 
-const DEFAULT_COMMAND_AGENT_SOURCE: CommandAgentSource = MARID_COMMAND_AGENT_SOURCE;
-const COMMAND_AGENT_SOURCE_ORDER: readonly CommandAgentSource[] = MARID_COMMAND_AGENT_SOURCES;
+const DEFAULT_COMMAND_AGENT_SOURCE: CommandAgentSource = QODEX_COMMAND_AGENT_SOURCE;
+const COMMAND_AGENT_SOURCE_ORDER: readonly CommandAgentSource[] = QODEX_COMMAND_AGENT_SOURCES;
 const ENABLE_OVERRIDE_KEY = "enable";
 const HOME_PREFIX = "~/";
-const MARID_OFFICIAL_PLUGIN_MARKETPLACE = "marid-plugins-official";
-const MARID_INLINE_PLUGIN_MARKETPLACE = "inline";
-const MARID_PLUGIN_MANIFEST_PATH = join(".marid-plugin", "plugin.json");
+const QODEX_OFFICIAL_PLUGIN_MARKETPLACE = "qodex-plugins-official";
+const QODEX_INLINE_PLUGIN_MARKETPLACE = "inline";
+const QODEX_PLUGIN_MANIFEST_PATH = join(".qodex-plugin", "plugin.json");
 const CLAUDE_PLUGIN_MANIFEST_PATH = join(".claude-plugin", "plugin.json");
 const CODEX_PLUGIN_MANIFEST_PATH = join(".codex-plugin", "plugin.json");
-const MARID_COMMAND_DESCRIPTOR: CommandAgentSourceDescriptor = {
-  agentSource: "maridAgent",
-  directorySource: "marid",
-  userDirectorySegments: [".marid", "commands"],
-  workspaceDirectorySegments: [".marid", "commands"],
+const QODEX_COMMAND_DESCRIPTOR: CommandAgentSourceDescriptor = {
+  agentSource: "qodexAgent",
+  directorySource: "qodex",
+  userDirectorySegments: [".qodex", "commands"],
+  workspaceDirectorySegments: [".qodex", "commands"],
   fileExtension: ".md",
   format: "markdown",
   namespaceSeparator: "/",
@@ -62,13 +62,13 @@ const MARID_COMMAND_DESCRIPTOR: CommandAgentSourceDescriptor = {
 };
 
 const COMMAND_AGENT_SOURCE_DESCRIPTORS: Record<CommandAgentSource, CommandAgentSourceDescriptor> = {
-  maridAgent: MARID_COMMAND_DESCRIPTOR,
+  qodexAgent: QODEX_COMMAND_DESCRIPTOR,
 };
 
 const COMMAND_DIRECTORY_SOURCE_DESCRIPTORS: readonly CommandAgentSourceDescriptor[] = [
-  MARID_COMMAND_DESCRIPTOR,
+  QODEX_COMMAND_DESCRIPTOR,
   {
-    ...MARID_COMMAND_DESCRIPTOR,
+    ...QODEX_COMMAND_DESCRIPTOR,
     directorySource: "agents",
     userDirectorySegments: [".agents", "commands"],
     workspaceDirectorySegments: [".agents", "commands"],
@@ -87,7 +87,7 @@ function getUserCommandsRoot(agentSource?: CommandAgentSource): string {
 }
 
 function getUserCliConfigPath(): string {
-  return join(resolveUserHomeDir(), ".marid", "cli", "config.json");
+  return join(resolveUserHomeDir(), ".qodex", "cli", "config.json");
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -223,7 +223,7 @@ function readStorageDirFromConfig(config: Record<string, unknown>): string {
   const storage = isRecord(config.storage) ? config.storage : {};
   return typeof storage.dir === "string" && storage.dir.trim().length > 0
     ? storage.dir
-    : "~/.marid";
+    : "~/.qodex";
 }
 
 function readPluginConfigFromConfig(config: Record<string, unknown>): PluginConfigSummary {
@@ -276,7 +276,7 @@ function resolveInside(rootPath: string, rawPath: string): string | null {
 }
 
 async function scanOfficialPluginCacheRoots(pluginStorageRoot: string): Promise<string[]> {
-  const cacheRoot = join(pluginStorageRoot, "cache", MARID_OFFICIAL_PLUGIN_MARKETPLACE);
+  const cacheRoot = join(pluginStorageRoot, "cache", QODEX_OFFICIAL_PLUGIN_MARKETPLACE);
   let pluginEntries: string[] = [];
   try {
     pluginEntries = await readdir(cacheRoot);
@@ -336,7 +336,7 @@ async function readPluginManifest(rootPath: string): Promise<PluginManifestSumma
 
 async function findPluginManifestPath(rootPath: string): Promise<string | null> {
   for (const manifestPath of [
-    join(rootPath, MARID_PLUGIN_MANIFEST_PATH),
+    join(rootPath, QODEX_PLUGIN_MANIFEST_PATH),
     join(rootPath, CLAUDE_PLUGIN_MANIFEST_PATH),
     join(rootPath, CODEX_PLUGIN_MANIFEST_PATH),
   ]) {
@@ -379,12 +379,12 @@ async function resolvePluginCommandRootDescriptors(): Promise<PluginCommandRootD
   const candidates: PluginRootCandidate[] = [
     ...config.dirs.map((dir) => ({
       defaultEnabled: true,
-      marketplace: MARID_INLINE_PLUGIN_MARKETPLACE,
+      marketplace: QODEX_INLINE_PLUGIN_MARKETPLACE,
       rootPath: resolveConfigPath(dir),
     })),
     ...officialCacheRoots.map((rootPath) => ({
       defaultEnabled: false,
-      marketplace: MARID_OFFICIAL_PLUGIN_MARKETPLACE,
+      marketplace: QODEX_OFFICIAL_PLUGIN_MARKETPLACE,
       rootPath,
     })),
     ...installedRoots,
@@ -402,7 +402,7 @@ async function resolvePluginCommandRootDescriptors(): Promise<PluginCommandRootD
     // 官方 cache 时不经过 CLI resolve 的过滤，需要在这里同样跳过，否则被卸载的内置插件
     // 仍会从 cache 贡献命令。
     if (
-      candidate.marketplace === MARID_OFFICIAL_PLUGIN_MARKETPLACE &&
+      candidate.marketplace === QODEX_OFFICIAL_PLUGIN_MARKETPLACE &&
       config.suppressedBuiltins.includes(pluginId)
     ) {
       continue;
@@ -543,11 +543,11 @@ export function createCommandsService(_options?: CommandsServiceOptions): IComma
     const agentSources = getCommandAgentSources(params.agentSource);
     const enabledOverrides = await readCommandEnabledOverridesFromUserConfig();
 
-    // Marid Agent 需要先合并所有 workspace 目录，再合并所有 user 目录；
-    // 按每个目录交错读取 project/user 会让 user .marid 抢在 workspace .agents 前面。
+    // Qodex Agent 需要先合并所有 workspace 目录，再合并所有 user 目录；
+    // 按每个目录交错读取 project/user 会让 user .qodex 抢在 workspace .agents 前面。
     for (const agentSource of agentSources) {
       const descriptors =
-        agentSource === MARID_COMMAND_AGENT_SOURCE
+        agentSource === QODEX_COMMAND_AGENT_SOURCE
           ? COMMAND_DIRECTORY_SOURCE_DESCRIPTORS
           : [getCommandSourceDescriptor(agentSource)];
 
@@ -575,12 +575,12 @@ export function createCommandsService(_options?: CommandsServiceOptions): IComma
 
     const dedupedUserCommands = dedupeCommandsByName(userCommands);
     const pluginCommands =
-      !params.agentSource || params.agentSource === MARID_COMMAND_AGENT_SOURCE
+      !params.agentSource || params.agentSource === QODEX_COMMAND_AGENT_SOURCE
         ? await discoverPluginCommands(enabledOverrides)
         : [];
 
     return {
-      commands: [...dedupedUserCommands, ...pluginCommands] as MaridCommand[],
+      commands: [...dedupedUserCommands, ...pluginCommands] as QodexCommand[],
       userCommands: dedupedUserCommands,
       pluginCommands,
       capability: { userScopeAvailable: true },
@@ -851,7 +851,7 @@ async function discoverPluginCommandsRecursive(
       continue;
     }
 
-    if (!entry.toLowerCase().endsWith(MARID_COMMAND_DESCRIPTOR.fileExtension)) {
+    if (!entry.toLowerCase().endsWith(QODEX_COMMAND_DESCRIPTOR.fileExtension)) {
       continue;
     }
 
@@ -860,12 +860,12 @@ async function discoverPluginCommandsRecursive(
       const parsed = CommandFileParser.parseCommandFile(
         content,
         fullPath,
-        MARID_COMMAND_DESCRIPTOR.format,
+        QODEX_COMMAND_DESCRIPTOR.format,
       );
       if (!parsed) {
         continue;
       }
-      const name = getCommandName(rootDir, fullPath, MARID_COMMAND_DESCRIPTOR);
+      const name = getCommandName(rootDir, fullPath, QODEX_COMMAND_DESCRIPTOR);
       const commandKey = fullPath.replaceAll("\\", "/").toLowerCase();
       if (options.seenFilePaths.has(commandKey)) {
         continue;
@@ -1013,8 +1013,8 @@ async function discoverCommandsFromDirectorySources(params: {
       scope: params.scope,
       ...(params.projectPath ? { projectPath: params.projectPath } : {}),
     });
-    // `.marid` 是强优先级来源；只要读到有效命令，同 scope 的 `.agents` 就不再参与。
-    if (descriptor.directorySource === "marid" && discoveredCount > 0) {
+    // `.qodex` 是强优先级来源；只要读到有效命令，同 scope 的 `.agents` 就不再参与。
+    if (descriptor.directorySource === "qodex" && discoveredCount > 0) {
       break;
     }
   }

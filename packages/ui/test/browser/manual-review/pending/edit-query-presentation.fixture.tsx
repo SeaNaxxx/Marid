@@ -6,10 +6,10 @@ import type {
   ConversationRow,
   ConversationSnapshot,
   ConversationTopicFrame,
-} from "@marid/shared/marid-protocol-v4";
-import type { IServiceAccessor, IBroadcastService } from "@marid/services";
-import type { IPlatformService } from "@marid/shared";
-import { MaridIntlProvider } from "@/i18n/IntlProvider.js";
+} from "@qodex/shared/qodex-protocol-v4";
+import type { IServiceAccessor, IBroadcastService } from "@qodex/services";
+import type { IPlatformService } from "@qodex/shared";
+import { QodexIntlProvider } from "@/i18n/IntlProvider.js";
 import { DEFAULT_CODE_PREVIEW_SETTINGS } from "@/lib/codePreviewSettings.js";
 import { ConversationTimeline } from "@/v4/ConversationTimeline.js";
 import { ConversationProjectionStore } from "@/v4/conversationProjectionStore.js";
@@ -19,7 +19,7 @@ import { TabStoreProvider } from "@/store/TabStoreProvider.js";
 import { ServiceProvider } from "@/hooks/useServices.js";
 import { PlatformProvider } from "@/hooks/usePlatform.js";
 import { StoreContext } from "@/store/StoreProvider.js";
-import { createMaridStore } from "@/store/index.js";
+import { createQodexStore } from "@/store/index.js";
 import { composerEditSessionKey, useComposerEditStore } from "@/composer-edit-mode/index.js";
 import "@/styles.css";
 
@@ -34,12 +34,12 @@ const broadcast = {
 const services = {
   clientConfigService: {},
   subagentsService: { list: async () => ({ agents: [], capability: null }) },
-  maridAgentService: {},
+  qodexAgentService: {},
   settingService: { get: async () => ({}) },
   broadcastService: broadcast,
 } as unknown as IServiceAccessor;
 const platform = { platform: "darwin" } as unknown as IPlatformService;
-const settings = createMaridStore(broadcast);
+const settings = createQodexStore(broadcast);
 settings.getState().setTheme(theme);
 document.documentElement.className = `${theme} theme-zai-${theme}`;
 const rows: ConversationRow[] = Array.from({ length: count }, (_, index) => {
@@ -357,11 +357,11 @@ createRoot(document.getElementById("root")!).render(
     <PlatformProvider platform={platform}>
       <StoreContext.Provider value={settings}>
         <TabStoreProvider>
-          <MaridIntlProvider initialLocale={mobile ? "en-US" : "zh-CN"}>
+          <QodexIntlProvider initialLocale={mobile ? "en-US" : "zh-CN"}>
             <TooltipProvider>
               <Fixture />
             </TooltipProvider>
-          </MaridIntlProvider>
+          </QodexIntlProvider>
         </TabStoreProvider>
       </StoreContext.Provider>
     </PlatformProvider>

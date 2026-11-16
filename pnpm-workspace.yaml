@@ -1,9 +1,9 @@
 packages:
   - apps/dev-docs
   - packages/*
-  - apps/marid-cli
-  - apps/marid-cli/packages/*
-  - apps/marid-cli/tools/*
+  - apps/qodex-cli
+  - apps/qodex-cli/packages/*
+  - apps/qodex-cli/tools/*
 supportedArchitectures:
   os:
     - current

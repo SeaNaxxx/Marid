@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { AttachmentRef } from "@marid/shared/marid-protocol-v4";
+import type { AttachmentRef } from "@qodex/shared/qodex-protocol-v4";
 import { shouldExposeE2EStoreBridge } from "@/lib/e2eStoreBridge.js";
 import type { ChatComposerAttachment } from "@/lib/chatAttachments.js";
 
@@ -49,19 +49,19 @@ export const useComposerAttachmentUploadStore = create<ComposerAttachmentUploadS
 
 declare global {
   interface Window {
-    __maridComposerAttachmentUploadStoreE2E?: typeof useComposerAttachmentUploadStore;
-    __maridCurrentComposerAttachmentScopeKeyE2E?: string;
+    __qodexComposerAttachmentUploadStoreE2E?: typeof useComposerAttachmentUploadStore;
+    __qodexCurrentComposerAttachmentScopeKeyE2E?: string;
   }
 }
 
 if (shouldExposeE2EStoreBridge()) {
   // E2E 只暴露当前唯一附件 owner，供 scope 切换用例准备状态；不再把附件塞回旧 Session Store。
-  window.__maridComposerAttachmentUploadStoreE2E = useComposerAttachmentUploadStore;
+  window.__qodexComposerAttachmentUploadStoreE2E = useComposerAttachmentUploadStore;
 }
 
 export function exposeComposerAttachmentScopeKeyForE2E(scopeKey: string): void {
-  if (window.__maridComposerAttachmentUploadStoreE2E) {
-    window.__maridCurrentComposerAttachmentScopeKeyE2E = scopeKey;
+  if (window.__qodexComposerAttachmentUploadStoreE2E) {
+    window.__qodexCurrentComposerAttachmentScopeKeyE2E = scopeKey;
   }
 }
 

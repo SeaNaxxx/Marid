@@ -1,4 +1,4 @@
-import type { MaridPlanStep } from "./marid-task-types-core.js";
+import type { QodexPlanStep } from "./qodex-task-types-core.js";
 
 const TODO_TOOL_NAME_PATTERN =
   /(?:^|[_\s-])(?:todo[_\s-]*(?:read|write)|update[_\s-]*plan)(?:$|[_\s-])/i;
@@ -12,7 +12,7 @@ function readString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
 }
 
-function normalizePlanStatus(value: unknown): MaridPlanStep["status"] | null {
+function normalizePlanStatus(value: unknown): QodexPlanStep["status"] | null {
   const status = readString(value)?.replace(/-/g, "_").toLowerCase();
   if (status === "pending" || status === "in_progress" || status === "completed") {
     return status;
@@ -20,7 +20,7 @@ function normalizePlanStatus(value: unknown): MaridPlanStep["status"] | null {
   return null;
 }
 
-function parsePlanStep(value: unknown, index: number): MaridPlanStep | null {
+function parsePlanStep(value: unknown, index: number): QodexPlanStep | null {
   if (typeof value === "string") {
     const title = value.trim();
     return title ? { id: title, title, status: index === 0 ? "in_progress" : "pending" } : null;
@@ -69,7 +69,7 @@ function readPlanCollection(input: unknown): unknown[] | null {
   return null;
 }
 
-function extractPlanStepsFromValue(value: unknown): MaridPlanStep[] | null {
+function extractPlanStepsFromValue(value: unknown): QodexPlanStep[] | null {
   const collection = readPlanCollection(value);
   if (!collection || collection.length === 0) {
     return null;
@@ -77,7 +77,7 @@ function extractPlanStepsFromValue(value: unknown): MaridPlanStep[] | null {
 
   const steps = collection
     .map((item, index) => parsePlanStep(item, index))
-    .filter((step): step is MaridPlanStep => step !== null);
+    .filter((step): step is QodexPlanStep => step !== null);
 
   return steps.length === collection.length ? steps : null;
 }
@@ -146,7 +146,7 @@ export function extractPlanStepsFromToolInput(params: {
   title?: string;
   kind?: string;
   input: unknown;
-}): MaridPlanStep[] | null {
+}): QodexPlanStep[] | null {
   const fingerprint = [params.title, params.kind].filter(Boolean).join(" ");
   if (!isTodoPlanToolName(fingerprint)) {
     return null;
@@ -159,7 +159,7 @@ export function extractPlanStepsFromToolOutput(params: {
   title?: string;
   kind?: string;
   output: unknown;
-}): MaridPlanStep[] | null {
+}): QodexPlanStep[] | null {
   const fingerprint = [params.title, params.kind].filter(Boolean).join(" ");
   if (!isTodoPlanToolName(fingerprint)) {
     return null;

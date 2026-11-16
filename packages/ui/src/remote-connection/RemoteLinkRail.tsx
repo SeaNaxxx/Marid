@@ -1,4 +1,4 @@
-import type { RemoteTarget } from "@marid/shared";
+import type { RemoteTarget } from "@qodex/shared";
 
 export function formatRemoteLinkRailTarget(target: RemoteTarget): string {
   switch (target.kind) {

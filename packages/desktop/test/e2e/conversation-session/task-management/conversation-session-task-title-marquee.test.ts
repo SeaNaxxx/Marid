@@ -4,7 +4,7 @@ import {
   TID_WORKSPACE_PATH,
   TID_WORKSPACE_TITLE,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { DEFAULT_WORKSPACE, clearAppData, waitForWorkspaceApp } from "#e2e/helpers/desktop-app";
 import { ensureProjectExpanded } from "#e2e/helpers/project-sidebar";
 import {
@@ -158,8 +158,8 @@ describe("TTL：Task 名称溢出走马灯", () => {
     await icon.moveTo();
     const info = await $("[data-workspace-header-context-info]");
     await info.waitForDisplayed({ timeout: 5000 });
-    expect(await info.getText()).toContain("MaridProject");
-    expect(await info.$("[data-workspace-context-path]").getText()).toContain("MaridProject");
+    expect(await info.getText()).toContain("QodexProject");
+    expect(await info.$("[data-workspace-context-path]").getText()).toContain("QodexProject");
     const activity = await info.$("[data-workspace-last-activity]");
     await activity.waitForDisplayed({ timeout: 10000 });
     expect(await activity.getText()).toMatch(/Last active|最近活动/);

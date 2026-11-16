@@ -1,4 +1,4 @@
-import type { MaridAutomationScheduleRule } from "@marid/shared";
+import type { QodexAutomationScheduleRule } from "@qodex/shared";
 import {
   describeCron,
   describeCronBuilder,
@@ -6,7 +6,7 @@ import {
   type IntlLike,
 } from "@/settings/automationFormat.js";
 
-function scheduleRuleToBuilder(rule: MaridAutomationScheduleRule): CronBuilderState {
+function scheduleRuleToBuilder(rule: QodexAutomationScheduleRule): CronBuilderState {
   return {
     frequency: "custom",
     hour: rule.hour,
@@ -27,7 +27,7 @@ function scheduleRuleToBuilder(rule: MaridAutomationScheduleRule): CronBuilderSt
 export function describeAutomationCardSchedule(
   automation: {
     cronExpr: string;
-    scheduleRule?: MaridAutomationScheduleRule;
+    scheduleRule?: QodexAutomationScheduleRule;
     recurring?: boolean;
     maxRuns?: number;
   },

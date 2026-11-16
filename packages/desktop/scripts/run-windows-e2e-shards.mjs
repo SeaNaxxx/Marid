@@ -38,7 +38,7 @@ function splitRunnerArgs(args) {
 }
 
 function isTargetedRun(args, env) {
-  const requestedSpec = env.MARID_E2E_SPEC?.trim();
+  const requestedSpec = env.QODEX_E2E_SPEC?.trim();
   return (
     Boolean(requestedSpec) ||
     args.some(
@@ -52,8 +52,8 @@ function isTargetedRun(args, env) {
 
 function isManualReviewRun(args, env) {
   return (
-    env.MARID_E2E_MANUAL_REVIEW?.trim() === "1" ||
-    args.concat(env.MARID_E2E_SPEC ?? "").some((arg) => arg.includes("/manual-review/"))
+    env.QODEX_E2E_MANUAL_REVIEW?.trim() === "1" ||
+    args.concat(env.QODEX_E2E_SPEC ?? "").some((arg) => arg.includes("/manual-review/"))
   );
 }
 
@@ -77,9 +77,9 @@ export function resolveWindowsE2EShardTotal({
     return explicitShardTotal;
   }
 
-  const envShardTotal = env.MARID_E2E_SHARD_TOTAL?.trim();
+  const envShardTotal = env.QODEX_E2E_SHARD_TOTAL?.trim();
   if (envShardTotal) {
-    return readPositiveInteger(envShardTotal, "MARID_E2E_SHARD_TOTAL");
+    return readPositiveInteger(envShardTotal, "QODEX_E2E_SHARD_TOTAL");
   }
 
   // 修复原因：按机器资源自动启用多 shard 会让无参数命令产生隐式并发，既不便于
@@ -160,15 +160,15 @@ export function createWindowsE2ERunId({ timestamp, processId, entropy }) {
 
 function createBuildEnv(env) {
   const { NODE_OPTIONS: _nodeOptions, ...buildEnv } = env;
-  // 修复原因：从 Marid 客户端 shell 运行时，构建会继承 MARID_ENV=production / MARID_BASE_URL，
+  // 修复原因：从 Qodex 客户端 shell 运行时，构建会继承 QODEX_ENV=production / QODEX_BASE_URL，
   // 把它们固化进 agent 与桌面包，导致 E2E 打生产域、fixture endpoint 失效。
   return normalizeE2EDesktopBuildEnv({
     ...buildEnv,
     PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false",
-    VITE_MARID_E2E_STORE_BRIDGE: "1",
+    VITE_QODEX_E2E_STORE_BRIDGE: "1",
     // Windows full E2E 反复执行时复用 Turbo 内容缓存；冷缓存仍按依赖图构建，
     // targeted/non-Windows 路径不会经过父 runner 的 sharded build env。
-    MARID_DESKTOP_AGENT_BUILD_MODE: env.MARID_DESKTOP_AGENT_BUILD_MODE ?? "turbo",
+    QODEX_DESKTOP_AGENT_BUILD_MODE: env.QODEX_DESKTOP_AGENT_BUILD_MODE ?? "turbo",
   });
 }
 
@@ -188,16 +188,16 @@ export function createWindowsE2EShardPlan({
   // 修复原因：只有 ISO 毫秒的自动 ID 会让同毫秒启动的 runner 共享 HOME/artifact/network。
   // 显式 ID 保持原语义；自动 ID 同时加入 PID 和随机熵，测试可注入固定值稳定验证。
   const runId =
-    env.MARID_E2E_RUN_ID?.trim() ||
+    env.QODEX_E2E_RUN_ID?.trim() ||
     createWindowsE2ERunId({
       entropy: runIdEntropy ?? randomBytes(8).toString("hex"),
       processId,
       timestamp: runIdTimestamp,
     });
   const artifactRoot = resolve(
-    env.MARID_E2E_ARTIFACT_DIR?.trim() || join(desktopDir, ".e2e-artifacts", runId),
+    env.QODEX_E2E_ARTIFACT_DIR?.trim() || join(desktopDir, ".e2e-artifacts", runId),
   );
-  const explicitHomeRoot = env.MARID_E2E_HOME_DIR?.trim();
+  const explicitHomeRoot = env.QODEX_E2E_HOME_DIR?.trim();
   // 修复原因：单 shard runner 也可能并发启动；默认 HOME 若固定为 `.e2e-home`，
   // 不同 runId 会互相清理进程和状态。显式 HOME 保持调用方语义，默认 HOME 才追加 runId。
   const homeRoot = resolve(explicitHomeRoot || join(desktopDir, `.e2e-home-${runId}`));
@@ -248,22 +248,22 @@ export function createWindowsE2EShardPlan({
         : join(desktopDir, `.e2e-home-${runId}`);
     const childEnv = {
       ...env,
-      MARID_E2E_HOME_DIR: childHomeDir,
-      MARID_E2E_RUN_ID: childRunId,
-      MARID_E2E_ARTIFACT_DIR: artifactDir,
-      MARID_E2E_NETWORK_CAPTURE_DIR: sharded
+      QODEX_E2E_HOME_DIR: childHomeDir,
+      QODEX_E2E_RUN_ID: childRunId,
+      QODEX_E2E_ARTIFACT_DIR: artifactDir,
+      QODEX_E2E_NETWORK_CAPTURE_DIR: sharded
         ? join(artifactDir, "network-capture")
         : resolve(
-            env.MARID_E2E_NETWORK_CAPTURE_DIR?.trim() || join(artifactDir, "network-capture"),
+            env.QODEX_E2E_NETWORK_CAPTURE_DIR?.trim() || join(artifactDir, "network-capture"),
           ),
       ...(sharded
         ? {
-            MARID_E2E_SKIP_BUILD: "1",
-            MARID_E2E_SKIP_AGENT_BUILD: "1",
+            QODEX_E2E_SKIP_BUILD: "1",
+            QODEX_E2E_SKIP_AGENT_BUILD: "1",
           }
         : {}),
       ...(useWeightedSpecBuckets
-        ? { MARID_E2E_SPEC: weightedSpecBuckets[offset].specs.join(",") }
+        ? { QODEX_E2E_SPEC: weightedSpecBuckets[offset].specs.join(",") }
         : {}),
     };
 

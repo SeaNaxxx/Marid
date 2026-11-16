@@ -1,5 +1,5 @@
-import type { MaridTaskMeta, MaridWorkspaceTaskListChanged } from "@marid/shared";
-import type { SessionSummary, SessionsIndexReconcileResult } from "@marid/shared/marid-protocol-v4";
+import type { QodexTaskMeta, QodexWorkspaceTaskListChanged } from "@qodex/shared";
+import type { SessionSummary, SessionsIndexReconcileResult } from "@qodex/shared/qodex-protocol-v4";
 
 export interface TaskWorkspace {
   workspacePath: string;
@@ -10,7 +10,7 @@ export interface TaskFactTarget extends TaskWorkspace {
 }
 export type TaskFactMutation = { type: "rename"; title: string } | { type: "delete" };
 export interface CliTaskFacts {
-  meta: MaridTaskMeta;
+  meta: QodexTaskMeta;
   titleSource?: string;
   lastOutcome?: "completed" | "interrupted" | "error";
   deleted?: boolean;
@@ -18,13 +18,13 @@ export interface CliTaskFacts {
 
 /** 存储端口只接受 CLI 事实，不能据 Host 时钟或运行态推导会话事实。 */
 export interface TaskFactStore {
-  applyCliFacts(facts: CliTaskFacts): Promise<MaridTaskMeta>;
+  applyCliFacts(facts: CliTaskFacts): Promise<QodexTaskMeta>;
   applyCliDeletion(target: TaskFactTarget): Promise<void>;
   markCliOrphan(target: TaskFactTarget): Promise<void>;
   listReconciliationRows(
     target: TaskWorkspace,
-  ): Promise<Array<{ meta: MaridTaskMeta; handoffPending: number }>>;
-  getTaskMeta(target: TaskFactTarget): Promise<MaridTaskMeta | null>;
+  ): Promise<Array<{ meta: QodexTaskMeta; handoffPending: number }>>;
+  getTaskMeta(target: TaskFactTarget): Promise<QodexTaskMeta | null>;
 }
 export interface TaskFactSource {
   reconcile(target: TaskWorkspace, sessionIds: string[]): Promise<SessionsIndexReconcileResult>;
@@ -32,14 +32,14 @@ export interface TaskFactSource {
 }
 export interface TaskFactChange {
   target: TaskFactTarget;
-  meta?: MaridTaskMeta;
-  reason: MaridWorkspaceTaskListChanged["reason"];
+  meta?: QodexTaskMeta;
+  reason: QodexWorkspaceTaskListChanged["reason"];
 }
 export interface TaskFactsContract {
-  ingest(target: TaskWorkspace, summary: SessionSummary): Promise<MaridTaskMeta>;
+  ingest(target: TaskWorkspace, summary: SessionSummary): Promise<QodexTaskMeta>;
   removed(target: TaskFactTarget): Promise<void>;
-  refresh(target: TaskFactTarget): Promise<MaridTaskMeta | null>;
-  mutate(target: TaskFactTarget, intent: TaskFactMutation): Promise<MaridTaskMeta | null>;
+  refresh(target: TaskFactTarget): Promise<QodexTaskMeta | null>;
+  mutate(target: TaskFactTarget, intent: TaskFactMutation): Promise<QodexTaskMeta | null>;
   reconcile(
     target: TaskWorkspace,
     presentSessionIds: ReadonlySet<string>,

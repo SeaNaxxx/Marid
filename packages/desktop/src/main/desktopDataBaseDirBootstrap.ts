@@ -1,10 +1,10 @@
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { setDataBaseDir } from "@marid/services/node";
+import { setDataBaseDir } from "@qodex/services/node";
 
 export function resolveBootstrapSettingsFile(homePath: string = homedir()): string {
-  return join(homePath, ".marid", "v2", "setting.json");
+  return join(homePath, ".qodex", "v2", "setting.json");
 }
 
 export function extractBootstrapDataBaseDir(rawValue: unknown): string | null {

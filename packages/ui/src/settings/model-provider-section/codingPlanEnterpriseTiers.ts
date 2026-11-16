@@ -1,4 +1,4 @@
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import type { EnterpriseCodingPlanProductDisplay } from "@/settings/model-provider-section/enterpriseCodingPlanProducts.js";
 
 // 2026-09: 原生购买面板（CodingPlanPurchasePanel）整体下线，购买流程切换为内嵌官网
@@ -55,7 +55,7 @@ function normalizeEnterpriseTierFormatOptions(
 }
 
 export function createEnterpriseTierMessageFormatter(
-  intl: ReturnType<typeof useMaridIntl>["intl"],
+  intl: ReturnType<typeof useQodexIntl>["intl"],
 ): EnterpriseTierMessageFormatter {
   return (id, fallback) => {
     const message = intl.formatMessage({ id });

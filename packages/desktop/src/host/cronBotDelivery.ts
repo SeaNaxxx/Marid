@@ -1,15 +1,15 @@
-import type { MaridAutomationBotDeliveryTarget } from "@marid/shared";
+import type { QodexAutomationBotDeliveryTarget } from "@qodex/shared";
 
 interface CronBotDeliveryRepo {
   getBotDeliveryTarget(
     automationId: string,
     workspaceKey?: string,
-  ): Promise<MaridAutomationBotDeliveryTarget | undefined>;
+  ): Promise<QodexAutomationBotDeliveryTarget | undefined>;
 }
 
 interface CronBotDeliveryService {
   watchAutomationRun(params: {
-    target: MaridAutomationBotDeliveryTarget;
+    target: QodexAutomationBotDeliveryTarget;
     runId?: string;
     taskId: string;
     workspacePath: string;

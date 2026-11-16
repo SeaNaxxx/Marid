@@ -14,7 +14,7 @@ import {
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu.js";
 import { FileApplicationIcon } from "@/file-menu/FileApplicationIcon.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 interface ApplicationItem {
   id: string;
@@ -47,7 +47,7 @@ export function FileApplicationSubmenu<T extends ApplicationItem>({
   onSelect: (application: T) => void;
   label?: string;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const sorted = useMemo(
     () =>
       [...applications].sort(

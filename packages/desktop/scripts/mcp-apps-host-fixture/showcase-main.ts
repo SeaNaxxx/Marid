@@ -286,7 +286,7 @@ app
             { ...scope, resourceUri: "ui://showcase/dashboard.html" },
             "sampling",
           );
-          await env.evalPage(legacy, "window.marid.ready()");
+          await env.evalPage(legacy, "window.qodex.ready()");
           await env.evalPage(
             legacy,
             `document.getElementById('refresh').click(); new Promise(resolve => {

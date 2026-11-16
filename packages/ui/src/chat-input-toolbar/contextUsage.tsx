@@ -10,10 +10,10 @@ import {
 } from "react";
 import {
   type CodingPlanResetType,
-  type MaridContextUsageBreakdownItem,
-  type MaridProvider,
-} from "@marid/shared";
-import { TID_CHAT_CONTEXT_USAGE_TRIGGER } from "@marid/shared/test-ids";
+  type QodexContextUsageBreakdownItem,
+  type QodexProvider,
+} from "@qodex/shared";
+import { TID_CHAT_CONTEXT_USAGE_TRIGGER } from "@qodex/shared/test-ids";
 import {
   Context,
   ContextContentBody,
@@ -28,7 +28,7 @@ import { ControlHintTooltip } from "@/ControlHintTooltip.js";
 import { resolveCodingPlanUsageRemainingState } from "@/CodingPlanUsageRemainingPanel.js";
 import { CodingPlanQuotaResetStatusContent } from "@/components/coding-plan-quota-reset/CodingPlanQuotaResetStatus.js";
 import { useCodingPlanQuotaResetUi } from "@/hooks/useCodingPlanQuotaResetUi.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import {
   CODING_PLAN_QUOTA_RESET_AUTOMATIC_PROCESSING_MS,
   CODING_PLAN_QUOTA_RESET_TYPES,
@@ -64,7 +64,7 @@ import {
   shouldDismissContextQuotaResetOpportunityReminder,
 } from "@/chat-input-toolbar/contextQuotaResetOpportunityReminder.js";
 
-type ContextUsageBreakdownSource = MaridContextUsageBreakdownItem["source"];
+type ContextUsageBreakdownSource = QodexContextUsageBreakdownItem["source"];
 
 interface ContextUsageBreakdownSegment {
   chars: number;
@@ -168,7 +168,7 @@ const BREAKDOWN_SOURCE_ORDER: Record<ContextUsageBreakdownSource, number> = {
 };
 
 export function buildContextUsageBreakdownSegments(
-  breakdown: readonly MaridContextUsageBreakdownItem[] | undefined,
+  breakdown: readonly QodexContextUsageBreakdownItem[] | undefined,
 ): ContextUsageBreakdownSegment[] {
   const charsBySource = new Map<ContextUsageBreakdownSource, number>();
   for (const item of breakdown ?? []) {
@@ -220,7 +220,7 @@ export function getRenderableTaskUsage<
     return null;
   }
 
-  // Marid Protocol 迁移后会单独补齐真实 contextUsed/contextWindow。
+  // Qodex Protocol 迁移后会单独补齐真实 contextUsed/contextWindow。
   // used=0 或非法值不代表可展示的上下文占用，避免把初始化/异常兜底渲染成误导性的 0%。
   if (
     !Number.isFinite(taskUsage.used) ||
@@ -234,7 +234,7 @@ export function getRenderableTaskUsage<
   return taskUsage;
 }
 
-export function getContextCompressionCommand(_provider: MaridProvider): string {
+export function getContextCompressionCommand(_provider: QodexProvider): string {
   return "/compact";
 }
 
@@ -272,10 +272,10 @@ export function ChatContextUsage({
     used: number;
     size: number;
     cache?: { hitRate: number | null };
-    breakdown?: MaridContextUsageBreakdownItem[];
+    breakdown?: QodexContextUsageBreakdownItem[];
   } | null;
-  selectedProvider: MaridProvider;
-  intl: ReturnType<typeof useMaridIntl>["intl"];
+  selectedProvider: QodexProvider;
+  intl: ReturnType<typeof useQodexIntl>["intl"];
   locale: string;
   onSendCompressionCommand?: (command: string) => void;
   compressionDisabled?: boolean;

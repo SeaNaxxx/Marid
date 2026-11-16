@@ -1,24 +1,24 @@
 import { getPluginSandboxHost } from "./pluginSandbox/index.js";
 /* eslint-disable max-lines -- 桌面命令分发需要共享窗口与平台上下文，集中维护更便于一致性 */
-import { readMaridStdioTapDevState, setMaridStdioTapDevEnabled } from "@marid/services/node";
+import { readQodexStdioTapDevState, setQodexStdioTapDevEnabled } from "@qodex/services/node";
 import {
-  buildMaridEndpointUrls,
-  DEFAULT_MARID_ENDPOINT_ORIGIN,
+  buildQodexEndpointUrls,
+  DEFAULT_QODEX_ENDPOINT_ORIGIN,
   DesktopCommandIds,
   REWARDS_PARTITION,
-  TEST_MARID_ENDPOINT_ORIGIN,
+  TEST_QODEX_ENDPOINT_ORIGIN,
   getCommunityUrlFromConfigs,
   getFeedbackUrlFromConfig,
-  normalizeMaridEndpointOrigin,
+  normalizeQodexEndpointOrigin,
   PlatformChannels,
   resolveHelpAppConfig,
-  resolveMaridEndpointOrigin,
-  MARID_ENV,
-  MARID_PRODUCT_FLAVOR,
+  resolveQodexEndpointOrigin,
+  QODEX_ENV,
+  QODEX_PRODUCT_FLAVOR,
   type AppSettings,
   type DesktopCommandId,
   type Locale,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type { MessageBoxOptions } from "electron";
 import { app, BrowserWindow, dialog, session, shell } from "electron";
 import { readFile } from "node:fs/promises";
@@ -40,10 +40,10 @@ import { exportLogs } from "./exportLogs.js";
 import { openResourceManager } from "./resourceManagerWindow.js";
 
 export const HELP_TOGGLE_DEV_TOOLS_MENU_ID = "help.toggle-dev-tools";
-export const HELP_TOGGLE_MARID_STDIO_TAP_MENU_ID = "help.toggle-marid-stdio-tap";
-const MARID_ENDPOINT_PROMPT_WIDTH = 460;
-const MARID_ENDPOINT_PROMPT_HEIGHT = 210;
-const CODING_PLAN_WEBVIEW_PARTITION = "persist:marid-coding-plan";
+export const HELP_TOGGLE_QODEX_STDIO_TAP_MENU_ID = "help.toggle-qodex-stdio-tap";
+const QODEX_ENDPOINT_PROMPT_WIDTH = 460;
+const QODEX_ENDPOINT_PROMPT_HEIGHT = 210;
+const CODING_PLAN_WEBVIEW_PARTITION = "persist:qodex-coding-plan";
 
 function resolveTargetWindow(senderWindow?: BrowserWindow | null) {
   if (senderWindow && !senderWindow.isDestroyed()) {
@@ -95,7 +95,7 @@ async function clearAllDataAndRelaunch(options: {
     title: "Clear All Data",
     message: "确定要清除所有数据吗？",
     detail:
-      "将删除 ~/.marid/v2（配置、凭据、日志）和浏览器缓存（localStorage）。操作不可恢复，清除后应用将自动重启。",
+      "将删除 ~/.qodex/v2（配置、凭据、日志）和浏览器缓存（localStorage）。操作不可恢复，清除后应用将自动重启。",
   });
   if (response !== 1) {
     return;
@@ -105,9 +105,9 @@ async function clearAllDataAndRelaunch(options: {
   const { rm } = await import("node:fs/promises");
   try {
     await rm(options.credentialsDir, { recursive: true, force: true });
-    options.logger.info("[clear-all-data] deleted ~/.marid/v2");
+    options.logger.info("[clear-all-data] deleted ~/.qodex/v2");
   } catch (error) {
-    options.logger.error("[clear-all-data] failed to delete ~/.marid/v2:", error);
+    options.logger.error("[clear-all-data] failed to delete ~/.qodex/v2:", error);
   }
 
   for (const win of BrowserWindow.getAllWindows()) {
@@ -288,11 +288,11 @@ async function openCommunity(
   await shell.openExternal(communityUrl);
 }
 
-async function promptCustomMaridEndpoint(
+async function promptCustomQodexEndpoint(
   targetWindow: BrowserWindow | null | undefined,
   currentValue: string,
 ): Promise<string | undefined> {
-  return showMaridEndpointPromptWindow({
+  return showQodexEndpointPromptWindow({
     currentValue,
     parentWindow: targetWindow && !targetWindow.isDestroyed() ? targetWindow : undefined,
   });
@@ -306,13 +306,13 @@ function escapeHtmlAttribute(value: string): string {
     .replace(/>/g, "&gt;");
 }
 
-function buildMaridEndpointPromptHtml(currentValue: string): string {
+function buildQodexEndpointPromptHtml(currentValue: string): string {
   const value = escapeHtmlAttribute(currentValue);
   return `<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Marid Endpoint</title>
+    <title>Qodex Endpoint</title>
     <style>
       :root { color-scheme: light dark; }
       body { margin: 0; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
@@ -325,9 +325,9 @@ function buildMaridEndpointPromptHtml(currentValue: string): string {
   </head>
   <body>
     <form id="form">
-      <label for="endpoint">Marid endpoint origin</label>
-      <input id="endpoint" value="${value}" placeholder="https://marid.z.ai" spellcheck="false" />
-      <div class="hint">Use an http or https origin, for example https://marid.z.ai.</div>
+      <label for="endpoint">Qodex endpoint origin</label>
+      <input id="endpoint" value="${value}" placeholder="https://qodex.z.ai" spellcheck="false" />
+      <div class="hint">Use an http or https origin, for example https://qodex.z.ai.</div>
       <div class="actions">
         <button id="cancel" type="button">Cancel</button>
         <button type="submit">Save</button>
@@ -335,13 +335,13 @@ function buildMaridEndpointPromptHtml(currentValue: string): string {
     </form>
     <script>
       const input = document.getElementById("endpoint");
-      const submit = (value) => { document.title = "marid-endpoint-submit:" + encodeURIComponent(value); };
+      const submit = (value) => { document.title = "qodex-endpoint-submit:" + encodeURIComponent(value); };
       document.getElementById("form").addEventListener("submit", (event) => {
         event.preventDefault();
         submit(input.value);
       });
       document.getElementById("cancel").addEventListener("click", () => {
-        document.title = "marid-endpoint-cancel";
+        document.title = "qodex-endpoint-cancel";
       });
       input.focus();
       input.select();
@@ -350,21 +350,21 @@ function buildMaridEndpointPromptHtml(currentValue: string): string {
 </html>`;
 }
 
-function showMaridEndpointPromptWindow(options: {
+function showQodexEndpointPromptWindow(options: {
   currentValue: string;
   parentWindow?: BrowserWindow;
 }): Promise<string | undefined> {
   return new Promise((resolve) => {
     let settled = false;
     const promptWindow = new BrowserWindow({
-      width: MARID_ENDPOINT_PROMPT_WIDTH,
-      height: MARID_ENDPOINT_PROMPT_HEIGHT,
+      width: QODEX_ENDPOINT_PROMPT_WIDTH,
+      height: QODEX_ENDPOINT_PROMPT_HEIGHT,
       parent: options.parentWindow,
       modal: Boolean(options.parentWindow),
       resizable: false,
       minimizable: false,
       maximizable: false,
-      title: "Marid Endpoint",
+      title: "Qodex Endpoint",
       webPreferences: {
         contextIsolation: true,
         nodeIntegration: false,
@@ -385,40 +385,40 @@ function showMaridEndpointPromptWindow(options: {
 
     promptWindow.on("closed", () => finish(undefined));
     promptWindow.on("page-title-updated", (event, title) => {
-      if (title === "marid-endpoint-cancel") {
+      if (title === "qodex-endpoint-cancel") {
         event.preventDefault();
         finish(undefined);
         return;
       }
-      if (!title.startsWith("marid-endpoint-submit:")) {
+      if (!title.startsWith("qodex-endpoint-submit:")) {
         return;
       }
       event.preventDefault();
-      finish(decodeURIComponent(title.slice("marid-endpoint-submit:".length)));
+      finish(decodeURIComponent(title.slice("qodex-endpoint-submit:".length)));
     });
 
     // Electron 菜单命令在主进程触发，调用 renderer 的 window.prompt 可能被禁用或没有焦点，表现为点击无反应。
     // 这里改为主进程创建受控 modal 输入窗，确保 Custom... 始终有可见交互入口。
     void promptWindow.loadURL(
       `data:text/html;charset=utf-8,${encodeURIComponent(
-        buildMaridEndpointPromptHtml(options.currentValue),
+        buildQodexEndpointPromptHtml(options.currentValue),
       )}`,
     );
   });
 }
 
-async function setMaridEndpointOverride(options: {
+async function setQodexEndpointOverride(options: {
   value: string | undefined;
-  settingService: { update(patch: { maridEndpointOrigin?: string | undefined }): Promise<void> };
-  onMaridEndpointChanged: () => Promise<void> | void;
+  settingService: { update(patch: { qodexEndpointOrigin?: string | undefined }): Promise<void> };
+  onQodexEndpointChanged: () => Promise<void> | void;
   logger: { warn: (...args: unknown[]) => void };
 }) {
-  if (MARID_ENV === "production") {
+  if (QODEX_ENV === "production") {
     return;
   }
-  const normalized = options.value ? normalizeMaridEndpointOrigin(options.value) : undefined;
-  await options.settingService.update({ maridEndpointOrigin: normalized });
-  await options.onMaridEndpointChanged();
+  const normalized = options.value ? normalizeQodexEndpointOrigin(options.value) : undefined;
+  await options.settingService.update({ qodexEndpointOrigin: normalized });
+  await options.onQodexEndpointChanged();
 }
 
 async function persistDesktopZoomLevel(options: {
@@ -435,13 +435,13 @@ async function persistDesktopZoomLevel(options: {
   }
 }
 
-function toggleMaridStdioTapDevProxy(options: {
+function toggleQodexStdioTapDevProxy(options: {
   logger: { info: (...args: unknown[]) => void };
-  updateMaridStdioTapDevMenuState: () => void;
+  updateQodexStdioTapDevMenuState: () => void;
 }) {
-  const current = readMaridStdioTapDevState();
-  const next = setMaridStdioTapDevEnabled(!current.enabled);
-  options.updateMaridStdioTapDevMenuState();
+  const current = readQodexStdioTapDevState();
+  const next = setQodexStdioTapDevEnabled(!current.enabled);
+  options.updateQodexStdioTapDevMenuState();
   options.logger.info("[stdio-tap] dev proxy toggled", {
     enabled: next.enabled,
     visible: next.visible,
@@ -451,30 +451,30 @@ function toggleMaridStdioTapDevProxy(options: {
 
 function resolveChangelogUrl(
   locale: Locale,
-  endpointOrigin = DEFAULT_MARID_ENDPOINT_ORIGIN,
+  endpointOrigin = DEFAULT_QODEX_ENDPOINT_ORIGIN,
 ): string {
   // 帮助菜单里的外链以前只有固定英文地址，切到中文界面后仍会落到英文 changelog。
   // 这里统一收口到主进程按当前应用语言分流，避免菜单模板里手写分支后续再出现多处不一致。
-  const origin = buildMaridEndpointUrls(endpointOrigin).origin;
+  const origin = buildQodexEndpointUrls(endpointOrigin).origin;
   return locale === "zh-CN" ? `${origin}/cn/changelog` : `${origin}/en/changelog`;
 }
 
 export async function openChangelog(
   locale: Locale,
-  endpointOrigin = DEFAULT_MARID_ENDPOINT_ORIGIN,
+  endpointOrigin = DEFAULT_QODEX_ENDPOINT_ORIGIN,
 ) {
   await shell.openExternal(resolveChangelogUrl(locale, endpointOrigin));
 }
 
-async function resolveCurrentMaridEndpointOrigin(settingService: {
-  get(): Promise<{ maridEndpointOrigin?: string }>;
+async function resolveCurrentQodexEndpointOrigin(settingService: {
+  get(): Promise<{ qodexEndpointOrigin?: string }>;
   envBaseOrigin?: string | null;
 }): Promise<string> {
   const settings = await settingService.get();
-  return resolveMaridEndpointOrigin({
-    env: MARID_ENV,
+  return resolveQodexEndpointOrigin({
+    env: QODEX_ENV,
     envBaseOrigin: settingService.envBaseOrigin,
-    overrideOrigin: settings.maridEndpointOrigin,
+    overrideOrigin: settings.qodexEndpointOrigin,
   });
 }
 
@@ -487,17 +487,17 @@ export async function executeDesktopCommand(options: {
     warn: (...args: unknown[]) => void;
     error: (...args: unknown[]) => void;
   };
-  updateMaridStdioTapDevMenuState: () => void;
+  updateQodexStdioTapDevMenuState: () => void;
   onDesktopZoomChanged?: (zoomLevel: number) => Promise<void> | void;
-  onMaridEndpointChanged: () => Promise<void> | void;
+  onQodexEndpointChanged: () => Promise<void> | void;
   onRelaunchApp: () => Promise<void>;
   settingService: {
-    get(): Promise<Pick<AppSettings, "maridEndpointOrigin" | "desktopZoomLevel">>;
+    get(): Promise<Pick<AppSettings, "qodexEndpointOrigin" | "desktopZoomLevel">>;
     update(
-      patch: Partial<Pick<AppSettings, "maridEndpointOrigin" | "desktopZoomLevel">>,
+      patch: Partial<Pick<AppSettings, "qodexEndpointOrigin" | "desktopZoomLevel">>,
     ): Promise<void>;
   };
-  maridEndpointEnvBaseOrigin?: string | null;
+  qodexEndpointEnvBaseOrigin?: string | null;
   credentialsDir: string;
   currentApplicationLocale: Locale;
   /** 远控诊断：向已配对手机拉取日志并导出（窗口 id 为命令来源窗口）。 */
@@ -588,15 +588,15 @@ export async function executeDesktopCommand(options: {
     case DesktopCommandIds.OpenChangelog:
       await openChangelog(
         options.currentApplicationLocale,
-        await resolveCurrentMaridEndpointOrigin({
+        await resolveCurrentQodexEndpointOrigin({
           ...options.settingService,
-          envBaseOrigin: options.maridEndpointEnvBaseOrigin,
+          envBaseOrigin: options.qodexEndpointEnvBaseOrigin,
         }),
       );
       return;
     case DesktopCommandIds.CheckForUpdates:
       // 按产品身份而不是后端环境放行：生产后端的 Preview 同样没有更新器。
-      if (MARID_PRODUCT_FLAVOR === "production") {
+      if (QODEX_PRODUCT_FLAVOR === "production") {
         checkForUpdateMenuClick(targetWindow);
       } else {
         options.logger.info("[auto-update] Preview 已禁用手动更新检查");
@@ -627,57 +627,57 @@ export async function executeDesktopCommand(options: {
     case DesktopCommandIds.OpenResourceManager:
       openResourceManager();
       return;
-    case DesktopCommandIds.ToggleMaridStdioTapDevProxy:
-      toggleMaridStdioTapDevProxy({
+    case DesktopCommandIds.ToggleQodexStdioTapDevProxy:
+      toggleQodexStdioTapDevProxy({
         logger: options.logger,
-        updateMaridStdioTapDevMenuState: options.updateMaridStdioTapDevMenuState,
+        updateQodexStdioTapDevMenuState: options.updateQodexStdioTapDevMenuState,
       });
       return;
-    case DesktopCommandIds.SetMaridEndpointProduction:
-      await setMaridEndpointOverride({
-        value: DEFAULT_MARID_ENDPOINT_ORIGIN,
+    case DesktopCommandIds.SetQodexEndpointProduction:
+      await setQodexEndpointOverride({
+        value: DEFAULT_QODEX_ENDPOINT_ORIGIN,
         settingService: options.settingService,
-        onMaridEndpointChanged: options.onMaridEndpointChanged,
+        onQodexEndpointChanged: options.onQodexEndpointChanged,
         logger: options.logger,
       });
       return;
-    case DesktopCommandIds.SetMaridEndpointTest:
-      await setMaridEndpointOverride({
-        value: TEST_MARID_ENDPOINT_ORIGIN,
+    case DesktopCommandIds.SetQodexEndpointTest:
+      await setQodexEndpointOverride({
+        value: TEST_QODEX_ENDPOINT_ORIGIN,
         settingService: options.settingService,
-        onMaridEndpointChanged: options.onMaridEndpointChanged,
+        onQodexEndpointChanged: options.onQodexEndpointChanged,
         logger: options.logger,
       });
       return;
-    case DesktopCommandIds.SetMaridEndpointCustom: {
+    case DesktopCommandIds.SetQodexEndpointCustom: {
       const current =
-        (await options.settingService.get()).maridEndpointOrigin ?? DEFAULT_MARID_ENDPOINT_ORIGIN;
-      const value = await promptCustomMaridEndpoint(targetWindow, current);
+        (await options.settingService.get()).qodexEndpointOrigin ?? DEFAULT_QODEX_ENDPOINT_ORIGIN;
+      const value = await promptCustomQodexEndpoint(targetWindow, current);
       if (!value) {
         return;
       }
       try {
-        await setMaridEndpointOverride({
+        await setQodexEndpointOverride({
           value,
           settingService: options.settingService,
-          onMaridEndpointChanged: options.onMaridEndpointChanged,
+          onQodexEndpointChanged: options.onQodexEndpointChanged,
           logger: options.logger,
         });
       } catch (error) {
         await showMessageBoxWithOptionalParent(targetWindow, {
           type: "error",
-          title: "Marid Endpoint",
+          title: "Qodex Endpoint",
           message: "Endpoint 无效",
           detail: error instanceof Error ? error.message : String(error),
         });
       }
       return;
     }
-    case DesktopCommandIds.ResetMaridEndpoint:
-      await setMaridEndpointOverride({
+    case DesktopCommandIds.ResetQodexEndpoint:
+      await setQodexEndpointOverride({
         value: undefined,
         settingService: options.settingService,
-        onMaridEndpointChanged: options.onMaridEndpointChanged,
+        onQodexEndpointChanged: options.onQodexEndpointChanged,
         logger: options.logger,
       });
       return;

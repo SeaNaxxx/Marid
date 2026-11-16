@@ -5,8 +5,8 @@ import type {
   SaveProjectInput,
   VirtualProject,
 } from "#src/project-storage/contract.js";
-import { ServiceChannels } from "@marid/shared";
-import type { FileEntry } from "@marid/shared";
+import { ServiceChannels } from "@qodex/shared";
+import type { FileEntry } from "@qodex/shared";
 import { createServiceDescriptor } from "#src/descriptors.js";
 import type { ProjectDataDeleteResult, ProjectDataMeasure } from "#src/project/data/contract.js";
 export type {

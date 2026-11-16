@@ -1,7 +1,7 @@
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { ServiceChannels } from "@marid/shared";
-import { TID_V4_COMPOSER_INPUT, TID_V4_COMPOSER_SEND } from "@marid/shared/test-ids";
+import { ServiceChannels } from "@qodex/shared";
+import { TID_V4_COMPOSER_INPUT, TID_V4_COMPOSER_SEND } from "@qodex/shared/test-ids";
 import { DEFAULT_WORKSPACE, setInputValueByTestIdDom } from "#e2e/helpers/desktop-app";
 import { getV4ComposerDraftScopeSnapshot } from "#e2e/helpers/conversation-session-store";
 import {
@@ -55,8 +55,8 @@ interface TypingProbe {
 
 declare global {
   interface Window {
-    __maridComposerCompositionProbe?: CompositionProbe;
-    __maridComposerTypingProbe?: TypingProbe;
+    __qodexComposerCompositionProbe?: CompositionProbe;
+    __qodexComposerTypingProbe?: TypingProbe;
   }
 }
 
@@ -66,7 +66,7 @@ const DELETE_CHARS = 32;
 const EXPECTED_KEY_EVENTS = INPUT_CHARS + DELETE_CHARS;
 const SHORT_DRAFT = "";
 const LONG_DRAFT = "长草稿输入基线".repeat(1_024);
-const DRAFT_STORAGE_PREFIX = "marid-v4-composer-project-drafts:v1:";
+const DRAFT_STORAGE_PREFIX = "qodex-v4-composer-project-drafts:v1:";
 const STRESS_SCOPE_COUNT = 128;
 const STRESS_SCOPE_TEXT = "草稿存储负载".repeat(2_048);
 let originalDraftStorage: { key: string; value: string | null } | null = null;
@@ -81,7 +81,7 @@ const median = (values: readonly number[]) => percentile(values, 0.5);
 
 async function createImportedSession(title: string) {
   const result = await callHandoffHost<{ session: { sessionId: string } }>(
-    ServiceChannels.MaridAgent,
+    ServiceChannels.QodexAgent,
     "createSession",
     [
       {
@@ -100,7 +100,7 @@ async function createImportedSession(title: string) {
     ],
   );
   const sessionId = result.session.sessionId;
-  await callHandoffHost(ServiceChannels.MaridTask, "resumeTask", [
+  await callHandoffHost(ServiceChannels.QodexTask, "resumeTask", [
     { taskId: sessionId, workspacePath: DEFAULT_WORKSPACE },
   ]);
   return sessionId;
@@ -111,22 +111,22 @@ async function installDraftStorageStress() {
     (prefix, scopeCount, scopeText) => {
       type WorkspaceState = { draftProjectId?: string | null };
       const e2eWindow = window as Window & {
-        __maridTabStoreE2E?: {
+        __qodexTabStoreE2E?: {
           getState(): {
             activeWorkspaceIdentity?: string | null;
             activeWorkspacePath?: string | null;
           };
         };
-        __maridSessionStoreE2E?: {
+        __qodexSessionStoreE2E?: {
           getState(): {
             getWorkspaceState(path: string, identity?: string): WorkspaceState;
           };
         };
       };
-      const tabState = e2eWindow.__maridTabStoreE2E?.getState();
+      const tabState = e2eWindow.__qodexTabStoreE2E?.getState();
       const workspacePath = tabState?.activeWorkspacePath ?? "";
       const workspaceIdentity = tabState?.activeWorkspaceIdentity?.trim() || undefined;
-      const workspace = e2eWindow.__maridSessionStoreE2E
+      const workspace = e2eWindow.__qodexSessionStoreE2E
         ?.getState()
         .getWorkspaceState(workspacePath, workspaceIdentity);
       const scopeKey = JSON.stringify([
@@ -222,7 +222,7 @@ async function installTypingProbe(initialLength: number) {
               longTasksMs.push(...list.getEntries().map((entry) => entry.duration));
             });
       observer?.observe({ type: "longtask" });
-      window.__maridComposerTypingProbe = {
+      window.__qodexComposerTypingProbe = {
         frame,
         frameGapsMs,
         inputEvents,
@@ -261,7 +261,7 @@ async function installTypingProbe(initialLength: number) {
           };
         },
       };
-      Object.defineProperties(window.__maridComposerTypingProbe, {
+      Object.defineProperties(window.__qodexComposerTypingProbe, {
         inputEvents: { get: () => inputEvents },
         keyEvents: { get: () => keyEvents },
         pendingFrames: { get: () => pendingFrames },
@@ -278,8 +278,8 @@ async function finishTypingProbe() {
   await browser.waitUntil(
     async () => {
       latest = await browser.execute(() => ({
-        keyEvents: window.__maridComposerTypingProbe?.keyEvents ?? 0,
-        pendingFrames: window.__maridComposerTypingProbe?.pendingFrames ?? 0,
+        keyEvents: window.__qodexComposerTypingProbe?.keyEvents ?? 0,
+        pendingFrames: window.__qodexComposerTypingProbe?.pendingFrames ?? 0,
       }));
       return latest.keyEvents === EXPECTED_KEY_EVENTS && latest.pendingFrames === 0;
     },
@@ -289,10 +289,10 @@ async function finishTypingProbe() {
     },
   );
   return browser.execute(() => {
-    const probe = window.__maridComposerTypingProbe;
+    const probe = window.__qodexComposerTypingProbe;
     if (!probe) throw new Error("Composer typing probe is unavailable");
     const result = probe.dispose();
-    delete window.__maridComposerTypingProbe;
+    delete window.__qodexComposerTypingProbe;
     return result;
   });
 }
@@ -358,7 +358,7 @@ async function beginChromiumImeComposition() {
         );
       };
       const probe: CompositionProbe = { originalSetItem, events, onEvent, writes: [] };
-      window.__maridComposerCompositionProbe = probe;
+      window.__qodexComposerCompositionProbe = probe;
       Storage.prototype.setItem = function (key: string, value: string) {
         if (prefixes.some((prefix) => key.startsWith(prefix))) probe.writes.push(value);
         return originalSetItem.call(this, key, value);
@@ -374,7 +374,7 @@ async function beginChromiumImeComposition() {
       }
     },
     TID_V4_COMPOSER_INPUT,
-    [DRAFT_STORAGE_PREFIX, "marid-v4-composer-drafts:v1:"],
+    [DRAFT_STORAGE_PREFIX, "qodex-v4-composer-drafts:v1:"],
   );
   await browser.electron.execute(async (electron) => {
     const window = electron.BrowserWindow.getAllWindows().find(
@@ -399,9 +399,9 @@ async function beginChromiumImeComposition() {
   });
   return browser.execute(
     (inputTestId, sendTestId) => {
-      const probe = window.__maridComposerCompositionProbe;
+      const probe = window.__qodexComposerCompositionProbe;
       const input = document.querySelector<
-        HTMLElement & { __maridLexicalInputE2E?: { getText(): string } }
+        HTMLElement & { __qodexLexicalInputE2E?: { getText(): string } }
       >(`[data-testid="${inputTestId}"]`);
       const sendButton = document.querySelector<HTMLButtonElement>(`[data-testid="${sendTestId}"]`);
       if (!sendButton) throw new Error("Composer send button is unavailable");
@@ -409,7 +409,7 @@ async function beginChromiumImeComposition() {
         events: [...(probe?.events ?? [])],
         sendEnabled: !sendButton.hasAttribute("disabled"),
         writes: probe?.writes.length ?? -1,
-        text: input?.__maridLexicalInputE2E?.getText() ?? "",
+        text: input?.__qodexLexicalInputE2E?.getText() ?? "",
       };
     },
     TID_V4_COMPOSER_INPUT,
@@ -426,7 +426,7 @@ async function cleanupChromiumImeComposition() {
     if (window?.webContents.debugger.isAttached()) window.webContents.debugger.detach();
   });
   return browser.execute((inputTestId) => {
-    const probe = window.__maridComposerCompositionProbe;
+    const probe = window.__qodexComposerCompositionProbe;
     const input = document.querySelector<HTMLElement>(`[data-testid="${inputTestId}"]`);
     if (!probe) return { events: [], writes: -1 };
     Storage.prototype.setItem = probe.originalSetItem;
@@ -439,7 +439,7 @@ async function cleanupChromiumImeComposition() {
     ]) {
       input?.removeEventListener(eventName, probe.onEvent, true);
     }
-    delete window.__maridComposerCompositionProbe;
+    delete window.__qodexComposerCompositionProbe;
     return { events: probe.events, writes: probe.writes.length };
   }, TID_V4_COMPOSER_INPUT);
 }
@@ -461,12 +461,12 @@ async function finishChromiumImeComposition() {
   });
   await browser.pause(450);
   return browser.execute((inputTestId) => {
-    const probe = window.__maridComposerCompositionProbe;
+    const probe = window.__qodexComposerCompositionProbe;
     const input = document.querySelector<
-      HTMLElement & { __maridLexicalInputE2E?: { getText(): string } }
+      HTMLElement & { __qodexLexicalInputE2E?: { getText(): string } }
     >(`[data-testid="${inputTestId}"]`);
     if (!probe) {
-      return { events: [], writes: -1, text: input?.__maridLexicalInputE2E?.getText() ?? "" };
+      return { events: [], writes: -1, text: input?.__qodexLexicalInputE2E?.getText() ?? "" };
     }
     Storage.prototype.setItem = probe.originalSetItem;
     for (const eventName of [
@@ -478,11 +478,11 @@ async function finishChromiumImeComposition() {
     ]) {
       input?.removeEventListener(eventName, probe.onEvent, true);
     }
-    delete window.__maridComposerCompositionProbe;
+    delete window.__qodexComposerCompositionProbe;
     return {
       events: probe.events,
       writes: probe.writes.length,
-      text: input?.__maridLexicalInputE2E?.getText() ?? "",
+      text: input?.__qodexLexicalInputE2E?.getText() ?? "",
     };
   }, TID_V4_COMPOSER_INPUT);
 }
@@ -490,7 +490,7 @@ async function finishChromiumImeComposition() {
 async function startRendererCpuProfile() {
   await sendRendererProfilerCommand({ command: "start" });
   return async () => {
-    const artifactDir = process.env.MARID_E2E_ARTIFACT_DIR;
+    const artifactDir = process.env.QODEX_E2E_ARTIFACT_DIR;
     if (!artifactDir) return;
     const serialized = await sendRendererProfilerCommand({ command: "stop" });
     expect(serialized.length).toBeGreaterThan(100);
@@ -522,7 +522,7 @@ async function sendRendererProfilerCommand(input: { command: "start" | "stop" })
 }
 
 async function writeJsonArtifact(fileName: string, value: unknown) {
-  const artifactDir = process.env.MARID_E2E_ARTIFACT_DIR;
+  const artifactDir = process.env.QODEX_E2E_ARTIFACT_DIR;
   if (!artifactDir) return;
   await writeFile(join(artifactDir, fileName), JSON.stringify(value, null, 2));
 }
@@ -568,7 +568,7 @@ describeWindows("CTP02 Windows composer typing performance", () => {
 
   it("keeps real character and backspace input responsive for short and long drafts", async () => {
     await prepareV4ConversationE2E({ skipProvider: true });
-    if (process.env.MARID_E2E_COMPOSER_CPU_PROFILE === "1") {
+    if (process.env.QODEX_E2E_COMPOSER_CPU_PROFILE === "1") {
       const stopProfile = await startRendererCpuProfile();
       try {
         await writeMetrics({ profileBatch: await runTypingBatch(LONG_DRAFT) });

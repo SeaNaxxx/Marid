@@ -1,5 +1,5 @@
-import type { AppSettings, WebRemoteControlAppPayload } from "@marid/shared";
-import type { WebRemoteControlRelayV2Meta } from "@marid/shared/web-remote-relay";
+import type { AppSettings, WebRemoteControlAppPayload } from "@qodex/shared";
+import type { WebRemoteControlRelayV2Meta } from "@qodex/shared/web-remote-relay";
 
 export type WebRemoteControlRegisteredDevice = NonNullable<
   AppSettings["webRemoteControlRelayV2Device"]

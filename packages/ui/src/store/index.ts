@@ -5,9 +5,9 @@
  * 广播频道前缀 "state:" 表示状态同步类消息。
  */
 import { create } from "zustand";
-import type { IBroadcastService, BroadcastMessage } from "@marid/services";
-import type { OAuthProviderId, UserInfo } from "@marid/shared";
-import type { CodingPlanResetType } from "@marid/shared";
+import type { IBroadcastService, BroadcastMessage } from "@qodex/services";
+import type { OAuthProviderId, UserInfo } from "@qodex/shared";
+import type { CodingPlanResetType } from "@qodex/shared";
 import type { CodePreviewSettings } from "@/lib/codePreviewSettings.js";
 import type {
   CodingPlanQuotaResetUiEntries,
@@ -67,18 +67,18 @@ export interface LoginEntryAttempt {
   status: LoginEntryAttemptStatus;
 }
 
-const CODE_PREVIEW_SETTINGS_KEY = "marid-code-preview-settings";
-const FONT_SMOOTHING_STORAGE_KEY = "marid-macos-font-smoothing";
+const CODE_PREVIEW_SETTINGS_KEY = "qodex-code-preview-settings";
+const FONT_SMOOTHING_STORAGE_KEY = "qodex-macos-font-smoothing";
 
 function applyFontSmoothing(enabled: boolean): void {
   // 仅设置展示标记；CSS 以本机 macOS desktop 为边界，远端设备与 Web 不受影响。
   document.documentElement.classList.toggle("font-smoothing-enabled", enabled);
 }
 
-const PERFORMANCE_MODE_STORAGE_KEY = "marid-performance-mode";
-const HIDE_PROJECT_DEVICE_NAMES_STORAGE_KEY = "marid-hide-project-device-names";
+const PERFORMANCE_MODE_STORAGE_KEY = "qodex-performance-mode";
+const HIDE_PROJECT_DEVICE_NAMES_STORAGE_KEY = "qodex-hide-project-device-names";
 export const FILE_MANAGER_NAVIGATION_PREFERENCES_STORAGE_KEY =
-  "marid-file-manager-navigation-preferences";
+  "qodex-file-manager-navigation-preferences";
 
 function loadFileManagerNavigationPreferences(): Record<string, boolean> {
   try {
@@ -127,7 +127,7 @@ function loadPerformanceMode(): boolean {
 // State 定义
 // ============================================================================
 
-export interface MaridState {
+export interface QodexState {
   /** 展示详情偏好，不改变 Agent 权限或执行能力。 */
   interfaceMode: InterfaceMode;
   setInterfaceMode: (mode: InterfaceMode) => void;
@@ -284,7 +284,7 @@ const STATE_CHANNEL_PREFIX = "state:";
  *
  * @param broadcastService - 广播服务。Desktop 走 RPC，Web 可传 no-op 实现
  */
-export function createMaridStore(
+export function createQodexStore(
   broadcastService: IBroadcastService,
   options: {
     initialIsRestoringOAuthSession?: boolean;
@@ -296,7 +296,7 @@ export function createMaridStore(
   let cleanupSystemThemeListener: (() => void) | null = null;
   let syncSystemThemeListener = (_theme: Theme) => {};
 
-  const useStore = create<MaridState>()((set, get) => ({
+  const useStore = create<QodexState>()((set, get) => ({
     interfaceMode: normalizeInterfaceMode(readSafeLocalStorage(INTERFACE_MODE_STORAGE_KEY)),
     setInterfaceMode: (mode) => {
       const interfaceMode = normalizeInterfaceMode(mode);
@@ -311,19 +311,19 @@ export function createMaridStore(
     },
     // 默认主题统一收敛到 Zai dark，避免首次启动时 store 与其他主题入口表现不一致。
     // 仍然优先尊重 localStorage 中已保存的用户选择，不覆盖已有偏好。
-    theme: normalizeThemePreference((readSafeLocalStorage("marid-theme") as Theme) || "zai-dark"),
+    theme: normalizeThemePreference((readSafeLocalStorage("qodex-theme") as Theme) || "zai-dark"),
     setTheme: (theme: Theme) => {
       const normalizedTheme = normalizeThemePreference(theme);
-      writeSafeLocalStorage("marid-theme", normalizedTheme);
+      writeSafeLocalStorage("qodex-theme", normalizedTheme);
       syncSystemThemeListener(normalizedTheme);
       applyTheme(normalizedTheme);
 
       set({ theme: normalizedTheme });
     },
 
-    locale: readSafeLocalStorage("marid-locale") || "zh-CN",
+    locale: readSafeLocalStorage("qodex-locale") || "zh-CN",
     setLocale: (locale: string) => {
-      writeSafeLocalStorage("marid-locale", locale);
+      writeSafeLocalStorage("qodex-locale", locale);
       set({ locale });
     },
 
@@ -593,4 +593,4 @@ export function createMaridStore(
   return useStore;
 }
 
-export type MaridStore = ReturnType<typeof createMaridStore>;
+export type QodexStore = ReturnType<typeof createQodexStore>;

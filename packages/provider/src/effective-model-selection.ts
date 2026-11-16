@@ -1,6 +1,6 @@
 import type { AccountProviderStates } from "./account-provider-state.js";
-import type { EffectiveModelSelectionResult } from "@marid/shared/model-selection";
-export type { EffectiveModelSelectionResult } from "@marid/shared/model-selection";
+import type { EffectiveModelSelectionResult } from "@qodex/shared/model-selection";
+export type { EffectiveModelSelectionResult } from "@qodex/shared/model-selection";
 import {
   validateModelSelectionOptions,
   type ModelSelection,

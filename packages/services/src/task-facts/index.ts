@@ -1,10 +1,10 @@
 import {
   generateTraceId,
   resolveWorkspaceKey,
-  MARID_AGENT_PROVIDER,
-  type MaridTaskMeta,
-} from "@marid/shared";
-import type { SessionsIndexReconcileResult } from "@marid/shared/marid-protocol-v4";
+  QODEX_AGENT_PROVIDER,
+  type QodexTaskMeta,
+} from "@qodex/shared";
+import type { SessionsIndexReconcileResult } from "@qodex/shared/qodex-protocol-v4";
 import type {
   TaskFactChange,
   TaskFactSource,
@@ -58,7 +58,7 @@ export function createTaskFacts(options: {
           createdAt: fact.createdAt,
           updatedAt: fact.updatedAt,
           mode: "default",
-          provider: MARID_AGENT_PROVIDER,
+          provider: QODEX_AGENT_PROVIDER,
           // 对账可能先于摘要完成首次入库；两条路径必须保留相同的父子关系。
           ...(fact.parentSessionId ? { forkedFromTaskId: fact.parentSessionId } : {}),
         },
@@ -86,7 +86,7 @@ export function createTaskFacts(options: {
     async ingest(target, summary) {
       refreshes.delete(key({ ...target, taskId: summary.sessionId }));
       const lastOutcome = summary.lastOutcome;
-      const meta: MaridTaskMeta = {
+      const meta: QodexTaskMeta = {
         taskId: summary.sessionId,
         traceId: generateTraceId(summary.sessionId),
         title: summary.title,
@@ -95,7 +95,7 @@ export function createTaskFacts(options: {
         createdAt: summary.createdAt,
         updatedAt: summary.lastActivityAt,
         mode: "default",
-        provider: MARID_AGENT_PROVIDER,
+        provider: QODEX_AGENT_PROVIDER,
         ...(summary.parentSessionId ? { forkedFromTaskId: summary.parentSessionId } : {}),
         ...(lastOutcome ? { status: lastOutcome === "error" ? "error" : "completed" } : {}),
       };

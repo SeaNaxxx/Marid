@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.marid.app"
+    namespace = "com.qodex.app"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.marid.app"
+        applicationId = "com.qodex.app"
         // minSdk 24 / targetSdk 28 are deliberate (Zcode-Android device-proven):
         // Android 10+ W^X policy blocks exec() of binaries in app-writable
         // storage for apps targeting >= 29; targeting 28 keeps the embedded
@@ -17,7 +17,7 @@ android {
         minSdk = 24
         targetSdk = 28
         versionCode = 1
-        versionName = "0.1.0-marid"
+        versionName = "0.1.0-qodex"
     }
 
     buildTypes {

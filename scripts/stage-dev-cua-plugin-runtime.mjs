@@ -10,13 +10,13 @@ export function stageDevCuaPluginRuntime({
   platform = process.platform,
   arch = process.arch,
   desktopPackageRoot = resolve(repositoryRoot, "packages", "desktop"),
-  pluginRoot = resolve(repositoryRoot, "apps", "marid-cli", "packages", "marid-cua-plugin"),
+  pluginRoot = resolve(repositoryRoot, "apps", "qodex-cli", "packages", "qodex-cua-plugin"),
 } = {}) {
-  if (env.MARID_CUA_DEV_MODE !== "1") return [];
+  if (env.QODEX_CUA_DEV_MODE !== "1") return [];
   // 开源占位包不提供 Computer Use 原生能力，也不随附 Sharp：没有真实 producer 时不暂存。
   if (!isRealComputerUseProducerInstalled({ desktopPackageRoot })) return [];
 
-  const manifestPath = resolve(pluginRoot, ".marid-plugin", "plugin.json");
+  const manifestPath = resolve(pluginRoot, ".qodex-plugin", "plugin.json");
   if (!existsSync(manifestPath)) {
     throw new Error(
       `[stage-dev-cua-plugin-runtime] CUA plugin manifest is missing: ${manifestPath}`,

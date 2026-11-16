@@ -11,44 +11,44 @@ import { createServer } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { WebSocketServer } from "ws";
-import { ChannelServer, Emitter, Event, SocketProtocol, VSBuffer } from "@marid/rpc";
+import { ChannelServer, Emitter, Event, SocketProtocol, VSBuffer } from "@qodex/rpc";
 import {
   ISettingService,
   IMemoryService,
   IOnboardingRecordService,
   ServiceCollection,
-} from "@marid/services";
-import { createSettingService } from "@marid/services/node";
+} from "@qodex/services";
+import { createSettingService } from "@qodex/services/node";
 
 const repoRoot = fileURLToPath(new URL("../../../../../../../../", import.meta.url));
 const artifacts = resolve(repoRoot, "packages/desktop/.e2e-artifacts/memory-settings-mobile");
 const root = await mkdtemp(resolve(tmpdir(), "memory-settings-mobile-"));
 await mkdir(artifacts, { recursive: true });
 const targets = {};
-const previousDesktopHome = process.env.MARID_DESKTOP_HOME_DIR;
+const previousDesktopHome = process.env.QODEX_DESKTOP_HOME_DIR;
 try {
   for (const name of ["local", "remote"]) {
     // SettingService 按实例捕获 home，不读取 dataBaseDir；必须在构造前隔离实际目录。
-    process.env.MARID_DESKTOP_HOME_DIR = resolve(root, name);
+    process.env.QODEX_DESKTOP_HOME_DIR = resolve(root, name);
     const settings = createSettingService();
     await settings.update({ memoryEnabled: false, locale: "zh-CN" });
     targets[name] = settings;
   }
 } finally {
-  if (previousDesktopHome === undefined) delete process.env.MARID_DESKTOP_HOME_DIR;
-  else process.env.MARID_DESKTOP_HOME_DIR = previousDesktopHome;
+  if (previousDesktopHome === undefined) delete process.env.QODEX_DESKTOP_HOME_DIR;
+  else process.env.QODEX_DESKTOP_HOME_DIR = previousDesktopHome;
 }
 let catalogReads = 0;
 const entryId = resolve(repoRoot, "packages/desktop/memory-mobile-entry.js");
 const entry = `
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { connectViaWebSocket } from '@marid/client';
-import { Event } from '@marid/rpc';
+import { connectViaWebSocket } from '@qodex/client';
+import { Event } from '@qodex/rpc';
 import { ServiceProvider } from '@/hooks/useServices.js';
 import { PlatformProvider } from '@/hooks/usePlatform.js';
 import { StoreProvider } from '@/store/StoreProvider.js';
-import { MaridIntlProvider } from '@/i18n/IntlProvider.js';
+import { QodexIntlProvider } from '@/i18n/IntlProvider.js';
 import { MemorySettingsPage } from '@/settings/MemorySettingsSection.js';
 import '@/styles.css';
 const services = await connectViaWebSocket('ws://' + location.host + '/memory-rpc?target=' + new URLSearchParams(location.search).get('target'));
@@ -57,7 +57,7 @@ const platform = { getDeviceId: () => 'mobile-memory', reportTelemetryEvent: asy
 const broadcast = { onMessage: Event.None, send: async () => {} };
 createRoot(document.getElementById('root')).render(
   h(ServiceProvider, {services}, h(PlatformProvider, {platform},
-    h(StoreProvider, {broadcastService: broadcast}, h(MaridIntlProvider, null,
+    h(StoreProvider, {broadcastService: broadcast}, h(QodexIntlProvider, null,
       h('main', {style: {background: 'var(--color-background)', color: 'var(--color-foreground)', minHeight: '100vh', padding: 16}},
         h(MemorySettingsPage, {isDesktop: false, workspaceDisplayNames: []})))))));
 `;

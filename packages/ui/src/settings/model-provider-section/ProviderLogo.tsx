@@ -1,8 +1,8 @@
-import type { ProviderConfigObject } from "@marid/provider";
+import type { ProviderConfigObject } from "@qodex/provider";
 import { PackageIcon } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridStoreWithDefault } from "@/store/StoreProvider.js";
+import { useQodexStoreWithDefault } from "@/store/StoreProvider.js";
 import { resolveTheme, type ResolvedTheme } from "@/useTheme.js";
 import alibabaModelStudioLogo from "@/assets/provider-icons/model-provider-alibaba-cloud.png";
 import anthropicLogo from "@/assets/provider-icons/model-provider-anthropic.png";
@@ -71,7 +71,7 @@ export function ProviderLogo({
   logo?: ProviderLogoRef | null;
   className?: string;
 }) {
-  const theme = useMaridStoreWithDefault((state) => state.theme, "zai-dark");
+  const theme = useQodexStoreWithDefault((state) => state.theme, "zai-dark");
   const src = resolveBuiltinProviderLogoAsset(logo, resolveTheme(theme));
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
   if (!src || failedSrc === src) {

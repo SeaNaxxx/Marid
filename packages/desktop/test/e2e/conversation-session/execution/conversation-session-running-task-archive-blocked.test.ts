@@ -3,7 +3,7 @@ import {
   TID_TASK_ITEM,
   TID_WORKSPACE_MORE_BUTTON,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { clearAppData } from "#e2e/helpers/desktop-app";
 import {
   clickV4Stop,

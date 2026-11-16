@@ -1,4 +1,4 @@
-import type { BotCommandPolicy } from "@marid/shared";
+import type { BotCommandPolicy } from "@qodex/shared";
 const BOT_POLICY_COMMAND_ORDER = [
   "status",
   "new",

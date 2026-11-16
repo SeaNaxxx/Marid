@@ -3,9 +3,9 @@ import {
   migrateLegacyModelProviderId,
   migrateLegacyOfficialGlmModelId,
   modelSelectionSchema,
-  MARID_AGENT_PROVIDER,
+  QODEX_AGENT_PROVIDER,
   type ModelSelection,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { normalizeBotCurrentOptions, normalizeBotDraftOptions } from "./config.js";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -78,7 +78,7 @@ export function importLegacyBotState(value: unknown): unknown {
       {
         ...state,
         draftOptions: normalizeBotDraftOptions({
-          provider: MARID_AGENT_PROVIDER,
+          provider: QODEX_AGENT_PROVIDER,
           modelSelection: migrateSelection(options),
           ...(typeof options.mode === "string" ? { mode: options.mode } : {}),
         }),

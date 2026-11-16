@@ -1,4 +1,4 @@
-import { channelContentText, type BotActor, type ChannelContentPart } from "@marid/shared";
+import { channelContentText, type BotActor, type ChannelContentPart } from "@qodex/shared";
 import {
   createBotsServiceHarness,
   createFeishuConfig,
@@ -127,9 +127,9 @@ describe("BOT-E2E-MN-01 native channel mentions", () => {
         };
         const botId = `${provider}-native-${topic}`;
         const h = createBotsServiceHarness({ config: createFeishuConfig(provider, botId) });
-        h.maridTaskService.readBotTopicExecution = async () => undefined;
-        h.maridTaskService.invalidateBotTopicInputs = async () => undefined;
-        h.maridTaskService.submitBotGroupInput = async (params: { commandId: string }) => ({
+        h.qodexTaskService.readBotTopicExecution = async () => undefined;
+        h.qodexTaskService.invalidateBotTopicInputs = async () => undefined;
+        h.qodexTaskService.submitBotGroupInput = async (params: { commandId: string }) => ({
           commandId: params.commandId,
           status: "accepted",
           revisionAtDecision: 1,
@@ -146,7 +146,7 @@ describe("BOT-E2E-MN-01 native channel mentions", () => {
           await h.service.handleInboundMessage({ botId, actor, text: "/enable" });
           const commandReply = await h.service.handleProviderCallback(provider, {
             botId,
-            maridBotOpenId: "ou_bot",
+            qodexBotOpenId: "ou_bot",
             event: {
               sender: { sender_type: "user", sender_id: { open_id: actor.providerUserId } },
               message: {
@@ -192,7 +192,7 @@ describe("BOT-E2E-MN-01 native channel mentions", () => {
           expect(
             await h.service.handleProviderCallback(provider, {
               botId,
-              maridBotOpenId: "ou_bot",
+              qodexBotOpenId: "ou_bot",
               event: {
                 sender: { sender_type: "bot", sender_id: { open_id: "ou_other_bot" } },
                 message: {
@@ -229,7 +229,7 @@ describe("BOT-E2E-MN-01 native channel mentions", () => {
           expect(
             await h.service.handleProviderCallback(provider, {
               botId,
-              maridBotOpenId: "ou_bot",
+              qodexBotOpenId: "ou_bot",
               event: {
                 sender: { sender_type: "bot", sender_id: { open_id: "ou_other_bot" } },
                 message: {
@@ -258,7 +258,7 @@ describe("BOT-E2E-MN-01 native channel mentions", () => {
           expect(
             await h.service.handleProviderCallback(provider, {
               botId,
-              maridBotOpenId: "ou_bot",
+              qodexBotOpenId: "ou_bot",
               event: {
                 sender: { sender_type: "bot", sender_id: { open_id: "ou_other_bot" } },
                 message: {
@@ -457,8 +457,8 @@ describe("BOT-E2E-MN-01 native channel mentions", () => {
             // 使用真实接收事件的 bot 类型；机器人命令正文也只能作为普通输入。
             const payload = {
               botId,
-              maridProvider: provider,
-              maridBotOpenId: "ou_bot",
+              qodexProvider: provider,
+              qodexBotOpenId: "ou_bot",
               event: {
                 sender: { sender_type: "bot", sender_id: { open_id: "ou_other_bot" } },
                 message: {

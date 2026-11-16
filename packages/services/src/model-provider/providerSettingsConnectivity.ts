@@ -1,4 +1,4 @@
-import type { ModelConnectivityResult } from "@marid/shared";
+import type { ModelConnectivityResult } from "@qodex/shared";
 import type { ProviderSettingsConnectivityTester } from "./providerFacadeServices.js";
 
 interface FormalModelConnectivityInput {

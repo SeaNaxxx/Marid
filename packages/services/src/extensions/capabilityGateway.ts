@@ -1,4 +1,4 @@
-import type { Event, IDisposable } from "@marid/rpc";
+import type { Event, IDisposable } from "@qodex/rpc";
 import {
   ExtensionError,
   capabilityCallInputSchema,
@@ -16,7 +16,7 @@ import {
   type ExtensionGrant,
   type ExtensionProtocols,
   type IExtensionWindowChannel,
-} from "@marid/shared/extension-host";
+} from "@qodex/shared/extension-host";
 import type { ServiceLogger } from "#src/logger/serviceLogger.js";
 import type {
   CapabilityCallContext,

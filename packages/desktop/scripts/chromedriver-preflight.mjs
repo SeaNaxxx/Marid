@@ -38,7 +38,7 @@ export async function resolveChromedriverBuild({
 }
 
 function cacheRecordPath({ cacheDir, electronVersion, platform }) {
-  return join(cacheDir, `marid-chromedriver-${electronVersion}-${platform}.json`);
+  return join(cacheDir, `qodex-chromedriver-${electronVersion}-${platform}.json`);
 }
 
 export async function prepareChromedriver({

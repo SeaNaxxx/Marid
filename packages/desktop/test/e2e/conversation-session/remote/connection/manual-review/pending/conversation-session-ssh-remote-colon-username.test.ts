@@ -1,6 +1,6 @@
-import { ServiceChannels } from "@marid/shared";
-import { TID_SSH_PASSWORD_INPUT } from "@marid/shared/test-ids";
-import type { RemoteProjectDirectory } from "@marid/services";
+import { ServiceChannels } from "@qodex/shared";
+import { TID_SSH_PASSWORD_INPUT } from "@qodex/shared/test-ids";
+import type { RemoteProjectDirectory } from "@qodex/services";
 import {
   clearAppData,
   setInputValueByTestIdDom,

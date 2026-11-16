@@ -3,7 +3,7 @@ import {
   resolveWorkspaceKey,
   parseRemoteWorkspaceIdentity,
   remoteHostIdFromWorkspaceIdentity,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { tableExists } from "#src/project-storage/schema.js";
 
 export const HANDOFF_DELETE = 1;

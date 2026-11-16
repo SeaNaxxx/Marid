@@ -1,16 +1,16 @@
 import { useEffect, useMemo } from "react";
 import { create } from "zustand";
 import type {
-  MaridAvailablePluginSummary,
-  MaridInstalledPluginSummary,
-  MaridPluginDiagnostic,
-  MaridPluginInfo,
-  MaridPluginMarketplaceSummary,
-  MaridPluginScope,
-  MaridPluginsDescribeResult,
-} from "@marid/shared";
-import { CLAUDE_OFFICIAL_PLUGIN_MARKETPLACE_ID } from "@marid/shared";
-import type { IPluginManagementService } from "@marid/services";
+  QodexAvailablePluginSummary,
+  QodexInstalledPluginSummary,
+  QodexPluginDiagnostic,
+  QodexPluginInfo,
+  QodexPluginMarketplaceSummary,
+  QodexPluginScope,
+  QodexPluginsDescribeResult,
+} from "@qodex/shared";
+import { CLAUDE_OFFICIAL_PLUGIN_MARKETPLACE_ID } from "@qodex/shared";
+import type { IPluginManagementService } from "@qodex/services";
 import { logger } from "@/logger.js";
 import {
   beginPluginOperation,
@@ -25,27 +25,27 @@ import { setPluginEnabledOptimistically } from "@/store/pluginManagementStoreEna
 // 市场详情按需拉取的组件清单缓存：按 pluginId 记 loading/data/error，避免重复请求与切换闪烁。
 export interface PluginDescribeEntry {
   status: "loading" | "loaded" | "error";
-  data?: MaridPluginsDescribeResult;
+  data?: QodexPluginsDescribeResult;
   error?: string;
 }
 
-// 设置页「插件管理」的数据源: 经 IPluginManagementService 薄服务由 marid-cli 提供 (list + enable/disable)。
-// UI 不再直触 IMaridAgentService，plugins/* 旧协议词的消费收拢到服务实现一处。
+// 设置页「插件管理」的数据源: 经 IPluginManagementService 薄服务由 qodex-cli 提供 (list + enable/disable)。
+// UI 不再直触 IQodexAgentService，plugins/* 旧协议词的消费收拢到服务实现一处。
 // 与已 retired 的 marketplace pluginStore 无关, 故单独建一个精简 store。
 export interface PluginManagementState {
   workspacePath: string | null;
   workspaceIdentity: string | null;
   /** Source 缓存权威：同一 home 路径下不同 Source 的投影不能互相复用。 */
   authorityKey: string | null;
-  configScope: MaridPluginScope | null;
-  plugins: MaridPluginInfo[];
-  marketplaces: MaridPluginMarketplaceSummary[];
+  configScope: QodexPluginScope | null;
+  plugins: QodexPluginInfo[];
+  marketplaces: QodexPluginMarketplaceSummary[];
   /** 最近一次 overview 是否成功；false 表示来源存在性未知，不能推导孤立状态。 */
   marketplaceAvailabilityKnown: boolean;
-  availablePlugins: MaridAvailablePluginSummary[];
-  installedPlugins: MaridInstalledPluginSummary[];
-  restorableBuiltins: MaridAvailablePluginSummary[];
-  diagnostics: MaridPluginDiagnostic[];
+  availablePlugins: QodexAvailablePluginSummary[];
+  installedPlugins: QodexInstalledPluginSummary[];
+  restorableBuiltins: QodexAvailablePluginSummary[];
+  diagnostics: QodexPluginDiagnostic[];
   loading: boolean;
   error: string | null;
   /**
@@ -63,7 +63,7 @@ export interface PluginManagementState {
     workspacePath: string;
     workspaceIdentity?: string;
     authorityKey?: string;
-    configScope?: MaridPluginScope;
+    configScope?: QodexPluginScope;
     pluginService: IPluginManagementService;
   }) => Promise<void>;
   refresh: (
@@ -83,7 +83,7 @@ export interface PluginManagementState {
     pluginName: string,
     marketplace: string,
     pluginService: IPluginManagementService,
-    scope?: MaridPluginScope,
+    scope?: QodexPluginScope,
   ) => Promise<boolean>;
   uninstallPlugin: (
     pluginId: string,
@@ -96,20 +96,20 @@ export interface PluginManagementState {
     pluginId: string,
     options: Record<string, string | number | boolean>,
     pluginService: IPluginManagementService,
-    scope?: MaridPluginScope,
+    scope?: QodexPluginScope,
     clearOptionKeys?: string[],
   ) => Promise<boolean>;
   resetPluginConfig: (
     pluginId: string,
     pluginService: IPluginManagementService,
-    scope?: MaridPluginScope,
+    scope?: QodexPluginScope,
   ) => Promise<boolean>;
   validateSource: (source: string, pluginService: IPluginManagementService) => Promise<void>;
   setEnabled: (
     pluginId: string,
     enabled: boolean,
     pluginService: IPluginManagementService,
-    scope?: MaridPluginScope,
+    scope?: QodexPluginScope,
   ) => Promise<boolean>;
   // 按需拉取插件组件清单（名称+描述）；force 跳过缓存重试。
   describePlugin: (
@@ -125,7 +125,7 @@ function toMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-function throwForErrorDiagnostic(diagnostics: MaridPluginDiagnostic[]): void {
+function throwForErrorDiagnostic(diagnostics: QodexPluginDiagnostic[]): void {
   const blockingDiagnostic = diagnostics.find((diagnostic) => diagnostic.severity === "error");
   if (blockingDiagnostic) {
     throw new Error(blockingDiagnostic.message);

@@ -12,7 +12,7 @@ import {
   type ConversationShareManagedList,
   type ConversationShareManagedUpdateRequest,
   type ConversationShareTtlOptions,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { z } from "zod";
 import { ConversationSharePreviewClientError } from "../share/conversationSharePreviewClient.js";
 import {

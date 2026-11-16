@@ -1,19 +1,19 @@
 /* eslint-disable max-lines -- Coding Plan 用量视图集中维护来源选择、额度投影和重置入口；本阶段只迁移 Account Access，不拆分既有 UI 结构。 */
 import type {
   UsageEntitlementSnapshot,
-  MaridAccountAccess,
-  MaridProviderAccountAccess,
-} from "@marid/shared";
+  QodexAccountAccess,
+  QodexProviderAccountAccess,
+} from "@qodex/shared";
 import {
   BIGMODEL_PROVIDER_ID,
   BUILTIN_MODEL_PROVIDER_IDS,
   type OAuthProviderId,
   ZAI_PROVIDER_ID,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { ChevronRightIcon, LoaderCircle } from "lucide-react";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import {
   findCodingPlanQuotaLimit,
   formatQuotaRemainingPercentage,
@@ -29,7 +29,7 @@ import type {
 export interface CodingPlanUsageRemainingEntitlement {
   sourceId?: SidebarUsageCodingPlanSourceId;
   providerId: SidebarUsageCodingPlanProviderId;
-  accountAccess: MaridProviderAccountAccess | MaridAccountAccess;
+  accountAccess: QodexProviderAccountAccess | QodexAccountAccess;
   label?: string;
   snapshot: UsageEntitlementSnapshot | null;
   loading: boolean;
@@ -38,7 +38,7 @@ export interface CodingPlanUsageRemainingEntitlement {
 
 export interface CodingPlanUsageAvailableProvider {
   providerId: SidebarUsageCodingPlanProviderId;
-  accountAccess: MaridProviderAccountAccess | MaridAccountAccess;
+  accountAccess: QodexProviderAccountAccess | QodexAccountAccess;
   label: string;
 }
 
@@ -238,7 +238,7 @@ export function CodingPlanUsageRemainingPanel({
   onUsageClick?: () => void;
   selectedProviderId?: SidebarUsageCodingPlanSourceId;
 }) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const state = useMemo(
     () =>
       resolveCodingPlanUsageRemainingState({

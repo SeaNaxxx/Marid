@@ -1,4 +1,4 @@
-import type { AssistantTextRow } from "@marid/shared/marid-protocol-v4";
+import type { AssistantTextRow } from "@qodex/shared/qodex-protocol-v4";
 import {
   buildAssistantPreviewCards,
   type AssistantPreviewCard,

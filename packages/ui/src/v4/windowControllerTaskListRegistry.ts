@@ -2,8 +2,8 @@ import type {
   IWindowControllerService,
   WindowHostControllerFrame,
   WindowHostControllerTaskListResult,
-  MaridTaskListQuery,
-} from "@marid/services";
+  QodexTaskListQuery,
+} from "@qodex/services";
 import {
   CONTROLLER_TASKS_INDEX_TOPIC,
   CONTROLLER_WORKSPACES_TOPIC,
@@ -12,7 +12,7 @@ import {
   type WindowHostControllerCursor,
   type WindowHostControllerTaskFrame,
   type WindowHostControllerTaskRow,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 import { logger } from "@/logger.js";
 
 export interface WindowControllerTaskListRegistry {
@@ -27,7 +27,7 @@ export interface WindowControllerTaskListRegistry {
   list(
     queryKey: string,
     version: WindowControllerTaskListVersion,
-    query: MaridTaskListQuery,
+    query: QodexTaskListQuery,
   ): Promise<WindowHostControllerTaskListResult>;
 }
 
@@ -63,7 +63,7 @@ function taskAddressKey(address: WindowHostControllerTaskRow["address"]): string
 }
 
 function queryContainsWorkspace(
-  query: MaridTaskListQuery,
+  query: QodexTaskListQuery,
   address: WindowHostControllerTaskRow["address"],
 ): boolean {
   if (query.workspaceScopes === "host") return !address.sourceServerId && !address.remoteSessionId;
@@ -100,7 +100,7 @@ export function getWindowControllerTaskListRegistry(
     {
       versionKey: string;
       promise: Promise<WindowHostControllerTaskListResult>;
-      query: MaridTaskListQuery;
+      query: QodexTaskListQuery;
     }
   >();
   const taskRows = new Map<string, WindowHostControllerTaskRow>();

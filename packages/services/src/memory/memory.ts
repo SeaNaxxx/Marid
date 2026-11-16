@@ -1,5 +1,5 @@
-import type { Memory, MemoryConfig } from "@marid/shared";
-import { ServiceChannels } from "@marid/shared";
+import type { Memory, MemoryConfig } from "@qodex/shared";
+import { ServiceChannels } from "@qodex/shared";
 import { createServiceDescriptor } from "../descriptors.js";
 
 export const PROJECT_MEMORY_PREVIEW_LIMIT_EXCEEDED_ERROR_CODE =

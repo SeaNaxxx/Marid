@@ -20,7 +20,7 @@ import type {
   SettingsSyncSourceScope,
   SettingsSyncSourceRootSummary,
   SettingsSyncTaskImportResult,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { copyFile, cp, link, lstat, mkdir, readFile, readdir, rm, symlink } from "node:fs/promises";
 import { homedir } from "node:os";
 import { basename, dirname, join, relative, resolve } from "node:path";
@@ -402,7 +402,7 @@ const SUPPORTED_MCP_AGENT_SOURCES: ExternalAgentMcpPathSource[] = [
   },
 ];
 
-const MARID_PLUGIN_MANIFEST_PATH = [".marid-plugin", "plugin.json"] as const;
+const QODEX_PLUGIN_MANIFEST_PATH = [".qodex-plugin", "plugin.json"] as const;
 const CLAUDE_PLUGIN_MANIFEST_PATH = [".claude-plugin", "plugin.json"] as const;
 const CODEX_PLUGIN_MANIFEST_PATH = [".codex-plugin", "plugin.json"] as const;
 const INLINE_PLUGIN_MARKETPLACE = "inline";
@@ -412,44 +412,44 @@ function resolveUserHomeDir(): string {
   return envHome && envHome.length > 0 ? envHome : homedir();
 }
 
-function getWorkspaceMaridSkillRoot(workspacePath: string): string {
-  return join(workspacePath, ".marid", "skills");
+function getWorkspaceQodexSkillRoot(workspacePath: string): string {
+  return join(workspacePath, ".qodex", "skills");
 }
 
-function getUserMaridSkillRoot(): string {
-  return join(resolveUserHomeDir(), ".marid", "skills");
+function getUserQodexSkillRoot(): string {
+  return join(resolveUserHomeDir(), ".qodex", "skills");
 }
 
-function getWorkspaceMaridCommandRoot(workspacePath: string): string {
-  return join(workspacePath, ".marid", "commands");
+function getWorkspaceQodexCommandRoot(workspacePath: string): string {
+  return join(workspacePath, ".qodex", "commands");
 }
 
-function getUserMaridCommandRoot(): string {
-  return join(resolveUserHomeDir(), ".marid", "commands");
+function getUserQodexCommandRoot(): string {
+  return join(resolveUserHomeDir(), ".qodex", "commands");
 }
 
-function getWorkspaceMaridPluginRoot(workspacePath: string): string {
-  return join(workspacePath, ".marid", "plugins");
+function getWorkspaceQodexPluginRoot(workspacePath: string): string {
+  return join(workspacePath, ".qodex", "plugins");
 }
 
-function getUserMaridPluginRoot(): string {
-  return join(resolveUserHomeDir(), ".marid", "plugins");
+function getUserQodexPluginRoot(): string {
+  return join(resolveUserHomeDir(), ".qodex", "plugins");
 }
 
-function getUserMaridCliConfigPath(): string {
-  return join(resolveUserHomeDir(), ".marid", "cli", "config.json");
+function getUserQodexCliConfigPath(): string {
+  return join(resolveUserHomeDir(), ".qodex", "cli", "config.json");
 }
 
-function getWorkspaceMaridConfigPath(workspacePath: string): string {
-  return join(workspacePath, ".marid", "config.json");
+function getWorkspaceQodexConfigPath(workspacePath: string): string {
+  return join(workspacePath, ".qodex", "config.json");
 }
 
 function getClaudeUserAgentsFileSourcePath(): string {
   return join(resolveUserHomeDir(), ".claude", "CLAUDE.md");
 }
 
-function getUserMaridAgentsFilePath(): string {
-  return join(resolveUserHomeDir(), ".marid", "AGENTS.md");
+function getUserQodexAgentsFilePath(): string {
+  return join(resolveUserHomeDir(), ".qodex", "AGENTS.md");
 }
 
 function resolveTargetRootForScope(
@@ -457,9 +457,9 @@ function resolveTargetRootForScope(
   workspacePath: string | undefined,
 ): string | null {
   if (targetScope === "global") {
-    return getUserMaridSkillRoot();
+    return getUserQodexSkillRoot();
   }
-  return workspacePath ? getWorkspaceMaridSkillRoot(workspacePath) : null;
+  return workspacePath ? getWorkspaceQodexSkillRoot(workspacePath) : null;
 }
 
 function resolveCandidateTargetRoot(
@@ -468,9 +468,9 @@ function resolveCandidateTargetRoot(
 ): string | null {
   return sourceScope === "workspace"
     ? workspacePath
-      ? getWorkspaceMaridSkillRoot(workspacePath)
+      ? getWorkspaceQodexSkillRoot(workspacePath)
       : null
-    : getUserMaridSkillRoot();
+    : getUserQodexSkillRoot();
 }
 
 function resolveCommandTargetRootForScope(
@@ -478,9 +478,9 @@ function resolveCommandTargetRootForScope(
   workspacePath: string | undefined,
 ): string | null {
   if (targetScope === "global") {
-    return getUserMaridCommandRoot();
+    return getUserQodexCommandRoot();
   }
-  return workspacePath ? getWorkspaceMaridCommandRoot(workspacePath) : null;
+  return workspacePath ? getWorkspaceQodexCommandRoot(workspacePath) : null;
 }
 
 function resolveCommandCandidateTargetRoot(
@@ -489,9 +489,9 @@ function resolveCommandCandidateTargetRoot(
 ): string | null {
   return sourceScope === "workspace"
     ? workspacePath
-      ? getWorkspaceMaridCommandRoot(workspacePath)
+      ? getWorkspaceQodexCommandRoot(workspacePath)
       : null
-    : getUserMaridCommandRoot();
+    : getUserQodexCommandRoot();
 }
 
 function resolvePluginTargetRootForScope(
@@ -499,9 +499,9 @@ function resolvePluginTargetRootForScope(
   workspacePath: string | undefined,
 ): string | null {
   if (targetScope === "global") {
-    return getUserMaridPluginRoot();
+    return getUserQodexPluginRoot();
   }
-  return workspacePath ? getWorkspaceMaridPluginRoot(workspacePath) : null;
+  return workspacePath ? getWorkspaceQodexPluginRoot(workspacePath) : null;
 }
 
 function resolvePluginCandidateTargetRoot(
@@ -510,9 +510,9 @@ function resolvePluginCandidateTargetRoot(
 ): string | null {
   return sourceScope === "workspace"
     ? workspacePath
-      ? getWorkspaceMaridPluginRoot(workspacePath)
+      ? getWorkspaceQodexPluginRoot(workspacePath)
       : null
-    : getUserMaridPluginRoot();
+    : getUserQodexPluginRoot();
 }
 
 function resolvePluginConfigPathForScope(
@@ -520,9 +520,9 @@ function resolvePluginConfigPathForScope(
   workspacePath: string | undefined,
 ): string | null {
   if (targetScope === "global") {
-    return getUserMaridCliConfigPath();
+    return getUserQodexCliConfigPath();
   }
-  return workspacePath ? getWorkspaceMaridConfigPath(workspacePath) : null;
+  return workspacePath ? getWorkspaceQodexConfigPath(workspacePath) : null;
 }
 
 function resolveMcpConfigPathForScope(
@@ -530,9 +530,9 @@ function resolveMcpConfigPathForScope(
   workspacePath: string | undefined,
 ): string | null {
   if (targetScope === "global") {
-    return getUserMaridCliConfigPath();
+    return getUserQodexCliConfigPath();
   }
-  return workspacePath ? getWorkspaceMaridConfigPath(workspacePath) : null;
+  return workspacePath ? getWorkspaceQodexConfigPath(workspacePath) : null;
 }
 
 async function importSkillDirectory(
@@ -769,9 +769,9 @@ async function collectCommandMarkdownPaths(rootPath: string): Promise<string[]> 
 }
 
 async function findPluginManifestPath(pluginPath: string): Promise<string | null> {
-  const maridManifestPath = join(pluginPath, ...MARID_PLUGIN_MANIFEST_PATH);
-  if (await pathExists(maridManifestPath)) {
-    return maridManifestPath;
+  const qodexManifestPath = join(pluginPath, ...QODEX_PLUGIN_MANIFEST_PATH);
+  if (await pathExists(qodexManifestPath)) {
+    return qodexManifestPath;
   }
   const claudeManifestPath = join(pluginPath, ...CLAUDE_PLUGIN_MANIFEST_PATH);
   if (await pathExists(claudeManifestPath)) {
@@ -1012,7 +1012,7 @@ function stripExternalMcpTimeoutFields(config: McpServerConfig): McpServerConfig
   return rest as McpServerConfig;
 }
 
-function readMaridMcpServers(parsed: Record<string, unknown>): Record<string, McpServerConfig> {
+function readQodexMcpServers(parsed: Record<string, unknown>): Record<string, McpServerConfig> {
   if (!isRecord(parsed.mcp)) {
     return {};
   }
@@ -1087,7 +1087,7 @@ async function collectExistingMcpServerNameKeys(
   const targetConfigPath = resolveMcpConfigPathForScope(targetScope, workspacePath);
   if (targetConfigPath) {
     for (const name of Object.keys(
-      readMaridMcpServers(await readJsonFileOrEmpty(targetConfigPath)),
+      readQodexMcpServers(await readJsonFileOrEmpty(targetConfigPath)),
     )) {
       nameKeys.add(normalizeMcpServerNameKey(name));
     }
@@ -1102,7 +1102,7 @@ async function collectExistingMcpServerNameKeys(
  * 修法：改用 updateJsonObjectFile——文件损坏时报错不写，写前重读，只改自己的字段，原子替换。
  * 错误交给 importXxxForAgent 的 catch，按现有方式把该项标为 failed 显示在迁移结果里。
  */
-async function addMcpServerToMaridConfig(
+async function addMcpServerToQodexConfig(
   filePath: string,
   name: string,
   config: McpServerConfig,
@@ -1112,7 +1112,7 @@ async function addMcpServerToMaridConfig(
     mcp: {
       ...(isRecord(current.mcp) ? current.mcp : {}),
       servers: {
-        ...readMaridMcpServers(current),
+        ...readQodexMcpServers(current),
         [name]: config,
       },
     },
@@ -2143,7 +2143,7 @@ async function importMcpServersForAgent(
       continue;
     }
     try {
-      await addMcpServerToMaridConfig(selectedConfigPath, candidate.name, candidate.config);
+      await addMcpServerToQodexConfig(selectedConfigPath, candidate.name, candidate.config);
       importedCount += 1;
       const existingNameKeys = existingNameKeysByTargetScope.get(selectedTargetScope);
       if (existingNameKeys) {
@@ -2213,7 +2213,7 @@ function shouldScanMcpServers(request: {
 async function getClaudeAgentsFileMigrationStatus(): Promise<SettingsSyncClaudeAgentsFileMigrationStatus> {
   const sourcePath = getClaudeUserAgentsFileSourcePath();
   const sourceExists = await pathExists(sourcePath);
-  const targetPath = getUserMaridAgentsFilePath();
+  const targetPath = getUserQodexAgentsFilePath();
   const targetExists = await pathExists(targetPath);
 
   return {
@@ -2226,11 +2226,11 @@ async function getClaudeAgentsFileMigrationStatus(): Promise<SettingsSyncClaudeA
   };
 }
 
-async function copyClaudeAgentsFileToMaridAgentsFile(params: {
+async function copyClaudeAgentsFileToQodexAgentsFile(params: {
   overwrite?: boolean;
 }): Promise<SettingsSyncClaudeAgentsFileCopyResult> {
   const sourcePath = getClaudeUserAgentsFileSourcePath();
-  const targetPath = getUserMaridAgentsFilePath();
+  const targetPath = getUserQodexAgentsFilePath();
   const sourceExists = await pathExists(sourcePath);
   const targetExists = await pathExists(targetPath);
 
@@ -2283,10 +2283,10 @@ export function createSettingsSyncService(
       return getClaudeAgentsFileMigrationStatus();
     },
 
-    async copyClaudeAgentsFileToMaridAgentsFile(
+    async copyClaudeAgentsFileToQodexAgentsFile(
       request = {},
     ): Promise<SettingsSyncClaudeAgentsFileCopyResult> {
-      const result = await copyClaudeAgentsFileToMaridAgentsFile({
+      const result = await copyClaudeAgentsFileToQodexAgentsFile({
         overwrite: request.overwrite,
       });
       log.info("[settings-sync] Claude AGENTS.md migration completed", {

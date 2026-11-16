@@ -1,18 +1,18 @@
 import {
   BOT_TASK_STREAM_BROADCAST_CHANNEL,
-  type MaridStreamEvent,
+  type QodexStreamEvent,
   type BotTaskStreamBroadcastPayload,
-} from "@marid/shared";
-import type { BroadcastMessage } from "@marid/services";
+} from "@qodex/shared";
+import type { BroadcastMessage } from "@qodex/services";
 import { buildTaskWorkspaceKey } from "@/lib/taskQueryCache.js";
 import type { WindowTabState } from "@/store/tabStore.js";
 import { isWorkspaceTab } from "@/store/tabStore.js";
 
-function isMaridStreamEvent(value: unknown): value is MaridStreamEvent {
+function isQodexStreamEvent(value: unknown): value is QodexStreamEvent {
   if (typeof value !== "object" || value === null) {
     return false;
   }
-  const event = value as Partial<MaridStreamEvent>;
+  const event = value as Partial<QodexStreamEvent>;
   return typeof event.type === "string" && typeof event.taskId === "string";
 }
 
@@ -29,7 +29,7 @@ function isBotTaskStreamBroadcastPayload(
     typeof value.updatedAt === "number" &&
     (value.workspaceIdentity === undefined ||
       typeof value.workspaceIdentity === "string") &&
-    isMaridStreamEvent(value.event) &&
+    isQodexStreamEvent(value.event) &&
     value.event.taskId === value.taskId
   );
 }

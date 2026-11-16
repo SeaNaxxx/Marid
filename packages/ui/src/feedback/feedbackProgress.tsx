@@ -1,6 +1,6 @@
-import type { FeedbackTicketStatus } from "@marid/shared";
+import type { FeedbackTicketStatus } from "@qodex/shared";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 /**
  * 简化的工单流转进度（用户视角）：
@@ -47,7 +47,7 @@ export function FeedbackProgress({
   status: FeedbackTicketStatus;
   assigneeDisplay?: string | null;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const formatMessage = intl.formatMessage;
   const { current, rejected } = statusToStage(status);
   const currentIdx = STAGES.findIndex((item) => item.key === current);

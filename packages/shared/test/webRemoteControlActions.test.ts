@@ -12,7 +12,7 @@ import {
 describe("手机置顶/归档/新建项目 payload", () => {
   it.each([
     {
-      marid_type: "task-pin-request",
+      qodex_type: "task-pin-request",
       requestId: "r1",
       taskId: "t1",
       workspacePath: "/w",
@@ -20,61 +20,61 @@ describe("手机置顶/归档/新建项目 payload", () => {
       pinned: true,
     },
     {
-      marid_type: "task-pin-response",
+      qodex_type: "task-pin-response",
       requestId: "r1",
       taskId: "t1",
       success: true,
       pinned: false,
     },
-    { marid_type: "task-pin-response", requestId: "r1", taskId: "t1", success: false, error: "x" },
-    { marid_type: "task-archive-request", requestId: "r2", taskId: "t1", workspacePath: "/w" },
+    { qodex_type: "task-pin-response", requestId: "r1", taskId: "t1", success: false, error: "x" },
+    { qodex_type: "task-archive-request", requestId: "r2", taskId: "t1", workspacePath: "/w" },
     {
-      marid_type: "task-archive-request",
+      qodex_type: "task-archive-request",
       requestId: "r2",
       taskId: "t1",
       workspacePath: "/w",
       archived: false,
     },
     {
-      marid_type: "task-archive-response",
+      qodex_type: "task-archive-response",
       requestId: "r2",
       taskId: "t1",
       success: true,
       archived: false,
     },
     {
-      marid_type: "task-archive-response",
+      qodex_type: "task-archive-response",
       requestId: "r2",
       taskId: "t1",
       success: true,
       archived: true,
     },
-    { marid_type: "workspace-create-request", requestId: "r3", name: "demo" },
+    { qodex_type: "workspace-create-request", requestId: "r3", name: "demo" },
     {
-      marid_type: "workspace-create-response",
+      qodex_type: "workspace-create-response",
       requestId: "r3",
       success: true,
-      workspacePath: "/Users/u/MaridProject/demo",
-      workspaceKey: "/Users/u/MaridProject/demo",
+      workspacePath: "/Users/u/QodexProject/demo",
+      workspaceKey: "/Users/u/QodexProject/demo",
       projectId: "p1",
       hostId: "local",
     },
-    { marid_type: "workspace-create-response", requestId: "r3", success: false, error: "bad" },
-  ])("解析 $marid_type", (payload) => {
+    { qodex_type: "workspace-create-response", requestId: "r3", success: false, error: "bad" },
+  ])("解析 $qodex_type", (payload) => {
     expect(parseWebRemoteControlAppPayload(payload)).toEqual(payload);
   });
 
   it("拒绝缺字段或成功应答带错的 payload", () => {
     expect(
       parseWebRemoteControlAppPayload({
-        marid_type: "task-pin-request",
+        qodex_type: "task-pin-request",
         requestId: "r",
         taskId: "t",
       }),
     ).toBeNull();
     expect(
       parseWebRemoteControlAppPayload({
-        marid_type: "task-archive-response",
+        qodex_type: "task-archive-response",
         requestId: "r",
         taskId: "t",
         success: true,
@@ -114,17 +114,17 @@ describe("normalizeWebRemoteControlWorkspaceName", () => {
 describe("resolveUnrecognizedWebRemoteControlRequest", () => {
   it("只对带 requestId 的 -request 类型回错", () => {
     expect(
-      resolveUnrecognizedWebRemoteControlRequest({ marid_type: "future-request", requestId: "r" }),
-    ).toEqual({ requestId: "r", maridType: "future-request" });
+      resolveUnrecognizedWebRemoteControlRequest({ qodex_type: "future-request", requestId: "r" }),
+    ).toEqual({ requestId: "r", qodexType: "future-request" });
   });
 
   it.each([
     null,
     "text",
-    { marid_type: "future-response", requestId: "r" },
-    { marid_type: "future-request" },
-    { marid_type: "future-request", requestId: "  " },
-    { marid_type: 1, requestId: "r" },
+    { qodex_type: "future-response", requestId: "r" },
+    { qodex_type: "future-request" },
+    { qodex_type: "future-request", requestId: "  " },
+    { qodex_type: 1, requestId: "r" },
   ])("忽略 %j", (value) => {
     expect(resolveUnrecognizedWebRemoteControlRequest(value)).toBeNull();
   });

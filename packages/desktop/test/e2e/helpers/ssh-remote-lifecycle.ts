@@ -6,7 +6,7 @@ import {
   waitForTaskRowInProject,
 } from "./project-sidebar.js";
 import { removeRemoteProjectEntryForRow } from "./remote-project-handoff-probe.js";
-import { TID_TASK_SETTINGS_BUTTON } from "@marid/shared/test-ids";
+import { TID_TASK_SETTINGS_BUTTON } from "@qodex/shared/test-ids";
 import {
   waitForWorkspaceApp,
   switchToWorkspaceRendererWindow,
@@ -407,12 +407,12 @@ export async function reconnectRemoteProjectHost(
   });
 }
 
-export async function listRemoteMaridServerPids(config: SSHConnectionConfig): Promise<number[]> {
+export async function listRemoteQodexServerPids(config: SSHConnectionConfig): Promise<number[]> {
   const result = await runSSHCommand(config, "ps -eo pid=,args=");
   if (result.code !== 0) {
-    throw new Error(`读取远端 marid-server PID 失败: ${result.stderr}`);
+    throw new Error(`读取远端 qodex-server PID 失败: ${result.stderr}`);
   }
-  // 缺陷原因：这里原先匹配 `marid-server.cjs`，而 3.12 的 release 布局早已把 daemon 换成
+  // 缺陷原因：这里原先匹配 `qodex-server.cjs`，而 3.12 的 release 布局早已把 daemon 换成
   // <release>/runtime/server-cli.js serve --supervisor（工作进程是 server-core.js）。旧名字
   // 在远端根本不存在，匹配结果恒为空数组，SSH-P0-LIFE-02 只会报 before=/current= 全空，
   // 看不出是探测失效而不是产品没起 server（2026-09-15 服务器全量实测）。
@@ -435,7 +435,7 @@ async function listRemoteServerCorePids(
 ): Promise<number[]> {
   const result = await runSSHCommand(config, "ps -eo pid=,ppid=,args=");
   if (result.code !== 0) {
-    throw new Error(`读取远端 marid server core PID 失败: ${result.stderr}`);
+    throw new Error(`读取远端 qodex server core PID 失败: ${result.stderr}`);
   }
   return result.stdout
     .split("\n")
@@ -455,11 +455,11 @@ export async function stopOwnedSSHServer(
   beforePids: readonly number[],
   caseMarker: string,
 ): Promise<number> {
-  const currentPids = await listRemoteMaridServerPids(config);
+  const currentPids = await listRemoteQodexServerPids(config);
   const owned = currentPids.filter((pid) => !beforePids.includes(pid));
   if (owned.length !== 1) {
     throw new Error(
-      `${caseMarker}: 只允许终止本 case 新建的一个 marid-server，before=${beforePids.join(",")}, current=${currentPids.join(",")}`,
+      `${caseMarker}: 只允许终止本 case 新建的一个 qodex-server，before=${beforePids.join(",")}, current=${currentPids.join(",")}`,
     );
   }
   const pid = owned[0]!;
@@ -470,7 +470,7 @@ export async function stopOwnedSSHServer(
   const corePids = await listRemoteServerCorePids(config, pid);
   const result = await runSSHCommand(config, `kill -TERM -- ${pid}`);
   if (result.code !== 0) {
-    throw new Error(`${caseMarker}: 终止远端 marid-server ${pid} 失败: ${result.stderr}`);
+    throw new Error(`${caseMarker}: 终止远端 qodex-server ${pid} 失败: ${result.stderr}`);
   }
   if (corePids.length > 0) {
     await runSSHCommand(config, `kill -TERM -- ${corePids.join(" ")}`).catch(() => undefined);
@@ -478,14 +478,14 @@ export async function stopOwnedSSHServer(
   await browser.waitUntil(
     async () => {
       const [daemons, cores] = await Promise.all([
-        listRemoteMaridServerPids(config),
+        listRemoteQodexServerPids(config),
         listRemoteServerCorePids(config),
       ]);
       return !daemons.includes(pid) && corePids.every((corePid) => !cores.includes(corePid));
     },
     {
       timeout: SSH_WORKSPACE_READY_TIMEOUT_MS,
-      timeoutMsg: `${caseMarker}: 远端 marid-server ${pid}（core=${corePids.join(",") || "none"}）没有退出`,
+      timeoutMsg: `${caseMarker}: 远端 qodex-server ${pid}（core=${corePids.join(",") || "none"}）没有退出`,
     },
   );
   return pid;
@@ -545,7 +545,7 @@ export async function readRemoteCoreIdentity(
   state: string;
   generation: number;
 }> {
-  const statusResult = await runSSHCommand(config, 'cat "$HOME/.marid/server/run/status.json"');
+  const statusResult = await runSSHCommand(config, 'cat "$HOME/.qodex/server/run/status.json"');
   if (statusResult.code !== 0) {
     throw new Error(`${caseMarker}: 读取远端 Core status 失败: ${statusResult.stderr}`);
   }
@@ -580,7 +580,7 @@ export async function readRemoteCoreIdentity(
 export async function listRemoteAgentProcesses(
   config: SSHConnectionConfig,
 ): Promise<Array<RemoteProcessIdentity & { cwd: string }>> {
-  // CLI 会把 argv 改名为 marid-cli；旧的全文正则漏掉真 Agent，还会命中查询 shell。
+  // CLI 会把 argv 改名为 qodex-cli；旧的全文正则漏掉真 Agent，还会命中查询 shell。
   // 先按 Core 的直接子进程筛选，再读 /proc 身份，排除 SSH 命令和 Agent 派生插件。
   const corePids = new Set(await listRemoteServerCorePids(config));
   const processes = await runSSHCommand(config, "ps -eo pid=,ppid=,args=");
@@ -589,7 +589,7 @@ export async function listRemoteAgentProcesses(
     const match = line.match(/^\s*(\d+)\s+(\d+)\s+(.+)$/u);
     if (!match || !corePids.has(Number(match[2]))) return [];
     const command = match[3]!;
-    return /^marid-cli(?:\s|$)/u.test(command) || /\bapp-server\s+--stdio\b/u.test(command)
+    return /^qodex-cli(?:\s|$)/u.test(command) || /\bapp-server\s+--stdio\b/u.test(command)
       ? [Number(match[1])]
       : [];
   });

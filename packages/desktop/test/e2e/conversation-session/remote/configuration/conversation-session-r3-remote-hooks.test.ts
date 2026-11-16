@@ -23,20 +23,20 @@ import {
 import { openWorkspaceDraftFromSidebar } from "#e2e/helpers/workspace-agent-warmup";
 
 const CASE_MARKER = "E2E_R3_REMOTE_HOOKS";
-const artifactDir = resolve(process.env.MARID_E2E_ARTIFACT_DIR ?? ".e2e-artifacts/r3-remote-hooks");
-const REMOTE_MARKER_DIR = "/home/dev/r3-workspace-a/.marid-e2e/r3-hooks";
+const artifactDir = resolve(process.env.QODEX_E2E_ARTIFACT_DIR ?? ".e2e-artifacts/r3-remote-hooks");
+const REMOTE_MARKER_DIR = "/home/dev/r3-workspace-a/.qodex-e2e/r3-hooks";
 const REMOTE_MARKER_FILE = `${REMOTE_MARKER_DIR}/marker.txt`;
 const HOOK_MARKER = "R3_DEV08_USER_PROMPT_HOOK";
 
 const REMOTE_CONFIG_PATCH = `python3 - <<'PY'
 import json,os
-p=os.path.expanduser("~/.marid/cli/config.json")
+p=os.path.expanduser("~/.qodex/cli/config.json")
 os.makedirs(os.path.dirname(p),exist_ok=True)
 try:
     j=json.load(open(p))
 except Exception:
     j={}
-j["hooks"]={"enabled":True,"timeoutMs":10000,"maxOutputBytes":32768,"events":{"UserPromptSubmit":[{"matcher":"matcher-must-not-filter-prompt","hooks":[{"type":"command","command":"mkdir -p .marid-e2e/r3-hooks && echo ${HOOK_MARKER} $(date +%s) >> .marid-e2e/r3-hooks/marker.txt","timeoutMs":10000}]}]}}
+j["hooks"]={"enabled":True,"timeoutMs":10000,"maxOutputBytes":32768,"events":{"UserPromptSubmit":[{"matcher":"matcher-must-not-filter-prompt","hooks":[{"type":"command","command":"mkdir -p .qodex-e2e/r3-hooks && echo ${HOOK_MARKER} $(date +%s) >> .qodex-e2e/r3-hooks/marker.txt","timeoutMs":10000}]}]}}
 open(p,"w").write(json.dumps(j,indent=2))
 print("patched")
 PY`;
@@ -63,7 +63,7 @@ describe(`${CASE_MARKER}: 远端 user-scope Hook 只在目标 Source 执行且�
     await clearAppData();
   });
 
-  it("R3A-DEV-08 远端 ~/.marid/cli/config.json 的 UserPromptSubmit hook 在远端回合执行（marker 落远端），本机无 marker；切回本机 Source 后本机不执行；Provider 同步不覆盖 hooks 配置", async function () {
+  it("R3A-DEV-08 远端 ~/.qodex/cli/config.json 的 UserPromptSubmit hook 在远端回合执行（marker 落远端），本机无 marker；切回本机 Source 后本机不执行；Provider 同步不覆盖 hooks 配置", async function () {
     this.timeout(30 * 60_000);
     const prepared = await prepareSSHLifecycle(CASE_MARKER, { tunnelUsername: "tunnel" });
     provider = prepared.provider;
@@ -120,7 +120,7 @@ describe(`${CASE_MARKER}: 远端 user-scope Hook 只在目标 Source 执行且�
     expect(lines).toHaveLength(2);
     expect(lines.every((line) => line.startsWith(HOOK_MARKER))).toBe(true);
     facts.localMarkerExists = await localExists(
-      join(DEFAULT_WORKSPACE, ".marid-e2e", "r3-hooks", "marker.txt"),
+      join(DEFAULT_WORKSPACE, ".qodex-e2e", "r3-hooks", "marker.txt"),
     );
     facts.localConfigHasHook = await readFile(
       join(resolveE2EStorageRoot(), "cli", "config.json"),
@@ -134,7 +134,7 @@ describe(`${CASE_MARKER}: 远端 user-scope Hook 只在目标 Source 执行且�
     // Provider 同步（连接与首连已发生）后 hooks 配置仍在远端 config.json。
     const remoteConfig = await runSSHCommand(
       prepared.config,
-      'grep -c "UserPromptSubmit" "$HOME/.marid/cli/config.json"; grep -c "R3_DEV08_USER_PROMPT_HOOK" "$HOME/.marid/cli/config.json"',
+      'grep -c "UserPromptSubmit" "$HOME/.qodex/cli/config.json"; grep -c "R3_DEV08_USER_PROMPT_HOOK" "$HOME/.qodex/cli/config.json"',
     );
     facts.remoteHooksConfigSurvived = remoteConfig.stdout.trim().split("\n");
     expect(
@@ -170,7 +170,7 @@ describe(`${CASE_MARKER}: 远端 user-scope Hook 只在目标 Source 执行且�
     );
     expect((await readRemoteTabSnapshot()).activeWorkspaceIdentity).toBeNull();
     facts.localMarkerExistsAfterSwitch = await localExists(
-      join(DEFAULT_WORKSPACE, ".marid-e2e", "r3-hooks", "marker.txt"),
+      join(DEFAULT_WORKSPACE, ".qodex-e2e", "r3-hooks", "marker.txt"),
     );
     expect(facts.localMarkerExistsAfterSwitch).toBe(false);
     const remoteAfterLocal = await runSSHCommand(prepared.config, `cat "${REMOTE_MARKER_FILE}"`);
@@ -182,7 +182,7 @@ describe(`${CASE_MARKER}: 远端 user-scope Hook 只在目标 Source 执行且�
     // 清理远端 hooks 配置，避免影响后续用例。
     await runSSHCommand(
       prepared.config,
-      `python3 - <<'PY'\nimport json,os\np=os.path.expanduser("~/.marid/cli/config.json")\nj=json.load(open(p)); j.pop("hooks",None); open(p,"w").write(json.dumps(j,indent=2))\nPY`,
+      `python3 - <<'PY'\nimport json,os\np=os.path.expanduser("~/.qodex/cli/config.json")\nj=json.load(open(p)); j.pop("hooks",None); open(p,"w").write(json.dumps(j,indent=2))\nPY`,
     );
   });
 });

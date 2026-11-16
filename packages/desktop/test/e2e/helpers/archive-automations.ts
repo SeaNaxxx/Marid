@@ -1,13 +1,13 @@
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { AutomationRepo } from "@marid/services/node";
-import type { MaridAutomation, MaridAutomationCreateParams } from "@marid/shared";
+import { AutomationRepo } from "@qodex/services/node";
+import type { QodexAutomation, QodexAutomationCreateParams } from "@qodex/shared";
 
 /** 使用真实任务库建立关联；日程远于验收窗口，不让后台 tick 改写对照数据。 */
 export async function seedArchiveAutomations(target: { workspacePath?: string; taskId: string }) {
-  const home = process.env.MARID_E2E_HOME_DIR;
+  const home = process.env.QODEX_E2E_HOME_DIR;
   if (!home) throw new Error("archive automation fixture requires isolated E2E HOME");
-  const database = new DatabaseSync(join(home, ".marid/v2/tasks-index.sqlite"), { readOnly: true });
+  const database = new DatabaseSync(join(home, ".qodex/v2/tasks-index.sqlite"), { readOnly: true });
   let workspacePath = target.workspacePath;
   try {
     if (!workspacePath) {
@@ -20,8 +20,8 @@ export async function seedArchiveAutomations(target: { workspacePath?: string; t
   } finally {
     database.close();
   }
-  const repo = new AutomationRepo(join(home, ".marid/v2/tasks-index.sqlite"));
-  const records: MaridAutomation[] = [];
+  const repo = new AutomationRepo(join(home, ".qodex/v2/tasks-index.sqlite"));
+  const records: QodexAutomation[] = [];
   try {
     for (const kind of [
       "first",
@@ -32,7 +32,7 @@ export async function seedArchiveAutomations(target: { workspacePath?: string; t
       "unbound",
       "other-identity",
     ]) {
-      const input: MaridAutomationCreateParams = {
+      const input: QodexAutomationCreateParams = {
         title: `E2E_ARCHIVE_${kind}`,
         workspacePath,
         targetTaskId: kind === "unbound" ? undefined : target.taskId,

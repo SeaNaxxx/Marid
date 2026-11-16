@@ -21,7 +21,7 @@
       "componentTypes": ["extension"],
       "extensionSummary": {
         "engines": {
-          "marid": "^1.4.0"
+          "qodex": "^1.4.0"
         },
         "grants": ["sessions.fullAccess", "notifications"]
       }
@@ -45,7 +45,7 @@
       "componentTypes": ["extension"],
       "extensionSummary": {
         "engines": {
-          "marid": "^99.0.0"
+          "qodex": "^99.0.0"
         },
         "grants": ["sessions.read"]
       }
@@ -69,7 +69,7 @@
       "componentTypes": ["extension"],
       "extensionSummary": {
         "engines": {
-          "marid": "^1.4.0"
+          "qodex": "^1.4.0"
         },
         "grants": []
       }

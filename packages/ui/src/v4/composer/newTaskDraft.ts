@@ -1,5 +1,5 @@
-import type { ComposerInitialConfig } from "@/store/maridSessionStoreTypes.js";
-import type { ModelSelectionView } from "@marid/services";
+import type { ComposerInitialConfig } from "@/store/qodexSessionStoreTypes.js";
+import type { ModelSelectionView } from "@qodex/services";
 import { readComposerRecent, resolveDraftInitialModelSelection } from "@/lib/composerRecent.js";
 import {
   readV4ComposerDraft,

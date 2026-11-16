@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu.js";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import {
   collectArchivedTaskDeletion,
   deleteArchivedTaskSelection,
@@ -36,7 +36,7 @@ export function DeleteAllArchivedTasksButton({
   onDeleted: (target: ArchivedTaskDeletionTarget) => void;
   onRefresh?: () => Promise<void>;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const confirmDialog = useConfirmDialog();
   const inFlight = useRef(false);
   const [busy, setBusy] = useState(false);

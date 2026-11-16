@@ -3,8 +3,8 @@ import {
   type CancellationToken,
   type IChannelServer,
   type IServerChannel,
-} from "@marid/rpc";
-import { ServiceChannels } from "@marid/shared";
+} from "@qodex/rpc";
+import { ServiceChannels } from "@qodex/shared";
 import {
   conversationTopicFrameSchema,
   encodeTopicWireFrames,
@@ -19,7 +19,7 @@ import {
   type TopicWireFrameCandidate,
   workspaceConfigTopic,
   workspaceConfigTopicFrameSchema,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 import { createServiceLogger } from "../logger/serviceLogger.js";
 
 const log = createServiceLogger("source-server-workspace-identity");

@@ -10,10 +10,10 @@ import type {
   McpUiHostCapabilities,
   McpUiHostContext,
 } from "@modelcontextprotocol/ext-apps";
-import type { McpAppsDownloadFileItem } from "@marid/shared/mcp-apps";
+import type { McpAppsDownloadFileItem } from "@qodex/shared/mcp-apps";
 
-/** `window.marid` / `window.openai` 的公开形状；实现在 aliasRuntime / openaiAlias，两边只依赖这里。 */
-export interface MaridAliasApi {
+/** `window.qodex` / `window.openai` 的公开形状；实现在 aliasRuntime / openaiAlias，两边只依赖这里。 */
+export interface QodexAliasApi {
   readonly toolInput: Record<string, unknown> | null;
   readonly toolOutput: unknown;
   readonly toolResponseMetadata: Record<string, unknown> | null;
@@ -35,7 +35,7 @@ export interface MaridAliasApi {
   listResources(input?: { cursor?: string }): Promise<ListResourcesResult>;
   listResourceTemplates(input?: { cursor?: string }): Promise<ListResourceTemplatesResult>;
   /**
-   * 订阅资源变更（Marid 扩展，宿主宣告 `experimental["marid/resourceSubscribe"]`；server 须声明 resources.subscribe）。
+   * 订阅资源变更（Qodex 扩展，宿主宣告 `experimental["qodex/resourceSubscribe"]`；server 须声明 resources.subscribe）。
    * 变更只带 uri，页面自行 readResource；沙箱销毁时宿主自动退订。
    */
   subscribeResource(uri: string): Promise<void>;
@@ -50,7 +50,7 @@ export interface MaridAliasApi {
   /** 界面状态：初值随握手经 hostContext 扩展键下发；setWidgetState 后本地立即可读。 */
   readonly widgetState: unknown;
   /**
-   * Marid 扩展 `ui/set-widget-state`（宿主宣告 `experimental["marid/widgetState"]`）：宿主内存保存、会话内有效，
+   * Qodex 扩展 `ui/set-widget-state`（宿主宣告 `experimental["qodex/widgetState"]`）：宿主内存保存、会话内有效，
    * 不承诺跨进程恢复；宿主不可用时 reject -32601。要给模型信息走 updateModelContext。
    */
   setWidgetState(widgetState: unknown): Promise<void>;

@@ -1,4 +1,4 @@
-import type { RemoteWorkspaceSessionEntry } from "@marid/shared";
+import type { RemoteWorkspaceSessionEntry } from "@qodex/shared";
 
 interface ReconnectingRemoteWorkspaceEntry {
   workspaceKey?: string;

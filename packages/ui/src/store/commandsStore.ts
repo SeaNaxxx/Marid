@@ -5,9 +5,9 @@ import type {
   CommandSetEnabledParams,
   CommandUpdateParams,
   UserCommand,
-  MaridCommand,
-} from "@marid/shared";
-import type { ICommandsService } from "@marid/services";
+  QodexCommand,
+} from "@qodex/shared";
+import type { ICommandsService } from "@qodex/services";
 
 interface CommandsStoreState {
   workspacePath: string | null;
@@ -17,9 +17,9 @@ interface CommandsStoreState {
   loadedWorkspacePath: string | null;
   loadedWorkspaceIdentity: string | null;
   loadedAuthorityKey: string | null;
-  commands: MaridCommand[];
+  commands: QodexCommand[];
   userCommands: UserCommand[];
-  pluginCommands: MaridCommand[];
+  pluginCommands: QodexCommand[];
   capability: { userScopeAvailable: boolean };
   loading: boolean;
   error: string | null;

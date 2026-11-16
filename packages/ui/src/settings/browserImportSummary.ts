@@ -1,9 +1,9 @@
-import type { ChromeBrowserDataImportResult } from "@marid/shared";
-import type { useMaridIntl } from "@/i18n/IntlProvider.js";
+import type { ChromeBrowserDataImportResult } from "@qodex/shared";
+import type { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 export function formatImportSummary(
   result: ChromeBrowserDataImportResult,
-  formatMessage: ReturnType<typeof useMaridIntl>["intl"]["formatMessage"],
+  formatMessage: ReturnType<typeof useQodexIntl>["intl"]["formatMessage"],
 ): string {
   if (!result.success) {
     const errorMessageId =

@@ -5,7 +5,7 @@ import {
   type SourceServerRecord,
   type SourceServerWorkspaceHistoryEntry,
   type WorkspacePurpose,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   buildAggregatedSourceStatusMap,
   type AggregatedSourceStatus,

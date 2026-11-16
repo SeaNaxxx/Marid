@@ -1,14 +1,14 @@
 import { SidebarNativeTooltip, ControlHintTooltip } from "@/ControlHintTooltip.js";
-import type { ProjectTask as MaridTaskMeta } from "@/project-sidebar/contract.js";
+import type { ProjectTask as QodexTaskMeta } from "@/project-sidebar/contract.js";
 import type {
-  MaridGroupedTaskViewNode,
-  MaridTaskGroupColor,
+  QodexGroupedTaskViewNode,
+  QodexTaskGroupColor,
 } from "@/project-sidebar/grouped/types.js";
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 
-import { CRON_DEFAULT_GROUP_ID, OFF_PEAK_DEFAULT_GROUP_ID } from "@marid/shared";
+import { CRON_DEFAULT_GROUP_ID, OFF_PEAK_DEFAULT_GROUP_ID } from "@qodex/shared";
 import { ChevronDownIcon, ChevronRightIcon, MessageCirclePlus } from "lucide-react";
 import { cn } from "@/components/lib/utils.js";
 import { Button } from "@/components/ui/button.js";
@@ -30,7 +30,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 import { isImeComposingKeyEvent } from "@/lib/imeComposition.js";
 import { EmptyGroupDropZone } from "@/project-sidebar/grouped/task-item.js";
@@ -84,17 +84,17 @@ export function GroupItem({
   activeDragGroupId,
   tooltipsDisabled,
 }: {
-  node: Extract<MaridGroupedTaskViewNode, { type: "group" }>;
+  node: Extract<QodexGroupedTaskViewNode, { type: "group" }>;
   groups: TaskGroupMenuItem[];
   activeWorkspacePath: string;
   activeWorkspaceIdentity?: string;
   activeTaskId: string | null;
   mobileActiveTaskKey?: string | null;
-  getTaskRemoteSessionId: (task: MaridTaskMeta) => string | undefined;
-  getTaskWorkspaceLabel: (task: MaridTaskMeta) => string;
+  getTaskRemoteSessionId: (task: QodexTaskMeta) => string | undefined;
+  getTaskWorkspaceLabel: (task: QodexTaskMeta) => string;
   onSelectTask: (workspacePath: string, taskId: string, workspaceIdentity?: string) => void;
-  onCloseTask: (task: MaridTaskMeta) => void;
-  onOpenFileTree?: (task: MaridTaskMeta) => void;
+  onCloseTask: (task: QodexTaskMeta) => void;
+  onOpenFileTree?: (task: QodexTaskMeta) => void;
   onCreateTask: () => void;
   hasDraftTask?: boolean;
   draftTaskActive?: boolean;
@@ -102,13 +102,13 @@ export function GroupItem({
   onSelectDraftTask?: () => void;
   onCloseDraftTask?: () => void;
   onRenameGroup: (groupId: string, title: string) => void;
-  onUpdateGroupColor: (groupId: string, color: MaridTaskGroupColor) => void;
+  onUpdateGroupColor: (groupId: string, color: QodexTaskGroupColor) => void;
   onUngroupGroup: (groupId: string) => void;
-  onMoveTaskToGroup: (task: MaridTaskMeta, groupId: string | null) => void;
-  onMoveTaskToTop: (task: MaridTaskMeta) => void;
-  onStartRenameTask: (task: MaridTaskMeta) => void;
-  onArchiveTask: (task: MaridTaskMeta) => void;
-  onMarkTaskAsUnread: (task: MaridTaskMeta) => void;
+  onMoveTaskToGroup: (task: QodexTaskMeta, groupId: string | null) => void;
+  onMoveTaskToTop: (task: QodexTaskMeta) => void;
+  onStartRenameTask: (task: QodexTaskMeta) => void;
+  onArchiveTask: (task: QodexTaskMeta) => void;
+  onMarkTaskAsUnread: (task: QodexTaskMeta) => void;
   newGroupSetup: boolean;
   onNewGroupSetupStarted: (groupId: string) => void;
   collapsed: boolean;
@@ -117,7 +117,7 @@ export function GroupItem({
   activeDragGroupId?: string | null;
   tooltipsDisabled?: boolean;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const [renaming, setRenaming] = useState(false);
   const [renameDraft, setRenameDraft] = useState(node.group.title);
   const titleInputRef = useRef<HTMLInputElement | null>(null);
@@ -419,7 +419,7 @@ export function GroupItem({
 
   const handleGroupColorChange = useCallback(
     (color: string) => {
-      onUpdateGroupColor(node.group.id, color as MaridTaskGroupColor);
+      onUpdateGroupColor(node.group.id, color as QodexTaskGroupColor);
     },
     [node.group.id, onUpdateGroupColor],
   );

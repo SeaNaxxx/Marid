@@ -1,10 +1,10 @@
-import { encodeCustomModelValue } from "@marid/shared";
+import { encodeCustomModelValue } from "@qodex/shared";
 import {
   TID_CHAT_MODEL_SELECT_GROUP,
   TID_CHAT_MODEL_SELECT_ITEM,
   TID_CHAT_MODEL_SELECT_TRIGGER,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { DEFAULT_WORKSPACE, clearAppData, waitForWorkspaceApp } from "#e2e/helpers/desktop-app";
 import {
   assertUpstreamRequestCapture,

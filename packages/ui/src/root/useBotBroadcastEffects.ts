@@ -1,12 +1,12 @@
 import { useEffect } from "react";
-import type { IServiceAccessor } from "@marid/services";
-import type { MaridConfigOption } from "@marid/shared";
+import type { IServiceAccessor } from "@qodex/services";
+import type { QodexConfigOption } from "@qodex/shared";
 import {
   buildTaskContextUsageFromUsageUpdate,
   recordTaskContextUsageUpdate,
-} from "@/lib/maridTaskUsageFallback.js";
-import { normalizeMaridUiError } from "@/lib/maridUiError.js";
-import { useMaridSessionStore } from "@/store/maridSessionStore.js";
+} from "@/lib/qodexTaskUsageFallback.js";
+import { normalizeQodexUiError } from "@/lib/qodexUiError.js";
+import { useQodexSessionStore } from "@/store/qodexSessionStore.js";
 import type { useTabStoreApi } from "@/store/TabStoreProvider.js";
 import {
   resolveBotTaskBroadcastRefresh,
@@ -19,19 +19,19 @@ import {
 } from "@/lib/taskListMetaSync.js";
 
 export function syncBotTaskConfigOptionsToStore(params: {
-  maridSessionStore: Pick<
-    ReturnType<typeof useMaridSessionStore.getState>,
+  qodexSessionStore: Pick<
+    ReturnType<typeof useQodexSessionStore.getState>,
     "setTaskConfigOptions"
   >;
   workspacePath: string;
   workspaceIdentity?: string;
   taskId: string;
-  configOptions: MaridConfigOption[];
+  configOptions: QodexConfigOption[];
 }) {
   // Bugfix: Bot /mode 不经过 ChatInputToolbar/useTaskStreamEvents。
   // setTaskConfigOptions 会按 activeTaskId 决定是否同步到 workspace configOptions，
   // 当前 mode 再由 configOptions 派生，避免 UI 维护第二份模式状态。
-  params.maridSessionStore.setTaskConfigOptions(
+  params.qodexSessionStore.setTaskConfigOptions(
     params.workspacePath,
     params.taskId,
     params.configOptions,
@@ -64,7 +64,7 @@ export function shouldMirrorBotTaskStreamToStore(params: {
     return true;
   }
 
-  // Bugfix: 远端 Bot task 的 stream 来自 bot runtime host，不一定会被当前 ChatView 的 Marid Agent stream 订阅收到。
+  // Bugfix: 远端 Bot task 的 stream 来自 bot runtime host，不一定会被当前 ChatView 的 Qodex Agent stream 订阅收到。
   // 之前 active task 直接跳过 bot broadcast，导致消息内容要切换任务重新拉 snapshot 后才显示。
   return Boolean(params.workspaceIdentity?.trim());
 }
@@ -80,8 +80,8 @@ export function useBotBroadcastEffects(
         tabStoreApi.getState().tabs,
       );
       if (stream) {
-        const maridSessionStore = useMaridSessionStore.getState();
-        const workspaceState = maridSessionStore.getWorkspaceState(
+        const qodexSessionStore = useQodexSessionStore.getState();
+        const workspaceState = qodexSessionStore.getWorkspaceState(
           stream.workspacePath,
           stream.workspaceIdentity,
         );
@@ -104,7 +104,7 @@ export function useBotBroadcastEffects(
           case "agent_message_chunk":
           case "agent_thought_chunk":
           case "tool_call":
-            maridSessionStore.setTaskRuntimeState(
+            qodexSessionStore.setTaskRuntimeState(
               stream.workspacePath,
               stream.taskId,
               "streaming",
@@ -113,8 +113,8 @@ export function useBotBroadcastEffects(
             );
             break;
           case "permission_request":
-            maridSessionStore.setTaskPermissionRequest(stream.workspacePath, stream.taskId, event, stream.workspaceIdentity);
-            maridSessionStore.setTaskRuntimeState(
+            qodexSessionStore.setTaskPermissionRequest(stream.workspacePath, stream.taskId, event, stream.workspaceIdentity);
+            qodexSessionStore.setTaskRuntimeState(
               stream.workspacePath,
               stream.taskId,
               "streaming",
@@ -123,18 +123,18 @@ export function useBotBroadcastEffects(
             );
             break;
           case "task_complete":
-            maridSessionStore.setTaskRuntimeState(
+            qodexSessionStore.setTaskRuntimeState(
               stream.workspacePath,
               stream.taskId,
               "completed",
               undefined,
               stream.workspaceIdentity,
             );
-            maridSessionStore.setTaskPermissionRequest(stream.workspacePath, stream.taskId, null, stream.workspaceIdentity);
-            maridSessionStore.setTaskError(stream.workspacePath, stream.taskId, null, stream.workspaceIdentity);
+            qodexSessionStore.setTaskPermissionRequest(stream.workspacePath, stream.taskId, null, stream.workspaceIdentity);
+            qodexSessionStore.setTaskError(stream.workspacePath, stream.taskId, null, stream.workspaceIdentity);
             break;
           case "task_error": {
-            const normalizedError = normalizeMaridUiError(
+            const normalizedError = normalizeQodexUiError(
               {
                 message: event.error,
                 detail: event.detail,
@@ -146,22 +146,22 @@ export function useBotBroadcastEffects(
                 taskId: event.taskId,
               },
             );
-            maridSessionStore.setTaskRuntimeState(
+            qodexSessionStore.setTaskRuntimeState(
               stream.workspacePath,
               stream.taskId,
               "failed",
               normalizedError.message,
               stream.workspaceIdentity,
             );
-            maridSessionStore.setTaskPermissionRequest(stream.workspacePath, stream.taskId, null, stream.workspaceIdentity);
-            maridSessionStore.setTaskError(stream.workspacePath, stream.taskId, normalizedError, stream.workspaceIdentity);
+            qodexSessionStore.setTaskPermissionRequest(stream.workspacePath, stream.taskId, null, stream.workspaceIdentity);
+            qodexSessionStore.setTaskError(stream.workspacePath, stream.taskId, normalizedError, stream.workspaceIdentity);
             break;
           }
           case "task_warning":
-            maridSessionStore.setTaskError(
+            qodexSessionStore.setTaskError(
               stream.workspacePath,
               stream.taskId,
-              normalizeMaridUiError(
+              normalizeQodexUiError(
                 {
                   message: event.warning,
                   detail: event.detail,
@@ -178,7 +178,7 @@ export function useBotBroadcastEffects(
             break;
           case "usage_update":
             {
-              const workspaceState = maridSessionStore.getWorkspaceState(
+              const workspaceState = qodexSessionStore.getWorkspaceState(
                 stream.workspacePath,
                 stream.workspaceIdentity,
               );
@@ -204,13 +204,13 @@ export function useBotBroadcastEffects(
                 size: event.size,
                 used: event.used,
               });
-              maridSessionStore.setTaskContextWindow(
+              qodexSessionStore.setTaskContextWindow(
                 stream.workspacePath,
                 stream.taskId,
                 event.size,
                 stream.workspaceIdentity,
               );
-              maridSessionStore.setTaskUsage(
+              qodexSessionStore.setTaskUsage(
                 stream.workspacePath,
                 stream.taskId,
                 nextUsage,
@@ -220,7 +220,7 @@ export function useBotBroadcastEffects(
             break;
           case "session_info_update":
             if (event.apiRetry !== undefined) {
-              maridSessionStore.setTaskApiRetryStatus(
+              qodexSessionStore.setTaskApiRetryStatus(
                 stream.workspacePath,
                 stream.taskId,
                 event.apiRetry ?? null,
@@ -241,18 +241,18 @@ export function useBotBroadcastEffects(
       }
       // Bots 在 host 侧创建/推进 task，不会挂载聊天视图里的 stream 订阅。
       // 因此除了刷新列表，还要同步 task 运行态；否则 sidebar 能看到新 task，却不会显示进行中状态。
-      const maridSessionStore = useMaridSessionStore.getState();
-      const workspaceState = maridSessionStore.getWorkspaceState(
+      const qodexSessionStore = useQodexSessionStore.getState();
+      const workspaceState = qodexSessionStore.getWorkspaceState(
         refresh.workspacePath,
         refresh.workspaceIdentity,
       );
       const provider = refresh.task?.provider ?? refresh.provider;
       const shouldSyncVisibleTaskConfig = workspaceState.activeTaskId === refresh.taskId;
       if (provider && shouldSyncVisibleTaskConfig) {
-        // Bugfix: /model、/mode 可以从第三方 Bot 修改当前 task 的真实 Marid Agent 状态。
+        // Bugfix: /model、/mode 可以从第三方 Bot 修改当前 task 的真实 Qodex Agent 状态。
         // 这些操作不经过 ChatInputToolbar，本地 store 以前不会同步 provider/configOptions，
         // 导致 Bot 回复已切换但 UI 下拉仍显示旧状态。
-        maridSessionStore.bindRuntimeProvider(
+        qodexSessionStore.bindRuntimeProvider(
           refresh.workspacePath,
           provider,
           refresh.workspaceIdentity,
@@ -260,14 +260,14 @@ export function useBotBroadcastEffects(
       }
       if (refresh.configOptions) {
         syncBotTaskConfigOptionsToStore({
-          maridSessionStore,
+          qodexSessionStore,
           workspacePath: refresh.workspacePath,
           workspaceIdentity: refresh.workspaceIdentity,
           taskId: refresh.taskId,
           configOptions: refresh.configOptions,
         });
       }
-      maridSessionStore.setTaskRuntimeState(
+      qodexSessionStore.setTaskRuntimeState(
         refresh.workspacePath,
         refresh.taskId,
         resolveBotTaskBroadcastRuntimeStatus(refresh.event),
@@ -298,16 +298,16 @@ export function useBotBroadcastEffects(
       }
       // prompt_sent 不再向 renderer 本地补写 user message——bot 发的
       // prompt 经 v4 命令进入 session 事件日志，订阅该 session 的 conversation 投影
-      // 会自然出现该消息；本地拼装面（maridChatMessages）随旧 ChatView 退役。
+      // 会自然出现该消息；本地拼装面（qodexChatMessages）随旧 ChatView 退役。
       if (refresh.event === "permission_request" && refresh.permissionRequest) {
-        maridSessionStore.setTaskPermissionRequest(
+        qodexSessionStore.setTaskPermissionRequest(
           refresh.workspacePath,
           refresh.taskId,
           refresh.permissionRequest,
           refresh.workspaceIdentity,
         );
       } else if (refresh.event === "permission_resolved" && refresh.requestId) {
-        maridSessionStore.removeTaskPermissionRequest(
+        qodexSessionStore.removeTaskPermissionRequest(
           refresh.workspacePath,
           refresh.taskId,
           refresh.requestId,
@@ -315,24 +315,24 @@ export function useBotBroadcastEffects(
         );
       } else if (refresh.event === "elicitation_request" && refresh.elicitationRequest) {
         // Bugfix: Bot channel 消费 AskUserQuestion 后，下一题只会先到 Bot runtime。
-        // 当前 UI 窗口不一定有同一条 Marid Agent stream 订阅，必须把新的 elicitation_request 显式写回 store。
-        maridSessionStore.setTaskElicitationRequest(
+        // 当前 UI 窗口不一定有同一条 Qodex Agent stream 订阅，必须把新的 elicitation_request 显式写回 store。
+        qodexSessionStore.setTaskElicitationRequest(
           refresh.workspacePath,
           refresh.taskId,
           refresh.elicitationRequest,
           refresh.workspaceIdentity,
         );
       } else if (refresh.event === "elicitation_resolved" && refresh.requestId) {
-        // Bugfix: Bot 代用户提交 AskUserQuestion 时，当前 UI 窗口不一定能收到 Marid Agent stream 的
+        // Bugfix: Bot 代用户提交 AskUserQuestion 时，当前 UI 窗口不一定能收到 Qodex Agent stream 的
         // elicitation_response。通过 bots:task 明确同步 requestId 出队，避免问答弹窗一直挂着。
-        maridSessionStore.removeTaskElicitationRequest(
+        qodexSessionStore.removeTaskElicitationRequest(
           refresh.workspacePath,
           refresh.taskId,
           refresh.requestId,
           refresh.workspaceIdentity,
         );
       } else if (refresh.event === "completed" || refresh.event === "error") {
-        maridSessionStore.setTaskPermissionRequest(
+        qodexSessionStore.setTaskPermissionRequest(
           refresh.workspacePath,
           refresh.taskId,
           null,
@@ -340,7 +340,7 @@ export function useBotBroadcastEffects(
         );
       }
       if (shouldRefreshBotTaskList(refresh.event, Boolean(refresh.task))) {
-        maridSessionStore.bumpTaskListVersion(refresh.workspacePath, refresh.workspaceIdentity);
+        qodexSessionStore.bumpTaskListVersion(refresh.workspacePath, refresh.workspaceIdentity);
       }
     });
     return () => disposable.dispose();

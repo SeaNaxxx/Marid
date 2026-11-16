@@ -1,4 +1,4 @@
-import type { Event } from "@marid/rpc";
+import type { Event } from "@qodex/rpc";
 import type {
   ManagedWorktreeCreation,
   ManagedWorktreeCreationSettlement,
@@ -6,9 +6,9 @@ import type {
   ManagedWorktreeError,
   ManagedWorktreeStartRefs,
   RemoveManagedWorktreeResult,
-} from "@marid/shared";
-import { ServiceChannels } from "@marid/shared";
-import type { CommandEnvelope } from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared";
+import { ServiceChannels } from "@qodex/shared";
+import type { CommandEnvelope } from "@qodex/shared/qodex-protocol-v4";
 import { createServiceDescriptor } from "#src/descriptors.js";
 
 export interface ManagedWorktreeGroup {

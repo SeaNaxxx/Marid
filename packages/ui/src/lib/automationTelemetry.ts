@@ -4,10 +4,10 @@ import {
   sanitizeTelemetryErrorMessage,
   type IPlatformService,
   type ModelSelection,
-  type MaridAutomation,
-} from "@marid/shared";
-import type { ProviderSettingsView } from "@marid/services";
-import { isApiKeyAccess } from "@marid/provider";
+  type QodexAutomation,
+} from "@qodex/shared";
+import type { ProviderSettingsView } from "@qodex/services";
+import { isApiKeyAccess } from "@qodex/provider";
 import { reportAppTelemetryEvent } from "@/lib/appTelemetry.js";
 import { legacyTelemetryProviderId } from "@/lib/providerTelemetryIdentity.js";
 
@@ -135,7 +135,7 @@ export function reportAutomationActionClick(
   params: {
     action: "run_now" | "delete";
     source: "list" | "editor";
-    automation: MaridAutomation;
+    automation: QodexAutomation;
     providerSettingsView: ProviderSettingsView | null;
   },
 ): Promise<void> {

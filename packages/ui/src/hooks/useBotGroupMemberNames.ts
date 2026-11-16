@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { BotContextState } from "@marid/shared";
+import type { BotContextState } from "@qodex/shared";
 import { useServices } from "@/hooks/useServices.js";
 import { logger } from "@/logger.js";
 

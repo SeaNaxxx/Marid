@@ -1,13 +1,13 @@
 import { z } from "zod";
-import { modelSelectionSchema } from "@marid/shared/model-selection";
-import { completeModelConfigDataSchema, modelConfigDataSchema } from "@marid/shared/model-config";
+import { modelSelectionSchema } from "@qodex/shared/model-selection";
+import { completeModelConfigDataSchema, modelConfigDataSchema } from "@qodex/shared/model-config";
 import {
   parsePersonalModelConfigRules,
   parsePersonalProviderConfigMap,
   extractManualModelConfig,
   manualModelConfigSchema,
   type ProviderConfigLayerUpdate,
-} from "@marid/provider";
+} from "@qodex/provider";
 
 const CURRENT_SCHEMA_VERSION = 1 as const;
 

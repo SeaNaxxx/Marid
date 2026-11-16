@@ -32,7 +32,7 @@
 
 ## 协议
 
-新增两个 Marid Protocol session 方法：
+新增两个 Qodex Protocol session 方法：
 
 - `session/previewFileRewind`
 - `session/applyFileRewind`
@@ -42,7 +42,7 @@
 ```ts
 {
   sessionId: string;
-  target: MaridSessionHistoryTarget;
+  target: QodexSessionHistoryTarget;
   expectedRevision?: number;
 }
 ```
@@ -52,7 +52,7 @@ preview 返回文件级结果：
 ```ts
 {
   sessionId: string;
-  target: MaridSessionHistoryTarget;
+  target: QodexSessionHistoryTarget;
   canApply: boolean;
   safeFiles: Array<{
     path: string;

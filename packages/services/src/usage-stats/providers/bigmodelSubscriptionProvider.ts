@@ -1,4 +1,4 @@
-import type { ApiClient, ProviderFamilyDomain } from "@marid/shared";
+import type { ApiClient, ProviderFamilyDomain } from "@qodex/shared";
 import {
   fetchPersonalCodingPlanEntitlement,
   fetchTeamCodingPlanEntitlement,

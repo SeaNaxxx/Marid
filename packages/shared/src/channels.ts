@@ -123,14 +123,14 @@ export const ServiceChannels = {
   CuaPipSession: "cua-pip-session",
   /** 跨窗口广播 */
   Broadcast: "broadcast",
-  /** Marid task wrapper 服务 */
-  MaridTask: "marid-task",
+  /** Qodex task wrapper 服务 */
+  QodexTask: "qodex-task",
   /** 窗口 Host 聚合 workspace/task 投影与列表写路由 */
   WindowController: "window-controller",
-  /** Marid Protocol agent 服务 */
-  MaridAgent: "marid-agent",
-  /** Marid session 应用服务 */
-  MaridSession: "marid-session",
+  /** Qodex Protocol agent 服务 */
+  QodexAgent: "qodex-agent",
+  /** Qodex session 应用服务 */
+  QodexSession: "qodex-session",
   Project: "project",
   /** 受管 worktree 任务管理（列表、删除、起点、fork 到新 worktree），仅本地桌面 Host。 */
   ManagedWorktrees: "managed-worktrees",
@@ -171,11 +171,11 @@ export const ServiceChannels = {
   /** Coding Plan 订阅购买服务 */
   CodingPlanSubscription: "coding-plan-subscription",
   ClientConfig: "client-config",
-  /** Marid 客户端场景配置服务 */
+  /** Qodex 客户端场景配置服务 */
   ClientScenes: "client-scenes",
   CloudContent: "cloud-content",
   MarketingTouch: "marketing-touch",
-  /** 桌面 Host 的语音输入：连接 marid-server ASR（docs/chat/composer-voice-input.md，仅本机 base 连接） */
+  /** 桌面 Host 的语音输入：连接 qodex-server ASR（docs/chat/composer-voice-input.md，仅本机 base 连接） */
   VoiceInput: "voice-input",
   /** Skills 管理服务 */
   Skills: "skills",
@@ -189,7 +189,7 @@ export const ServiceChannels = {
   UserConfigSync: "user-config-sync",
   /** 插件管理服务 */
   Plugins: "plugins",
-  /** 设置页插件管理服务（UI 平台能力面收敛，不再直触 maridAgentService） */
+  /** 设置页插件管理服务（UI 平台能力面收敛，不再直触 qodexAgentService） */
   PluginManagement: "plugin-management",
   /** 插件 UI 沙箱桥：host 读取 ui:// 资源并向 main 登记、代理 UI 发起的工具调用 */
   PluginUiBridge: "plugin-ui-bridge",
@@ -230,337 +230,337 @@ export type ServiceChannelName = (typeof ServiceChannels)[keyof typeof ServiceCh
 /** Electron IPC 频道名。仅在 preload ↔ main 之间使用。 */
 export const PlatformChannels = {
   /** renderer → main：释放插件 UI 沙箱（关闭 ports、撤 protocol handler、清 partition） */
-  PluginSandboxDispose: "marid:plugin-sandbox-dispose",
-  PluginSandboxCopyImage: "marid:plugin-sandbox-copy-image",
-  PluginSandboxExecutionActive: "marid:plugin-sandbox-execution-active",
+  PluginSandboxDispose: "qodex:plugin-sandbox-dispose",
+  PluginSandboxCopyImage: "qodex:plugin-sandbox-copy-image",
+  PluginSandboxExecutionActive: "qodex:plugin-sandbox-execution-active",
   /** renderer → main：一次性消费插件 UI 沙箱 guest 的用户手势 token */
-  PluginSandboxConsumeUserGesture: "marid:plugin-sandbox-consume-user-gesture",
+  PluginSandboxConsumeUserGesture: "qodex:plugin-sandbox-consume-user-gesture",
   /** renderer → main：查询自身 webContents id，作为沙箱登记的 owner */
-  PluginSandboxOwnerWebContentsId: "marid:plugin-sandbox-owner-web-contents-id",
+  PluginSandboxOwnerWebContentsId: "qodex:plugin-sandbox-owner-web-contents-id",
   /** 打开系统目录选择框 */
-  SelectDirectory: "marid:select-directory",
+  SelectDirectory: "qodex:select-directory",
   /** 打开系统多目录选择框 */
-  SelectDirectories: "marid:select-directories",
+  SelectDirectories: "qodex:select-directories",
   /** 打开系统文件选择框 */
-  SelectFile: "marid:select-file",
+  SelectFile: "qodex:select-file",
   /** 打开系统多文件选择框 */
-  SelectFiles: "marid:select-files",
-  /** Renderer → Main：写入宿主 ~/.marid 临时文本附件 */
-  CreateTempTextAttachment: "marid:create-temp-text-attachment",
+  SelectFiles: "qodex:select-files",
+  /** Renderer → Main：写入宿主 ~/.qodex 临时文本附件 */
+  CreateTempTextAttachment: "qodex:create-temp-text-attachment",
   /** Renderer → Main：把 dwf 产物某一版的字节落成本机副本（「作为文件打开」） */
-  MaterializeWorkflowArtifactFile: "marid:materialize-workflow-artifact-file",
+  MaterializeWorkflowArtifactFile: "qodex:materialize-workflow-artifact-file",
   /** Renderer → Main：通过原生另存为对话框保存文件 */
-  SaveFile: "marid:save-file",
+  SaveFile: "qodex:save-file",
   /** Renderer → Main：用 Chromium 打印引擎把当前页面 print 媒体版面导出为 PDF */
-  PrintToPdf: "marid:print-to-pdf",
+  PrintToPdf: "qodex:print-to-pdf",
   /** Renderer → Main：检查并按需请求系统麦克风权限 */
-  MicrophoneAccess: "marid:microphone-access",
+  MicrophoneAccess: "qodex:microphone-access",
   /** Renderer → Main：macOS 重置本 App 的麦克风授权记录并重新请求 */
-  ResetMicrophoneAccess: "marid:reset-microphone-access",
+  ResetMicrophoneAccess: "qodex:reset-microphone-access",
   /** Renderer → Main：打开系统麦克风权限 / 声音输入设置页 */
-  OpenMicrophoneSettings: "marid:open-microphone-settings",
+  OpenMicrophoneSettings: "qodex:open-microphone-settings",
   /** Renderer → Main：在 main 截取内置浏览器 guest 当前视口为 PNG（renderer 侧 capturePage 会崩溃） */
-  CaptureBrowserGuestPage: "marid:capture-browser-guest-page",
+  CaptureBrowserGuestPage: "qodex:capture-browser-guest-page",
   /** Main → Renderer：转发远程连接过程日志 */
-  RemoteConnectionLog: "marid:remote-connection-log",
+  RemoteConnectionLog: "qodex:remote-connection-log",
   /** Main → Renderer：远程 workspace session 已关闭 */
-  RemoteSessionClosed: "marid:remote-session-closed",
+  RemoteSessionClosed: "qodex:remote-session-closed",
   /** Main → Renderer：Source 自动重连后的 logical session 已换代并完成 port ready */
-  RemoteSessionReconnected: "marid:remote-session-reconnected",
+  RemoteSessionReconnected: "qodex:remote-session-reconnected",
   /** 检查目录是否已在其他窗口打开，如果是则激活该窗口 */
-  ActivateOrSetWorkspace: "marid:activate-or-set-workspace",
+  ActivateOrSetWorkspace: "qodex:activate-or-set-workspace",
   /** 建立 SSH 远程连接 */
-  ConnectRemote: "marid:connect-remote",
+  ConnectRemote: "qodex:connect-remote",
   /** Desktop Renderer → Main：为在线 Source 创建配置专用 attachment */
-  RequestSourceSettingsAttachment: "marid:request-source-settings-attachment",
+  RequestSourceSettingsAttachment: "qodex:request-source-settings-attachment",
   /** 取消当前窗口正在进行中的远程连接 */
-  CancelPendingRemoteConnection: "marid:cancel-pending-remote-connection",
+  CancelPendingRemoteConnection: "qodex:cancel-pending-remote-connection",
   /** Renderer → Main：绑定远程 logical session 的 canonical workspace context */
-  BindRemoteWorkspaceSessionContext: "marid:bind-remote-workspace-session-context",
+  BindRemoteWorkspaceSessionContext: "qodex:bind-remote-workspace-session-context",
   /** 为当前 workspace 开启 Web 远程控制 */
-  StartWebRemoteControl: "marid:start-web-remote-control",
+  StartWebRemoteControl: "qodex:start-web-remote-control",
   /** 关闭当前窗口的 Web 远程控制 */
-  StopWebRemoteControl: "marid:stop-web-remote-control",
+  StopWebRemoteControl: "qodex:stop-web-remote-control",
   /** 查询当前窗口的 Web 远程控制状态 */
-  GetWebRemoteControlStatus: "marid:get-web-remote-control-status",
+  GetWebRemoteControlStatus: "qodex:get-web-remote-control-status",
   /** Renderer → Main：OAuth 会话变化通知，不携带凭据 */
-  WebRemoteControlAuthStateChanged: "marid:web-remote-control-auth-state-changed",
+  WebRemoteControlAuthStateChanged: "qodex:web-remote-control-auth-state-changed",
   /** Main → Renderer：当前窗口 Web 远程控制状态变化 */
-  WebRemoteControlStatusChanged: "marid:web-remote-control-status-changed",
+  WebRemoteControlStatusChanged: "qodex:web-remote-control-status-changed",
   /** 释放当前窗口里的远程 session */
-  DisposeRemoteSession: "marid:dispose-remote-session",
+  DisposeRemoteSession: "qodex:dispose-remote-session",
   /** Renderer → Main：检查本机 Docker daemon 是否可用 */
-  IsDockerAvailable: "marid:is-docker-available",
+  IsDockerAvailable: "qodex:is-docker-available",
   /** Renderer → Main：列出本机可用的 WSL 发行版 */
-  ListWSLDistros: "marid:list-wsl-distros",
+  ListWSLDistros: "qodex:list-wsl-distros",
   /** Renderer → Main：列出当前可连接的 Docker 容器 */
-  ListDockerContainers: "marid:list-docker-containers",
+  ListDockerContainers: "qodex:list-docker-containers",
   /** Renderer → Main：列出 SSH config 里可用于快速填表的 alias */
-  ListSSHConfigAliases: "marid:list-ssh-config-aliases",
+  ListSSHConfigAliases: "qodex:list-ssh-config-aliases",
   /** Renderer → Main：从用户目录加载 CLI MCP 配置 */
-  LoadMcpFromUserDirectory: "marid:load-mcp-from-user-directory",
+  LoadMcpFromUserDirectory: "qodex:load-mcp-from-user-directory",
   /** Renderer → Main：保存 CLI MCP 配置到用户目录 */
-  SaveMcpToUserDirectory: "marid:save-mcp-to-user-directory",
+  SaveMcpToUserDirectory: "qodex:save-mcp-to-user-directory",
   /** Renderer → Main：查询"关闭驻留托盘"能力（Linux 置灰判断；spec：docs/desktop/linux-close-to-tray.md） */
-  GetCloseToTrayCapability: "marid:get-close-to-tray-capability",
+  GetCloseToTrayCapability: "qodex:get-close-to-tray-capability",
   /** Renderer 日志转发到 main 进程统一存储 */
-  Log: "marid:log",
+  Log: "qodex:log",
   /** Renderer → Main：同步当前窗口所有 tab 的 workspace 路径 */
-  SyncWindowTabs: "marid:sync-window-tabs",
+  SyncWindowTabs: "qodex:sync-window-tabs",
   /** Renderer → Main：同步当前窗口可供 Web 远程控制切换的 workspace */
-  SyncWebRemoteControlWorkspaces: "marid:sync-web-remote-control-workspaces",
+  SyncWebRemoteControlWorkspaces: "qodex:sync-web-remote-control-workspaces",
   /** Main → Renderer：手机端请求重连当前窗口里的远程 workspace */
-  WebRemoteControlReconnectWorkspace: "marid:web-remote-control-reconnect-workspace",
+  WebRemoteControlReconnectWorkspace: "qodex:web-remote-control-reconnect-workspace",
   /** Main → Renderer：手机请求置顶/归档任务或新建本地项目，Renderer 按侧栏同一路径执行 */
-  WebRemoteControlRendererAction: "marid:web-remote-control-renderer-action",
+  WebRemoteControlRendererAction: "qodex:web-remote-control-renderer-action",
   /** Renderer → Main：同步当前窗口的未读 task 数 */
-  SyncWindowUnreadCount: "marid:sync-window-unread-count",
+  SyncWindowUnreadCount: "qodex:sync-window-unread-count",
   /** Renderer → Main：当前窗口 active task，只更新 Main 的临时焦点映射。 */
-  SyncActiveTaskSession: "marid:sync-active-task-session",
+  SyncActiveTaskSession: "qodex:sync-active-task-session",
   /** Renderer → Main：同步 main 进程需即时感知的应用设置 */
-  SyncAppSettings: "marid:sync-app-settings",
+  SyncAppSettings: "qodex:sync-app-settings",
   /** Renderer → Main：快捷键设置页录制态开关；true = main 暂时摘除可配置菜单 accelerator */
-  SetShortcutRecordingActive: "marid:set-shortcut-recording-active",
+  SetShortcutRecordingActive: "qodex:set-shortcut-recording-active",
   /** Main → Renderer：聚焦到指定 workspace 路径的 tab */
-  FocusTab: "marid:focus-tab",
+  FocusTab: "qodex:focus-tab",
   /** Main → Renderer：菜单触发新建 tab */
-  NewTab: "marid:new-tab",
+  NewTab: "qodex:new-tab",
   /** Main → Renderer：菜单或快捷键请求关闭当前上下文 */
-  CloseActiveContextRequest: "marid:close-active-context-request",
+  CloseActiveContextRequest: "qodex:close-active-context-request",
   /** Main → Renderer：内置 webview 请求打开新的浏览器 tab */
-  OpenBrowserUrl: "marid:open-browser-url",
+  OpenBrowserUrl: "qodex:open-browser-url",
   /** Main → Renderer：内置浏览器网页权限/屏幕共享源/设备选择弹窗请求 */
-  EmbeddedBrowserPermissionPrompt: "marid:embedded-browser-permission-prompt",
+  EmbeddedBrowserPermissionPrompt: "qodex:embedded-browser-permission-prompt",
   /** Renderer → Main：用户对内置浏览器权限弹窗的决策回传 */
-  EmbeddedBrowserPermissionResolve: "marid:embedded-browser-permission-resolve",
+  EmbeddedBrowserPermissionResolve: "qodex:embedded-browser-permission-resolve",
   /** Main → Renderer：agent 首次 browser 命令建好受控 view，通知 renderer 自动开 browser-use tab */
-  BrowserViewReady: "marid:browser-view-ready",
+  BrowserViewReady: "qodex:browser-view-ready",
   /** Main → Renderer：agent 正在操作某个 browser-use tab，renderer 临时显示状态图标 */
-  BrowserViewOperation: "marid:browser-view-operation",
+  BrowserViewOperation: "qodex:browser-view-operation",
   /** Main → Renderer：browser visibility capability 显示/隐藏 IAB 右侧面板 */
-  BrowserViewVisibility: "marid:browser-view-visibility",
+  BrowserViewVisibility: "qodex:browser-view-visibility",
   /** Main → Renderer：Agent 设置/重置目标 tab viewport */
-  BrowserViewViewportChanged: "marid:browser-view-viewport-changed",
+  BrowserViewViewportChanged: "qodex:browser-view-viewport-changed",
   /** Main → Renderer：截图前请求 owner renderer 准备后台 guest 合成表面。 */
-  BrowserViewScreenshotSurfacePrepare: "marid:browser-view-screenshot-surface-prepare",
+  BrowserViewScreenshotSurfacePrepare: "qodex:browser-view-screenshot-surface-prepare",
   /** Renderer → Main：目标 guest 连续两个 animation frame 的 viewport 已稳定。 */
-  BrowserViewScreenshotSurfaceReady: "marid:browser-view-screenshot-surface-ready",
+  BrowserViewScreenshotSurfaceReady: "qodex:browser-view-screenshot-surface-ready",
   /** Main → Renderer：截图结束或准备失败，释放临时后台合成层。 */
-  BrowserViewScreenshotSurfaceRelease: "marid:browser-view-screenshot-surface-release",
+  BrowserViewScreenshotSurfaceRelease: "qodex:browser-view-screenshot-surface-release",
   /** Main → Renderer：agent close 命令 detach 受控 guest 后，通知 renderer 卸载对应 tab */
-  BrowserViewCloseTab: "marid:browser-view-close-tab",
+  BrowserViewCloseTab: "qodex:browser-view-close-tab",
   /** Main → Renderer：预算淘汰时卸载 guest，但保留 logical tab shell。 */
-  BrowserViewSuspend: "marid:browser-view-suspend",
+  BrowserViewSuspend: "qodex:browser-view-suspend",
   /** Main → Renderer：为 suspended shell 重新挂载 guest。 */
-  BrowserViewRestore: "marid:browser-view-restore",
+  BrowserViewRestore: "qodex:browser-view-restore",
   /** Main → Renderer：菜单触发新建任务 */
-  NewTask: "marid:new-task",
+  NewTask: "qodex:new-task",
   /** Main → Renderer：菜单触发打开工作区 */
-  OpenWorkspace: "marid:open-workspace",
+  OpenWorkspace: "qodex:open-workspace",
   /** Main → Renderer：deep link 直接打开指定本地工作区目录 */
-  OpenWorkspacePath: "marid:open-workspace-path",
+  OpenWorkspacePath: "qodex:open-workspace-path",
   /** Main → Renderer：打开内置反馈对话框 */
-  OpenFeedbackDialog: "marid:open-feedback-dialog",
+  OpenFeedbackDialog: "qodex:open-feedback-dialog",
   /** Main → Renderer：打开我的工单面板 */
-  OpenTicketsPanel: "marid:open-tickets-panel",
+  OpenTicketsPanel: "qodex:open-tickets-panel",
   /** Main → Renderer：窗口全屏状态变化 */
-  WindowFullscreenChanged: "marid:window-fullscreen-changed",
+  WindowFullscreenChanged: "qodex:window-fullscreen-changed",
   /** Renderer → Main：读取窗口最大化状态与系统原生圆角能力 */
-  GetDesktopWindowChromeState: "marid:get-desktop-window-chrome-state",
+  GetDesktopWindowChromeState: "qodex:get-desktop-window-chrome-state",
   /** Main → Renderer：窗口最大化状态与系统原生圆角能力变化 */
-  DesktopWindowChromeStateChanged: "marid:desktop-window-chrome-state-changed",
+  DesktopWindowChromeStateChanged: "qodex:desktop-window-chrome-state-changed",
   /** Main → Renderer：原生窗口控制区安全边距变化 */
-  WindowControlsOverlayChanged: "marid:window-controls-overlay-changed",
+  WindowControlsOverlayChanged: "qodex:window-controls-overlay-changed",
   /** Preload → Main：preload 已同步读到当前窗口控制区安全边距 */
-  WindowControlsOverlayReady: "marid:window-controls-overlay-ready",
+  WindowControlsOverlayReady: "qodex:window-controls-overlay-ready",
   /** 获取资源管理器快照（CPU / 内存，按基础服务、内置插件、社区插件归类） */
-  GetResourceUsageSnapshot: "marid:get-resource-usage-snapshot",
-  SetResourceUsageSamplingActive: "marid:set-resource-usage-sampling-active",
-  GetNetworkCaptureSnapshot: "marid:get-network-capture-snapshot",
-  ClearNetworkCapture: "marid:clear-network-capture",
+  GetResourceUsageSnapshot: "qodex:get-resource-usage-snapshot",
+  SetResourceUsageSamplingActive: "qodex:set-resource-usage-sampling-active",
+  GetNetworkCaptureSnapshot: "qodex:get-network-capture-snapshot",
+  ClearNetworkCapture: "qodex:clear-network-capture",
   /** 打开资源管理器窗口（其他窗口触发） */
-  OpenResourceManager: "marid:open-resource-manager",
-  /** 资源管理器「存储」tab：开始扫描本机 .marid 占用（main 持有 StorageService，Worker 线程遍历） */
-  StorageStartScan: "marid:storage-start-scan",
+  OpenResourceManager: "qodex:open-resource-manager",
+  /** 资源管理器「存储」tab：开始扫描本机 .qodex 占用（main 持有 StorageService，Worker 线程遍历） */
+  StorageStartScan: "qodex:storage-start-scan",
   /** 资源管理器「存储」tab：取消扫描 */
-  StorageCancelScan: "marid:storage-cancel-scan",
+  StorageCancelScan: "qodex:storage-cancel-scan",
   /** 资源管理器「存储」tab：读取最近一次快照 */
-  StorageGetSnapshot: "marid:storage-get-snapshot",
+  StorageGetSnapshot: "qodex:storage-get-snapshot",
   /** 资源管理器「存储」tab：按类别清理 */
-  StorageClean: "marid:storage-clean",
+  StorageClean: "qodex:storage-clean",
   /** 资源管理器「存储」tab：在系统文件管理器中定位数据根内的路径 */
-  StorageRevealPath: "marid:storage-reveal-path",
+  StorageRevealPath: "qodex:storage-reveal-path",
   /** Main → 资源管理器 renderer：扫描进度快照推送 */
-  StorageScanProgress: "marid:storage-scan-progress",
+  StorageScanProgress: "qodex:storage-scan-progress",
   /** Renderer → Main：打开外部 URL（用于 OAuth 跳转浏览器） */
-  OpenExternal: "marid:open-external",
+  OpenExternal: "qodex:open-external",
   /** Renderer → Main：查询当前语言下是否存在可用的用户社群入口 */
-  CanOpenCommunity: "marid:can-open-community",
+  CanOpenCommunity: "qodex:can-open-community",
   /** Renderer → Main：在系统文件管理器中打开路径 */
-  OpenInFileManager: "marid:open-in-file-manager",
+  OpenInFileManager: "qodex:open-in-file-manager",
   /** Renderer → Main：使用系统默认应用打开本地文件 */
-  OpenExternalFile: "marid:open-external-file",
-  /** Renderer → Main：打开 Marid Computer Use 权限引导 */
-  OpenCuaPermissionOnboarding: "marid:open-cua-permission-onboarding",
+  OpenExternalFile: "qodex:open-external-file",
+  /** Renderer → Main：打开 Qodex Computer Use 权限引导 */
+  OpenCuaPermissionOnboarding: "qodex:open-cua-permission-onboarding",
   /** Renderer → Main：取消当前 renderer 发起的一次权限引导 participant */
-  CancelCuaPermissionOnboarding: "marid:cancel-cua-permission-onboarding",
+  CancelCuaPermissionOnboarding: "qodex:cancel-cua-permission-onboarding",
   /**
    * Renderer → Main：预热并缓存已验证的 Helper 路径 + bundle 指纹。
    * 必须在拖拽浮窗挂载时调用 —— dragstart 链路里不允许任何异步 I/O。
    */
-  PrepareCuaHelperPermissionDrag: "marid:prepare-cua-helper-permission-drag",
+  PrepareCuaHelperPermissionDrag: "qodex:prepare-cua-helper-permission-drag",
   /** Renderer → Main：把已验证的 Helper.app 同步拖出到 macOS 权限列表 */
-  StartCuaHelperPermissionDrag: "marid:start-cua-helper-permission-drag",
+  StartCuaHelperPermissionDrag: "qodex:start-cua-helper-permission-drag",
   /**
    * Renderer → Main：拖拽手势结束。
    * 拖完授权即完成，浮窗该让位（用户此时要看设置页和系统的重启提示）。必须等 dragend 而不是
    * 在 dragstart 里就收窗：startDrag 只是把 drag session 交给 OS，非阻塞，drag source
    * 立刻消失可能打断正在进行的拖拽。
    */
-  NotifyCuaHelperPermissionDragEnded: "marid:notify-cua-helper-permission-drag-ended",
+  NotifyCuaHelperPermissionDragEnded: "qodex:notify-cua-helper-permission-drag-ended",
   /** Renderer → Main：上报 OAuth state 用于 deep link 路由 */
-  OAuthRegisterState: "marid:oauth-register-state",
+  OAuthRegisterState: "qodex:oauth-register-state",
   /** Main → Renderer：转发 deep link URL */
-  OAuthCallback: "marid:oauth-callback",
+  OAuthCallback: "qodex:oauth-callback",
   /** Main → Renderer：转发支付 deep link URL */
-  PaymentCallback: "marid:payment-callback",
+  PaymentCallback: "qodex:payment-callback",
   /** Main → Renderer：外部分享页请求导入 share code。 */
-  ShareImport: "marid:share-import",
+  ShareImport: "qodex:share-import",
   /** Renderer → Main：OAuth 回调已处理完成，可继续后置启动流程 */
-  OAuthCallbackHandled: "marid:oauth-callback-handled",
+  OAuthCallbackHandled: "qodex:oauth-callback-handled",
   /** Renderer → Main：renderer 已就绪，可接收缓存的 deep link */
-  RendererReady: "marid:renderer-ready",
+  RendererReady: "qodex:renderer-ready",
   /** Renderer → Main：同步当前 renderer 的 telemetry 上下文 */
-  SyncTelemetryContext: "marid:sync-telemetry-context",
+  SyncTelemetryContext: "qodex:sync-telemetry-context",
   /** Renderer → Main：通过统一 telemetry 层上报业务事件 */
-  ReportTelemetryEvent: "marid:report-telemetry-event",
+  ReportTelemetryEvent: "qodex:report-telemetry-event",
   /** Renderer → Main：上报 ARMS 自定义事件 */
-  ReportArmsCustomEvent: "marid:report-arms-custom-event",
+  ReportArmsCustomEvent: "qodex:report-arms-custom-event",
   /** Renderer → Main：读取 Renderer 用户操作 Trace 灰度配置。 */
-  GetRendererActionTraceConfig: "marid:get-renderer-action-trace-config",
+  GetRendererActionTraceConfig: "qodex:get-renderer-action-trace-config",
   /** Main → Renderer：Renderer 用户操作 Trace 灰度配置变化。 */
-  RendererActionTraceConfigChanged: "marid:renderer-action-trace-config-changed",
+  RendererActionTraceConfigChanged: "qodex:renderer-action-trace-config-changed",
   /** Renderer → Main：发送已结束的 ui_action batch。 */
-  ReportRendererActionTraceBatch: "marid:report-renderer-action-trace-batch",
+  ReportRendererActionTraceBatch: "qodex:report-renderer-action-trace-batch",
   /** Renderer → Main：主窗口 renderer 每 60 秒的 heap 读数，单向 send，不需要回执。 */
-  ReportRendererHeapSample: "marid:report-renderer-heap-sample",
-  ReportLocalTtftBatch: "marid:report-local-ttft-batch",
+  ReportRendererHeapSample: "qodex:report-renderer-heap-sample",
+  ReportLocalTtftBatch: "qodex:report-local-ttft-batch",
   /** E2E preload → Main：读取 sendCustom 最终参数的内存 ring。 */
-  ReadFinalArmsCustomEventsE2E: "marid:e2e:read-final-arms-custom-events",
+  ReadFinalArmsCustomEventsE2E: "qodex:e2e:read-final-arms-custom-events",
   /** E2E preload → Main：清空 sendCustom 最终参数的内存 ring。 */
-  ClearFinalArmsCustomEventsE2E: "marid:e2e:clear-final-arms-custom-events",
+  ClearFinalArmsCustomEventsE2E: "qodex:e2e:clear-final-arms-custom-events",
   /** E2E preload → Main：配置只针对目标 event name 的真实网络抑制。 */
-  ConfigureFinalArmsCustomEventsE2E: "marid:e2e:configure-final-arms-custom-events",
+  ConfigureFinalArmsCustomEventsE2E: "qodex:e2e:configure-final-arms-custom-events",
   /** Renderer → Main：触发任务完成/失败的系统通知 */
-  ShowTaskNotification: "marid:show-task-notification",
+  ShowTaskNotification: "qodex:show-task-notification",
   /** Main → Preload：通知 renderer 播放任务通知提示音 */
-  TaskNotificationSound: "marid:task-notification-sound",
+  TaskNotificationSound: "qodex:task-notification-sound",
   /** Main → Preload：用户点击了系统通知，携带 taskId 让 renderer 跳转到对应任务 */
-  TaskNotificationClick: "marid:task-notification-click",
+  TaskNotificationClick: "qodex:task-notification-click",
   /** Renderer → Main：弹扩展的系统通知并返回结果（§18.1 H8） */
-  ShowExtensionNotification: "marid:show-extension-notification",
+  ShowExtensionNotification: "qodex:show-extension-notification",
   /** Main → Preload：用户点了扩展通知，携带插件 id 与要打开的视图 */
-  ExtensionNotificationClick: "marid:extension-notification-click",
-  /** Renderer → Main：导出日志（打包 ~/.marid/v2 及外部 agent 日志为 zip 并在 Finder 中显示） */
-  ExportLogs: "marid:export-logs",
+  ExtensionNotificationClick: "qodex:extension-notification-click",
+  /** Renderer → Main：导出日志（打包 ~/.qodex/v2 及外部 agent 日志为 zip 并在 Finder 中显示） */
+  ExportLogs: "qodex:export-logs",
   /** Renderer → Main：截取当前窗口作为反馈附件 */
-  CaptureWindowScreenshot: "marid:capture-window-screenshot",
+  CaptureWindowScreenshot: "qodex:capture-window-screenshot",
   /**
    * Renderer → Main：`<webview>` guest dom-ready 后上报 webContentsId，
    * main 用 BrowserGuestManager attach 该 guest（fire-and-forget）。CDP-on-guest pivot。
    */
-  BrowserViewAttachGuest: "marid:browser-view-attach-guest",
+  BrowserViewAttachGuest: "qodex:browser-view-attach-guest",
   /** 可信宿主发起导航；main 将本地 HTML 转成有目录边界的预览地址。 */
-  BrowserViewLoadUrl: "marid:browser-view-load-url",
+  BrowserViewLoadUrl: "qodex:browser-view-load-url",
   /** Renderer → Main：重建 `<webview>` 前主动断开旧 guest 的 CDP。 */
-  BrowserViewDownloadStarted: "marid:browser-view-download-started",
-  BrowserViewDetachGuest: "marid:browser-view-detach-guest",
+  BrowserViewDownloadStarted: "qodex:browser-view-download-started",
+  BrowserViewDetachGuest: "qodex:browser-view-detach-guest",
   /** Renderer → Main：用户显式关闭 Browser tab。 */
-  BrowserViewCloseTabFromRenderer: "marid:browser-view-close-tab-from-renderer",
+  BrowserViewCloseTabFromRenderer: "qodex:browser-view-close-tab-from-renderer",
   /** Renderer → Main：上报 Browser tab residency/display facts。 */
-  BrowserViewReportResidency: "marid:browser-view-report-residency",
+  BrowserViewReportResidency: "qodex:browser-view-report-residency",
   /** Renderer → Main：草稿首发后把草稿 human tab 的 owner 升级为新会话。 */
-  BrowserViewPromoteDraftTabs: "marid:browser-view-promote-draft-tabs",
+  BrowserViewPromoteDraftTabs: "qodex:browser-view-promote-draft-tabs",
   /** Renderer → Main：指定 generation 的 guest 已卸载。 */
-  BrowserViewSuspendReady: "marid:browser-view-suspend-ready",
+  BrowserViewSuspendReady: "qodex:browser-view-suspend-ready",
   /** Renderer → Main：用户访问 suspended tab，请求恢复。 */
-  BrowserViewEnsureResident: "marid:browser-view-ensure-resident",
+  BrowserViewEnsureResident: "qodex:browser-view-ensure-resident",
   /** Renderer → Main：读取 workspace/task 的持久化 logical shells。 */
-  BrowserViewRestoreTabs: "marid:browser-view-restore-tabs",
+  BrowserViewRestoreTabs: "qodex:browser-view-restore-tabs",
   /** Renderer → Main：自由尺寸拖拽/开关回写目标 guest viewport */
-  BrowserViewUpdateViewport: "marid:browser-view-update-viewport",
+  BrowserViewUpdateViewport: "qodex:browser-view-update-viewport",
   /** Embedded Browser preload → Main：在网页原生 Dialog 创建前同步请求可信系统框。 */
-  EmbeddedBrowserJavaScriptDialog: "marid:embedded-browser-javascript-dialog",
+  EmbeddedBrowserJavaScriptDialog: "qodex:embedded-browser-javascript-dialog",
   /** Renderer → Main：把自动发现的本机 Chrome Profile 数据一次性导入内置浏览器分区。 */
-  ImportChromeBrowserData: "marid:import-chrome-browser-data",
+  ImportChromeBrowserData: "qodex:import-chrome-browser-data",
   /** Renderer → Main：清理内置浏览器缓存或全部站点数据。 */
-  ClearEmbeddedBrowserData: "marid:clear-embedded-browser-data",
+  ClearEmbeddedBrowserData: "qodex:clear-embedded-browser-data",
   /** Renderer → Main：读取内置浏览器站点权限记录（设置页「网站权限」） */
-  GetEmbeddedBrowserSitePermissions: "marid:get-embedded-browser-site-permissions",
+  GetEmbeddedBrowserSitePermissions: "qodex:get-embedded-browser-site-permissions",
   /** Renderer → Main：修改/删除单条站点权限（state="ask" 表示删除） */
-  SetEmbeddedBrowserSitePermission: "marid:set-embedded-browser-site-permission",
+  SetEmbeddedBrowserSitePermission: "qodex:set-embedded-browser-site-permission",
   /** Renderer → Main：清空全部站点权限记录 */
-  ClearEmbeddedBrowserSitePermissions: "marid:clear-embedded-browser-site-permissions",
+  ClearEmbeddedBrowserSitePermissions: "qodex:clear-embedded-browser-site-permissions",
   /** Renderer → Main：重置单个站点的全部权限记录（站点权限设置标签页「重置」） */
-  ResetEmbeddedBrowserSitePermission: "marid:reset-embedded-browser-site-permission",
+  ResetEmbeddedBrowserSitePermission: "qodex:reset-embedded-browser-site-permission",
   /** Main → Renderer：通知有新版本已下载完毕，可以重启安装 */
-  UpdateReady: "marid:update-ready",
+  UpdateReady: "qodex:update-ready",
   /** Main → Renderer：用户手动点击"检查更新"后的结果反馈（toast 用） */
-  UpdateCheckResult: "marid:update-check-result",
+  UpdateCheckResult: "qodex:update-check-result",
   /** Main → Renderer：自动更新持续状态变化（菜单 UI 用） */
-  UpdateStateChanged: "marid:update-state-changed",
+  UpdateStateChanged: "qodex:update-state-changed",
   /** Renderer → Main：主动获取当前自动更新状态（菜单打开时补偿事件丢失） */
-  GetUpdateState: "marid:get-update-state",
+  GetUpdateState: "qodex:get-update-state",
   /** Renderer → Main：开始下载当前已发现的自动更新 */
-  DownloadUpdate: "marid:download-update",
+  DownloadUpdate: "qodex:download-update",
   /** Renderer → Main：取消当前正在下载的自动更新 */
-  CancelUpdateDownload: "marid:cancel-update-download",
+  CancelUpdateDownload: "qodex:cancel-update-download",
   /** Renderer → Main：打开独立自动更新窗口 */
-  OpenUpdateStatusWindow: "marid:open-update-status-window",
+  OpenUpdateStatusWindow: "qodex:open-update-status-window",
   /** Renderer → Main：读取自动更新偏好 */
-  GetAutoUpdatePreferences: "marid:get-auto-update-preferences",
+  GetAutoUpdatePreferences: "qodex:get-auto-update-preferences",
   /** Renderer → Main：写入“自动下载并安装更新”偏好 */
-  SetAutoDownloadAndInstallUpdates: "marid:set-auto-download-and-install-updates",
+  SetAutoDownloadAndInstallUpdates: "qodex:set-auto-download-and-install-updates",
   /** Renderer → Main：查询桌面端正在运行的会话数量 */
-  GetDesktopSessionActivity: "marid:get-desktop-session-activity",
+  GetDesktopSessionActivity: "qodex:get-desktop-session-activity",
   /** Renderer → Main：读取当前窗口页面缩放档位 */
-  GetDesktopZoomLevel: "marid:get-desktop-zoom-level",
+  GetDesktopZoomLevel: "qodex:get-desktop-zoom-level",
   /** Main → Renderer：当前窗口页面缩放档位变化 */
-  DesktopZoomLevelChanged: "marid:desktop-zoom-level-changed",
+  DesktopZoomLevelChanged: "qodex:desktop-zoom-level-changed",
   /** Renderer → Main：读取开发态 stdio tap proxy 开关状态 */
-  GetMaridStdioTapDevState: "marid:get-marid-stdio-tap-dev-state",
+  GetQodexStdioTapDevState: "qodex:get-qodex-stdio-tap-dev-state",
   /** Main → Renderer：本地 setting.json 已由 main 进程更新 */
-  SettingsChanged: "marid:settings-changed",
+  SettingsChanged: "qodex:settings-changed",
   /** Main → Renderer：应用语言已切换 */
-  ApplicationLocaleChanged: "marid:application-locale-changed",
+  ApplicationLocaleChanged: "qodex:application-locale-changed",
   /** Renderer → Main：读取宿主系统语言 */
-  GetSystemLocale: "marid:get-system-locale",
+  GetSystemLocale: "qodex:get-system-locale",
   /** Main → Renderer：更新安装后的版本说明 */
-  PostUpdateReleaseNotes: "marid:post-update-release-notes",
+  PostUpdateReleaseNotes: "qodex:post-update-release-notes",
   /** Renderer → Main：确认版本说明已读 */
-  AcknowledgePostUpdateReleaseNotes: "marid:ack-post-update-release-notes",
+  AcknowledgePostUpdateReleaseNotes: "qodex:ack-post-update-release-notes",
   /** Renderer → Main：跳过当前已发现的自动更新版本 */
-  SkipUpdateVersion: "marid:skip-update-version",
+  SkipUpdateVersion: "qodex:skip-update-version",
   /** Renderer → Main：用户确认重启安装更新 */
-  QuitAndInstallUpdate: "marid:quit-and-install-update",
+  QuitAndInstallUpdate: "qodex:quit-and-install-update",
   /** Renderer → Main：获取系统中已安装的编辑器/终端列表（含图标） */
-  GetInstalledEditors: "marid:get-installed-editors",
-  GetFileApplications: "marid:get-file-applications",
-  OpenFileWithApplication: "marid:open-file-with-application",
+  GetInstalledEditors: "qodex:get-installed-editors",
+  GetFileApplications: "qodex:get-file-applications",
+  OpenFileWithApplication: "qodex:open-file-with-application",
   /** Renderer → Main：按 bundle id 获取系统应用图标 */
-  GetApplicationIcon: "marid:get-application-icon",
+  GetApplicationIcon: "qodex:get-application-icon",
   /** Renderer → Main：用指定编辑器打开路径 */
-  OpenInEditor: "marid:open-in-editor",
+  OpenInEditor: "qodex:open-in-editor",
   /** Renderer → Main：执行桌面窗口级命令 */
-  ExecuteDesktopCommand: "marid:execute-desktop-command",
+  ExecuteDesktopCommand: "qodex:execute-desktop-command",
   /** Renderer → Main：同步应用菜单语言，用于重建原生菜单 */
-  SetApplicationLocale: "marid:set-application-locale",
+  SetApplicationLocale: "qodex:set-application-locale",
   /** Renderer → Main：同步标题栏亮暗色，用于原生窗口控制按钮配色 */
-  SetTitleBarTheme: "marid:set-title-bar-theme",
+  SetTitleBarTheme: "qodex:set-title-bar-theme",
   /** Renderer → Main：迁移旧版 Common MCP 配置 */
-  MigrateLegacyCommonMcp: "marid:migrate-legacy-common-mcp",
+  MigrateLegacyCommonMcp: "qodex:migrate-legacy-common-mcp",
   /** Renderer → Main：获取当前设备的稳定标识符（deviceMid） */
-  GetDeviceId: "marid:get-device-id",
+  GetDeviceId: "qodex:get-device-id",
 } as const;
 
 export type PlatformChannelName = (typeof PlatformChannels)[keyof typeof PlatformChannels];
@@ -572,22 +572,22 @@ export type PlatformChannelName = (typeof PlatformChannels)[keyof typeof Platfor
 /** Electron `<webview>` 的 `sendToHost` / `ipc-message` 频道，不经过 main process。 */
 export const EmbeddedBrowserWebviewChannels = {
   /** Guest 无法继续消费某方向的滚动时，把二维 delta 转交自由尺寸画布。 */
-  WheelBoundary: "marid:embedded-browser-wheel-boundary",
+  WheelBoundary: "qodex:embedded-browser-wheel-boundary",
   /**
    * 设计运行时的页面事件（docs/browser-use/2026-11-03-browser-design-mode-spec.md）：页面主世界
    * `window.postMessage` 带命名空间的信封，preload 校验后把 `events` 数组转给宿主。
    */
-  DesignEvents: "marid:embedded-browser-design-events",
+  DesignEvents: "qodex:embedded-browser-design-events",
   /**
    * 页面上按下 Cmd/Ctrl + Z（Shift 为重做），且按键当下的目标不是可编辑元素：preload 隔离世界只认 isTrusted 的按键，
    * 页面脚本发不出这条，设计工具据此撤销 / 重做源码写回。
    */
-  DesignUndoShortcut: "marid:embedded-browser-design-undo-shortcut",
+  DesignUndoShortcut: "qodex:embedded-browser-design-undo-shortcut",
 } as const;
 
 /** 设计运行时 postMessage 信封：`{ [messageKey]: 1, events: unknown[] }`；events 序列化后超过上限（UTF-8 字节）的消息 preload 直接丢弃。 */
 export const EMBEDDED_BROWSER_DESIGN_BRIDGE = {
-  messageKey: "__maridDesign",
+  messageKey: "__qodexDesign",
   maxMessageBytes: 256 * 1024,
 } as const;
 
@@ -601,12 +601,12 @@ export interface EmbeddedBrowserWheelBoundaryPayload {
 // ============================================================================
 
 /**
- * Electron `<webview>`（partition=persist:marid-coding-plan）的 `sendToHost` / `ipc-message` 频道。
- * 官网页通过 preload 注入的 window.maridBridge 调用，不经过 main process。
+ * Electron `<webview>`（partition=persist:qodex-coding-plan）的 `sendToHost` / `ipc-message` 频道。
+ * 官网页通过 preload 注入的 window.qodexBridge 调用，不经过 main process。
  */
 export const CodingPlanWebviewChannels = {
   /** 官网页购买成功后通知 App 刷新 entitlements 并关闭 webview。 */
-  PurchaseComplete: "marid:coding-plan-purchase-complete",
+  PurchaseComplete: "qodex:coding-plan-purchase-complete",
 } as const;
 
 /**
@@ -615,7 +615,7 @@ export const CodingPlanWebviewChannels = {
  */
 export const PluginSandboxChannels = {
   /** main → guest：{ sandboxId, initId, names } + port1[]，shell 据此建立宿主端口 */
-  Init: "marid:plugin-sandbox-init",
+  Init: "qodex:plugin-sandbox-init",
 } as const;
 
 /** 购买完成回传 payload。provider 与官网 CodingPlanProvider / auth-ready 事件 detail.provider 同构。 */
@@ -626,14 +626,14 @@ export interface CodingPlanPurchaseCompletePayload {
 }
 
 /**
- * 官网页 window.__maridLang__ 的取值，与 App IntlProvider 的 Locale 一致。
+ * 官网页 window.__qodexLang__ 的取值，与 App IntlProvider 的 Locale 一致。
  * App locale 变化时通过 executeJavaScript 重写此变量并派发 lang-change 事件。
  */
 export type CodingPlanWebviewLocale = "zh-CN" | "en-US";
 
 /**
  * 官网页 lang-change 事件 detail。App 用 executeJavaScript 在 main world 派发
- * `marid-coding-plan-lang-change` CustomEvent，website 侧（maridBridge.onLangChange 或
+ * `qodex-coding-plan-lang-change` CustomEvent，website 侧（qodexBridge.onLangChange 或
  * 直接 window.addEventListener）订阅后切换 copy。
  */
 export interface CodingPlanWebviewLangChangeDetail {
@@ -645,28 +645,28 @@ export interface CodingPlanWebviewLangChangeDetail {
 // ============================================================================
 /** 内部传输频道。用于 MessagePort 转发等框架级通信。 */
 export const InternalChannels = {
-  DatabaseStartupState: "marid:database-startup-state",
-  DatabaseStartupControl: "marid:database-startup-control",
+  DatabaseStartupState: "qodex:database-startup-state",
+  DatabaseStartupControl: "qodex:database-startup-control",
   /** main → renderer 转发 MessagePort（通过 webContents.postMessage） */
-  ServicePort: "marid:service-port",
+  ServicePort: "qodex:service-port",
   /** main → renderer 转发窗口 Host 的 scoped MessagePort */
-  ScopedServicePort: "marid:scoped-service-port",
+  ScopedServicePort: "qodex:scoped-service-port",
   /** renderer → main：scoped MessagePort 已注册，可安全切换 attachment */
-  ScopedServicePortReady: "marid:scoped-service-port-ready",
+  ScopedServicePortReady: "qodex:scoped-service-port-ready",
   /** main → renderer：ready ACK 到达时 route 已不存在，窗口释放这次 attachment 的登记 */
-  ScopedServicePortReleased: "marid:scoped-service-port-released",
+  ScopedServicePortReleased: "qodex:scoped-service-port-released",
   /** main → renderer：在线 Source 的配置专用 MessagePort */
-  SourceSettingsServicePort: "marid:source-settings-service-port",
+  SourceSettingsServicePort: "qodex:source-settings-service-port",
   /** preload → renderer：主进程已确认系统通知展示，renderer 可播放提示音 */
-  TaskNotificationSound: "marid:task-notification-sound",
+  TaskNotificationSound: "qodex:task-notification-sound",
   /** main → 宿主 renderer：插件 UI 沙箱的 MessagePort 组（port2[]），payload { sandboxId, initId, names } */
-  PluginSandboxPorts: "marid:plugin-sandbox-ports",
+  PluginSandboxPorts: "qodex:plugin-sandbox-ports",
 } as const;
 
 /** @deprecated `/ws` 已忽略该头；保留常量仅供旧客户端兼容。 */
-export const MARID_RPC_CLIENT_MODE_HEADER = "x-marid-rpc-client-mode";
+export const QODEX_RPC_CLIENT_MODE_HEADER = "x-qodex-rpc-client-mode";
 /** desktop 先经受保护 HTTP endpoint 申请，再在 `/ws/host` 握手时一次性消费。 */
-export const MARID_RPC_HOST_CAPABILITY_HEADER = "x-marid-rpc-host-capability";
+export const QODEX_RPC_HOST_CAPABILITY_HEADER = "x-qodex-rpc-host-capability";
 
 // ============================================================================
 // 进程间消息类型 —— main ↔ host process 之间的 postMessage
@@ -728,7 +728,7 @@ export const HostMessageTypes = {
   LocalMediaPreviewPathAuthorizeResult: "local-media-preview-path-authorize-result",
   /** main → host：插件 UI 沙箱登记结果（PluginSandboxRegisterResultPayload） */
   PluginSandboxRegisterResult: "plugin-sandbox-register-result",
-  /** Main → Host：全局前台 Marid 窗口派生的 producer focus fact。 */
+  /** Main → Host：全局前台 Qodex 窗口派生的 producer focus fact。 */
   CuaPipFocusChanged: "cua-pip-focus-changed",
   /** main → host：要求 Host 现读本地 Source，并同步指定 Remote Environment。 */
   ProviderProvisioningExecute: "provider-provisioning-execute",
@@ -738,7 +738,7 @@ export const HostMessageTypes = {
   ResourceUsageSnapshotRequest: "resource-usage-snapshot-request",
   ResourceUsageSnapshotCancel: "resource-usage-snapshot-cancel",
   NetworkCapture: "network-capture",
-  /** main → host：Main 的实时界面语言变化（Host 用于 Marid endpoint 的 X-Client-Language） */
+  /** main → host：Main 的实时界面语言变化（Host 用于 Qodex endpoint 的 X-Client-Language） */
   ApplicationLocaleChanged: "application-locale-changed",
 } as const;
 
@@ -826,7 +826,7 @@ export const HostResponseTypes = {
   TaskOwnerCommandResult: "task-owner-command-result",
   /** host → main：Agent 请求向另一个 session 发送消息 */
   SessionMessageSendRequested: "session-message-send-requested",
-  /** host → main：声明一个 Marid Agent session 当前归属该 host */
+  /** host → main：声明一个 Qodex Agent session 当前归属该 host */
   SessionRouteAnnounce: "session-route-announce",
   /** host → main：目标 host 完成本地 session message 投递 */
   SessionMessageDeliverResult: "session-message-deliver-result",

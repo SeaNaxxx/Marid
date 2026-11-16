@@ -1,11 +1,11 @@
-import type { ProjectTask as MaridTaskMeta } from "@/project-sidebar/contract.js";
+import type { ProjectTask as QodexTaskMeta } from "@/project-sidebar/contract.js";
 import { memo } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import type { UniqueIdentifier } from "@dnd-kit/core";
 
 import { MessageCirclePlus } from "lucide-react";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { GroupedTaskRow } from "@/project-sidebar/grouped/task-row.js";
 import type { TaskGroupMenuItem } from "@/project-sidebar/grouped/shared.js";
 
@@ -16,7 +16,7 @@ export function EmptyGroupDropZone({
   groupId: string;
   onCreateTask: () => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const droppable = useDroppable({
     id: `group-empty-drop:${groupId}`,
     data: {
@@ -69,7 +69,7 @@ function GroupedTaskItemComponent({
   dragOverlay,
   tooltipsDisabled,
 }: {
-  task: MaridTaskMeta;
+  task: QodexTaskMeta;
   groupId?: string;
   groups: TaskGroupMenuItem[];
   remoteSessionId?: string;
@@ -77,13 +77,13 @@ function GroupedTaskItemComponent({
   isMobileActive: boolean;
   workspaceLabel: string;
   onSelectTask: (workspacePath: string, taskId: string, workspaceIdentity?: string) => void;
-  onCloseTask: (task: MaridTaskMeta) => void;
-  onOpenFileTree?: (task: MaridTaskMeta) => void;
-  onMoveTaskToGroup: (task: MaridTaskMeta, groupId: string | null) => void;
-  onMoveTaskToTop: (task: MaridTaskMeta) => void;
-  onStartRenameTask: (task: MaridTaskMeta) => void;
-  onArchiveTask: (task: MaridTaskMeta) => void;
-  onMarkTaskAsUnread: (task: MaridTaskMeta) => void;
+  onCloseTask: (task: QodexTaskMeta) => void;
+  onOpenFileTree?: (task: QodexTaskMeta) => void;
+  onMoveTaskToGroup: (task: QodexTaskMeta, groupId: string | null) => void;
+  onMoveTaskToTop: (task: QodexTaskMeta) => void;
+  onStartRenameTask: (task: QodexTaskMeta) => void;
+  onArchiveTask: (task: QodexTaskMeta) => void;
+  onMarkTaskAsUnread: (task: QodexTaskMeta) => void;
   dragId?: UniqueIdentifier;
   dragging?: boolean;
   dragOverlay?: boolean;

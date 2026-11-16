@@ -1,7 +1,7 @@
-export const WORKBENCH_SESSION_DRAG_MIME = "application/x-marid-session";
+export const WORKBENCH_SESSION_DRAG_MIME = "application/x-qodex-session";
 
 export interface WorkbenchSessionDragPayload {
-  readonly kind: "marid/session";
+  readonly kind: "qodex/session";
   readonly workspacePath: string;
   readonly workspaceIdentity?: string;
   readonly remoteSessionId?: string;
@@ -49,14 +49,14 @@ export function parseWorkbenchSessionDragPayload(
     const parsed = JSON.parse(raw);
     if (
       !isRecord(parsed) ||
-      parsed.kind !== "marid/session" ||
+      parsed.kind !== "qodex/session" ||
       typeof parsed.workspacePath !== "string" ||
       typeof parsed.sessionId !== "string"
     ) {
       return null;
     }
     return {
-      kind: "marid/session",
+      kind: "qodex/session",
       workspacePath: parsed.workspacePath,
       workspaceIdentity:
         typeof parsed.workspaceIdentity === "string" ? parsed.workspaceIdentity : undefined,

@@ -3,24 +3,24 @@ import {
   GHOST_SUPPLIER_KEY_PREFIX,
   buildNativeSupplierKey,
   resolveSupplierKeyFromModelDisplayValue,
-  type MaridConfigOption,
-  type MaridProvider,
-  type MaridTaskMeta,
-} from "@marid/shared";
-import { decodeCustomModelValue } from "@/lib/maridCustomModelValue.js";
+  type QodexConfigOption,
+  type QodexProvider,
+  type QodexTaskMeta,
+} from "@qodex/shared";
+import { decodeCustomModelValue } from "@/lib/qodexCustomModelValue.js";
 
 interface ModelConfigSyncScope {
-  provider: MaridProvider;
+  provider: QodexProvider;
   supplierKey: string;
 }
 
 export interface ModelConfigSyncWorkspaceSnapshot {
   activeTaskId: string | null;
-  selectedProvider: MaridProvider;
+  selectedProvider: QodexProvider;
   selectedSupplierKey: string;
-  configOptions: MaridConfigOption[] | null;
-  optimisticTaskListByTaskId: Record<string, Pick<MaridTaskMeta, "provider">>;
-  taskListCache: MaridTaskMeta[] | null;
+  configOptions: QodexConfigOption[] | null;
+  optimisticTaskListByTaskId: Record<string, Pick<QodexTaskMeta, "provider">>;
+  taskListCache: QodexTaskMeta[] | null;
 }
 
 export function parseCustomProviderIdFromSupplierKey(supplierKey: string): string | null {
@@ -70,8 +70,8 @@ function isCustomSupplierKey(supplierKey: string): boolean {
 }
 
 function resolveModelSupplierKeyFromConfigOptions(
-  configOptions: MaridConfigOption[] | null,
-  provider: MaridProvider,
+  configOptions: QodexConfigOption[] | null,
+  provider: QodexProvider,
 ): string | null {
   const modelValue = resolveModelValueFromConfigOptions(configOptions);
   if (!modelValue) {
@@ -83,7 +83,7 @@ function resolveModelSupplierKeyFromConfigOptions(
 
 function resolveActiveTaskProvider(
   snapshot: ModelConfigSyncWorkspaceSnapshot,
-): MaridProvider | null {
+): QodexProvider | null {
   const activeTaskId = snapshot.activeTaskId?.trim();
   if (!activeTaskId) {
     return null;
@@ -120,7 +120,7 @@ export function resolveWorkspaceModelConfigSyncScope(
   }
 
   if (activeTaskProvider === snapshot.selectedProvider) {
-    // Bugfix: 自定义供应商运行中的 Marid Agent 回包经常只带纯模型名（如 glm-5.1），
+    // Bugfix: 自定义供应商运行中的 Qodex Agent 回包经常只带纯模型名（如 glm-5.1），
     // 直接按模型值推导会误判成 native supplier，导致设置页保存后刷新到错误的 scope。
     // 当前 provider 与 selectedProvider 一致时，纯模型名不能证明 supplier 已变化，所以继续沿用 selectedSupplierKey。
     return {
@@ -143,7 +143,7 @@ export function resolveWorkspaceModelConfigSyncScope(
 }
 
 function resolveModelValueFromConfigOptions(
-  configOptions: MaridConfigOption[] | null,
+  configOptions: QodexConfigOption[] | null,
 ): string | null {
   const modelOption = configOptions?.find(
     (option) => option.category === "model" && option.type === "select",
@@ -161,8 +161,8 @@ function resolveModelValueFromConfigOptions(
 }
 
 export function resolveModelNameForConfigSync(params: {
-  configOptions: MaridConfigOption[] | null;
-  selectedProvider: MaridProvider;
+  configOptions: QodexConfigOption[] | null;
+  selectedProvider: QodexProvider;
   providerId: string;
   providerModels: string[];
 }): string | undefined {

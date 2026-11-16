@@ -4,12 +4,12 @@ import {
 } from "#src/oauth/repo/oauthCredentialRepo.js";
 import {
   ApiError,
-  resolveOptionalMaridAuthorization,
+  resolveOptionalQodexAuthorization,
   readValidatedRequestVerificationConfig,
   requestVerificationClaimHeaders,
   isRequestVerificationMessage,
   type RequestVerificationClientConfig,
-} from "@marid/shared";
+} from "@qodex/shared";
 /* eslint-disable max-lines -- Coding Plan provider 需要集中维护 BigModel 支付宝与 Z.ai Stripe/PayPal 接口映射，拆分会让共享鉴权和响应解包更难追踪。 */
 import type {
   ApiClient,
@@ -65,27 +65,27 @@ import type {
   ManualClaimPlanClaimRequest,
   ManualClaimPlanClaimResult,
   ManualClaimPlanPreviewSnapshot,
-  MaridModelContextBudgetStrategy,
+  QodexModelContextBudgetStrategy,
   DynamicWorkflowClientConfig,
-} from "@marid/shared";
-import type { ModelSelectionView } from "@marid/provider";
+} from "@qodex/shared";
+import type { ModelSelectionView } from "@qodex/provider";
 import type { OffPeakClientConfig } from "./codingPlanSubscription.js";
 import {
   BUILTIN_MODEL_PROVIDER_IDS,
   REQUEST_VERIFICATION_REQUIRED,
   CODING_PLAN_SYSTEM_BUSY,
-  buildRuntimeMaridApiUrl,
+  buildRuntimeQodexApiUrl,
   isZaiCodingPlanProviderId,
   resolveBigModelApiOrigin,
   resolveZaiBusinessBaseUrl,
-  MARID_VERSION,
-  DEFAULT_MARID_MODEL_CONTEXT_BUDGET_STRATEGY,
+  QODEX_VERSION,
+  DEFAULT_QODEX_MODEL_CONTEXT_BUDGET_STRATEGY,
   createDynamicWorkflowClientConfig,
   normalizeDynamicWorkflowMode,
   resolveDynamicWorkflowClientConfig,
   DEFAULT_DYNAMIC_WORKFLOW_MODE,
-  MARID_DYNAMIC_WORKFLOW_MODE_ENV,
-} from "@marid/shared";
+  QODEX_DYNAMIC_WORKFLOW_MODE_ENV,
+} from "@qodex/shared";
 import type { ICredentialService } from "../credential/credential.js";
 import { readApiJson } from "../providers/api/apiJson.js";
 import { createServiceLogger } from "../logger/serviceLogger.js";
@@ -97,11 +97,11 @@ import {
 
 const BIGMODEL_CODING_PLAN_API_PREFIX = "/api/biz";
 const ZAI_CODING_PLAN_PAY_API_PREFIX = "/api/pay";
-const MARID_CLIENT_CONFIG_API_PREFIX = "/api/v1/client/configs";
+const QODEX_CLIENT_CONFIG_API_PREFIX = "/api/v1/client/configs";
 const REQUEST_TIMEOUT_MS = 15_000;
 const CLIENT_CONFIG_CACHE_TTL_MS = 60 * 60 * 1000;
 const CODING_PLAN_ZAI_OVERSEAS_PAYMENT_REQUIRED = "coding_plan_zai_overseas_payment_required";
-const MARID_JWT_TOKEN_KEY = "maridjwttoken";
+const QODEX_JWT_TOKEN_KEY = "qodexjwttoken";
 const log = createServiceLogger("codingPlanSubscription");
 
 // 合并时曾丢失秒到毫秒的边界转换，导致客户端用本机时间误判待生效权益。
@@ -156,7 +156,7 @@ interface ManualClaimPlanClaimPayload {
   };
 }
 
-interface MaridClientConfigEnvelope {
+interface QodexClientConfigEnvelope {
   code?: number;
   msg?: string;
   success?: boolean;
@@ -222,9 +222,9 @@ export class BigModelCodingPlanSubscriptionProvider {
   protected readonly credentialService: Pick<ICredentialService, "load">;
   private readonly resolveOffPeakModelSelectionView?: () => Promise<ModelSelectionView>;
   private clientConfigKey = "";
-  private clientConfigSnapshot: MaridClientConfigEnvelope | null = null;
+  private clientConfigSnapshot: QodexClientConfigEnvelope | null = null;
   private clientConfigSnapshotExpiresAt = 0;
-  private clientConfigRequest: Promise<MaridClientConfigEnvelope> | null = null;
+  private clientConfigRequest: Promise<QodexClientConfigEnvelope> | null = null;
 
   constructor(options: BigModelCodingPlanSubscriptionProviderOptions) {
     this.apiClient = options.apiClient;
@@ -278,9 +278,9 @@ export class BigModelCodingPlanSubscriptionProvider {
   }
 
   async getManualClaimPlanPreviews(): Promise<ManualClaimPlanPreviewSnapshot> {
-    const token = (await this.credentialService.load(MARID_JWT_TOKEN_KEY))?.trim();
-    const url = new URL(buildRuntimeMaridApiUrl(process.env, "/api/v1/marid-plan/billing/preview"));
-    url.searchParams.set("app_version", MARID_VERSION);
+    const token = (await this.credentialService.load(QODEX_JWT_TOKEN_KEY))?.trim();
+    const url = new URL(buildRuntimeQodexApiUrl(process.env, "/api/v1/qodex-plan/billing/preview"));
+    url.searchParams.set("app_version", QODEX_VERSION);
     url.searchParams.set("platform", resolveClientPlatformKey());
     const payload = await readCodingPlanApiJson<RemoteEnvelope<ManualClaimPlanPreviewPayload>>(
       this.apiClient,
@@ -291,7 +291,7 @@ export class BigModelCodingPlanSubscriptionProvider {
         timeoutMs: REQUEST_TIMEOUT_MS,
       },
     );
-    // 新 Marid billing 接口沿用平台 envelope（code=0 成功），不能复用
+    // 新 Qodex billing 接口沿用平台 envelope（code=0 成功），不能复用
     // BigModel 支付接口的 code=200 解包器，否则合法 preview 会被误判失败。
     if (payload.code !== undefined && payload.code !== 0) {
       throw new Error(payload.msg?.trim() || "manual_claim_preview_failed");
@@ -338,7 +338,7 @@ export class BigModelCodingPlanSubscriptionProvider {
   }
 
   async claimManualPlan(request: ManualClaimPlanClaimRequest): Promise<ManualClaimPlanClaimResult> {
-    const token = (await this.credentialService.load(MARID_JWT_TOKEN_KEY))?.trim();
+    const token = (await this.credentialService.load(QODEX_JWT_TOKEN_KEY))?.trim();
     if (!token) {
       return { success: false, code: 401, message: "" };
     }
@@ -346,14 +346,14 @@ export class BigModelCodingPlanSubscriptionProvider {
       Omit<RemoteEnvelope<ManualClaimPlanClaimPayload>, "code"> & { code?: number | string }
     >(
       this.apiClient,
-      new URL(buildRuntimeMaridApiUrl(process.env, "/api/v1/marid-plan/billing/claim")),
+      new URL(buildRuntimeQodexApiUrl(process.env, "/api/v1/qodex-plan/billing/claim")),
       {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
           ...requestVerificationClaimHeaders(request),
-          "X-Marid-App-Version": MARID_VERSION,
+          "X-Qodex-App-Version": QODEX_VERSION,
           "X-Platform": resolveClientPlatformKey(),
         },
         body: JSON.stringify({ plan_id: request.planId }),
@@ -415,7 +415,7 @@ export class BigModelCodingPlanSubscriptionProvider {
    * forceRefresh 供"打开 Automations 入口补拉"（1h 快照否则灰度翻转最长 1h 不可见）。
    */
   async getOffPeakClientConfig(options?: { forceRefresh?: boolean }): Promise<OffPeakClientConfig> {
-    if (process.env["MARID_OFFPEAK_MOCK"] === "1") {
+    if (process.env["QODEX_OFFPEAK_MOCK"] === "1") {
       // mock 已经明确替代远端曝光配置，不能再先等待 /client/configs：
       // 离线 Desktop E2E 会一直停在 Loading，根本无法进入闲时执行链。
       const modelSelectionView = await this.resolveOffPeakModelSelectionView?.();
@@ -433,7 +433,7 @@ export class BigModelCodingPlanSubscriptionProvider {
   /**
    * 动态工作流灰度快照：与闲时任务同走
    * client/configs，零新增请求。三条边界：
-   *   1. 本地覆盖（MARID_DYNAMIC_WORKFLOW_MODE）在任何网络动作之前裁决，命中即返回——
+   *   1. 本地覆盖（QODEX_DYNAMIC_WORKFLOW_MODE）在任何网络动作之前裁决，命中即返回——
    *      preview 构建和开发者手测因此不受 1h 快照与首次 Host 竞态影响；
    *   2. forceRefresh 与 Off-Peak 同义，清掉快照后重拉（灰度翻转最长 1h 不可见）；
    *   3. 请求失败 fail-closed：返回 default（disabled）并 warn，绝不把异常抛给调用方——
@@ -443,7 +443,7 @@ export class BigModelCodingPlanSubscriptionProvider {
     forceRefresh?: boolean;
   }): Promise<DynamicWorkflowClientConfig> {
     // 覆盖合法即短路：判据（normalize）与快照构造（resolve）都留在 shared，这里不复述取值域。
-    if (normalizeDynamicWorkflowMode(process.env[MARID_DYNAMIC_WORKFLOW_MODE_ENV])) {
+    if (normalizeDynamicWorkflowMode(process.env[QODEX_DYNAMIC_WORKFLOW_MODE_ENV])) {
       return resolveDynamicWorkflowClientConfig({ remote: undefined, env: process.env });
     }
     if (options?.forceRefresh) {
@@ -464,9 +464,9 @@ export class BigModelCodingPlanSubscriptionProvider {
     }
   }
 
-  async getModelContextBudgetStrategy(): Promise<MaridModelContextBudgetStrategy> {
+  async getModelContextBudgetStrategy(): Promise<QodexModelContextBudgetStrategy> {
     // 3.12.2：预算统一为 preflight-v1；保留兼容方法，但不能再为每次建会话等待远端配置。
-    return DEFAULT_MARID_MODEL_CONTEXT_BUDGET_STRATEGY;
+    return DEFAULT_QODEX_MODEL_CONTEXT_BUDGET_STRATEGY;
   }
 
   async getBillingDiscount(): Promise<CodingPlanBillingDiscountConfig | undefined> {
@@ -498,8 +498,8 @@ export class BigModelCodingPlanSubscriptionProvider {
         imRef: request.imRef ?? null,
         ticket: request.ticket ?? null,
         randstr: request.randstr ?? null,
-        // Coding Plan 试算接口默认按 Maas 渠道处理，不显式标记会丢失 marid 来源归因。
-        salesChannel: request.salesChannel ?? "marid",
+        // Coding Plan 试算接口默认按 Maas 渠道处理，不显式标记会丢失 qodex 来源归因。
+        salesChannel: request.salesChannel ?? "qodex",
       },
     );
   }
@@ -662,7 +662,7 @@ export class BigModelCodingPlanSubscriptionProvider {
     const account = await this.loadOAuthAccountMaterial(family);
     if (
       !account?.accessToken ||
-      (family === "bigmodel" && account.accessToken === account.maridJwtToken)
+      (family === "bigmodel" && account.accessToken === account.qodexJwtToken)
     )
       throw new Error(`${family}_oauth_required`);
     const assertCurrent = async () => {
@@ -835,12 +835,12 @@ export class BigModelCodingPlanSubscriptionProvider {
     return unwrapEnvelope(payload, endpoint.providerId);
   }
 
-  private async getClientConfigs(): Promise<MaridClientConfigEnvelope> {
-    const authorization = await resolveOptionalMaridAuthorization(() =>
-      this.credentialService.load(MARID_JWT_TOKEN_KEY),
+  private async getClientConfigs(): Promise<QodexClientConfigEnvelope> {
+    const authorization = await resolveOptionalQodexAuthorization(() =>
+      this.credentialService.load(QODEX_JWT_TOKEN_KEY),
     );
     const url = resolveCodingPlanClientConfigUrl(process.env);
-    url.searchParams.set("app_version", MARID_VERSION);
+    url.searchParams.set("app_version", QODEX_VERSION);
     url.searchParams.set("platform", resolveClientPlatformKey());
     const key = JSON.stringify([url.toString(), authorization]);
     // 登录、换号、退出或切换 endpoint 后不能沿用上一上下文的套餐配置。
@@ -855,7 +855,7 @@ export class BigModelCodingPlanSubscriptionProvider {
     }
     if (this.clientConfigRequest) return this.clientConfigRequest;
 
-    const request = readCodingPlanApiJson<MaridClientConfigEnvelope>(this.apiClient, url, {
+    const request = readCodingPlanApiJson<QodexClientConfigEnvelope>(this.apiClient, url, {
       method: "GET",
       redirect: "error",
       timeoutMs: REQUEST_TIMEOUT_MS,
@@ -903,12 +903,12 @@ export class BigModelCodingPlanSubscriptionProvider {
     if (!token) {
       throw new Error("bigmodel_oauth_required");
     }
-    const maridJwtToken = account?.maridJwtToken;
-    if (maridJwtToken && token === maridJwtToken) {
-      // 旧版 BigModel OAuth callback 曾把 marid JWT 同时写进
+    const qodexJwtToken = account?.qodexJwtToken;
+    if (qodexJwtToken && token === qodexJwtToken) {
+      // 旧版 BigModel OAuth callback 曾把 qodex JWT 同时写进
       // oauth:bigmodel:access_token，付费套餐预览会拿它去打 bigmodel.cn 并报令牌过期。
       // 这里在服务边界拦截旧污染状态，避免继续向 BigModel 业务接口发送错误凭据。
-      log.warn(undefined, "BigModel access token is stale marid JWT; login required");
+      log.warn(undefined, "BigModel access token is stale qodex JWT; login required");
       throw new Error("bigmodel_oauth_required");
     }
     return token;
@@ -1032,7 +1032,7 @@ export class BigModelCodingPlanSubscriptionProvider {
           createTeamPlanProjectApiKeyPrewarmStatusFromEnsureResult(result),
         );
       } catch (error) {
-        // 多团队套餐每个项目都需要独立 marid-team-api-key。
+        // 多团队套餐每个项目都需要独立 qodex-team-api-key。
         // 单个团队项目创建失败不能阻断 pricing 返回，否则会让其他团队入口一起不可见。
         log.warn(undefined, "Team Plan project api key prewarm failed", {
           family: this.codingPlanProviderId(),
@@ -1061,7 +1061,7 @@ export class BigModelCodingPlanSubscriptionProvider {
 }
 
 export function resolveCodingPlanClientConfigUrl(env: NodeJS.ProcessEnv): URL {
-  return new URL(buildRuntimeMaridApiUrl(env, MARID_CLIENT_CONFIG_API_PREFIX));
+  return new URL(buildRuntimeQodexApiUrl(env, QODEX_CLIENT_CONFIG_API_PREFIX));
 }
 
 function resolveFallbackEnterpriseTeamPlanProduct(
@@ -1363,27 +1363,27 @@ function normalizeStaticProductProviderIds<T>(
 }
 
 function unwrapClientConfigProducts(
-  payload: MaridClientConfigEnvelope,
+  payload: QodexClientConfigEnvelope,
 ): CodingPlanStaticProductsConfig {
   if (payload.code !== undefined && payload.code !== 0) {
-    throw new Error(payload.msg?.trim() || "Marid client config request failed");
+    throw new Error(payload.msg?.trim() || "Qodex client config request failed");
   }
   const products = payload.data?.configs?.codingPlanStaticProducts;
   if (!products || typeof products !== "object") {
-    throw new Error("Marid client config missing Coding Plan products");
+    throw new Error("Qodex client config missing Coding Plan products");
   }
   return normalizeStaticProductProviderIds(products);
 }
 
 function unwrapClientConfigTeamProducts(
-  payload: MaridClientConfigEnvelope,
+  payload: QodexClientConfigEnvelope,
 ): CodingPlanStaticTeamProductsConfig {
   if (payload.code !== undefined && payload.code !== 0) {
-    throw new Error(payload.msg?.trim() || "Marid client config request failed");
+    throw new Error(payload.msg?.trim() || "Qodex client config request failed");
   }
   const products: unknown = payload.data?.configs?.codingPlanStaticTeamProducts;
   if (!products || typeof products !== "object") {
-    throw new Error("Marid client config missing Coding Plan team products");
+    throw new Error("Qodex client config missing Coding Plan team products");
   }
   for (const providerProducts of Object.values(products)) {
     if (
@@ -1392,7 +1392,7 @@ function unwrapClientConfigTeamProducts(
     ) {
       // 远端配置没有运行时类型保障；无效静态目录必须整体降级为读取失败，
       // 让 UI 继续使用实时 pricing 恢复团队订阅身份，不能在合并阶段抛错。
-      throw new Error("Marid client config has invalid Coding Plan team products");
+      throw new Error("Qodex client config has invalid Coding Plan team products");
     }
   }
   return normalizeStaticProductProviderIds(products as CodingPlanStaticTeamProductsConfig);
@@ -1440,10 +1440,10 @@ function isValidCardCopyConfigItem(value: unknown): boolean {
 }
 
 function unwrapClientConfigBillingDiscount(
-  payload: MaridClientConfigEnvelope,
+  payload: QodexClientConfigEnvelope,
 ): CodingPlanBillingDiscountConfig | undefined {
   if (payload.code !== undefined && payload.code !== 0) {
-    throw new Error(payload.msg?.trim() || "Marid client config request failed");
+    throw new Error(payload.msg?.trim() || "Qodex client config request failed");
   }
   const configs = payload.data?.configs;
   if (!configs || !("codingPlanBillingDiscount" in configs)) {
@@ -1453,10 +1453,10 @@ function unwrapClientConfigBillingDiscount(
 }
 
 function unwrapClientConfigStartPlanPreview(
-  payload: MaridClientConfigEnvelope,
+  payload: QodexClientConfigEnvelope,
 ): StartPlanPreviewConfig | null {
   if (payload.code !== undefined && payload.code !== 0) {
-    throw new Error(payload.msg?.trim() || "Marid client config request failed");
+    throw new Error(payload.msg?.trim() || "Qodex client config request failed");
   }
   const preview = payload.data?.configs?.startPlanPreview;
   if (!preview) {
@@ -1467,7 +1467,7 @@ function unwrapClientConfigStartPlanPreview(
     typeof preview.name !== "string" ||
     !Array.isArray(preview.entitlements)
   ) {
-    throw new Error("Marid client config invalid Start Plan preview");
+    throw new Error("Qodex client config invalid Start Plan preview");
   }
   return {
     planId: preview.planId,
@@ -1477,10 +1477,10 @@ function unwrapClientConfigStartPlanPreview(
 }
 
 function unwrapClientConfigForceUpdate(
-  payload: MaridClientConfigEnvelope,
+  payload: QodexClientConfigEnvelope,
 ): ForceUpdateConfig | null {
   if (payload.code !== undefined && payload.code !== 0) {
-    throw new Error(payload.msg?.trim() || "Marid client config request failed");
+    throw new Error(payload.msg?.trim() || "Qodex client config request failed");
   }
 
   const forceUpdate = payload.data?.configs?.forceUpdate;
@@ -1597,21 +1597,21 @@ function dropUndefined(value: Record<string, unknown>): Record<string, unknown> 
 
 /**
  * 闲时任务灰度判据（纯函数供单测）：远端只提供曝光开关，模型成员和事实
- * 来自 Marid Built-in Provider / Model Config。
- * mock 模式（MARID_OFFPEAK_MOCK=1）只替代产品曝光与套餐状态；模型候选仍来自 Registry。
+ * 来自 Qodex Built-in Provider / Model Config。
+ * mock 模式（QODEX_OFFPEAK_MOCK=1）只替代产品曝光与套餐状态；模型候选仍来自 Registry。
  */
 export function resolveOffPeakClientConfig(
-  payload: MaridClientConfigEnvelope,
+  payload: QodexClientConfigEnvelope,
   env: NodeJS.ProcessEnv,
   modelSelectionView: ModelSelectionView = EMPTY_OFF_PEAK_MODEL_SELECTION_VIEW,
 ): OffPeakClientConfig {
   const hasModels = modelSelectionView.providers.some((provider) => provider.models.length > 0);
-  if (env["MARID_OFFPEAK_MOCK"] === "1") {
+  if (env["QODEX_OFFPEAK_MOCK"] === "1") {
     return {
       enabled: hasModels,
       modelSelectionView,
-      // MARID_OFFPEAK_MOCK_NO_PLAN=1 演示「非 coding plan 锁定」态；缺省视为已订阅。
-      codingPlanActive: env["MARID_OFFPEAK_MOCK_NO_PLAN"] !== "1",
+      // QODEX_OFFPEAK_MOCK_NO_PLAN=1 演示「非 coding plan 锁定」态；缺省视为已订阅。
+      codingPlanActive: env["QODEX_OFFPEAK_MOCK_NO_PLAN"] !== "1",
     };
   }
   const raw = payload.data?.configs?.offPeak;

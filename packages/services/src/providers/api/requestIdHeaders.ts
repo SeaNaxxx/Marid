@@ -1,4 +1,4 @@
-import { createUuid } from "@marid/shared";
+import { createUuid } from "@qodex/shared";
 
 export const REQUEST_ID_HEADER_NAME = "x-request-id";
 

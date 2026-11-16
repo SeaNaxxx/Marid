@@ -1,6 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
-import { BUILTIN_MODEL_PROVIDER_IDS } from "@marid/shared";
-import { TID_LOGIN_TRIGGER } from "@marid/shared/test-ids";
+import { BUILTIN_MODEL_PROVIDER_IDS } from "@qodex/shared";
+import { TID_LOGIN_TRIGGER } from "@qodex/shared/test-ids";
 import {
   clearAppData,
   DEFAULT_WORKSPACE,

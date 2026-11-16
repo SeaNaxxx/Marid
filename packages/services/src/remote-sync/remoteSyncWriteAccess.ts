@@ -1,12 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { RemoteSyncWriteAccessResult } from "@marid/shared";
+import type { RemoteSyncWriteAccessResult } from "@qodex/shared";
 
 export async function checkRemoteSyncDirectoryWriteAccess(
   directoryPath: string,
 ): Promise<RemoteSyncWriteAccessResult> {
-  const markerPath = join(directoryPath, `.marid-sync-preflight-${process.pid}-${randomUUID()}`);
+  const markerPath = join(directoryPath, `.qodex-sync-preflight-${process.pid}-${randomUUID()}`);
   try {
     await mkdir(directoryPath, { recursive: true });
     await writeFile(markerPath, "ok", { encoding: "utf-8", flag: "wx" });

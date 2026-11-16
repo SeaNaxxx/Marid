@@ -1,5 +1,5 @@
 {
-  "name": "@marid/model-option-map",
+  "name": "@qodex/model-option-map",
   "private": true,
   "type": "module",
   "exports": {

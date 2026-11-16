@@ -1,9 +1,9 @@
 import { TASK_GROUP_ADMISSIONS_SQL } from "#src/task-groups/migration-v6.js";
 import { basename, dirname, join } from "node:path";
 import { createHash } from "node:crypto";
-import { databaseMigrationIdSchema, type DatabaseMigrationFacts } from "@marid/shared";
+import { databaseMigrationIdSchema, type DatabaseMigrationFacts } from "@qodex/shared";
 import type { DatabaseSync } from "node:sqlite";
-import { sqliteMigrations, type SqliteMigration } from "@marid/shared/sqlite-migrations";
+import { sqliteMigrations, type SqliteMigration } from "@qodex/shared/sqlite-migrations";
 import {
   AUTOMATION_SCHEMA,
   OFF_PEAK_SCHEMA,

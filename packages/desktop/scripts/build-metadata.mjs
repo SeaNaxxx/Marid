@@ -35,7 +35,7 @@ function findPackageDir(packageName, startDirs) {
   throw new Error(`Unable to find package directory for ${packageName}`);
 }
 
-const desktopDir = findPackageDir("@marid/desktop", [
+const desktopDir = findPackageDir("@qodex/desktop", [
   moduleDir,
   resolve(moduleDir, ".."),
   process.cwd(),
@@ -75,7 +75,7 @@ function resolveCommitId() {
       .toString()
       .trim();
   } catch {
-    return process.env.MARID_COMMIT ?? "unknown";
+    return process.env.QODEX_COMMIT ?? "unknown";
   }
 }
 
@@ -86,7 +86,7 @@ export function collectBuildMetadata() {
   return {
     appVersion: normalizeVersion(rootPackageJson.version),
     minCompatibleVersion: normalizeVersion(
-      rootPackageJson.maridCompatibility?.minCompatibleVersion ?? rootPackageJson.version,
+      rootPackageJson.qodexCompatibility?.minCompatibleVersion ?? rootPackageJson.version,
     ),
     buildCommitId: resolveCommitId(),
     buildTime: new Date().toISOString(),

@@ -6,7 +6,7 @@ import {
   TID_CONFIRM_DIALOG_CONFIRM,
   TID_CRON_CREATE_CARD,
   TID_CRON_CREATE_OPEN,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   clearAppData,
   clickTestIdByDom,

@@ -1,6 +1,6 @@
-import { Emitter, type Event } from "@marid/rpc";
-import type { ContextComposition } from "@marid/shared/marid-protocol-v4";
-import type { IMaridAgentService } from "#src/marid-agent/maridAgent.js";
+import { Emitter, type Event } from "@qodex/rpc";
+import type { ContextComposition } from "@qodex/shared/qodex-protocol-v4";
+import type { IQodexAgentService } from "#src/qodex-agent/qodexAgent.js";
 import type { ServiceLogger } from "#src/logger/serviceLogger.js";
 import {
   createWorkspaceSubscriptions,
@@ -22,7 +22,7 @@ export interface ContextPump {
 }
 
 export function createContextPump(deps: {
-  agent: Pick<IMaridAgentService, "getContextComposition" | "onDynamicContextCompositionChanged">;
+  agent: Pick<IQodexAgentService, "getContextComposition" | "onDynamicContextCompositionChanged">;
   workbench: WorkbenchState;
   logger: Pick<ServiceLogger, "debug" | "info">;
 }): ContextPump {

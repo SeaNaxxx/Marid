@@ -1,4 +1,4 @@
-import type { AppSettings } from "@marid/shared";
+import type { AppSettings } from "@qodex/shared";
 
 import type { WebRemoteControlDeviceStorage } from "#src/main/web-remote-relay/contract.js";
 

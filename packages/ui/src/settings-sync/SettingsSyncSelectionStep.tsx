@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { CheckIcon, MinusIcon } from "lucide-react";
-import type { SettingsSyncCategory, SettingsSyncDiscoveryResult } from "@marid/shared";
+import type { SettingsSyncCategory, SettingsSyncDiscoveryResult } from "@qodex/shared";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { renderProviderCliIcon } from "@/lib/providerCliIcon.js";
 
 function getSelectionKey(agent: string, category: string): string {
@@ -28,10 +28,10 @@ function agentsWithCategory(
   return agents.filter((a) => a.categories.some((c) => c.category === category));
 }
 
-function formatAgentName(agent: string, intl: ReturnType<typeof useMaridIntl>["intl"]): string {
+function formatAgentName(agent: string, intl: ReturnType<typeof useQodexIntl>["intl"]): string {
   switch (agent) {
-    case "marid":
-      return intl.formatMessage({ id: "settingsSync.agent.marid" });
+    case "qodex":
+      return intl.formatMessage({ id: "settingsSync.agent.qodex" });
     case "claudeCode":
       return intl.formatMessage({ id: "settingsSync.agent.claudeCode" });
     case "codexCli":
@@ -47,7 +47,7 @@ function formatAgentName(agent: string, intl: ReturnType<typeof useMaridIntl>["i
 
 function formatCategoryName(
   category: string,
-  intl: ReturnType<typeof useMaridIntl>["intl"],
+  intl: ReturnType<typeof useQodexIntl>["intl"],
 ): string {
   switch (category) {
     case "providers":
@@ -61,7 +61,7 @@ function formatCategoryName(
 
 function formatCategoryDescription(
   category: string,
-  intl: ReturnType<typeof useMaridIntl>["intl"],
+  intl: ReturnType<typeof useQodexIntl>["intl"],
 ): string {
   switch (category) {
     case "providers":
@@ -88,7 +88,7 @@ export function SettingsSyncSelectionStep(props: {
   onToggleSelection: (key: string) => void;
   onSetCategorySelectionAllAgents: (category: SettingsSyncCategory, checked: boolean) => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const selected = useMemo(() => new Set(props.selectedKeys), [props.selectedKeys]);
 
   const agents = props.discovery.agents;

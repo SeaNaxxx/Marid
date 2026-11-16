@@ -2,7 +2,7 @@ import {
   InternalChannels,
   scopedServicePortPayloadSchema,
   type ScopedServicePortPayload,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export type RemoteWorkspaceServicePortRegistration = ScopedServicePortPayload & {
   port: MessagePort;

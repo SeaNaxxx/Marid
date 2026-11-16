@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "@qodex/restore-legacy-sessions-plugin",
+  "version": "0.1.0-qodex",
+  "private": true,
+  "license": "MIT",
+  "description": "Legacy Qodex session restoration skills published as an official Qodex plugin."
+}

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { WorkflowRunArtifactSummary } from "@marid/shared/marid-protocol-v4";
+import type { WorkflowRunArtifactSummary } from "@qodex/shared/qodex-protocol-v4";
 import {
   WorkflowCompletionCard,
   type WorkflowCompletionFigures,

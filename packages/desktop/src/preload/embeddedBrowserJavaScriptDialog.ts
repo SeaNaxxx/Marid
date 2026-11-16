@@ -1,9 +1,9 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { PlatformChannels } from "@marid/shared";
+import { PlatformChannels } from "@qodex/shared";
 import { installEmbeddedBrowserDesignBridge } from "./embeddedBrowserDesignBridge.js";
 import { installEmbeddedBrowserWheelForwarding } from "./embeddedBrowserWheel.js";
 
-const BRIDGE_KEY = "__maridEmbeddedBrowserJavaScriptDialog__";
+const BRIDGE_KEY = "__qodexEmbeddedBrowserJavaScriptDialog__";
 
 if (typeof window !== "undefined") {
   installEmbeddedBrowserWheelForwarding(window, (channel, payload) => {

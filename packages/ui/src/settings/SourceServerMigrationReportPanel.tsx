@@ -1,10 +1,10 @@
 import type {
   SourceServerMigrationReport,
   SourceServerMigrationReportRow,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { Button } from "@/components/ui/button.js";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import {
   getSourceMigrationPhaseMessageId,
   getSourceMigrationStatusMessageId,
@@ -37,7 +37,7 @@ export function SourceServerMigrationReportPanel({
   onAbandon: (workspacePath: string, migrationId: string) => void;
   onRetry: (workspacePath: string, migrationId: string) => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const latestMigrationIdByPath = new Map<string, string>();
   for (const row of report.rows) {
     if (!latestMigrationIdByPath.has(row.workspacePath)) {

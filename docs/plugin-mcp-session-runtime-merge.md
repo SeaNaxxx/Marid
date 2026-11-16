@@ -2,7 +2,7 @@
 
 ## 背景
 
-Marid Dev 的设置页会通过 `marid/mcp/list` 展示插件 MCP 和用户 MCP 的合并结果，但桌面端创建或恢复 session 时，UI 传给 protocol 的 `mcpServers` 只来自 `source === "maridagentmcp"` 的用户配置。
+Qodex Dev 的设置页会通过 `qodex/mcp/list` 展示插件 MCP 和用户 MCP 的合并结果，但桌面端创建或恢复 session 时，UI 传给 protocol 的 `mcpServers` 只来自 `source === "qodexagentmcp"` 的用户配置。
 
 ## 问题
 

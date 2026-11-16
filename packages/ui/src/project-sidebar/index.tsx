@@ -6,7 +6,7 @@ export { useWebRemoteControlRendererActions } from "@/project-sidebar/useWebRemo
 export { ProjectManagement } from "@/project-sidebar/ProjectManagement.js";
 import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { ScrollFadeViewport } from "@/components/ui/scroll-fade-viewport.js";
-import { TID_SIDEBAR } from "@marid/shared/test-ids";
+import { TID_SIDEBAR } from "@qodex/shared/test-ids";
 import { remoteHostIdFromWorkspaceIdentity } from "@/project-sidebar/contract.js";
 import type {
   ProjectSidebarProps,
@@ -57,10 +57,10 @@ import { ProjectSidebarNavigation } from "@/project-sidebar/ProjectSidebarNaviga
 import { HomeOnlyWorkspaceRows } from "@/project-sidebar/HomeOnlyWorkspaceRows.js";
 import { WorkspaceSidebarFooter } from "@/WorkspaceSidebarFooter.js";
 import { SidebarBottomActivity } from "@/sidebar-activity/SidebarBottomActivity.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { useTabStoreApi } from "@/store/TabStoreProvider.js";
-import { useMaridSessionStore } from "@/store/maridSessionStore.js";
-import { useMaridStore } from "@/store/StoreProvider.js";
+import { useQodexSessionStore } from "@/store/qodexSessionStore.js";
+import { useQodexStore } from "@/store/StoreProvider.js";
 import { useCodingPlanUpgradeDialog } from "@/settings/CodingPlanUpgradeDialogProvider.js";
 export { attachRemoteProjectWorkspace } from "@/project-sidebar/remote-navigation.js";
 export { useRemoteWorkspaceConnectionGate } from "@/project-sidebar/useRemoteWorkspaceConnectionGate.js";
@@ -97,9 +97,9 @@ export const ProjectSidebar = memo(function ProjectSidebar(props: ProjectSidebar
     },
     [navigateToTask],
   );
-  const { intl, localePreference, setLocalePreference } = useMaridIntl();
+  const { intl, localePreference, setLocalePreference } = useQodexIntl();
   const tabStore = useTabStoreApi();
-  const setTheme = useMaridStore((state) => state.setTheme);
+  const setTheme = useQodexStore((state) => state.setTheme);
   const { openCodingPlanUpgrade } = useCodingPlanUpgradeDialog();
   const { view, setView } = preferences;
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -115,7 +115,7 @@ export const ProjectSidebar = memo(function ProjectSidebar(props: ProjectSidebar
   );
   // 当前任务只影响远端“创建项目”的默认设备；分组继承在点击时读，
   // 避免本地会话/草稿切换让全部项目的菜单与 Tooltip 重渲染。
-  const hasActiveRemoteTask = useMaridSessionStore((state) =>
+  const hasActiveRemoteTask = useQodexSessionStore((state) =>
     Boolean(
       props.workspaceIdentity &&
       state.workspaces[props.workspaceIdentity.trim() || props.workspacePath]?.activeTaskId,
@@ -151,7 +151,7 @@ export const ProjectSidebar = memo(function ProjectSidebar(props: ProjectSidebar
   );
   const msg = (id: string) => intl.formatMessage({ id: `project.${id}` });
   const start = async (projectId?: string, hostId?: string, taskGroupId?: string | null) => {
-    const activeTaskId = useMaridSessionStore
+    const activeTaskId = useQodexSessionStore
       .getState()
       .getWorkspaceState(props.workspacePath, props.workspaceIdentity).activeTaskId;
     const inheritedGroup =
@@ -164,7 +164,7 @@ export const ProjectSidebar = memo(function ProjectSidebar(props: ProjectSidebar
             }),
           ) ?? null)
         : view === "grouped" && !projectId
-          ? (useMaridSessionStore
+          ? (useQodexSessionStore
               .getState()
               .getWorkspaceState(props.workspacePath, props.workspaceIdentity).draftTaskGroupId ??
             null)

@@ -5,7 +5,7 @@ import { pathToFileURL } from "node:url";
 import { defineConfig, loadEnv, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
-import { resolveMaridEndpointOrigin } from "@marid/shared/maridEndpoint";
+import { resolveQodexEndpointOrigin } from "@qodex/shared/qodexEndpoint";
 import { pdfJsCMapsPlugin } from "../ui/vite/pdfJsCMapsPlugin.js";
 import { getBuildMetadata } from "./scripts/build-metadata.mjs";
 import { resolveDesktopProductFlavor } from "./scripts/desktop-product-identity.mjs";
@@ -56,7 +56,7 @@ export const desktopRendererDependencyAliases = {
   "lucide-react": resolveInstalledPackageRoot("lucide-react"),
 } as const;
 
-function resolveMaridEnv(value: string | undefined): "test" | "production" {
+function resolveQodexEnv(value: string | undefined): "test" | "production" {
   return value?.trim().toLowerCase() === "production" ? "production" : "test";
 }
 
@@ -82,7 +82,7 @@ function createE2EUIRendererCoveragePlugin(repoRoot: string): Plugin {
   );
 
   return {
-    name: "marid:e2e-ui-source-coverage",
+    name: "qodex:e2e-ui-source-coverage",
     enforce: "pre",
     transform(sourceCode, id, options) {
       if (options?.ssr || id.startsWith("\0")) {
@@ -153,7 +153,7 @@ function stripViteRequestQuery(id: string) {
 function createReactScanDevPlugin(): Plugin {
   const scriptPath = normalizePathForVite(desktopRequire.resolve("react-scan/dist/auto.global.js"));
   return {
-    name: "marid:react-scan",
+    name: "qodex:react-scan",
     apply: "serve",
     transformIndexHtml: {
       order: "post",
@@ -167,32 +167,32 @@ function createReactScanDevPlugin(): Plugin {
 }
 
 export default defineConfig(({ command, mode }) => {
-  // `.env*` 只提供链接常量；当前产品环境由启动脚本或 CI 注入 MARID_ENV。
+  // `.env*` 只提供链接常量；当前产品环境由启动脚本或 CI 注入 QODEX_ENV。
   const env = loadEnv(mode, "../..", "");
   const repoRoot = resolve(__dirname, "../..");
-  const maridEnv = resolveMaridEnv(env.MARID_ENV);
+  const qodexEnv = resolveQodexEnv(env.QODEX_ENV);
   // 安装包身份与后端环境分轴；renderer 用它决定是否展示更新入口。
-  const maridProductFlavor = resolveDesktopProductFlavor({
+  const qodexProductFlavor = resolveDesktopProductFlavor({
     ...process.env,
     ...env,
-    MARID_ENV: maridEnv,
+    QODEX_ENV: qodexEnv,
   });
   const e2eCoverageEnabled =
-    env.MARID_E2E_COVERAGE === "1" || process.env.MARID_E2E_COVERAGE === "1";
+    env.QODEX_E2E_COVERAGE === "1" || process.env.QODEX_E2E_COVERAGE === "1";
   const e2eStoreBridgeEnabled =
-    env.VITE_MARID_E2E_STORE_BRIDGE === "1" || process.env.VITE_MARID_E2E_STORE_BRIDGE === "1";
-  const maridEndpointOrigin = resolveMaridEndpointOrigin({
-    env: maridEnv,
+    env.VITE_QODEX_E2E_STORE_BRIDGE === "1" || process.env.VITE_QODEX_E2E_STORE_BRIDGE === "1";
+  const qodexEndpointOrigin = resolveQodexEndpointOrigin({
+    env: qodexEnv,
     envBaseOrigin:
-      env.MARID_BASE_URL ??
-      env.MARID_ENDPOINT_ORIGIN ??
-      (maridEnv === "production" ? env.MARID_PRODUCTION_BASE_URL : env.MARID_TEST_BASE_URL),
+      env.QODEX_BASE_URL ??
+      env.QODEX_ENDPOINT_ORIGIN ??
+      (qodexEnv === "production" ? env.QODEX_PRODUCTION_BASE_URL : env.QODEX_TEST_BASE_URL),
   });
   const codingPlanWebviewOrigin =
     env.VITE_CODING_PLAN_WEBVIEW_ORIGIN ?? process.env.VITE_CODING_PLAN_WEBVIEW_ORIGIN ?? "";
   const plugins = [
-    // 仅开发服务器装配，所有 build 都不注入；后端 MARID_ENV 不决定是否开启开发工具。
-    ...(command === "serve" && mode !== "production" && env.MARID_REACT_SCAN !== "0"
+    // 仅开发服务器装配，所有 build 都不注入；后端 QODEX_ENV 不决定是否开启开发工具。
+    ...(command === "serve" && mode !== "production" && env.QODEX_REACT_SCAN !== "0"
       ? [createReactScanDevPlugin()]
       : []),
     ...(e2eCoverageEnabled ? [createE2EUIRendererCoveragePlugin(repoRoot)] : []),
@@ -221,23 +221,23 @@ export default defineConfig(({ command, mode }) => {
     },
     server: { port: 5174, strictPort: true },
     define: {
-      __MARID_VERSION__: JSON.stringify(buildMetadata.appVersion),
-      __MARID_MIN_COMPATIBLE_VERSION__: JSON.stringify(buildMetadata.minCompatibleVersion),
-      __MARID_COMMIT__: JSON.stringify(buildMetadata.buildCommitId),
-      __MARID_BUILD_TIME__: JSON.stringify(buildMetadata.buildTime),
-      __MARID_ENV__: JSON.stringify(maridEnv),
-      __MARID_PRODUCT_FLAVOR__: JSON.stringify(maridProductFlavor),
+      __QODEX_VERSION__: JSON.stringify(buildMetadata.appVersion),
+      __QODEX_MIN_COMPATIBLE_VERSION__: JSON.stringify(buildMetadata.minCompatibleVersion),
+      __QODEX_COMMIT__: JSON.stringify(buildMetadata.buildCommitId),
+      __QODEX_BUILD_TIME__: JSON.stringify(buildMetadata.buildTime),
+      __QODEX_ENV__: JSON.stringify(qodexEnv),
+      __QODEX_PRODUCT_FLAVOR__: JSON.stringify(qodexProductFlavor),
       ...buildTimeConfigDefines,
-      __MARID_LOCAL_DEVELOPMENT_RUNTIME__: JSON.stringify(mode !== "production"),
-      "import.meta.env.VITE_MARID_BASE_URL": JSON.stringify(maridEndpointOrigin),
-      // 兼容旧 renderer 读取名；新代码统一读 VITE_MARID_BASE_URL。
-      "import.meta.env.VITE_MARID_ENDPOINT_ORIGIN": JSON.stringify(maridEndpointOrigin),
+      __QODEX_LOCAL_DEVELOPMENT_RUNTIME__: JSON.stringify(mode !== "production"),
+      "import.meta.env.VITE_QODEX_BASE_URL": JSON.stringify(qodexEndpointOrigin),
+      // 兼容旧 renderer 读取名；新代码统一读 VITE_QODEX_BASE_URL。
+      "import.meta.env.VITE_QODEX_ENDPOINT_ORIGIN": JSON.stringify(qodexEndpointOrigin),
       "import.meta.env.VITE_CODING_PLAN_WEBVIEW_ORIGIN": JSON.stringify(codingPlanWebviewOrigin),
       "import.meta.env.VITE_REWARDS_WEBVIEW_ORIGIN": JSON.stringify(
         env.VITE_REWARDS_WEBVIEW_ORIGIN ?? process.env.VITE_REWARDS_WEBVIEW_ORIGIN ?? "",
       ),
-      // Bugfix: E2E store bridge 只能由 WDIO 专用变量打开，避免把 MARID_ENV=test 产品环境误当成测试运行态。
-      "import.meta.env.VITE_MARID_E2E_STORE_BRIDGE": JSON.stringify(
+      // Bugfix: E2E store bridge 只能由 WDIO 专用变量打开，避免把 QODEX_ENV=test 产品环境误当成测试运行态。
+      "import.meta.env.VITE_QODEX_E2E_STORE_BRIDGE": JSON.stringify(
         e2eStoreBridgeEnabled ? "1" : "",
       ),
     },
@@ -263,7 +263,7 @@ export default defineConfig(({ command, mode }) => {
           index: resolve(__dirname, "src/renderer/index.html"),
           "resource-manager": resolve(__dirname, "src/renderer/resource-manager.html"),
           "cua-permission-panel": resolve(__dirname, "src/renderer/cua-permission-panel.html"),
-          // 插件 UI 沙箱的受信 shell，经 marid-sandbox:// 提供
+          // 插件 UI 沙箱的受信 shell，经 qodex-sandbox:// 提供
           "plugin-sandbox": resolve(__dirname, "src/renderer/plugin-sandbox.html"),
         },
       },

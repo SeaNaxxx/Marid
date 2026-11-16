@@ -12,7 +12,7 @@
  * 默认键位保持既有行为，零变化。
  */
 import { useEffect, useRef } from "react";
-import type { ShortcutCommandId, MaridConfigOption } from "@marid/shared";
+import type { ShortcutCommandId, QodexConfigOption } from "@qodex/shared";
 import {
   isShortcutRecordingActive,
   matchesShortcutBinding,
@@ -26,7 +26,7 @@ type ChatToolbarShortcutKey = "m" | "ctrlShiftM" | "t" | null;
 
 /** 旧 chatInputControlShortcuts.getChatToolbarShortcutKey 原样恢复。 */
 export function getChatToolbarShortcutKey(
-  category: MaridConfigOption["category"],
+  category: QodexConfigOption["category"],
 ): ChatToolbarShortcutKey {
   switch (category) {
     case "model":
@@ -42,7 +42,7 @@ export function getChatToolbarShortcutKey(
 
 /** 计算 select 选项的下一次循环取值（模式循环用）。 */
 export function getNextConfigSelectValue(
-  option: Pick<MaridConfigOption, "type" | "currentValue" | "options">,
+  option: Pick<QodexConfigOption, "type" | "currentValue" | "options">,
 ): string | null {
   if (option.type !== "select" || !option.options?.length) {
     return null;
@@ -71,9 +71,9 @@ interface ToolbarShortcutState {
   hasAnyOption: boolean;
   toolbarDisabled: boolean;
   modelMenuDisabled: boolean;
-  modelOption?: MaridConfigOption;
-  modeOption?: MaridConfigOption;
-  thoughtOption?: MaridConfigOption;
+  modelOption?: QodexConfigOption;
+  modeOption?: QodexConfigOption;
+  thoughtOption?: QodexConfigOption;
 }
 
 type ToolbarShortcutAction = "openModelMenu" | "cycleSessionMode" | "cycleThoughtLevel";
@@ -110,7 +110,7 @@ export function resolveToolbarShortcutAction(
     action: ToolbarShortcutAction;
     commandId: ShortcutCommandId;
     expectedKey: ChatToolbarShortcutKey;
-    option?: MaridConfigOption;
+    option?: QodexConfigOption;
     disabled?: boolean;
   }> = [
     {
@@ -158,9 +158,9 @@ export function useToolbarShortcutBindings(params: {
   hasAnyOption: boolean;
   toolbarDisabled: boolean;
   modelMenuDisabled: boolean;
-  modelOption?: MaridConfigOption;
-  modeOption?: MaridConfigOption;
-  thoughtOption?: MaridConfigOption;
+  modelOption?: QodexConfigOption;
+  modeOption?: QodexConfigOption;
+  thoughtOption?: QodexConfigOption;
   onOpenModelMenu: () => void;
   /** Ctrl+Shift+M：参考 thought level，按选项顺序快速切换会话模式，不打开菜单。 */
   onCycleSessionMode: () => void;

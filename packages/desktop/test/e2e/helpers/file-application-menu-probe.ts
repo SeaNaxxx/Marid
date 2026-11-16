@@ -2,7 +2,7 @@ import {
   PlatformChannels,
   type FileApplicationInfo,
   type FileApplicationTarget,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 type Handler = (...args: unknown[]) => unknown;
 declare global {

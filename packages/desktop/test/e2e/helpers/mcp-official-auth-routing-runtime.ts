@@ -2,12 +2,12 @@ import assert from "node:assert/strict";
 import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { setTimeout as pause } from "node:timers/promises";
-import { createOfficialMcpTrustedOriginRegistry } from "@marid/shared";
-import { createMaridAgentService, getDataBaseDir, setDataBaseDir } from "@marid/services/node";
+import { createOfficialMcpTrustedOriginRegistry } from "@qodex/shared";
+import { createQodexAgentService, getDataBaseDir, setDataBaseDir } from "@qodex/services/node";
 import {
   getTasksIndexDatabasePath,
   prepareTasksIndexStorage,
-} from "@marid/services/storage-startup";
+} from "@qodex/services/storage-startup";
 import { getE2EAppDataPaths } from "#e2e/helpers/desktop-app";
 import {
   OFFICIAL_AUTH_ROUTING_PLUGIN,
@@ -19,10 +19,10 @@ export async function runOfficialMcpRoutingRuntime(artifactDir: string): Promise
   const paths = getE2EAppDataPaths();
   const home = await mkdtemp(join(paths.homeDir, "mcp-auth-runtime-"));
   const previous = getDataBaseDir();
-  const origin = process.env.MARID_E2E_OFFICIAL_AUTH_ROUTING_URL;
+  const origin = process.env.QODEX_E2E_OFFICIAL_AUTH_ROUTING_URL;
   assert(origin, "Missing controlled MCP origin");
   const evidenceFile = join(home, "rejected-requests.ndjson");
-  const cliRoot = join(home, ".marid", "cli");
+  const cliRoot = join(home, ".qodex", "cli");
   const workspaceA = join(home, "project-a");
   const workspaceB = join(home, "project-b");
   await Promise.all(
@@ -44,26 +44,26 @@ export async function runOfficialMcpRoutingRuntime(artifactDir: string): Promise
   const exited: number[] = [];
   try {
     await prepareTasksIndexStorage(getTasksIndexDatabasePath(), () => {});
-    const service = createMaridAgentService({
+    const service = createQodexAgentService({
       mcpStatusIdleTimeoutMs: 1_000,
       commandResolver: ({ workspacePath }) => ({
         command: process.execPath,
         args: [
           resolve("test/e2e/fixtures/mcp/official-auth-routing-proxy.mjs"),
-          resolve("../../apps/marid-cli/packages/cli/dist/marid.cjs"),
+          resolve("../../apps/qodex-cli/packages/cli/dist/qodex.cjs"),
           evidenceFile,
           workspacePath.endsWith("plugin-workspace") ? "probe" : "passthrough",
         ],
         env: {
           HOME: home,
           USERPROFILE: home,
-          MARID_DATA_BASE_DIR: home,
-          MARID_OFFICIAL_MCP_DEV_TRUSTED_ORIGINS: origin,
+          QODEX_DATA_BASE_DIR: home,
+          QODEX_OFFICIAL_MCP_DEV_TRUSTED_ORIGINS: origin,
         },
       }),
       officialMcpTrustedOrigins: createOfficialMcpTrustedOriginRegistry({
         devTrustedOriginsRaw: origin,
-        resolveMaridApiOrigin: () => "https://example.com",
+        resolveQodexApiOrigin: () => "https://example.com",
       }),
       officialMcpAuthHeadersResolver: {
         async resolveHeaders(request) {

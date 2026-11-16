@@ -5,7 +5,7 @@ import {
   type ConnectionProfile,
   type RemoteTarget,
   stripRemoteTargetSecrets,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type { IRemoteProjectService } from "#src/remote-projects/contract.js";
 
 function hostIdForTarget(target: RemoteTarget, sourceServerId?: string): string | null {

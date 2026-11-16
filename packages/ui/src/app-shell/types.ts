@@ -2,10 +2,10 @@ import type { FileManagerTarget } from "@/lib/workspaceSidePane.js";
 import type { ComposerDraftHandoff } from "@/v4/composer/composerDraftWorkspaceTransfer.js";
 import type { RefObject } from "react";
 import type {
-  MaridProvider,
+  QodexProvider,
   SessionCreateSource,
-  MaridTaskRuntimeStatus,
-  MaridTaskMeta,
+  QodexTaskRuntimeStatus,
+  QodexTaskMeta,
   GitChangeSourceId,
   DesktopWindowChromeState,
   IPlatformService,
@@ -14,8 +14,8 @@ import type {
   RemoteWorkspaceSessionEntry,
   UpdateStatePayload,
   UserInfo,
-} from "@marid/shared";
-import type { IFeedbackService, IServiceAccessor } from "@marid/services";
+} from "@qodex/shared";
+import type { IFeedbackService, IServiceAccessor } from "@qodex/services";
 import type { SavedWorkflowsOpenTarget } from "@/settings/saved-workflows/SavedWorkflowsSection.js";
 import type { SavedWorkflowHubTarget } from "@/v4/savedWorkflowHubContext.js";
 import type { WebRemoteControlWorkspaceSwitcherApi } from "@/root/types.js";
@@ -35,7 +35,7 @@ import type {
   OpenScopedWorkflowWorkspaceSideTabRequest,
   WorkspaceSidePaneState,
 } from "@/lib/workspaceSidePane.js";
-import type { WorkspaceMaridUIState } from "@/store/maridSessionStore.js";
+import type { WorkspaceQodexUIState } from "@/store/qodexSessionStore.js";
 import type { RemoteConnectionLogEntry } from "@/hooks/useRemoteConnectionLogs.js";
 import type { Theme } from "@/useTheme.js";
 import type {
@@ -43,20 +43,20 @@ import type {
   ChatViewSummaryPanelVariant,
   ConversationFindMatchState,
 } from "@/v4/legacyChatViewTypes.js";
-import type { ComposerMentionPrefill } from "@/store/maridSessionStoreTypes.js";
+import type { ComposerMentionPrefill } from "@/store/qodexSessionStoreTypes.js";
 import type { TaskFindDialogProps } from "@/quickpick/TaskFindDialog.js";
 import type { AutomationsNavigationTab, OpenAutomationsMain } from "@/lib/taskNavigationHistory.js";
 import type { SidePaneFullViewController } from "@/side-pane-full-view/contract.js";
 
-export interface WorkspaceShellMaridState {
-  activeTaskId: WorkspaceMaridUIState["activeTaskId"];
-  draftFocusVersion: WorkspaceMaridUIState["draftFocusVersion"];
-  modelSwitchPending: WorkspaceMaridUIState["modelSwitchPending"];
-  modelSwitchStage: WorkspaceMaridUIState["modelSwitchStage"];
-  selectedProvider: WorkspaceMaridUIState["selectedProvider"];
-  optimisticTaskListByTaskId: WorkspaceMaridUIState["optimisticTaskListByTaskId"];
-  workspaceInit: WorkspaceMaridUIState["workspaceInit"];
-  taskStatus: MaridTaskRuntimeStatus;
+export interface WorkspaceShellQodexState {
+  activeTaskId: WorkspaceQodexUIState["activeTaskId"];
+  draftFocusVersion: WorkspaceQodexUIState["draftFocusVersion"];
+  modelSwitchPending: WorkspaceQodexUIState["modelSwitchPending"];
+  modelSwitchStage: WorkspaceQodexUIState["modelSwitchStage"];
+  selectedProvider: WorkspaceQodexUIState["selectedProvider"];
+  optimisticTaskListByTaskId: WorkspaceQodexUIState["optimisticTaskListByTaskId"];
+  workspaceInit: WorkspaceQodexUIState["workspaceInit"];
+  taskStatus: QodexTaskRuntimeStatus;
   taskError: string | null;
 }
 
@@ -69,7 +69,7 @@ export interface CreateTaskOptions {
   onError?: (error: unknown) => void;
   /** 异步预填只能提交到解析 Skill 时的同一新任务目标。 */
   expectedWorkspaceKey?: string;
-  provider?: MaridProvider;
+  provider?: QodexProvider;
   projectId?: string | null;
   /** 未归类任务目录准备的幂等身份，不作为 session 身份。 */
   draftId?: string;
@@ -97,7 +97,7 @@ export interface CreateTaskOptions {
   };
 }
 
-export type CreateTaskRequest = MaridProvider | CreateTaskOptions;
+export type CreateTaskRequest = QodexProvider | CreateTaskOptions;
 
 export interface RemoteWorkspaceRecoveryStatus {
   mode: "automatic" | "manual";
@@ -194,7 +194,7 @@ export interface AppProps {
   allowOpenWorkspace?: boolean;
   webRemoteControlWorkspaceSwitcher?: WebRemoteControlWorkspaceSwitcherApi;
   initialSidebarFileTreeOpen?: boolean;
-  initialWebRemoteControlMobileNavigationIntent?: import("@marid/shared").WebRemoteControlMobileNavigationIntent;
+  initialWebRemoteControlMobileNavigationIntent?: import("@qodex/shared").WebRemoteControlMobileNavigationIntent;
   webRemoteControlTerminalTransportState?: WebRemoteControlTerminalTransportState;
   allowRemoteWorkspace?: boolean;
   remoteWorkspaceSessions?: RemoteWorkspaceSessionEntry[];
@@ -233,7 +233,7 @@ export interface WorkspaceShellLayoutProps extends Omit<AppProps, "baseFeedbackS
   onOpenAutomationConsumed: () => void;
   handleOpenAutomations: OpenAutomationsMain;
   handleOpenPluginStore: () => void;
-  workspaceShellMaridState: WorkspaceShellMaridState;
+  workspaceShellQodexState: WorkspaceShellQodexState;
   theme: Theme;
   isMacFullscreen: boolean;
   desktopWindowChromeState: DesktopWindowChromeState | null;
@@ -271,9 +271,9 @@ export interface WorkspaceShellLayoutProps extends Omit<AppProps, "baseFeedbackS
     workspacePath: string;
     label: string;
     remoteSessionId?: string;
-    remoteTarget?: import("@marid/shared").RemoteTarget;
+    remoteTarget?: import("@qodex/shared").RemoteTarget;
     workspaceIdentity?: string;
-    workspacePurpose?: import("@marid/shared").WorkspacePurpose;
+    workspacePurpose?: import("@qodex/shared").WorkspacePurpose;
     localWorkspacePath?: string;
     availability?: import("@/store/tabStore.js").WorkspaceAvailability;
   }>;
@@ -283,8 +283,8 @@ export interface WorkspaceShellLayoutProps extends Omit<AppProps, "baseFeedbackS
   handleSidePaneDraftPromotion: (sessionId: string) => void;
   activeTraceId: string | null;
   activeSessionId: string | null;
-  activeTaskProvider: MaridProvider | null;
-  resolvedActiveTaskMeta?: MaridTaskMeta | null;
+  activeTaskProvider: QodexProvider | null;
+  resolvedActiveTaskMeta?: QodexTaskMeta | null;
   activeTaskTitle: string;
   activeTaskChangeSummary: ReturnType<
     typeof import("@/lib/taskChangeSummary.js").getTaskChangeSummary
@@ -320,7 +320,7 @@ export interface WorkspaceShellLayoutProps extends Omit<AppProps, "baseFeedbackS
   reloadSessionPending: boolean;
   handleReloadSession: (options?: {
     resumeTaskId?: string | null;
-    provider?: MaridProvider | null;
+    provider?: QodexProvider | null;
   }) => Promise<void>;
   handleSelectTask: (
     targetWorkspacePath: string,
@@ -333,7 +333,7 @@ export interface WorkspaceShellLayoutProps extends Omit<AppProps, "baseFeedbackS
   handleStartDraftInWorkspace: (
     targetWorkspacePath: string,
     targetWorkspaceIdentity?: string,
-    targetWorkspacePurpose?: import("@marid/shared").WorkspacePurpose,
+    targetWorkspacePurpose?: import("@qodex/shared").WorkspacePurpose,
     createSource?: SessionCreateSource,
   ) => void;
   handleOpenCommandCenter: () => void;

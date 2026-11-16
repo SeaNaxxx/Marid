@@ -3,7 +3,7 @@ import {
   providerProvisioningTriggerSchema,
   type ProviderProvisioningResult,
   type ProviderProvisioningTrigger,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export interface ProvisioningSyncEvent {
   kind: "completed" | "warning";

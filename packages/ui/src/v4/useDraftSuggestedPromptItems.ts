@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import type { IClientScenesService } from "@marid/services";
+import type { IClientScenesService } from "@qodex/services";
 import {
   isClientScenesBusinessError,
   useClientScenesResource,

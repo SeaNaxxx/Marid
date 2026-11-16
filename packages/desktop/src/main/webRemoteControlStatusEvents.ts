@@ -1,4 +1,4 @@
-import { PlatformChannels, type WebRemoteControlStatus } from "@marid/shared";
+import { PlatformChannels, type WebRemoteControlStatus } from "@qodex/shared";
 
 interface WebRemoteControlStatusEventTarget {
   isDestroyed(): boolean;

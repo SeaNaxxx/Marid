@@ -3,7 +3,7 @@ import {
   buildRemoteHostWorkspaceIdentity,
   buildServerRemoteWorkspaceIdentity,
 } from "@/project-sidebar/contract.js";
-import type { SourceServerManagementSnapshot } from "@marid/shared";
+import type { SourceServerManagementSnapshot } from "@qodex/shared";
 import type { RemoteConnectionOpenPreference } from "@/app-shell/types.js";
 import { getWorkspaceSourceServerId } from "@/conversation-workspace-target/sourceIdentity.js";
 import {

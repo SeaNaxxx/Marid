@@ -1,4 +1,4 @@
-import type { SessionCreateSource } from "@marid/shared";
+import type { SessionCreateSource } from "@qodex/shared";
 import type { ComposerRecentReceipt, FullAccessRecentReceipt } from "@/lib/composerRecent.js";
 export interface PendingCommandClientContext {
   fullAccess?: FullAccessRecentReceipt;

@@ -3,13 +3,13 @@ import {
   providerProvisioningErrorCodeSchema,
   type ProviderProvisioningResult,
   type ProviderProvisioningErrorCode,
-} from "@marid/shared";
-import type { IProviderProvisioningTargetService, IServiceAccessor } from "@marid/services";
+} from "@qodex/shared";
+import type { IProviderProvisioningTargetService, IServiceAccessor } from "@qodex/services";
 import {
   getProviderProvisioningSource,
   type ProviderProvisioningSource,
-} from "@marid/services/node";
-import type { ServiceCollection } from "@marid/services";
+} from "@qodex/services/node";
+import type { ServiceCollection } from "@qodex/services";
 
 export interface RemoteProviderProvisioningExecutor {
   syncLocalToRemote(): Promise<ProviderProvisioningResult>;

@@ -1,8 +1,8 @@
 import { lazy, Suspense, useMemo } from "react";
-import type { FileBinaryPreview } from "@marid/shared";
+import type { FileBinaryPreview } from "@qodex/shared";
 import { CodeBlock } from "@/components/ai-elements/code-block.js";
 import { MessageResponse } from "@/components/ai-elements/message.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import {
   buildPresetLabels,
   isArtifactPresetKind,
@@ -88,7 +88,7 @@ interface WorkflowArtifactBodyProps {
 }
 
 export function WorkflowArtifactBody(props: WorkflowArtifactBodyProps) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const { artifact } = props;
 
   // 预置看板不读字节，直接画。
@@ -157,7 +157,7 @@ function WorkflowArtifactContent({
   localSourcePath,
   isLatestVersion,
 }: WorkflowArtifactBodyProps & { bytes: Uint8Array<ArrayBuffer> }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const pdfLabels = usePdfViewerLabels();
   const pptxLabels = usePptxViewerLabels();
   const contentType = artifact.contentType ?? "application/octet-stream";

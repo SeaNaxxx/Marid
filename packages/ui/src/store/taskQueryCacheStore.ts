@@ -1,10 +1,10 @@
 /* eslint-disable max-lines -- task query cache 的 descriptor、membership 与 mutation 必须在同一 Zustand 事务里维护，拆散会增加缓存一致性风险。 */
 import { create } from "zustand";
-import type { MaridTaskListItem } from "@marid/services";
-import type { MaridTaskMeta } from "@marid/shared";
-import { matchesTaskListMembershipKind } from "@marid/shared/marid-protocol-v4";
-import { mergeTaskMetaCandidates } from "@/lib/maridTaskMetaMerge.js";
-import { compareMaridTaskListItems } from "@/lib/taskListOrdering.js";
+import type { QodexTaskListItem } from "@qodex/services";
+import type { QodexTaskMeta } from "@qodex/shared";
+import { matchesTaskListMembershipKind } from "@qodex/shared/qodex-protocol-v4";
+import { mergeTaskMetaCandidates } from "@/lib/qodexTaskMetaMerge.js";
+import { compareQodexTaskListItems } from "@/lib/taskListOrdering.js";
 import { getTaskListRowActivity, mergeTaskListMembershipFields } from "@/v4/taskListRowActivity.js";
 import {
   buildTaskEntityKey,
@@ -52,35 +52,35 @@ interface TaskQueryCacheState {
       expectedInvalidationVersion?: number;
     }>,
   ) => void;
-  upsertTaskMeta: (task: MaridTaskMeta) => void;
-  updateTaskMetaPreservingMembership: (task: MaridTaskMeta) => void;
+  upsertTaskMeta: (task: QodexTaskMeta) => void;
+  updateTaskMetaPreservingMembership: (task: QodexTaskMeta) => void;
   applyTaskMutation: (params: {
-    previousTask: MaridTaskMeta;
-    nextTask: MaridTaskMeta;
+    previousTask: QodexTaskMeta;
+    nextTask: QodexTaskMeta;
     previousState: TaskListMembershipState;
     nextState: TaskListMembershipState;
   }) => void;
   setTaskUnreadOverlay: (
-    task: Pick<MaridTaskMeta, "taskId" | "workspacePath" | "workspaceIdentity">,
+    task: Pick<QodexTaskMeta, "taskId" | "workspacePath" | "workspaceIdentity">,
     unreadAt: number | undefined,
   ) => void;
   reconcileTaskUnread: (
-    task: Pick<MaridTaskMeta, "taskId" | "workspacePath" | "workspaceIdentity">,
+    task: Pick<QodexTaskMeta, "taskId" | "workspacePath" | "workspaceIdentity">,
     unreadAt: number | undefined,
   ) => void;
   rollbackTaskUnread: (
-    task: Pick<MaridTaskMeta, "taskId" | "workspacePath" | "workspaceIdentity">,
+    task: Pick<QodexTaskMeta, "taskId" | "workspacePath" | "workspaceIdentity">,
     unreadAt: number | undefined,
   ) => void;
   removeTask: (
-    task: Pick<MaridTaskMeta, "taskId" | "workspacePath" | "workspaceIdentity">,
+    task: Pick<QodexTaskMeta, "taskId" | "workspacePath" | "workspaceIdentity">,
   ) => boolean;
   markWorkspaceKeysStale: (workspaceKeys: string[]) => void;
   invalidateWorkspaceKeys: (workspaceKeys: string[]) => void;
   clearAll: () => void;
 }
 
-type CachedTaskListItem = MaridTaskListItem & { searchSnippets?: string[] };
+type CachedTaskListItem = QodexTaskListItem & { searchSnippets?: string[] };
 
 function buildCachedTaskListResult(params: {
   descriptor: TaskListCacheDescriptor;
@@ -120,7 +120,7 @@ function matchesTaskMembership(
   return matchesTaskListMembershipKind(membership, kind);
 }
 
-function matchesTaskSearch(descriptor: TaskListCacheDescriptor, task: MaridTaskMeta): boolean {
+function matchesTaskSearch(descriptor: TaskListCacheDescriptor, task: QodexTaskMeta): boolean {
   if (!descriptor.search) {
     return true;
   }
@@ -130,7 +130,7 @@ function matchesTaskSearch(descriptor: TaskListCacheDescriptor, task: MaridTaskM
 
 function matchesTaskDescriptor(
   descriptor: TaskListCacheDescriptor,
-  task: MaridTaskMeta,
+  task: QodexTaskMeta,
   membership: TaskListMembershipState,
 ): boolean {
   const workspaceKey = buildTaskWorkspaceKey(task.workspacePath, task.workspaceIdentity);
@@ -143,7 +143,7 @@ function matchesTaskDescriptor(
 
 function sortTaskKeysByDescriptor(params: {
   taskKeys: TaskEntityKey[];
-  taskMetaByEntityKey: Record<TaskEntityKey, MaridTaskListItem>;
+  taskMetaByEntityKey: Record<TaskEntityKey, QodexTaskListItem>;
   descriptor: TaskListCacheDescriptor;
 }): TaskEntityKey[] {
   const uniqueTaskKeys = [...new Set(params.taskKeys)];
@@ -159,7 +159,7 @@ function sortTaskKeysByDescriptor(params: {
     if (!rightTask) {
       return -1;
     }
-    return compareMaridTaskListItems(leftTask, rightTask, params.descriptor.sortBy);
+    return compareQodexTaskListItems(leftTask, rightTask, params.descriptor.sortBy);
   });
 }
 
@@ -955,17 +955,17 @@ export function markTaskQueryCacheScopesStale(
   useTaskQueryCacheStore.getState().markWorkspaceKeysStale(workspaceKeys);
 }
 
-export function upsertTaskQueryCacheTaskMeta(task: MaridTaskMeta): void {
+export function upsertTaskQueryCacheTaskMeta(task: QodexTaskMeta): void {
   useTaskQueryCacheStore.getState().upsertTaskMeta(task);
 }
 
-export function updateTaskQueryCacheTaskMetaPreservingMembership(task: MaridTaskMeta): void {
+export function updateTaskQueryCacheTaskMetaPreservingMembership(task: QodexTaskMeta): void {
   useTaskQueryCacheStore.getState().updateTaskMetaPreservingMembership(task);
 }
 
 export function applyTaskQueryCacheMutation(params: {
-  previousTask: MaridTaskMeta;
-  nextTask: MaridTaskMeta;
+  previousTask: QodexTaskMeta;
+  nextTask: QodexTaskMeta;
   previousState: TaskListMembershipState;
   nextState: TaskListMembershipState;
 }): void {
@@ -973,28 +973,28 @@ export function applyTaskQueryCacheMutation(params: {
 }
 
 export function setTaskQueryCacheUnreadOverlay(
-  task: Pick<MaridTaskMeta, "taskId" | "workspacePath" | "workspaceIdentity">,
+  task: Pick<QodexTaskMeta, "taskId" | "workspacePath" | "workspaceIdentity">,
   unreadAt: number | undefined,
 ): void {
   useTaskQueryCacheStore.getState().setTaskUnreadOverlay(task, unreadAt);
 }
 
 export function reconcileTaskQueryCacheUnread(
-  task: Pick<MaridTaskMeta, "taskId" | "workspacePath" | "workspaceIdentity">,
+  task: Pick<QodexTaskMeta, "taskId" | "workspacePath" | "workspaceIdentity">,
   unreadAt: number | undefined,
 ): void {
   useTaskQueryCacheStore.getState().reconcileTaskUnread(task, unreadAt);
 }
 
 export function rollbackTaskQueryCacheUnread(
-  task: Pick<MaridTaskMeta, "taskId" | "workspacePath" | "workspaceIdentity">,
+  task: Pick<QodexTaskMeta, "taskId" | "workspacePath" | "workspaceIdentity">,
   unreadAt: number | undefined,
 ): void {
   useTaskQueryCacheStore.getState().rollbackTaskUnread(task, unreadAt);
 }
 
 export function removeTaskFromTaskQueryCaches(
-  task: Pick<MaridTaskMeta, "taskId" | "workspacePath" | "workspaceIdentity">,
+  task: Pick<QodexTaskMeta, "taskId" | "workspacePath" | "workspaceIdentity">,
 ): boolean {
   return useTaskQueryCacheStore.getState().removeTask(task);
 }

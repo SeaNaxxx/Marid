@@ -1,5 +1,5 @@
 import { remoteHostLabel } from "@/project-sidebar/RemoteHostSection.js";
-import type { V4SessionDeletionPreview } from "@marid/shared/marid-protocol-v4";
+import type { V4SessionDeletionPreview } from "@qodex/shared/qodex-protocol-v4";
 import { useEffect, useRef, useState } from "react";
 import type { ProjectTask } from "@/project-sidebar/contract.js";
 import { useProjectDirectory } from "@/project-sidebar/ProjectDirectoryProvider.js";
@@ -12,20 +12,20 @@ import { archiveTaskKey } from "@/project-sidebar/archive-view.js";
 import { useBaseWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
 import { resolveRemoteWorkspaceSessionIdForTarget } from "@/hooks/useResolvedRemoteWorkspaceSessionId.js";
 import { useRemoteWorkspaceSessionStore } from "@/store/remoteWorkspaceSessionStore.js";
-import { useMaridSessionStore } from "@/store/maridSessionStore.js";
+import { useQodexSessionStore } from "@/store/qodexSessionStore.js";
 import { clearBrowserRecentVisitsForTask } from "@/store/browserRecentVisitsStore.js";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 
 export type ArchiveOperation = "unarchive" | "delete";
 export function useArchiveManagement() {
   const directory = useProjectDirectory();
-  const { maridTaskService: service, windowControllerService: controller } =
+  const { qodexTaskService: service, windowControllerService: controller } =
     useBaseWorkspaceServices();
-  const removeTaskState = useMaridSessionStore((s) => s.removeTaskState);
+  const removeTaskState = useQodexSessionStore((s) => s.removeTaskState);
   const confirm = useConfirmDialog();
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{
     succeeded: number;

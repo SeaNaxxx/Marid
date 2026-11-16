@@ -134,8 +134,8 @@ Detached Operation（标题、Goal 校验、Workspace Generate）
   失败率。
 - 所有字符串 Attribute 在出口前有统一长度上限，避免异常对象、用户自定义 Provider/
   Model/Tool 名称造成单 Span 膨胀。
-- 宿主注入的 `MARID_TELEMETRY_USER_SUBJECT_ID` 只有符合受控 ID 约束时才可作为
-  `user_subject_id`；旧变量 `MARID_TELEMETRY_USER_ID_HASH` 已废弃并在子进程环境边界剔除。
+- 宿主注入的 `QODEX_TELEMETRY_USER_SUBJECT_ID` 只有符合受控 ID 约束时才可作为
+  `user_subject_id`；旧变量 `QODEX_TELEMETRY_USER_ID_HASH` 已废弃并在子进程环境边界剔除。
   当前 Desktop Host 以 SHA-256 生成稳定假名标识；它是关联键，不是匿名化承诺。
   `deviceMid` 也只接受有界、无空白和路径分隔符的标识符；不合法时降级为缺少设备关联。
 - 错误文本除清洗 URL、Header、邮箱、IP 和本地路径外，还必须识别常见裸凭据前缀以及
@@ -187,7 +187,7 @@ Detached Operation（标题、Goal 校验、Workspace Generate）
 | ---------------- | ------------------------------------- | ------------------------------------------ |
 | Repo Wiki        | `packages/services` 直接请求 Provider | P1 迁入 CLI ModelPort 或同一 Port          |
 | 模型连通性测试   | Host 发出真实小请求                   | 独立 `admin.model_probe`，不进入 Agent SLO |
-| `stream-animate` | 独立实验包                            | 不属于 Marid Agent 生产 Trace              |
+| `stream-animate` | 独立实验包                            | 不属于 Qodex Agent 生产 Trace              |
 
 P0 的完成口径是“CLI Agent 全部 LLM 流量”，不是“整个产品全部 LLM 流量”。
 
@@ -196,28 +196,28 @@ P0 的完成口径是“CLI Agent 全部 LLM 流量”，不是“整个产品�
 ### 3.1 Turn 主树
 
 ```text
-invoke_agent marid                         Root / INTERNAL
-├── marid.agent.step                       Step 0 / INTERNAL
-│   ├── marid.model.call                   Logical Call / INTERNAL
+invoke_agent qodex                         Root / INTERNAL
+├── qodex.agent.step                       Step 0 / INTERNAL
+│   ├── qodex.model.call                   Logical Call / INTERNAL
 │   │   ├── chat <model>                   Attempt 1 / CLIENT / error
 │   │   └── chat <model>                   Attempt 2 / CLIENT / ok
 │   ├── execute_tool Read                  Tool / INTERNAL
 │   └── execute_tool WebFetch              Tool / INTERNAL
-│       └── marid.model.call
+│       └── qodex.model.call
 │           └── chat <model>
-├── marid.context.compaction               INTERNAL
-│   ├── marid.model.call                   SSE Call / error
+├── qodex.context.compaction               INTERNAL
+│   ├── qodex.model.call                   SSE Call / error
 │   │   └── chat <model>
-│   └── marid.model.call                   HTTP Fallback / ok
+│   └── qodex.model.call                   HTTP Fallback / ok
 │       └── chat <model>
-└── marid.agent.step                       Step 1
+└── qodex.agent.step                       Step 1
 ```
 
 - Turn 使用 GenAI `invoke_agent` 语义。
 - Tool 使用 `execute_tool` 语义。
 - Physical Attempt 才是远程 `CLIENT` Span。
 - Logical Call 聚合 SDK Retry，因此是 `INTERNAL`。
-- `marid.span.type` 是稳定查询字段，不要求看板解析 Span 名。
+- `qodex.span.type` 是稳定查询字段，不要求看板解析 Span 名。
 
 ### 3.2 权威边界
 
@@ -298,17 +298,17 @@ Link 在目标 Span 创建时提供。跨 Runtime 只传不可变、可序列化
 ### 4.1 唯一位置与分层
 
 ```text
-apps/marid-cli/packages/contracts/src/telemetry/
+apps/qodex-cli/packages/contracts/src/telemetry/
 ├── agent-execution.ts     v2 Operation、Context、Link、各 Scope 与窄 Port
 └── index.ts               既有 v1 Model Call/Attempt 与统一导出入口
 ```
 
-`@marid/telemetry` 只放 Scope、Recorder、OTel 映射和 Exporter 实现。
+`@qodex/telemetry` 只放 Scope、Recorder、OTel 映射和 Exporter 实现。
 Core/Adapter 只依赖 Contracts，不 import OTel 或 ARMS。
 
 当前先在 `agent-execution.ts` 内聚 v2 schema，避免为了目录形式拆出相互跳转的小文件；
 当 Model v1 迁移到 v2 命名时，再按 `common/operations/model-api/ports` 做机械拆分，
-但外部统一入口仍保持 `@marid/contracts/telemetry`。
+但外部统一入口仍保持 `@qodex/contracts/telemetry`。
 
 Schema 使用四层组合，不做一个充满 Optional 字段的巨型接口：
 
@@ -398,10 +398,10 @@ Resource 由 Backend 作为 OTel Resource 注入，不要求业务每次构造�
 
 业务用途和标准 OTel 用途分开：
 
-- `marid.operation.name`：`context.compaction` 等 Marid 业务用途。
+- `qodex.operation.name`：`context.compaction` 等 Qodex 业务用途。
 - `gen_ai.operation.name`：`invoke_agent`、`execute_tool`、`chat`。
-- `marid.execution.kind`：`turn|step|tool|sidecar|standalone_blocking|standalone`。
-- `marid.actor.kind`：`main_agent|subagent|workflow_child|system|tool`。
+- `qodex.execution.kind`：`turn|step|tool|sidecar|standalone_blocking|standalone`。
+- `qodex.actor.kind`：`main_agent|subagent|workflow_child|system|tool`。
 
 v2 Operation：
 
@@ -432,7 +432,7 @@ export const Operation = {
 | `sidecar.git_commit_message` | `workspace.git_commit_message` |
 | `tool.web_fetch`             | `tool.web_fetch.process`       |
 
-Exporter 可在兼容窗口双写旧 `marid.operation`；业务只使用 v2。
+Exporter 可在兼容窗口双写旧 `qodex.operation`；业务只使用 v2。
 
 ### 4.4 Operation 专属字段
 
@@ -509,7 +509,7 @@ Child Error 不自动污染 Turn；Turn 只以权威 Turn terminal 为准。
 
 ```ts
 interface SanitizedTelemetryError<TPhase extends string = string> {
-  code?: string; // Marid 稳定低基数码
+  code?: string; // Qodex 稳定低基数码
   type: string; // Exception/归一类型
   message?: string; // 脱敏、截断后的运维信息
   phase?: TPhase;
@@ -583,15 +583,15 @@ ToolExecutionTelemetry
 ```
 
 `exitCode` 只属于 Command detail；Read、Write 等非命令工具在类型层无法填写退出码。
-远端只保留 `marid.tool.command.exit_code`，不再输出通用
-`marid.tool.exit_code`。
+远端只保留 `qodex.tool.command.exit_code`，不再输出通用
+`qodex.tool.exit_code`。
 
 `Tool outcome` 与 `Command status` 是两套语义。Tool handler 正常返回结构化
 `BashOutput` 时，Tool outcome 是 `completed`；即使 Bash 的退出码非零，
 Command status 仍会是 `failed`。因此：
 
-- 工具框架可靠性按 `marid.outcome` 统计。
-- Bash 子进程可靠性按 `marid.tool.command.status` 统计。
+- 工具框架可靠性按 `qodex.outcome` 统计。
+- Bash 子进程可靠性按 `qodex.tool.command.status` 统计。
 - Bash 退出码分布的分母只包含 `command.exitCode` 已知的调用。
 - 不得为了让两张成功率图一致而把非零退出改写成 Tool Span Error。
 
@@ -661,18 +661,18 @@ gen_ai.usage.reasoning.output_tokens
 server.address
 error.type / error.message
 
-Marid 扩展：
-marid.telemetry.schema_version
-marid.span.type
-marid.operation.name
-marid.execution.kind
-marid.actor.kind
-marid.session_id / marid.turn_id
-marid.agent.step_id / marid.agent.step_index
-marid.model.logical_call_id
-marid.model.provider.id / marid.model.provider.route
-marid.error.code / marid.error.phase
-marid.tool.command.name / marid.tool.command.category / marid.tool.command.status
+Qodex 扩展：
+qodex.telemetry.schema_version
+qodex.span.type
+qodex.operation.name
+qodex.execution.kind
+qodex.actor.kind
+qodex.session_id / qodex.turn_id
+qodex.agent.step_id / qodex.agent.step_index
+qodex.model.logical_call_id
+qodex.model.provider.id / qodex.model.provider.route
+qodex.error.code / qodex.error.phase
+qodex.tool.command.name / qodex.tool.command.category / qodex.tool.command.status
 ```
 
 为兼容现有 ARMS 查询，Exporter 可以继续生成只读别名：
@@ -689,7 +689,7 @@ rid = Physical Attempt requestId
 `deviceMid/sessionId/turnId/requestId` 也都属于可关联标识符。它们允许上报，但必须依赖
 ARMS 侧访问控制、保留周期和审计；禁止把这些字段拼入错误 message 或日志正文。
 
-业务代码不出现 `"marid.*"` 字符串。Exporter 使用 exhaustive mapping 测试；
+业务代码不出现 `"qodex.*"` 字符串。Exporter 使用 exhaustive mapping 测试；
 OTel 约定升级不要求修改业务调用点。
 
 ## 5. 埋点接口
@@ -980,7 +980,7 @@ detail children / turn 200
 ```
 
 Parent 缺失时回退合法祖先；仍缺失则创建 Orphan Root，记录
-`marid.telemetry.parent_resolution=orphan` 和 Health Counter，绝不阻塞业务。
+`qodex.telemetry.parent_resolution=orphan` 和 Health Counter，绝不阻塞业务。
 
 生产只保留一个 `TracerProvider + BatchSpanProcessor + OTLPTraceExporter` 网络 Owner。
 现有自定义 Queue 可在迁移期保留 Terminal Fact 兼容，但不再负责构造父子关系，避免双层 Queue。
@@ -1019,24 +1019,24 @@ Span 数只随 Turn/Step/Tool/Compaction/Call/Attempt 增长，不随 Token/Chun
 
 ## 8. 实现入口与参考
 
-- Turn：`apps/marid-cli/packages/core/src/runtime/methods/turn.ts`
-- Step：`apps/marid-cli/packages/core/src/runtime/methods/turn-model-step.ts`
-- Tool：`apps/marid-cli/packages/core/src/tool/executor/call-runner.ts`
-- Compaction：`apps/marid-cli/packages/core/src/runtime/methods/compact-active.ts`
-- Title：`apps/marid-cli/packages/core/src/runtime/methods/title-generation-sidecar.ts`
-- Goal Verification：`apps/marid-cli/packages/core/src/runtime/methods/target-completion-verification.ts`
-- Workspace Generate：`apps/marid-cli/packages/core/src/runtime/methods/workspace-generate-text.ts`
-- Model Adapter：`apps/marid-cli/packages/adapters/src/model/runner.ts`
-- Model Status：`apps/marid-cli/packages/adapters/src/model/runner-status.ts`
-- 当前 Schema：`apps/marid-cli/packages/contracts/src/telemetry/index.ts`
+- Turn：`apps/qodex-cli/packages/core/src/runtime/methods/turn.ts`
+- Step：`apps/qodex-cli/packages/core/src/runtime/methods/turn-model-step.ts`
+- Tool：`apps/qodex-cli/packages/core/src/tool/executor/call-runner.ts`
+- Compaction：`apps/qodex-cli/packages/core/src/runtime/methods/compact-active.ts`
+- Title：`apps/qodex-cli/packages/core/src/runtime/methods/title-generation-sidecar.ts`
+- Goal Verification：`apps/qodex-cli/packages/core/src/runtime/methods/target-completion-verification.ts`
+- Workspace Generate：`apps/qodex-cli/packages/core/src/runtime/methods/workspace-generate-text.ts`
+- Model Adapter：`apps/qodex-cli/packages/adapters/src/model/runner.ts`
+- Model Status：`apps/qodex-cli/packages/adapters/src/model/runner-status.ts`
+- 当前 Schema：`apps/qodex-cli/packages/contracts/src/telemetry/index.ts`
 - Agent v2 Schema：
-  `apps/marid-cli/packages/contracts/src/telemetry/agent-execution.ts`
+  `apps/qodex-cli/packages/contracts/src/telemetry/agent-execution.ts`
 - Runtime Facade：
-  `apps/marid-cli/packages/core/src/telemetry/runtime-telemetry.ts`
+  `apps/qodex-cli/packages/core/src/telemetry/runtime-telemetry.ts`
 - Agent Scope Runtime：
-  `apps/marid-cli/packages/telemetry/src/agent-trace-runtime.ts`
-- 当前 Recorder：`apps/marid-cli/packages/telemetry/src/model-api-recorder.ts`
-- 当前 Exporter：`apps/marid-cli/packages/telemetry/src/otlp-exporter.ts`
+  `apps/qodex-cli/packages/telemetry/src/agent-trace-runtime.ts`
+- 当前 Recorder：`apps/qodex-cli/packages/telemetry/src/model-api-recorder.ts`
+- 当前 Exporter：`apps/qodex-cli/packages/telemetry/src/otlp-exporter.ts`
 - OpenTelemetry Trace API：<https://opentelemetry.io/docs/specs/otel/trace/api/>
 - OpenTelemetry GenAI Attributes：<https://opentelemetry.io/docs/specs/semconv/registry/attributes/gen-ai/>
 - OpenTelemetry GenAI 规范仓库：<https://github.com/open-telemetry/semantic-conventions-genai>

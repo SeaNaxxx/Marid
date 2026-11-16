@@ -5,7 +5,7 @@ import {
   TID_V4_SESSION_PANE,
   TID_V4_STOP,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { clearAppData } from "#e2e/helpers/desktop-app";
 import {
   getV4PaneSnapshot,

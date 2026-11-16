@@ -1,13 +1,13 @@
-import type { Event } from "@marid/rpc";
-import { ServiceChannels } from "@marid/shared";
+import type { Event } from "@qodex/rpc";
+import { ServiceChannels } from "@qodex/shared";
 import type {
   ExtensionViewInput,
   ExtensionViewRequestMethod,
   ResolvedScope,
   WorkspaceRef,
   NotificationsShowResult,
-} from "@marid/shared/extension-host";
-import type { PluginSandboxHandle } from "@marid/shared/mcp-apps";
+} from "@qodex/shared/extension-host";
+import type { PluginSandboxHandle } from "@qodex/shared/mcp-apps";
 import { createServiceDescriptor } from "#src/descriptors.js";
 
 // 扩展视图门面（docs/plugins/extension-host.md §8）：从 IExtensionsService 拆出的视图通道。

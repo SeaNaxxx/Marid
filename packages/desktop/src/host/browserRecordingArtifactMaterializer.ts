@@ -1,8 +1,8 @@
 import { copyFile, mkdir, rename, rm } from "node:fs/promises";
 import { dirname, posix, relative, resolve } from "node:path";
 import { randomUUID } from "node:crypto";
-import type { IRemoteBackend } from "@marid/server/remote";
-import type { BrowserRecordingArtifact } from "@marid/shared";
+import type { IRemoteBackend } from "@qodex/server/remote";
+import type { BrowserRecordingArtifact } from "@qodex/shared";
 
 function resolveWorkspaceRecordingPath(workspacePath: string, outputPath: string): string {
   const root = resolve(workspacePath);
@@ -54,7 +54,7 @@ export async function materializeBrowserRecordingArtifact(input: {
 
   const targetPath = resolveWorkspaceRecordingPath(input.workspacePath, input.outputPath);
   await mkdir(dirname(targetPath), { recursive: true });
-  const stagingPath = `${targetPath}.marid-recording-${randomUUID()}.tmp`;
+  const stagingPath = `${targetPath}.qodex-recording-${randomUUID()}.tmp`;
   try {
     await copyFile(input.localPath, stagingPath);
     // Windows 不能用 rename 原子覆盖已有文件；先移除明确的目标 WebM，再提交 staging 文件。

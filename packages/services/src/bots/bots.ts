@@ -1,8 +1,8 @@
-import { ServiceChannels } from "@marid/shared";
+import { ServiceChannels } from "@qodex/shared";
 import { createServiceDescriptor } from "../descriptors.js";
 import type {
-  MaridConfigOption,
-  MaridProvider,
+  QodexConfigOption,
+  QodexProvider,
   BotConfig,
   BotContextState,
   BotInboundMessage,
@@ -12,9 +12,9 @@ import type {
   BotServiceStatus,
   BotWorkspaceRef,
   BotsConfigFile,
-  MaridAutomationBotDeliveryTarget,
-} from "@marid/shared";
-import type { MaridAgentAppRuntimePreferences } from "../marid-agent/maridAgent.js";
+  QodexAutomationBotDeliveryTarget,
+} from "@qodex/shared";
+import type { QodexAgentAppRuntimePreferences } from "../qodex-agent/qodexAgent.js";
 
 export interface BotCreateBindCodeParams {
   botId?: string;
@@ -47,13 +47,13 @@ export interface BotListWorkspaceRefsParams {
 export interface BotUserConfigOptionsParams {
   workspacePath: string;
   workspaceIdentity?: string;
-  provider: MaridProvider;
+  provider: QodexProvider;
 }
 
 export interface BotAutomationRunWatchParams {
   /** 与该次 sendPrompt.traceId 一致，避免排队期间污染其他轮次。 */
   runId?: string;
-  target: MaridAutomationBotDeliveryTarget;
+  target: QodexAutomationBotDeliveryTarget;
   taskId: string;
   workspacePath: string;
   workspaceIdentity?: string;
@@ -128,22 +128,22 @@ export type BotFeishuRegistrationPollResult =
 
 export interface IBotsService {
   replyToChannel?(
-    params: import("@marid/shared").ChannelReplyHostRequest,
-  ): Promise<import("@marid/shared").ChannelReplyResult>;
+    params: import("@qodex/shared").ChannelReplyHostRequest,
+  ): Promise<import("@qodex/shared").ChannelReplyResult>;
   validateTopicResource?(
     params: import("#src/bots/topicResource.js").TopicResourceRequest,
   ): Promise<void>;
   readTopicResource?(
     params: import("#src/bots/topicResource.js").TopicResourceRequest,
-  ): Promise<import("@marid/shared").MaridPromptAttachment>;
+  ): Promise<import("@qodex/shared").QodexPromptAttachment>;
   /**
    * 将 App 全局交互偏好同步给 Bot 已持有的远端 runtime；不得为此建立新的远端连接。
    */
-  syncAppRuntimePreferences(preferences: MaridAgentAppRuntimePreferences): Promise<void>;
+  syncAppRuntimePreferences(preferences: QodexAgentAppRuntimePreferences): Promise<void>;
   getStatus(): Promise<BotServiceStatus>;
   getConfig(): Promise<BotsConfigFile>;
   listWorkspaceRefs(params?: BotListWorkspaceRefsParams): Promise<BotWorkspaceRef[]>;
-  getUserConfigOptions(params: BotUserConfigOptionsParams): Promise<MaridConfigOption[]>;
+  getUserConfigOptions(params: BotUserConfigOptionsParams): Promise<QodexConfigOption[]>;
   beginFeishuRegistration(
     params?: BotFeishuRegistrationBeginParams,
   ): Promise<BotFeishuRegistrationBeginResult>;
@@ -193,13 +193,13 @@ export interface IBotsService {
     deliveryId: string;
     threadId?: string;
     received: boolean;
-  }): Promise<import("@marid/shared").BotGroupDelivery>;
+  }): Promise<import("@qodex/shared").BotGroupDelivery>;
   resendGroupResult?(params: {
     botId: string;
     chatId: string;
     deliveryId: string;
     threadId?: string;
-  }): Promise<import("@marid/shared").BotGroupDelivery>;
+  }): Promise<import("@qodex/shared").BotGroupDelivery>;
   retryPrivateDelivery?(params: { botId: string; deliveryId: string }): Promise<void>;
   resetBotState(contextKey: string): Promise<void>;
   /** 在 automation prompt 派发前订阅终态，并把结果回推到创建它的 Bot 会话。 */
@@ -218,7 +218,7 @@ export const IBotsService = createServiceDescriptor<IBotsService>(ServiceChannel
 export interface BotRemoteWorkspaceResolution {
   workspacePath: string;
   workspaceIdentity: string;
-  target: import("@marid/shared").RemoteTarget;
+  target: import("@qodex/shared").RemoteTarget;
   /** 只有当前窗口存在在线 logical session 才有值，用于 attachment 换代隔离。 */
   runtimeKey?: string;
 }

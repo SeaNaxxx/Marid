@@ -9,7 +9,7 @@ import {
   parseConversationSharePathname,
   type ConversationShareErrorKind,
   type ConversationSharePreview,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 const SHARE_CODE_PATTERN = /^[A-Za-z0-9._~-]{1,512}$/u;
 
@@ -66,7 +66,7 @@ export function buildShareImportDeepLink(shareCode: string): string {
   if (!isSafeConversationShareCode(shareCode)) {
     throw new TypeError("Invalid conversation share code");
   }
-  return `marid://share/import?code=${encodeURIComponent(shareCode)}`;
+  return `qodex://share/import?code=${encodeURIComponent(shareCode)}`;
 }
 
 export interface ConversationSharePreviewClientOptions {
@@ -237,7 +237,7 @@ export class ConversationSharePreviewClient {
       });
       throw new ConversationSharePreviewClientError({
         kind: "unsupported_schema_version",
-        message: "Conversation share requires a newer Marid version",
+        message: "Conversation share requires a newer Qodex version",
         status: response.status,
         requestId,
       });

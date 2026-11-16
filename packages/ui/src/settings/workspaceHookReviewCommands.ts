@@ -2,8 +2,8 @@ import type {
   CommandPayloadMap,
   CommandType,
   WorkspaceHookReviewRequestPayload,
-} from "@marid/shared/marid-protocol-v4";
-import type { Hook } from "@marid/shared";
+} from "@qodex/shared/qodex-protocol-v4";
+import type { Hook } from "@qodex/shared";
 import {
   findWorkspaceHookCommandBinding,
   findWorkspaceHookReviewBindingForItem,

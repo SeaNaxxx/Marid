@@ -6,7 +6,7 @@ import {
   TID_V4_COMPOSER_INPUT,
   TID_V4_STOP,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { Key } from "webdriverio";
 import {
   INCOMING_MESSAGE_MODES,
@@ -59,7 +59,7 @@ describe("会话区修饰键单条 delivery E2E", () => {
   before(async function () {
     this.timeout(TEST_TIMEOUT_MS);
     await prepareV4ConversationE2E();
-    expect((await readSettings()).maridInteractionBehavior).toBe("queue");
+    expect((await readSettings()).qodexInteractionBehavior).toBe("queue");
   });
 
   beforeEach(async function () {
@@ -190,7 +190,7 @@ describe("会话区修饰键单条 delivery E2E", () => {
     await waitForQueueContaining(marker);
     expect((await getQueueItems()).filter((item) => item.content.includes(marker))).toHaveLength(1);
     await expectNoUpstreamRequestForTextWithin(marker, 1500);
-    expect((await readSettings()).maridInteractionBehavior).toBe("guide");
+    expect((await readSettings()).qodexInteractionBehavior).toBe("guide");
   });
 });
 
@@ -223,7 +223,7 @@ async function startPreOutputTurn(marker: string) {
 }
 
 async function setInteractionBehavior(behavior: "queue" | "guide") {
-  if ((await readSettings()).maridInteractionBehavior === behavior) return;
+  if ((await readSettings()).qodexInteractionBehavior === behavior) return;
   await clickTestIdByDom(TID_TASK_SETTINGS_BUTTON);
   await $(sel(TID_SETTINGS_PAGE)).waitForDisplayed({ timeout: 15000 });
   await clickTestIdByDom(testId(TID_SETTINGS_SECTION_NAV, "agentBehavior"));
@@ -257,7 +257,7 @@ async function setInteractionBehavior(behavior: "queue" | "guide") {
     { timeout: 15000, timeoutMsg: `没有找到交互行为 ${behavior} 选项` },
   );
   await browser.waitUntil(
-    async () => (await readSettings()).maridInteractionBehavior === behavior,
+    async () => (await readSettings()).qodexInteractionBehavior === behavior,
     {
       timeout: 15000,
       timeoutMsg: `交互行为没有保存为 ${behavior}`,

@@ -1,14 +1,14 @@
 import type {
-  MaridProvider,
-  MaridTaskMeta,
-  MaridTaskChangeSummary,
+  QodexProvider,
+  QodexTaskMeta,
+  QodexTaskChangeSummary,
   EditorInfo,
   GitRepositorySummary,
   RemoteTarget,
   UserInfo,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { useState } from "react";
-import { TID_WORKSPACE_HEADER } from "@marid/shared/test-ids";
+import { TID_WORKSPACE_HEADER } from "@qodex/shared/test-ids";
 import type { ConversationDropTargetController } from "@/v4/composer/conversationDropTarget.js";
 import { cn } from "@/components/lib/utils.js";
 import {
@@ -100,16 +100,16 @@ export function WorkspaceHeader({
   localWorkspacePath?: string;
   projectName: string;
   activeTaskTitle: string;
-  activeTaskChangeSummary?: MaridTaskChangeSummary | null;
+  activeTaskChangeSummary?: QodexTaskChangeSummary | null;
   hasUpdateReady: boolean;
   activeTaskId: string | null;
   user?: UserInfo | null;
   activeTraceId: string | null;
   activeSessionId: string | null;
-  activeTaskProvider: MaridProvider | null;
-  resolvedActiveTaskMeta?: MaridTaskMeta | null;
+  activeTaskProvider: QodexProvider | null;
+  resolvedActiveTaskMeta?: QodexTaskMeta | null;
   sessionLogPath: string | null;
-  nativeSessionLogProvider: MaridProvider | null;
+  nativeSessionLogProvider: QodexProvider | null;
   nativeSessionLogPath: string | null;
   nativeSessionLogExists: boolean;
   nativeSessionLogLoading: boolean;
@@ -137,7 +137,7 @@ export function WorkspaceHeader({
   toggleSidePaneShortcutLabel?: string;
   onReloadSession: (options?: {
     resumeTaskId?: string | null;
-    provider?: MaridProvider | null;
+    provider?: QodexProvider | null;
   }) => void | Promise<void>;
   reloadSessionDisabled?: boolean;
   reloadSessionPending?: boolean;

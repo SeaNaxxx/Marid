@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { logger } from "@/logger.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
 import { resolveWorkspaceShellPanelRadiusPx } from "@/app-shell/workspaceShellWindowChrome.js";
-import { MaridStartupLogoBadge } from "@/root/RootStartupLoading.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { QodexStartupLogoBadge } from "@/root/RootStartupLoading.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { cn } from "@/components/lib/utils.js";
 import { useResolvedThemeHeroPalette } from "@/openWorkspacePageThemeHero.js";
 import "@/onboarding/onboardingLogoSweep.css";
@@ -37,7 +37,7 @@ export function OccupationOnboardingVisual({
     isWindowsDesktop,
     macOSMajorVersion,
   });
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const palette = useResolvedThemeHeroPalette();
   return (
     <aside
@@ -51,7 +51,7 @@ export function OccupationOnboardingVisual({
       />
       <div className="relative my-auto flex w-full max-w-[640px] shrink-0 flex-col items-start [container-type:inline-size]">
         <div aria-hidden="true" className="relative mb-10 rounded-3xl">
-          <MaridStartupLogoBadge animated={false} />
+          <QodexStartupLogoBadge animated={false} />
           <div className="onboarding-logo-sweep">
             <div />
           </div>

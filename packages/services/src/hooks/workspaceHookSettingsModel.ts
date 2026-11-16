@@ -5,7 +5,7 @@ import type {
   HookEvent,
   SettingsDirectoryLocation,
   WorkspaceHookDiscoveryState,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   resolveWorkspaceHookEntries,
   type CanonicalWorkspaceHookEntryData,
@@ -14,7 +14,7 @@ import {
   type WorkspaceHookRuntimeRoot,
   type WorkspaceHookSourceInput,
   type WorkspaceHooksConfig,
-} from "@marid/shared/workspace-hook-discovery";
+} from "@qodex/shared/workspace-hook-discovery";
 
 export interface LegacyHookDefinition {
   type?: "command" | "process" | string;
@@ -175,7 +175,7 @@ export function fromProjectSnapshot(input: {
       source,
       id: entry.reviewItemId,
       location: {
-        source: "marid",
+        source: "qodex",
         scope: "project",
         directoryPath: dirname(source.canonicalPath),
         projectPath: input.workspacePath,
@@ -192,7 +192,7 @@ export function fromProjectSnapshot(input: {
   });
 }
 
-export function fromUserMaridSource(input: {
+export function fromUserQodexSource(input: {
   source: WorkspaceHookSourceInput | undefined;
   runtimeRoot: WorkspaceHookRuntimeRoot;
   workspacePath: string;
@@ -207,7 +207,7 @@ export function fromUserMaridSource(input: {
     toHook({
       entry,
       source: input.source!,
-      id: `hook-marid-user-${index}`,
+      id: `hook-qodex-user-${index}`,
       location: input.location,
     }),
   );
@@ -248,7 +248,7 @@ export function fromLegacyHooksConfig(input: {
   return hooks;
 }
 
-export function toMaridHooksEvents(hooks: Hook[]): WorkspaceHooksConfig["events"] {
+export function toQodexHooksEvents(hooks: Hook[]): WorkspaceHooksConfig["events"] {
   const events: WorkspaceHooksConfig["events"] = {};
   for (const hook of hooks) {
     const eventMatchers = events[hook.event] ?? [];

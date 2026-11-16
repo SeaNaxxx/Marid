@@ -1,4 +1,4 @@
-import type { IPlatformService } from "@marid/shared";
+import type { IPlatformService } from "@qodex/shared";
 import type { IntlInstance } from "@/i18n/IntlProvider.js";
 import { dismissToast, toast } from "@/components/ui/toast.js";
 

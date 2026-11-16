@@ -14,7 +14,7 @@ import {
   TID_AUTOMATIONS_OPEN,
   TID_TASK_ITEM,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   clearAppData,
   clickTestIdByDom,
@@ -145,7 +145,7 @@ interface AutomationRecord {
 }
 
 function automationDatabasePath(): string {
-  return join(homedir(), ".marid", "v2", "tasks-index.sqlite");
+  return join(homedir(), ".qodex", "v2", "tasks-index.sqlite");
 }
 
 function readAutomationRecordByTitle(title: string): AutomationRecord | null {

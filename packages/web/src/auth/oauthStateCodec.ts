@@ -1,6 +1,6 @@
-import { DEFAULT_MARID_ENDPOINT_ORIGIN } from "@marid/shared";
+import { DEFAULT_QODEX_ENDPOINT_ORIGIN } from "@qodex/shared";
 
-const PRODUCTION_WEB_REMOTE_ORIGIN = DEFAULT_MARID_ENDPOINT_ORIGIN;
+const PRODUCTION_WEB_REMOTE_ORIGIN = DEFAULT_QODEX_ENDPOINT_ORIGIN;
 const WEB_REMOTE_CALLBACK_PATHS = new Set(["/remote/v4", "/remote/v4/"]);
 // 测试入口也经过登录门禁，必须保留原路径与扫码参数；OAuth 回调仍只使用已登记的 v4。
 const WEB_REMOTE_APP_PATHS = new Set([

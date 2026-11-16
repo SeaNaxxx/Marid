@@ -7,14 +7,14 @@ const entry = { ts: 1_700_000_000_000, level: "info", tag: "rc", message: "hello
 describe("web remote control mobile log payloads", () => {
   it("接受实时 mobile-log 帧，忽略未知字段（前向兼容）", () => {
     const parsed = parseWebRemoteControlAppPayload({
-      marid_type: "mobile-log",
+      qodex_type: "mobile-log",
       device: { id: "install-1", platform: "android", appVersion: "1.0.0" },
       sessionId: "boot-1",
       events: [{ ...entry, extra: true }],
       futureField: 1,
     });
     expect(parsed).toEqual({
-      marid_type: "mobile-log",
+      qodex_type: "mobile-log",
       device: { id: "install-1", platform: "android", appVersion: "1.0.0" },
       sessionId: "boot-1",
       events: [entry],
@@ -22,10 +22,10 @@ describe("web remote control mobile log payloads", () => {
   });
 
   it("拒绝空帧、超条数与非法级别", () => {
-    expect(parseWebRemoteControlAppPayload({ marid_type: "mobile-log", events: [] })).toBeNull();
+    expect(parseWebRemoteControlAppPayload({ qodex_type: "mobile-log", events: [] })).toBeNull();
     expect(
       parseWebRemoteControlAppPayload({
-        marid_type: "mobile-log",
+        qodex_type: "mobile-log",
         events: Array.from(
           { length: WEB_REMOTE_CONTROL_MOBILE_LOG_LIMITS.maxEventsPerFrame + 1 },
           () => entry,
@@ -34,7 +34,7 @@ describe("web remote control mobile log payloads", () => {
     ).toBeNull();
     expect(
       parseWebRemoteControlAppPayload({
-        marid_type: "mobile-log",
+        qodex_type: "mobile-log",
         events: [{ ...entry, level: "verbose" }],
       }),
     ).toBeNull();
@@ -43,16 +43,16 @@ describe("web remote control mobile log payloads", () => {
   it("解析拉取请求与三种应答（明文 / gzip / 失败）", () => {
     expect(
       parseWebRemoteControlAppPayload({
-        marid_type: "mobile-log-pull-request",
+        qodex_type: "mobile-log-pull-request",
         requestId: "r1",
         sinceTs: 1,
         minLevel: "warn",
         acceptEncodings: ["gzip"],
       }),
-    ).toMatchObject({ marid_type: "mobile-log-pull-request", requestId: "r1" });
+    ).toMatchObject({ qodex_type: "mobile-log-pull-request", requestId: "r1" });
 
     const meta = {
-      marid_type: "mobile-log-pull-response",
+      qodex_type: "mobile-log-pull-response",
       requestId: "r1",
       success: true,
       totalMatched: 1,
@@ -68,7 +68,7 @@ describe("web remote control mobile log payloads", () => {
     ).toMatchObject({ encoding: "gzip", entryCount: 1 });
     expect(
       parseWebRemoteControlAppPayload({
-        marid_type: "mobile-log-pull-response",
+        qodex_type: "mobile-log-pull-response",
         requestId: "r1",
         success: false,
         reason: "unsupported-action",
@@ -79,7 +79,7 @@ describe("web remote control mobile log payloads", () => {
 
   it("拒绝超限的 gzip 分片与超长 cursor", () => {
     const meta = {
-      marid_type: "mobile-log-pull-response",
+      qodex_type: "mobile-log-pull-response",
       requestId: "r1",
       success: true,
       totalMatched: 1,

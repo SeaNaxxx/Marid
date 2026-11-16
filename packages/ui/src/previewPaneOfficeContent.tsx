@@ -1,6 +1,6 @@
 import { Component, lazy, Suspense, useMemo, type ErrorInfo, type ReactNode } from "react";
-import type { FileBinaryPreview } from "@marid/shared";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import type { FileBinaryPreview } from "@qodex/shared";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { decodeBase64ToArrayBuffer, type OfficeFilePreviewKind } from "@/lib/officeFilePreview.js";
 import { logger } from "@/logger.js";
 
@@ -86,7 +86,7 @@ export function PreviewPaneOfficeContent({
   resolvedTheme: "light" | "dark";
   sourcePath: string;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const errorMessage = intl.formatMessage({
     id: "codeViewer.officeUnavailable",
   });

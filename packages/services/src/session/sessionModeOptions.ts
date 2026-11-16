@@ -1,6 +1,6 @@
-import type { MaridConfigOption, MaridProvider, MaridTaskMode } from "@marid/shared";
+import type { QodexConfigOption, QodexProvider, QodexTaskMode } from "@qodex/shared";
 
-const CANONICAL_SESSION_MODES = new Set<MaridTaskMode>([
+const CANONICAL_SESSION_MODES = new Set<QodexTaskMode>([
   "default",
   "yolo",
   "guarded",
@@ -23,21 +23,21 @@ function readTrimmedString(value: unknown): string | undefined {
   return normalized.length > 0 ? normalized : undefined;
 }
 
-function getModeConfigOption(options: readonly MaridConfigOption[]): MaridConfigOption | undefined {
+function getModeConfigOption(options: readonly QodexConfigOption[]): QodexConfigOption | undefined {
   return options.find((option) => option.category === "mode" && option.type === "select");
 }
 
 function normalizePersistedSessionMode(
   modeId: string | null | undefined,
-  _provider?: MaridProvider,
-): MaridTaskMode | undefined {
+  _provider?: QodexProvider,
+): QodexTaskMode | undefined {
   const trimmedModeId = readTrimmedString(modeId);
   if (!trimmedModeId) {
     return undefined;
   }
 
-  if (CANONICAL_SESSION_MODES.has(trimmedModeId as MaridTaskMode)) {
-    return trimmedModeId as MaridTaskMode;
+  if (CANONICAL_SESSION_MODES.has(trimmedModeId as QodexTaskMode)) {
+    return trimmedModeId as QodexTaskMode;
   }
 
   switch (trimmedModeId) {
@@ -69,9 +69,9 @@ function normalizePersistedSessionMode(
 }
 
 export function resolveProviderModeIdFromConfigOptions(params: {
-  configOptions: readonly MaridConfigOption[];
+  configOptions: readonly QodexConfigOption[];
   modeId: string | null | undefined;
-  provider?: MaridProvider;
+  provider?: QodexProvider;
 }): string | undefined {
   const requestedMode = readTrimmedString(params.modeId);
   if (!requestedMode) {

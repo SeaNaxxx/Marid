@@ -6,7 +6,7 @@ import type {
   BotOutboundMessage,
   BotProviderCallbackResult,
   Locale,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export interface BotTypingTarget {
   providerUserId: string;
@@ -60,8 +60,8 @@ export interface BotProviderAdapter {
   ): Promise<{ threadId: string; rootMessageId: string; topicTitle: string; topicUrl?: string }>;
   readTopicHistory?(
     bot: BotConfig,
-    request: import("@marid/shared").BotTopicHistoryRequest,
-  ): Promise<import("@marid/shared").BotTopicHistoryBatch>;
+    request: import("@qodex/shared").BotTopicHistoryRequest,
+  ): Promise<import("@qodex/shared").BotTopicHistoryBatch>;
   getGroupMemberNames?(bot: BotConfig, chatId: string): Promise<Record<string, string>>;
   getGroupInfo?(
     bot: BotConfig,

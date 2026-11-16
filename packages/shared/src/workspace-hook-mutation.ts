@@ -72,7 +72,7 @@ export async function writeWorkspaceHookConfiguredToggle(input: {
     !entry ||
     !entry.editable ||
     !source?.editable ||
-    source.configFileKind !== ".marid/config.json" ||
+    source.configFileKind !== ".qodex/config.json" ||
     resolve(source.canonicalPath) !== configPath
   ) {
     throw mismatch("Workspace Hook toggle target is not the current editable project config");

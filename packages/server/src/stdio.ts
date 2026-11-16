@@ -6,12 +6,12 @@ import {
   ChannelServer,
   ChannelClient,
   type ISocket,
-} from "@marid/rpc";
+} from "@qodex/rpc";
 import {
-  IMaridAgentService,
-  createMaridAgentConnectionScope,
+  IQodexAgentService,
+  createQodexAgentConnectionScope,
   type ServiceCollection,
-} from "@marid/services";
+} from "@qodex/services";
 
 /**
  * Wrap process.stdin/stdout as an ISocket for RPC communication.
@@ -69,9 +69,9 @@ export function createStdioServer(
   const channelServer = new ChannelServer(protocol, "stdio");
   const reverseClient = onReverseClientReady ? new ChannelClient(protocol) : undefined;
   if (reverseClient) onReverseClientReady?.(reverseClient);
-  const agentService = services.getOptional(IMaridAgentService);
+  const agentService = services.getOptional(IQodexAgentService);
   const connectionScope = agentService
-    ? createMaridAgentConnectionScope(agentService, {
+    ? createQodexAgentConnectionScope(agentService, {
         connectionId: `server-stdio-${randomUUID()}`,
         clientMode: "desktop-continuous",
         role: "trusted-host-relay",
@@ -80,7 +80,7 @@ export function createStdioServer(
   services.exposeOnChannelServer(
     channelServer,
     connectionScope
-      ? new Map([[IMaridAgentService.channelName, connectionScope.service]])
+      ? new Map([[IQodexAgentService.channelName, connectionScope.service]])
       : new Map(),
   );
   let stopPromise: Promise<void> | undefined;

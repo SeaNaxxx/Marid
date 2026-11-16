@@ -1,16 +1,16 @@
 import {
   BIGMODEL_PROVIDER_ID,
   BUILTIN_MODEL_PROVIDER_IDS,
-  DEFAULT_MARID_ENDPOINT_ORIGIN,
+  DEFAULT_QODEX_ENDPOINT_ORIGIN,
   isTrustedCodingPlanWebviewOrigin,
   isZaiCodingPlanProviderId,
-  normalizeMaridEndpointOrigin,
-  type MaridEnv,
+  normalizeQodexEndpointOrigin,
+  type QodexEnv,
   type OAuthProviderId,
-  MARID_ENV,
+  QODEX_ENV,
   ZAI_PROVIDER_ID,
-} from "@marid/shared";
-import type { CodingPlanWebviewLocale } from "@marid/shared";
+} from "@qodex/shared";
+import type { CodingPlanWebviewLocale } from "@qodex/shared";
 import type { CodingPlanFunnelContext } from "@/lib/codingPlanFunnelTelemetry.js";
 import type { CodingPlanProviderId } from "@/settings/model-provider-section/constants.js";
 
@@ -19,7 +19,7 @@ export type CodingPlanPurchaseAudience = "personal" | "team";
 
 export interface CodingPlanEmbeddedCredentials {
   zaiAccessToken?: string | null;
-  maridJwtToken?: string | null;
+  qodexJwtToken?: string | null;
   bigmodelAccessToken?: string | null;
 }
 
@@ -57,18 +57,18 @@ export interface ResolveCodingPlanEmbeddedOriginOptions {
   endpointOrigin: string;
   e2eStoreBridgeEnabled?: boolean;
   overrideOrigin?: string | null;
-  maridEnv?: MaridEnv;
+  qodexEnv?: QodexEnv;
 }
 
 export const CODING_PLAN_WEBVIEW_OVERRIDE_ENV_KEY = "VITE_CODING_PLAN_WEBVIEW_ORIGIN";
 const CODING_PLAN_WEBVIEW_CREDENTIAL_LOCAL_STORAGE_KEYS = [
   "oauth:zai:access_token",
-  "maridjwttoken",
+  "qodexjwttoken",
   "oauth:bigmodel:access_token",
   "oauth:zai_cn:access_token",
   "oauth:active_provider",
 ] as const;
-const CODING_PLAN_REPORT_CONTEXT_STORAGE_KEY = "marid:coding-plan:report-context";
+const CODING_PLAN_REPORT_CONTEXT_STORAGE_KEY = "qodex:coding-plan:report-context";
 
 export function resolveCodingPlanWebsiteProvider(
   providerId: CodingPlanProviderId,
@@ -84,23 +84,23 @@ export function resolveCodingPlanEmbeddedOrigin({
   endpointOrigin,
   e2eStoreBridgeEnabled,
   overrideOrigin,
-  maridEnv = MARID_ENV,
+  qodexEnv = QODEX_ENV,
 }: ResolveCodingPlanEmbeddedOriginOptions): string {
   const normalizedOverride = overrideOrigin?.trim();
   if (
     normalizedOverride &&
     isTrustedCodingPlanWebviewOrigin(normalizedOverride, { e2eStoreBridgeEnabled })
   ) {
-    return normalizeMaridEndpointOrigin(normalizedOverride);
+    return normalizeQodexEndpointOrigin(normalizedOverride);
   }
-  // Bug 原因：本地开发默认注入 MARID_ENV=production，不能仅凭 Vite DEV 就打开未启动的官网本地页。
-  if (dev && maridEnv === "test") {
+  // Bug 原因：本地开发默认注入 QODEX_ENV=production，不能仅凭 Vite DEV 就打开未启动的官网本地页。
+  if (dev && qodexEnv === "test") {
     return "http://localhost:3000";
   }
-  const normalizedEndpointOrigin = normalizeMaridEndpointOrigin(endpointOrigin);
+  const normalizedEndpointOrigin = normalizeQodexEndpointOrigin(endpointOrigin);
   return isTrustedCodingPlanWebviewOrigin(normalizedEndpointOrigin, { e2eStoreBridgeEnabled })
     ? normalizedEndpointOrigin
-    : DEFAULT_MARID_ENDPOINT_ORIGIN;
+    : DEFAULT_QODEX_ENDPOINT_ORIGIN;
 }
 
 export function buildCodingPlanEmbeddedWebviewUrl({
@@ -121,7 +121,7 @@ export function buildCodingPlanEmbeddedWebviewUrl({
   audience?: CodingPlanPurchaseAudience;
   teamPlanKey?: string | null;
 }): string {
-  const url = new URL("/coding-plan", normalizeMaridEndpointOrigin(origin));
+  const url = new URL("/coding-plan", normalizeQodexEndpointOrigin(origin));
   url.searchParams.set("provider", provider);
   url.searchParams.set("embedded", "app");
   url.searchParams.set("lang", codingPlanLocaleToWebsiteLang(locale));
@@ -187,7 +187,7 @@ export function createCodingPlanAuthInjectionScript({
   provider: CodingPlanWebsiteProvider;
   credentials: CodingPlanEmbeddedCredentials;
   theme: CodingPlanEmbeddedTheme;
-  // App 当前 locale，写入 window.__maridLang__ 供 maridBridge.getLang() 读取，
+  // App 当前 locale，写入 window.__qodexLang__ 供 qodexBridge.getLang() 读取，
   // 并附带在 auth-ready 事件 detail 里让官网一次性同步初始语言。
   locale: CodingPlanWebviewLocale | null;
   reportContext?: CodingPlanEmbeddedReportContext | null;
@@ -196,16 +196,16 @@ export function createCodingPlanAuthInjectionScript({
     provider === "zai"
       ? {
           "oauth:zai:access_token": credentials.zaiAccessToken?.trim() || null,
-          maridjwttoken: credentials.maridJwtToken?.trim() || null,
+          qodexjwttoken: credentials.qodexJwtToken?.trim() || null,
           "oauth:bigmodel:access_token": null,
         }
       : {
           "oauth:zai:access_token": null,
-          // maridjwttoken 是 marid-plan 域通用凭证（BigModel OAuth callback 同样落盘），
+          // qodexjwttoken 是 qodex-plan 域通用凭证（BigModel OAuth callback 同样落盘），
           // 官网用它查 billing/balance 判定 Start Plan 是否使用中；BigModel 分支缺失注入
           // 会导致官网 Start Plan 卡因查不到权益而误显示「已过期」。业务接口仍走
           // oauth:bigmodel:access_token，互不污染。
-          maridjwttoken: credentials.maridJwtToken?.trim() || null,
+          qodexjwttoken: credentials.qodexJwtToken?.trim() || null,
           "oauth:bigmodel:access_token": credentials.bigmodelAccessToken?.trim() || null,
         };
   values["oauth:active_provider"] = loginProvider ?? null;
@@ -222,20 +222,20 @@ export function createCodingPlanAuthInjectionScript({
   return `(() => {
   ${expectedUrl ? `if (window.location.href !== ${JSON.stringify(expectedUrl)}) return;` : ""}
   ${storageUpdates}
-  const maridTheme = ${JSON.stringify(theme)};
-  document.documentElement.classList.toggle("dark", maridTheme === "zai-dark");
-  document.documentElement.classList.toggle("theme-zai-light", maridTheme === "zai-light");
-  document.documentElement.classList.toggle("theme-zai-dark", maridTheme === "zai-dark");
-  localStorage.setItem("marid-theme", maridTheme);
-  localStorage.setItem("marid:coding-plan:embedded", "app");
-  // 写入当前 App locale，供官网 maridBridge.getLang() 读取。
+  const qodexTheme = ${JSON.stringify(theme)};
+  document.documentElement.classList.toggle("dark", qodexTheme === "zai-dark");
+  document.documentElement.classList.toggle("theme-zai-light", qodexTheme === "zai-light");
+  document.documentElement.classList.toggle("theme-zai-dark", qodexTheme === "zai-dark");
+  localStorage.setItem("qodex-theme", qodexTheme);
+  localStorage.setItem("qodex:coding-plan:embedded", "app");
+  // 写入当前 App locale，供官网 qodexBridge.getLang() 读取。
   // 注意：这是注入 webview 执行的原始 JS，不能用 TS 语法（如 as any）。
-  window.__maridLang__ = ${JSON.stringify(resolvedLocale)};
-  const maridReportContext = ${JSON.stringify(normalizedReportContext)};
-  window.__maridReportContext__ = maridReportContext;
-  localStorage.setItem(${JSON.stringify(CODING_PLAN_REPORT_CONTEXT_STORAGE_KEY)}, JSON.stringify(maridReportContext));
-  window.dispatchEvent(new CustomEvent("marid-coding-plan-auth-ready", {
-    detail: { ...${JSON.stringify({ provider, locale: resolvedLocale })}, reportContext: maridReportContext },
+  window.__qodexLang__ = ${JSON.stringify(resolvedLocale)};
+  const qodexReportContext = ${JSON.stringify(normalizedReportContext)};
+  window.__qodexReportContext__ = qodexReportContext;
+  localStorage.setItem(${JSON.stringify(CODING_PLAN_REPORT_CONTEXT_STORAGE_KEY)}, JSON.stringify(qodexReportContext));
+  window.dispatchEvent(new CustomEvent("qodex-coding-plan-auth-ready", {
+    detail: { ...${JSON.stringify({ provider, locale: resolvedLocale })}, reportContext: qodexReportContext },
   }));
 })()`;
 }
@@ -290,13 +290,13 @@ export function createCodingPlanCredentialClearScript(): string {
     localStorage.removeItem(key);
   }
   localStorage.removeItem(${JSON.stringify(CODING_PLAN_REPORT_CONTEXT_STORAGE_KEY)});
-  delete window.__maridReportContext__;
+  delete window.__qodexReportContext__;
 })()`;
 }
 
 export function createCodingPlanScrollbarHideScript(): string {
   return `(() => {
-  const styleId = "marid-coding-plan-hide-scrollbar";
+  const styleId = "qodex-coding-plan-hide-scrollbar";
   if (document.getElementById(styleId)) return;
   const style = document.createElement("style");
   style.id = styleId;
@@ -322,24 +322,24 @@ body::-webkit-scrollbar,
 /**
  * 生成「更新 webview 当前 locale」的注入脚本。
  * App locale 运行时变化时对 webview executeJavaScript 此脚本：
- * 重写 window.__maridLang__ 并派发 marid-coding-plan-lang-change 事件，
- * 官网侧（maridBridge.onLangChange 或 window 监听）据此无感切换语言。
+ * 重写 window.__qodexLang__ 并派发 qodex-coding-plan-lang-change 事件，
+ * 官网侧（qodexBridge.onLangChange 或 window 监听）据此无感切换语言。
  */
 export function createCodingPlanLangInjectionScript(locale: CodingPlanWebviewLocale): string {
   const resolvedLocale: CodingPlanWebviewLocale = locale === "zh-CN" ? "zh-CN" : "en-US";
   return `(() => {
   // 注意：注入 webview 执行的原始 JS，不能用 TS 语法（如 as any）。
-  window.__maridLang__ = ${JSON.stringify(resolvedLocale)};
-  window.dispatchEvent(new CustomEvent("marid-coding-plan-lang-change", {
+  window.__qodexLang__ = ${JSON.stringify(resolvedLocale)};
+  window.dispatchEvent(new CustomEvent("qodex-coding-plan-lang-change", {
     detail: ${JSON.stringify({ locale: resolvedLocale })},
   }));
 })()`;
 }
 
 export function getCodingPlanCredentialKeys(provider: CodingPlanWebsiteProvider): string[] {
-  // maridjwttoken 对两个 provider 都加载：它是 marid-plan 域通用凭证，
-  // BigModel OAuth callback 同样落盘（见 resolveBigModelStartPlanMaridJwt）。
+  // qodexjwttoken 对两个 provider 都加载：它是 qodex-plan 域通用凭证，
+  // BigModel OAuth callback 同样落盘（见 resolveBigModelStartPlanQodexJwt）。
   return provider === "zai"
-    ? [`oauth:${ZAI_PROVIDER_ID}:access_token`, "maridjwttoken"]
-    : [`oauth:${BIGMODEL_PROVIDER_ID}:access_token`, "maridjwttoken"];
+    ? [`oauth:${ZAI_PROVIDER_ID}:access_token`, "qodexjwttoken"]
+    : [`oauth:${BIGMODEL_PROVIDER_ID}:access_token`, "qodexjwttoken"];
 }

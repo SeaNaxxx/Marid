@@ -4,10 +4,10 @@ import {
   DesktopCommandIds,
   desktopMenuMessageIds,
   getDesktopMenuMessage,
-  MARID_PRODUCT_FLAVOR,
+  QODEX_PRODUCT_FLAVOR,
   type DesktopCommandId,
   type Locale,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 let desktopTray: Tray | null = null;
 let rebuildDesktopTrayContextMenu: (() => void) | null = null;
@@ -70,7 +70,7 @@ export function createDesktopTray(options: {
     desktopTray?.setContextMenu(
       Menu.buildFromTemplate([
         {
-          label: getLabel(desktopMenuMessageIds.trayOpenMarid),
+          label: getLabel(desktopMenuMessageIds.trayOpenQodex),
           click: showTrayWindow,
         },
         { type: "separator" },
@@ -84,7 +84,7 @@ export function createDesktopTray(options: {
         },
         { type: "separator" },
         // 更新入口跟随产品身份：Preview（含生产后端的 Preview）禁用更新器，托盘也不能露出入口。
-        ...(MARID_PRODUCT_FLAVOR === "production"
+        ...(QODEX_PRODUCT_FLAVOR === "production"
           ? [
               {
                 label: getLabel(desktopMenuMessageIds.helpCheckForUpdates),

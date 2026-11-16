@@ -1,6 +1,6 @@
 {
-  "name": "@marid/rpc",
-  "version": "0.1.0-marid",
+  "name": "@qodex/rpc",
+  "version": "0.1.0-qodex",
   "description": "VS Code style IPC communication abstraction framework",
   "type": "module",
   "types": "./dist/index.d.ts",

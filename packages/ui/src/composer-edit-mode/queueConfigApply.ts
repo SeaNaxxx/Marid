@@ -1,10 +1,10 @@
 // 编辑提交后把新模型/mode 应用到其他排队消息（docs/ui/composer-edit-mode.md「提交后应用到其他排队消息」）。
 // 候选项与要带的字段只从当前投影派生；弹窗确认时按当时投影重算，不缓存弹窗打开时的列表。
 import { useCallback, useEffect, useRef } from "react";
-import { isHighspeedProviderId, MARID_AGENT_PROVIDER, type ModelSelection } from "@marid/shared";
-import type { CommandAck, QueueItem, SubmissionMode } from "@marid/shared/marid-protocol-v4";
-import { TID_V4_COMPOSER_EDIT_APPLY_QUEUE_DIALOG } from "@marid/shared/test-ids";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { isHighspeedProviderId, QODEX_AGENT_PROVIDER, type ModelSelection } from "@qodex/shared";
+import type { CommandAck, QueueItem, SubmissionMode } from "@qodex/shared/qodex-protocol-v4";
+import { TID_V4_COMPOSER_EDIT_APPLY_QUEUE_DIALOG } from "@qodex/shared/test-ids";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { toast } from "@/components/ui/toast.js";
 import { useConfirmDialogStore } from "@/store/confirmDialogStore.js";
 import { getModeOptionLabelMessageId } from "@/chat-input-toolbar/display.js";
@@ -76,7 +76,7 @@ export function useQueueConfigApplyPrompt(params: {
   ) => Promise<CommandAck>;
 }): (submitted: QueueConfigApplySubmission, excludeQueueItemId?: string) => void {
   const { sessionId, readQueueItems, dispatchCommand } = params;
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const pendingRef = useRef<AbortController | null>(null);
   useEffect(
     () => () => {
@@ -91,7 +91,7 @@ export function useQueueConfigApplyPrompt(params: {
       const initial = items ? planQueueConfigApply(items, submitted, excludeQueueItemId) : null;
       if (!sessionId || !initial) return;
       const modeLabelId = initial.mode
-        ? getModeOptionLabelMessageId(MARID_AGENT_PROVIDER, { value: initial.mode })
+        ? getModeOptionLabelMessageId(QODEX_AGENT_PROVIDER, { value: initial.mode })
         : null;
       const modeLabel = modeLabelId ? intl.formatMessage({ id: modeLabelId }) : initial.mode;
       const reasoning = initial.modelSelection?.options?.reasoningLevel;

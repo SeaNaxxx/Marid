@@ -3,9 +3,9 @@ import type {
   BotInboundAttachment,
   BotsConfigFile,
   BotsStateFile,
-  MaridProtocolTrace,
-} from "@marid/shared";
-import { PROTOCOL_V4_LIMITS } from "@marid/shared/marid-protocol-v4";
+  QodexProtocolTrace,
+} from "@qodex/shared";
+import { PROTOCOL_V4_LIMITS } from "@qodex/shared/qodex-protocol-v4";
 
 export interface TopicResourceRequest {
   taskId: string;
@@ -16,7 +16,7 @@ export interface TopicResourceRequest {
   workspaceIdentity?: string;
   resourceIndex?: number;
   signal?: AbortSignal;
-  trace?: MaridProtocolTrace;
+  trace?: QodexProtocolTrace;
   remoteSessionId?: string;
 }
 

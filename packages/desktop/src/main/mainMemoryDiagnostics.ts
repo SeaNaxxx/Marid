@@ -1,4 +1,4 @@
-import { createMemoryDiagnosticsRegistry, type MemoryDiagnosticsRegistry } from "@marid/shared";
+import { createMemoryDiagnosticsRegistry, type MemoryDiagnosticsRegistry } from "@qodex/shared";
 
 /**
  * main 进程内存诊断计数器注册表。

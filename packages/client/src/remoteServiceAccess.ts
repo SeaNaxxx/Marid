@@ -1,5 +1,5 @@
-import { IGenUiService } from "@marid/services";
-import { ProxyChannel, type IChannelClient } from "@marid/rpc";
+import { IGenUiService } from "@qodex/services";
+import { ProxyChannel, type IChannelClient } from "@qodex/rpc";
 import {
   IFileService,
   IMediaPreviewService,
@@ -11,9 +11,9 @@ import {
   IOnboardingRecordService,
   ICredentialService,
   IBroadcastService,
-  IMaridTaskService,
-  IMaridAgentService,
-  IMaridSessionService,
+  IQodexTaskService,
+  IQodexAgentService,
+  IQodexSessionService,
   IProjectService,
   IManagedWorktreeService,
   ITaskGroupService,
@@ -66,7 +66,7 @@ import {
   IWindowProjectChangesService,
   type WindowProjectDirectoryServices,
   type IServiceAccessor,
-} from "@marid/services";
+} from "@qodex/services";
 
 /**
  * RemoteServiceAccess — 通过 ChannelClient 自动创建类型安全的服务代理
@@ -85,10 +85,10 @@ export class RemoteServiceAccess implements IServiceAccessor {
   readonly onboardingRecordService: IOnboardingRecordService;
   readonly credentialService: ICredentialService;
   readonly broadcastService: IBroadcastService;
-  readonly maridTaskService: IMaridTaskService;
+  readonly qodexTaskService: IQodexTaskService;
   readonly windowControllerService: IWindowControllerService;
-  readonly maridAgentService: IMaridAgentService;
-  readonly maridSessionService: IMaridSessionService;
+  readonly qodexAgentService: IQodexAgentService;
+  readonly qodexSessionService: IQodexSessionService;
   readonly taskGroupService: ITaskGroupService;
   readonly projectService: IProjectService;
   readonly managedWorktreeService?: IManagedWorktreeService;
@@ -199,14 +199,14 @@ export class RemoteServiceAccess implements IServiceAccessor {
     this.broadcastService = ProxyChannel.toService<IBroadcastService>(
       channelClient.getChannel(IBroadcastService.channelName),
     );
-    this.maridTaskService = ProxyChannel.toService<IMaridTaskService>(
-      channelClient.getChannel(IMaridTaskService.channelName),
+    this.qodexTaskService = ProxyChannel.toService<IQodexTaskService>(
+      channelClient.getChannel(IQodexTaskService.channelName),
     );
     this.windowControllerService = ProxyChannel.toService<IWindowControllerService>(
       channelClient.getChannel(IWindowControllerService.channelName),
     );
-    this.maridAgentService = ProxyChannel.toService<IMaridAgentService>(
-      channelClient.getChannel(IMaridAgentService.channelName),
+    this.qodexAgentService = ProxyChannel.toService<IQodexAgentService>(
+      channelClient.getChannel(IQodexAgentService.channelName),
     );
     this.remoteProjectService = ProxyChannel.toService<IRemoteProjectService>(
       channelClient.getChannel(IRemoteProjectService.channelName),
@@ -223,8 +223,8 @@ export class RemoteServiceAccess implements IServiceAccessor {
           channelClient.getChannel(IManagedWorktreeService.channelName),
         )
       : undefined;
-    this.maridSessionService = ProxyChannel.toService<IMaridSessionService>(
-      channelClient.getChannel(IMaridSessionService.channelName),
+    this.qodexSessionService = ProxyChannel.toService<IQodexSessionService>(
+      channelClient.getChannel(IQodexSessionService.channelName),
     );
     this.cuaPermissionService = ProxyChannel.toService<ICuaPermissionService>(
       channelClient.getChannel(ICuaPermissionService.channelName),

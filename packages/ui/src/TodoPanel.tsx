@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { MaridPlanStep } from "@marid/shared";
+import type { QodexPlanStep } from "@qodex/shared";
 import { Button } from "@/components/ui/button.js";
 import {
   Plan,
@@ -16,17 +16,17 @@ import {
   QueueList,
 } from "@/components/ai-elements/queue.js";
 import { ChevronsUpDownIcon, ListTodo, LoaderCircle } from "lucide-react";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
 import { cn } from "./components/lib/utils.js";
 
-const todoStatusIndicatorClasses: Record<MaridPlanStep["status"], string> = {
+const todoStatusIndicatorClasses: Record<QodexPlanStep["status"], string> = {
   pending: "text-foreground-subtlest",
   in_progress: "text-foreground",
   completed: "text-success",
 };
 
-const todoStatusContentClassesStreaming: Record<MaridPlanStep["status"], string> = {
+const todoStatusContentClassesStreaming: Record<QodexPlanStep["status"], string> = {
   pending: "text-foreground-subtle",
   in_progress: "animated-gradient-text",
   completed: "text-foreground-subtlest line-through",
@@ -34,7 +34,7 @@ const todoStatusContentClassesStreaming: Record<MaridPlanStep["status"], string>
 
 // Bugfix: 任务停止/结束后 plan 可能还留着 in_progress 项，如果继续套 animated-gradient-text，
 // 面板就会一直显示 loading 态。非运行期降级为普通文本，仅保留状态色。
-const todoStatusContentClassesIdle: Record<MaridPlanStep["status"], string> = {
+const todoStatusContentClassesIdle: Record<QodexPlanStep["status"], string> = {
   pending: "text-foreground-subtle",
   in_progress: "text-foreground",
   completed: "text-foreground-subtlest line-through",
@@ -44,10 +44,10 @@ export function TodoPanel({
   plan,
   isStreaming,
 }: {
-  plan: MaridPlanStep[] | null;
+  plan: QodexPlanStep[] | null;
   isStreaming: boolean;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const [isOpen, setIsOpen] = useState(false);
 
   if (!plan || plan.length === 0) {

@@ -1,9 +1,9 @@
-import type { ISettingService } from "@marid/services";
+import type { ISettingService } from "@qodex/services";
 import {
   type AppSettings,
   type ProviderFamilyConnectionSelectionSettings,
   type ProviderFamilyDomain,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export function resolveLogoutProviderFamilyDomain(params: {
   currentDomain: ProviderFamilyDomain | null | undefined;

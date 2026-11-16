@@ -11,7 +11,7 @@ import {
   type BrowserViewRestoreTabsRequest,
   type BrowserViewportSize,
   type BrowserViewScreenshotSurfaceReadyPayload,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { registerBrowserDataIpcHandlers } from "./desktopBrowserDataIpc.js";
 
 export type AttachBrowserGuest = (

@@ -1,5 +1,5 @@
-import { encodeCustomModelValue } from "@marid/shared";
-import { TID_SETTINGS_BACK_BUTTON } from "@marid/shared/test-ids";
+import { encodeCustomModelValue } from "@qodex/shared";
+import { TID_SETTINGS_BACK_BUTTON } from "@qodex/shared/test-ids";
 import {
   DEFAULT_WORKSPACE,
   clearAppData,

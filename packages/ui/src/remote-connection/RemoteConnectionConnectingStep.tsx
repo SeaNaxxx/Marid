@@ -1,4 +1,4 @@
-import { redactFeedbackText } from "@marid/shared";
+import { redactFeedbackText } from "@qodex/shared";
 import { usePlatform } from "@/hooks/usePlatform.js";
 import { RemotePasswordInput } from "@/remote-connection/RemotePasswordInput.js";
 import {
@@ -14,7 +14,7 @@ import {
   type SourceServerInstallPreview,
   type SourceServerOperationLog,
   type SourceServerRunningTask,
-} from "@marid/shared";
+} from "@qodex/shared";
 /* eslint-disable max-lines -- 连接阶段清单、日志和错误恢复共享同一视图状态，保持原子交互。 */
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import {
@@ -25,12 +25,12 @@ import {
   MinusIcon,
   XIcon,
 } from "lucide-react";
-import { type RemoteTarget } from "@marid/shared";
-import { TID_SSH_ERROR } from "@marid/shared/test-ids";
+import { type RemoteTarget } from "@qodex/shared";
+import { TID_SSH_ERROR } from "@qodex/shared/test-ids";
 import { cn } from "@/components/lib/utils.js";
 import { Button } from "@/components/ui/button.js";
 import type { RemoteConnectionLogEntry } from "@/hooks/useRemoteConnectionLogs.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { useFeedbackStore } from "@/feedback/feedbackStore.js";
 import {
   formatRemoteLinkRailTarget,
@@ -326,7 +326,7 @@ export function RemoteConnectionConnectingStep({
   onCancelConnection?: () => void;
   onContinueToDirectory?: () => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const credentialInputId = useId();
   const platform = usePlatform();
   const openFeedbackSubmit = useFeedbackStore((state) => state.openSubmit);

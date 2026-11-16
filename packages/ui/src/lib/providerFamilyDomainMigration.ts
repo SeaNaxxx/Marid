@@ -1,9 +1,9 @@
-import type { IServiceAccessor } from "@marid/services";
+import type { IServiceAccessor } from "@qodex/services";
 import {
   type ProviderFamilyDomain,
   resolveModelProviderFamilyIdByProviderId,
   resolveProviderFamilyDomainFromOAuthProvider,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { logger } from "@/logger.js";
 
 function inferProviderFamilyDomainFromSelection(

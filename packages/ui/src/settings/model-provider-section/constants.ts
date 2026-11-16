@@ -5,13 +5,13 @@ import {
   BUILTIN_MODEL_PROVIDER_IDS,
   createUuid,
   type OAuthProviderId,
-  MARID_ENV,
+  QODEX_ENV,
   ZAI_PROVIDER_ID,
   type BuiltinModelProviderId,
   type UsageQuotaLimit,
   type UsageEntitlementSubscriptionDetail,
   type UsageEntitlementSnapshot,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type { ProviderSettingsFormProvider } from "@/lib/providerSettingsFormTypes.js";
 import { getProviderFormLabel } from "@/lib/providerSettingsFormTypes.js";
 
@@ -20,9 +20,9 @@ export function generateId(): string {
 }
 
 export const PRESET_SUBSCRIPTION_TIMEOUT_MS = 2 * 60 * 1000;
-export const BIGMODEL_REGISTRATION_URL = buildBigModelApiUrl({ MARID_ENV }, "/login");
+export const BIGMODEL_REGISTRATION_URL = buildBigModelApiUrl({ QODEX_ENV }, "/login");
 export const BIGMODEL_CODING_PLAN_PERSONAL_MANAGE_URL = buildBigModelCodingPlanPersonalManageUrl({
-  MARID_ENV,
+  QODEX_ENV,
 });
 
 export interface PresetProviderSpec {

@@ -93,8 +93,8 @@ const INDICATOR_SHADOW_INSET = { top: 6, right: 8, bottom: 12, left: 8 } as cons
 
 function indicatorCopy(locale: Locale): { text: string; width: number } {
   return locale === "zh-CN"
-    ? { text: "Marid 正在操作电脑", width: 234 }
-    : { text: "Marid is controlling your computer", width: 308 };
+    ? { text: "Qodex 正在操作电脑", width: 234 }
+    : { text: "Qodex is controlling your computer", width: 308 };
 }
 
 function indicatorWindowSize(locale: Locale): { width: number; height: number } {
@@ -171,11 +171,11 @@ git add -- packages/desktop/src/main/windowsCuaOperationIndicator.ts packages/de
 git commit -m "fix(cua): render natural Windows indicator shadow"
 ```
 
-停止当前 `@marid/desktop dev:local-cli` 进程树，然后用以下环境变量启动隐藏 dev 进程：
+停止当前 `@qodex/desktop dev:local-cli` 进程树，然后用以下环境变量启动隐藏 dev 进程：
 
 ```powershell
-$env:MARID_CUA_DEV_ROOT = "C:\Users\dev\marid-cua"
-pnpm --filter @marid/desktop dev:local-cli
+$env:QODEX_CUA_DEV_ROOT = "C:\Users\dev\qodex-cua"
+pnpm --filter @qodex/desktop dev:local-cli
 ```
 
-Expected: Electron main、desktop Host、`marid.cjs app-server --stdio` 和 `C:\Users\dev\marid-cua\dist\windows-helper.js` 均存在。
+Expected: Electron main、desktop Host、`qodex.cjs app-server --stdio` 和 `C:\Users\dev\qodex-cua\dist\windows-helper.js` 均存在。

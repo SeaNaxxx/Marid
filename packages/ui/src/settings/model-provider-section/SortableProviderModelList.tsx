@@ -16,7 +16,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { PointerEvent as ReactPointerEvent, ReactNode } from "react";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 export function resolveReorderedModelIds(params: {
   activeModelId: string;
@@ -76,7 +76,7 @@ function SortableProviderModelRow({
   children: ReactNode;
   isLast: boolean;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: modelId,
   });

@@ -46,7 +46,7 @@ export type {
   ConversationShareTurnPreflightResult,
   PublishTextConversationInput,
 } from "./conversation-share/conversationShare.js";
-// Conversation share 的具体实现依赖 Node 文件系统，只能从 @marid/services/node 引入；
+// Conversation share 的具体实现依赖 Node 文件系统，只能从 @qodex/services/node 引入；
 // 根入口必须保持 browser-safe，避免 renderer 解析到 node:* 模块。
 export {
   createConversationTelemetryService,
@@ -92,7 +92,7 @@ export type {
   OnboardingRecordServiceFactory,
 } from "./onboarding/onboardingRecord.js";
 // 这里只能导出 descriptor 和类型。根 index 会被 renderer 经 value import 拉进浏览器包，
-// 若 value 导出 createOnboardingRecordService，会连带 fs/atomicFileUtils → @marid/shared/node →
+// 若 value 导出 createOnboardingRecordService，会连带 fs/atomicFileUtils → @qodex/shared/node →
 // node:timers/promises 整条 Node 链进浏览器，模块加载直接抛错导致整个应用黑屏。
 // 工厂函数由 host 侧（node.ts）与测试从实现文件路径直接导入，与 createSettingService 同惯例。
 export type {
@@ -101,25 +101,25 @@ export type {
   BroadcastMessage,
 } from "./broadcast/broadcast.js";
 
-// Marid task wrapper service — task 列表/置顶/归档等 app 侧包装状态入口。
-export { IMaridTaskService } from "./session/maridTaskService.js";
+// Qodex task wrapper service — task 列表/置顶/归档等 app 侧包装状态入口。
+export { IQodexTaskService } from "./session/qodexTaskService.js";
 export type {
-  MaridArchivedTaskDeletionResult,
-  MaridModelTrajectory,
-  MaridModelTrajectoryCallSource,
-  MaridModelTrajectoryCallSourceKind,
-  MaridModelTrajectoryContentPart,
-  MaridModelTrajectoryMessage,
-  MaridModelTrajectoryRecord,
-  MaridModelTrajectoryUsage,
-  MaridTaskListKind,
-  MaridTaskListQuery,
-  MaridTaskListResult,
-  MaridTaskListSortBy,
-  MaridTaskListWorkspaceScope,
-  MaridTaskReadyOutcome,
-} from "./session/maridTaskService.js";
-export type { MaridTaskListItem } from "./session/maridTaskListTypes.js";
+  QodexArchivedTaskDeletionResult,
+  QodexModelTrajectory,
+  QodexModelTrajectoryCallSource,
+  QodexModelTrajectoryCallSourceKind,
+  QodexModelTrajectoryContentPart,
+  QodexModelTrajectoryMessage,
+  QodexModelTrajectoryRecord,
+  QodexModelTrajectoryUsage,
+  QodexTaskListKind,
+  QodexTaskListQuery,
+  QodexTaskListResult,
+  QodexTaskListSortBy,
+  QodexTaskListWorkspaceScope,
+  QodexTaskReadyOutcome,
+} from "./session/qodexTaskService.js";
+export type { QodexTaskListItem } from "./session/qodexTaskListTypes.js";
 
 export { IWindowControllerService } from "./window-controller/windowController.js";
 export {
@@ -142,73 +142,73 @@ export type {
   WindowHostTasksRemovedSignal,
 } from "./window-controller/windowController.js";
 
-// Marid agent service — IMaridAgentService is both a type (interface) and value (descriptor)
+// Qodex agent service — IQodexAgentService is both a type (interface) and value (descriptor)
 export {
-  IMaridAgentService,
-  type MaridAgentLocalRuntimeChildProcesses,
-  MARID_AGENT_RUNTIME_UNAVAILABLE_CODE,
-} from "./marid-agent/maridAgent.js";
+  IQodexAgentService,
+  type QodexAgentLocalRuntimeChildProcesses,
+  QODEX_AGENT_RUNTIME_UNAVAILABLE_CODE,
+} from "./qodex-agent/qodexAgent.js";
 export {
-  isMaridAgentModelSelectionBasisUnsupportedError,
-  MaridAgentModelSelectionBasisUnsupportedError,
-  isMaridAgentMcpStatusModeUnsupportedError,
-  MARID_AGENT_MCP_STATUS_MODE_UNSUPPORTED_ERROR_CODE,
-  MaridAgentMcpStatusModeUnsupportedError,
-} from "./marid-agent/maridAgentErrors.js";
+  isQodexAgentModelSelectionBasisUnsupportedError,
+  QodexAgentModelSelectionBasisUnsupportedError,
+  isQodexAgentMcpStatusModeUnsupportedError,
+  QODEX_AGENT_MCP_STATUS_MODE_UNSUPPORTED_ERROR_CODE,
+  QodexAgentMcpStatusModeUnsupportedError,
+} from "./qodex-agent/qodexAgentErrors.js";
 export {
-  createMaridAgentConnectionScope,
-  readTrustedMaridAgentV4Connection,
-} from "./marid-agent/maridAgentConnectionScope.js";
+  createQodexAgentConnectionScope,
+  readTrustedQodexAgentV4Connection,
+} from "./qodex-agent/qodexAgentConnectionScope.js";
 export type {
-  MaridAgentConnectionScope,
-  MaridAgentV4ClientMode,
-  MaridAgentV4ConnectionContext,
-} from "./marid-agent/maridAgentConnectionScope.js";
+  QodexAgentConnectionScope,
+  QodexAgentV4ClientMode,
+  QodexAgentV4ConnectionContext,
+} from "./qodex-agent/qodexAgentConnectionScope.js";
 export type {
-  MaridAgentAttachmentBeginParams,
-  MaridAgentAttachmentChunkParams,
-  MaridAgentAttachmentTerminalParams,
-  MaridAgentCreateSessionParams,
-  MaridAgentCuaPermissionObservation,
-  MaridAgentInitializeResult,
-  MaridAgentStorageStartupSnapshot,
-  MaridAgentRuntimeExitedEvent,
-  MaridAgentRuntimeLifecycleEvent,
-  MaridAgentRuntimePolicy,
-  MaridAgentReadSessionParams,
-  MaridAgentRespondProviderRuntimeHeadersParams,
-  MaridAgentProviderRuntimeHeadersRequest,
-  MaridAgentResumeSessionParams,
-  MaridAgentRunAutomationNowResult,
-  MaridAgentSavedWorkflowTarget,
-  MaridAgentSendPromptParams,
-  MaridAgentServiceEvent,
-  MaridAgentSessionSubscribeParams,
-  MaridAgentSessionTarget,
-  MaridAgentSetModeParams,
-  MaridAgentSetModelParams,
-  MaridAgentSetThoughtLevelParams,
-  MaridAgentWorkspaceTarget,
-} from "./marid-agent/maridAgent.js";
+  QodexAgentAttachmentBeginParams,
+  QodexAgentAttachmentChunkParams,
+  QodexAgentAttachmentTerminalParams,
+  QodexAgentCreateSessionParams,
+  QodexAgentCuaPermissionObservation,
+  QodexAgentInitializeResult,
+  QodexAgentStorageStartupSnapshot,
+  QodexAgentRuntimeExitedEvent,
+  QodexAgentRuntimeLifecycleEvent,
+  QodexAgentRuntimePolicy,
+  QodexAgentReadSessionParams,
+  QodexAgentRespondProviderRuntimeHeadersParams,
+  QodexAgentProviderRuntimeHeadersRequest,
+  QodexAgentResumeSessionParams,
+  QodexAgentRunAutomationNowResult,
+  QodexAgentSavedWorkflowTarget,
+  QodexAgentSendPromptParams,
+  QodexAgentServiceEvent,
+  QodexAgentSessionSubscribeParams,
+  QodexAgentSessionTarget,
+  QodexAgentSetModeParams,
+  QodexAgentSetModelParams,
+  QodexAgentSetThoughtLevelParams,
+  QodexAgentWorkspaceTarget,
+} from "./qodex-agent/qodexAgent.js";
 
-// Marid session service — app-facing session facade without Marid Agent naming.
-export { IMaridSessionService } from "./marid-session/maridSession.js";
+// Qodex session service — app-facing session facade without Qodex Agent naming.
+export { IQodexSessionService } from "./qodex-session/qodexSession.js";
 export type {
-  MaridSessionCreateParams,
-  MaridSessionEventsParams,
-  MaridSessionInitializeResult,
-  MaridSessionListParams,
-  MaridSessionMessagesParams,
-  MaridSessionReadParams,
-  MaridSessionResumeParams,
-  MaridSessionServiceEvent,
-  MaridSessionSetModeParams,
-  MaridSessionSetModelParams,
-  MaridSessionSetThoughtLevelParams,
-  MaridSessionSubscribeParams,
-  MaridTaskTarget,
-  MaridSessionWorkspaceTarget,
-} from "./marid-session/maridSession.js";
+  QodexSessionCreateParams,
+  QodexSessionEventsParams,
+  QodexSessionInitializeResult,
+  QodexSessionListParams,
+  QodexSessionMessagesParams,
+  QodexSessionReadParams,
+  QodexSessionResumeParams,
+  QodexSessionServiceEvent,
+  QodexSessionSetModeParams,
+  QodexSessionSetModelParams,
+  QodexSessionSetThoughtLevelParams,
+  QodexSessionSubscribeParams,
+  QodexTaskTarget,
+  QodexSessionWorkspaceTarget,
+} from "./qodex-session/qodexSession.js";
 
 // Bots service — IBotsService is both a type (interface) and value (descriptor).
 export { IBotsService } from "./bots/bots.js";
@@ -246,7 +246,7 @@ export { IOAuthService } from "./oauth/oauth.js";
 // UsageStats service — IUsageStatsService is both a type (interface) and value (descriptor)
 export { IUsageStatsService } from "./usage-stats/usageStats.js";
 
-// Storage（资源管理器「存储」tab）：数据类型在 @marid/shared；这里只导出服务接口与卷分组纯函数
+// Storage（资源管理器「存储」tab）：数据类型在 @qodex/shared；这里只导出服务接口与卷分组纯函数
 // StorageRootSpec 随契约再导出：desktop 的 Worker 协议按 contract.ts 的口径只从 services 入口取类型。
 export type { IStorageService, StorageRootSpec } from "./storage/contract.js";
 
@@ -301,7 +301,7 @@ export {
 
 // Plugins service — IPluginsService is both a type (interface) and value (descriptor)
 export { IPluginsService } from "./plugins/plugins.js";
-// 设置页插件管理薄服务（UI 平台能力面不再直触 maridAgentService）
+// 设置页插件管理薄服务（UI 平台能力面不再直触 qodexAgentService）
 export { IPluginManagementService, withPluginTelemetry } from "./plugins/pluginManagement.js";
 
 // Subagents service — ISubagentsService is both a type (interface) and value (descriptor)
@@ -337,7 +337,7 @@ export type {
   FeedbackTicketStatus,
   FeedbackTicketSummary,
   FeedbackTicketType,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export { IProjectService, LEGACY_SINGLE_ROOT_PROJECT_PREFIX } from "#src/project/contract.js";
 export {

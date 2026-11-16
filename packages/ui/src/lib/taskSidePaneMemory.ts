@@ -1,4 +1,4 @@
-import type { GitChangeSourceId } from "@marid/shared";
+import type { GitChangeSourceId } from "@qodex/shared";
 import type { SidePaneFullViewState } from "@/side-pane-full-view/contract.js";
 import {
   normalizeWorkspaceSidePaneState,

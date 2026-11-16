@@ -41,7 +41,7 @@ export const sourceServerReleaseArchiveSchema = z
   })
   .strict()
   .superRefine((archive, context) => {
-    const expectedFileName = `marid-server-${archive.target}.tar.gz`;
+    const expectedFileName = `qodex-server-${archive.target}.tar.gz`;
     if (archive.fileName !== expectedFileName) {
       context.addIssue({
         code: "custom",

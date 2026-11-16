@@ -1,4 +1,4 @@
-import type { MaridTaskMeta } from "@marid/shared";
+import type { QodexTaskMeta } from "@qodex/shared";
 import { isTaskListRowActive } from "@/v4/taskListRowActivity.js";
 
 export type TaskListTimeSortBy = "created" | "updated";
@@ -62,9 +62,9 @@ export function compareTaskListItemsWithRunningFirst<T extends TaskListSortableI
   return compareTaskListItemsByTime(left, right, sortBy);
 }
 
-export function compareMaridTaskListItems(
-  left: MaridTaskMeta,
-  right: MaridTaskMeta,
+export function compareQodexTaskListItems(
+  left: QodexTaskMeta,
+  right: QodexTaskMeta,
   sortBy: TaskListTimeSortBy,
 ): number {
   return compareTaskListItemsWithRunningFirst(left, right, sortBy, isTaskListRowActive);

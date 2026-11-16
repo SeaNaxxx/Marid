@@ -1,4 +1,4 @@
-import type { SessionConfigState, SessionModelTransition } from "@marid/shared/marid-protocol-v4";
+import type { SessionConfigState, SessionModelTransition } from "@qodex/shared/qodex-protocol-v4";
 
 export interface ModelConfigProjectionObservation {
   sessionId: string;

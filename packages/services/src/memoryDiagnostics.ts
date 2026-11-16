@@ -1,9 +1,9 @@
-import type { IDisposable } from "@marid/rpc";
+import type { IDisposable } from "@qodex/rpc";
 import {
   createMemoryDiagnosticsRegistry,
   type MemoryDiagnosticsProvider,
   type MemoryDiagnosticsRegistry,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 /**
  * services 进程级内存诊断计数器注册表。

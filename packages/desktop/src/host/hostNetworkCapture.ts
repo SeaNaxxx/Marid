@@ -1,6 +1,6 @@
-import { HostResponseTypes, type NetworkCaptureBatch } from "@marid/shared";
-import { createNodeNetworkCapture } from "@marid/shared/node";
-import { localRuntimeNetworkCapture } from "@marid/services/node";
+import { HostResponseTypes, type NetworkCaptureBatch } from "@qodex/shared";
+import { createNodeNetworkCapture } from "@qodex/shared/node";
+import { localRuntimeNetworkCapture } from "@qodex/services/node";
 
 export function createHostNetworkCapture(
   port: { postMessage(message: unknown): void } | undefined,

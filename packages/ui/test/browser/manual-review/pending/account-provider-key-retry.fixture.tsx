@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { BUILTIN_MODEL_PROVIDER_IDS } from "@marid/shared";
-import { MaridIntlProvider } from "@/i18n/IntlProvider.js";
+import { BUILTIN_MODEL_PROVIDER_IDS } from "@qodex/shared";
+import { QodexIntlProvider } from "@/i18n/IntlProvider.js";
 import { CodingPlanStatusPanel } from "@/settings/model-provider-section/StatusCards.js";
 import { resolveCodingPlanEntitlementState } from "@/settings/model-provider-section/providerFamilyConnectionVisibility.js";
 import { TooltipProvider } from "@/components/ui/tooltip.js";
@@ -39,7 +39,7 @@ function Fixture() {
     }
   }
   return (
-    <MaridIntlProvider initialLocale={params.get("locale") === "zh-CN" ? "zh-CN" : "en-US"}>
+    <QodexIntlProvider initialLocale={params.get("locale") === "zh-CN" ? "zh-CN" : "en-US"}>
       <main className="min-h-screen bg-background p-4 text-ui-base text-foreground">
         <CodingPlanStatusPanel
           providerId={providerId}
@@ -58,7 +58,7 @@ function Fixture() {
         <output data-testid="requests">{requests}</output>
         <output data-testid="logins">{logins}</output>
       </main>
-    </MaridIntlProvider>
+    </QodexIntlProvider>
   );
 }
 

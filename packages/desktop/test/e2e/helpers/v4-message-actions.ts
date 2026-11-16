@@ -3,7 +3,7 @@ import {
   TID_V4_COMPOSER_SEND,
   TID_V4_SESSION_PANE,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { clickTestIdByDom, setInputValueByTestIdDom } from "#e2e/helpers/desktop-app";
 import { openV4UserQueryEditInComposer } from "#e2e/helpers/v4-composer-edit";
 

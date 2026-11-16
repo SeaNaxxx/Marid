@@ -1,4 +1,4 @@
-import { workflowRunStepCounts, type WorkflowRunState } from "@marid/shared/marid-protocol-v4";
+import { workflowRunStepCounts, type WorkflowRunState } from "@qodex/shared/qodex-protocol-v4";
 import type { WorkflowCausalityGraphData } from "@/components/workflow-graph/types.js";
 import { workflowSubagentModelCardLabel } from "./subagent-model-label.js";
 import type { WorkflowTimelineModel } from "./timeline-model.js";
@@ -197,7 +197,7 @@ export function workflowSummaryParts(
       ),
     );
   }
-  // 步数走 @marid/shared 的唯一实现：表内 + 表外（撞界后没进表的实例仍算步数）。
+  // 步数走 @qodex/shared 的唯一实现：表内 + 表外（撞界后没进表的实例仍算步数）。
   const { settled, total } = workflowRunStepCounts(run);
   parts.push(format({ id: "chat.toolCall.workflow.card.steps" }, { done: settled, total }));
   if (options.tokens !== false) {

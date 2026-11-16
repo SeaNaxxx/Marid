@@ -1,5 +1,5 @@
 const SHARE_CONTEXT_BLOCK_PATTERN =
-  /(?:\n\n)?# marid-share-context:\n```marid-share-context\n([\s\S]*?)\n```\s*$/u;
+  /(?:\n\n)?# qodex-share-context:\n```qodex-share-context\n([\s\S]*?)\n```\s*$/u;
 
 export interface ConversationShareContextReference {
   contextId: string;

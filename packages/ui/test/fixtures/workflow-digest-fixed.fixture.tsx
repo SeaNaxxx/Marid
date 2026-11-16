@@ -2,9 +2,9 @@ import { AvatarCluster, SpineRail } from "@/app-shell/WorkflowRunSpineParts.js";
 import { buildWorkflowTimeline } from "@/components/workflow-timeline/timeline-model.js";
 import "@/styles.css";
 import { createRoot } from "react-dom/client";
-import type { WorkflowRunState } from "@marid/shared/marid-protocol-v4";
+import type { WorkflowRunState } from "@qodex/shared/qodex-protocol-v4";
 import type { WorkflowRunCardSummary } from "@/ToolCallBlocks/shared.js";
-import { MaridIntlProvider } from "@/i18n/IntlProvider.js";
+import { QodexIntlProvider } from "@/i18n/IntlProvider.js";
 import { TooltipProvider } from "@/components/ui/tooltip.js";
 import { WorkflowRunDigest } from "@/components/workflow-timeline/WorkflowRunDigest.js";
 const LOOP_GRAPH = {
@@ -91,7 +91,7 @@ function joined(
 }
 
 createRoot(document.getElementById("root")!).render(
-  <MaridIntlProvider initialLocale="en-US">
+  <QodexIntlProvider initialLocale="en-US">
     <TooltipProvider>
       <div className="relative h-8" data-testid="spine-preview">
         <SpineRail ink="march" position="above" />
@@ -126,5 +126,5 @@ createRoot(document.getElementById("root")!).render(
         }}
       />
     </TooltipProvider>
-  </MaridIntlProvider>,
+  </QodexIntlProvider>,
 );

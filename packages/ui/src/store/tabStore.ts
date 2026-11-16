@@ -14,7 +14,7 @@ import {
   type TabId,
   type TabState,
   type WorkspacePurpose,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   persistWorkspaceExpandedPreference,
   readWorkspaceExpansionState,

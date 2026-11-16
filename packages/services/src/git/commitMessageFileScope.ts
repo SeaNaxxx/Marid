@@ -1,5 +1,5 @@
 import { isAbsolute, relative } from "node:path";
-import type { GitFileChange } from "@marid/shared";
+import type { GitFileChange } from "@qodex/shared";
 import { normalizeGitPath, normalizeWorkspaceInRepoPath } from "./config.js";
 
 function normalizeCommitMessageScopePath(path: string): string {

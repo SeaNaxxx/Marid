@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { FileApplicationInfo, FileApplicationTarget } from "@marid/shared";
+import type { FileApplicationInfo, FileApplicationTarget } from "@qodex/shared";
 import { usePlatform } from "@/hooks/usePlatform.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { toast } from "@/components/ui/toast.js";
 import { logger } from "@/logger.js";
 
 export function useFileApplications(target: FileApplicationTarget | null, isRemote = false) {
   const platform = usePlatform();
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const key = target ? `${target.path}\u0000${target.workspaceIdentity ?? ""}` : "";
   const targetRef = useRef(target);
   targetRef.current = target;

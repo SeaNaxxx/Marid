@@ -1,4 +1,4 @@
-import type { Locale } from "@marid/shared";
+import type { Locale } from "@qodex/shared";
 import zhCN from "./locales/zh-CN.js";
 import enUS from "./locales/en-US.js";
 import jaJP from "./locales/ja-JP.js";

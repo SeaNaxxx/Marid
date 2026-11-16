@@ -1,12 +1,12 @@
-import { ModelConfig, ModelPropertiesConfig } from "@marid/provider";
-import { NodePersonalProviderConfigRepository } from "@marid/provider-node";
+import { ModelConfig, ModelPropertiesConfig } from "@qodex/provider";
+import { NodePersonalProviderConfigRepository } from "@qodex/provider-node";
 import {
   TID_MODEL_PROVIDER_NAV_ITEM,
   TID_MODEL_PROVIDER_ADD_MODEL_BUTTON,
   TID_SETTINGS_SECTION_NAV,
   TID_TASK_SETTINGS_BUTTON,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { clearAppData, clickTestIdByDom, getE2EAppDataPaths } from "#e2e/helpers/desktop-app";
 import { restartIntoWorkspace, seedReplayProvider } from "#e2e/helpers/model-provider-restart";
 import { prepareV4ConversationE2E } from "#e2e/helpers/v4-conversation";

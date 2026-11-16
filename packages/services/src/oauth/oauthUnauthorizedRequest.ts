@@ -3,7 +3,7 @@ import {
   ZAI_PROVIDER_ID,
   buildBigModelApiUrl,
   buildRuntimeZaiBusinessUrl,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type { ICredentialService } from "#src/credential/credential.js";
 import { resolveBigModelUserinfoUrl } from "#src/oauth/providers/bigmodelProviderConfig.js";
 import { resolveZaiUserinfoUrl } from "#src/oauth/providers/zaiProviderConfig.js";
@@ -159,7 +159,7 @@ export async function isCurrentOAuthCredentialRequest(options: {
 }): Promise<boolean> {
   const authorization = options.headers.get("authorization")?.trim() ?? "";
   if (!authorization) return false;
-  const currentJwt = (await options.credentialService.load("maridjwttoken"))?.trim() ?? "";
+  const currentJwt = (await options.credentialService.load("qodexjwttoken"))?.trim() ?? "";
   if (currentJwt && authorization === `Bearer ${currentJwt}`) return true;
   return isCurrentBusinessOAuthCredentialRequest(options);
 }

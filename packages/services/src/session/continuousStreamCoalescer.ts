@@ -1,4 +1,4 @@
-import type { MaridStreamEvent } from "@marid/shared";
+import type { QodexStreamEvent } from "@qodex/shared";
 
 const CONTINUOUS_CHUNK_FLUSH_DELAY_MS = 16;
 const CONTINUOUS_CHUNK_MAX_CHARS = 4096;
@@ -6,12 +6,12 @@ const CONTINUOUS_CHUNK_MAX_EVENTS = 128;
 const CONTINUOUS_CHUNK_KEY_SEPARATOR = "\u0000";
 
 type ContinuousCoalescibleChunk =
-  | Extract<MaridStreamEvent, { type: "agent_message_chunk" }>
-  | Extract<MaridStreamEvent, { type: "agent_thought_chunk" }>;
+  | Extract<QodexStreamEvent, { type: "agent_message_chunk" }>
+  | Extract<QodexStreamEvent, { type: "agent_thought_chunk" }>;
 
 type ContinuousCoalescibleState =
-  | Extract<MaridStreamEvent, { type: "usage_update" }>
-  | Extract<MaridStreamEvent, { type: "session_info_update" }>;
+  | Extract<QodexStreamEvent, { type: "usage_update" }>
+  | Extract<QodexStreamEvent, { type: "session_info_update" }>;
 
 interface PendingContinuousChunkItem {
   kind: "chunk";
@@ -29,19 +29,19 @@ interface PendingContinuousStateItem {
 type PendingContinuousItem = PendingContinuousChunkItem | PendingContinuousStateItem;
 
 interface ContinuousStreamCoalescer {
-  accept(event: MaridStreamEvent): void;
+  accept(event: QodexStreamEvent): void;
   flush(): void;
   dispose(): void;
 }
 
-function isContinuousCoalescibleChunk(event: MaridStreamEvent): event is ContinuousCoalescibleChunk {
+function isContinuousCoalescibleChunk(event: QodexStreamEvent): event is ContinuousCoalescibleChunk {
   return (
     event.type === "agent_thought_chunk" ||
-    (event.type === "agent_message_chunk" && !event.maridTimeline)
+    (event.type === "agent_message_chunk" && !event.qodexTimeline)
   );
 }
 
-function isContinuousCoalescibleState(event: MaridStreamEvent): event is ContinuousCoalescibleState {
+function isContinuousCoalescibleState(event: QodexStreamEvent): event is ContinuousCoalescibleState {
   if (event.type === "usage_update") {
     return true;
   }
@@ -89,7 +89,7 @@ function mergeContinuousChunks(
 }
 
 export function createContinuousStreamCoalescer(params: {
-  emit: (event: MaridStreamEvent) => void;
+  emit: (event: QodexStreamEvent) => void;
   flushDelayMs?: number;
   maxChars?: number;
   maxEvents?: number;
@@ -168,7 +168,7 @@ export function createContinuousStreamCoalescer(params: {
   }
 
   return {
-    accept(event: MaridStreamEvent): void {
+    accept(event: QodexStreamEvent): void {
       if (disposed) {
         return;
       }

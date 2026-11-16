@@ -8,12 +8,12 @@
   ],
   "fileFixtures": [
     {
-      "path": ".marid/hooks-full-e2e-recorder.mjs",
+      "path": ".qodex/hooks-full-e2e-recorder.mjs",
       "source": "created-by-spec",
       "description": "Recorder shared by process and command Hooks across all four scenarios."
     },
     {
-      "path": ".marid/config.json",
+      "path": ".qodex/config.json",
       "source": "created-by-spec",
       "description": "Project Hook configuration installed before each new session snapshot."
     }

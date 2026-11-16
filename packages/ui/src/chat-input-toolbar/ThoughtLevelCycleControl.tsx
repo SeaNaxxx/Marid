@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
-import { type MaridConfigOption, type MaridProvider } from "@marid/shared";
+import { type QodexConfigOption, type QodexProvider } from "@qodex/shared";
 import {
   TID_CHAT_THOUGHT_LEVEL_SELECT_ITEM,
   TID_CHAT_THOUGHT_LEVEL_SELECT_TRIGGER,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { BrainIcon, ChevronDownIcon } from "lucide-react";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
 import { cn } from "@/components/lib/utils.js";
 import { Button } from "@/components/ui/button.js";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select.js";
-import type { useMaridIntl } from "@/i18n/IntlProvider.js";
+import type { useQodexIntl } from "@/i18n/IntlProvider.js";
 import {
   isCoarseTouchDevice,
   shouldRestoreChatInputFocusAfterPickerClose,
@@ -49,10 +49,10 @@ export function ThoughtLevelCycleControl({
   composerCollapsePriority?: number;
   interactionMode?: ThoughtLevelInteractionMode;
   indicatorClassName?: string;
-  intl: ReturnType<typeof useMaridIntl>["intl"];
+  intl: ReturnType<typeof useQodexIntl>["intl"];
   labelVisibilityClassName?: string;
-  option: MaridConfigOption;
-  provider?: MaridProvider;
+  option: QodexConfigOption;
+  provider?: QodexProvider;
   showInvalidCurrentValue?: boolean;
   restoreFocusSelector?: string | null;
   shortcutLabel?: string;

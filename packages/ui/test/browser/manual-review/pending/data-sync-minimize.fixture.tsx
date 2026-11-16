@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import type { IServiceAccessor } from "@marid/services";
-import type { IPlatformService } from "@marid/shared";
+import type { IServiceAccessor } from "@qodex/services";
+import type { IPlatformService } from "@qodex/shared";
 import { DataSyncDialogProvider, useDataSyncEntry } from "@/data-sync/index.js";
 import { PlatformProvider } from "@/hooks/usePlatform.js";
 import { ServiceProvider } from "@/hooks/useServices.js";
-import { MaridIntlProvider } from "@/i18n/IntlProvider.js";
+import { QodexIntlProvider } from "@/i18n/IntlProvider.js";
 import { TabStoreProvider } from "@/store/TabStoreProvider.js";
 import { registerSourceSettingsServices } from "@/store/sourceSettingsServiceStore.js";
 import "@/styles.css";
 
 const params = new URLSearchParams(location.search);
 const locale = params.get("locale") ?? "zh-CN";
-localStorage.setItem("marid-locale-preference", locale);
+localStorage.setItem("qodex-locale-preference", locale);
 document.documentElement.className =
   params.get("theme") === "dark" ? "theme-zai-dark dark" : "theme-zai-light";
 const sibling = params.get("scenario") === "sibling";
@@ -164,7 +164,7 @@ function Fixture() {
   );
 }
 createRoot(document.getElementById("root")!).render(
-  <MaridIntlProvider initialLocale={locale}>
+  <QodexIntlProvider initialLocale={locale}>
     <ServiceProvider services={services}>
       <PlatformProvider platform={platform}>
         <TabStoreProvider>
@@ -178,5 +178,5 @@ createRoot(document.getElementById("root")!).render(
         </TabStoreProvider>
       </PlatformProvider>
     </ServiceProvider>
-  </MaridIntlProvider>,
+  </QodexIntlProvider>,
 );

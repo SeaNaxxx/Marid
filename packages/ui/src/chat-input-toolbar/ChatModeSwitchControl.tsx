@@ -1,8 +1,8 @@
 import type { RefObject } from "react";
-import type { MaridConfigOption, MaridProvider } from "@marid/shared";
+import type { QodexConfigOption, QodexProvider } from "@qodex/shared";
 import { SlidersHorizontalIcon } from "lucide-react";
 import { ConfigSelect } from "@/chat-input-toolbar/display.js";
-import type { useMaridIntl } from "@/i18n/IntlProvider.js";
+import type { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 export function ChatModeSwitchControl({
   compactIconOnly = false,
@@ -22,16 +22,16 @@ export function ChatModeSwitchControl({
   compactIconOnly?: boolean;
   disabled?: boolean;
   disabledReason?: string;
-  intl: ReturnType<typeof useMaridIntl>["intl"];
+  intl: ReturnType<typeof useQodexIntl>["intl"];
   labelVisibilityClassName?: string;
-  modeOption: MaridConfigOption;
+  modeOption: QodexConfigOption;
   modeShortcutLabel: string;
   modeTriggerRef: RefObject<HTMLSpanElement | null>;
-  onConfigValueChange: (option: MaridConfigOption, value: string) => void;
+  onConfigValueChange: (option: QodexConfigOption, value: string) => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   restoreFocusSelector?: string | null;
-  selectedProvider: MaridProvider;
+  selectedProvider: QodexProvider;
 }) {
   return (
     <ConfigSelect

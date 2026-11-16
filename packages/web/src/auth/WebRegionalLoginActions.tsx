@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { ZAI_CN_PROVIDER_ID, ZAI_PROVIDER_ID } from "@marid/shared";
-import { Button } from "@marid/ui/button";
-import { renderOAuthProviderIcon } from "@marid/ui/oauth-provider-icon";
+import { ZAI_CN_PROVIDER_ID, ZAI_PROVIDER_ID } from "@qodex/shared";
+import { Button } from "@qodex/ui/button";
+import { renderOAuthProviderIcon } from "@qodex/ui/oauth-provider-icon";
 import { getWebAuthCopy } from "#src/auth/webAuthLocale.js";
 import type { WebOAuthProviderId } from "#src/auth/browserOAuthCredentialRepo.js";
 

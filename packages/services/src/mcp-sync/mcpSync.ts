@@ -3,13 +3,13 @@ import type {
   LoadCliMcpFromUserDirectoryResult,
   McpDataSyncPayload,
   SaveCliMcpToUserDirectoryRequest,
-  MaridAgentMcpServer,
-  MaridMcpListMode,
-  MaridMcpListResult,
+  QodexAgentMcpServer,
+  QodexMcpListMode,
+  QodexMcpListResult,
   WorkspaceMcpTrustDecision,
-  MaridWorkspaceMcpTrustResult,
-} from "@marid/shared";
-import { ServiceChannels } from "@marid/shared";
+  QodexWorkspaceMcpTrustResult,
+} from "@qodex/shared";
+import { ServiceChannels } from "@qodex/shared";
 import type { IDataSyncCategoryService } from "../data-sync/contract.js";
 import { createServiceDescriptor } from "../descriptors.js";
 
@@ -21,17 +21,17 @@ export interface IMcpSyncService extends IDataSyncCategoryService<McpDataSyncPay
     request?: LoadCliMcpFromUserDirectoryRequest,
   ): Promise<LoadCliMcpFromUserDirectoryResult>;
   /**
-   * workspace MCP server 运行态状态列表（原 UI 直调 maridAgentService 的
+   * workspace MCP server 运行态状态列表（原 UI 直调 qodexAgentService 的
    * mcp/list）。真实 connect/listTools 检查必须发生在 agent 进程（PATH/cwd 是
    * workspace 环境），本服务只是 UI 的注入面——mcp/list 词的 host 消费收拢到实现一处。
    */
   listWorkspaceMcpServerStatuses(params: {
     workspacePath: string;
     workspaceIdentity?: string;
-    mcpServers?: MaridAgentMcpServer[];
-    mode?: MaridMcpListMode;
-  }): Promise<MaridMcpListResult>;
-  setWorkspaceMcpTrust?(params: WorkspaceMcpTrustDecision): Promise<MaridWorkspaceMcpTrustResult>;
+    mcpServers?: QodexAgentMcpServer[];
+    mode?: QodexMcpListMode;
+  }): Promise<QodexMcpListResult>;
+  setWorkspaceMcpTrust?(params: WorkspaceMcpTrustDecision): Promise<QodexWorkspaceMcpTrustResult>;
   saveMcpToUserDirectory(payload: SaveCliMcpToUserDirectoryRequest): Promise<void>;
 }
 

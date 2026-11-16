@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { MARID_AGENT_PROVIDER } from "@marid/shared";
+import { QODEX_AGENT_PROVIDER } from "@qodex/shared";
 import {
   UPSTREAM_MODEL,
   UPSTREAM_PROVIDER_ID,
@@ -19,7 +19,7 @@ const desktopAppMocks = vi.hoisted(() => ({
 }));
 
 vi.mock("./e2e/helpers/desktop-app.js", () => ({
-  DEFAULT_WORKSPACE: "/tmp/marid-e2e-workspace",
+  DEFAULT_WORKSPACE: "/tmp/qodex-e2e-workspace",
   ...desktopAppMocks,
 }));
 
@@ -57,7 +57,7 @@ describe("Upstream E2E 工具栏偏好种子", () => {
 
     await ensureUpstreamProviderForE2E({ skipToolbarSelection: true });
 
-    expect(storage.getItem("marid-model-selection-recent-v1:/tmp/marid-e2e-workspace")).toBe(
+    expect(storage.getItem("qodex-model-selection-recent-v1:/tmp/qodex-e2e-workspace")).toBe(
       JSON.stringify({
         providerId: UPSTREAM_PROVIDER_ID,
         modelId: UPSTREAM_MODEL,
@@ -66,6 +66,6 @@ describe("Upstream E2E 工具栏偏好种子", () => {
           : {}),
       }),
     );
-    expect(storage.getItem("marid-last-agent-provider")).toBe(MARID_AGENT_PROVIDER);
+    expect(storage.getItem("qodex-last-agent-provider")).toBe(QODEX_AGENT_PROVIDER);
   });
 });

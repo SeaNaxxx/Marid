@@ -4,7 +4,7 @@ import {
   conversationShareConfirmRequestSchema,
   type ConversationShareArtifactDescriptor,
   type ConversationShareConfirmRequest,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 type ConversationShareConfirmRequestBase = Omit<ConversationShareConfirmRequest, "integrity"> & {
   artifacts: ConversationShareArtifactDescriptor[];

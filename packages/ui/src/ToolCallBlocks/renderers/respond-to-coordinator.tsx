@@ -1,6 +1,6 @@
 import { ReplyIcon } from "lucide-react";
 import { useMemo } from "react";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { ToolSnapshotFieldNotice } from "@/ToolCallBlocks/ToolSnapshotFieldNotice.js";
 import { ToolLayout } from "@/ToolCallBlocks/ToolLayout.js";
 import type { ToolCallBlockRenderContext } from "@/ToolCallBlocks/shared.js";
@@ -34,7 +34,7 @@ function readSummary(input: unknown): string | undefined {
 }
 
 export function RespondToCoordinatorToolCallBlock(context: ToolCallBlockRenderContext) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const { toolCall } = context.toolCallNode;
   const display = readToolResultDisplay(toolCall.raw);
   const responseDisplay = display?.kind === "respond_to_coordinator" ? display : undefined;

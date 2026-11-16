@@ -17,7 +17,7 @@ export const WORKSPACE_HOOK_EVENT_NAMES = [
 ] as const;
 
 export type WorkspaceHookEventName = (typeof WORKSPACE_HOOK_EVENT_NAMES)[number];
-export type WorkspaceHookConfigFileKind = "marid.json" | ".marid/config.json" | "explicit";
+export type WorkspaceHookConfigFileKind = "qodex.json" | ".qodex/config.json" | "explicit";
 
 const positiveNumberSchema = z.number().finite().positive();
 
@@ -177,8 +177,8 @@ export function resolveWorkspaceHookConfiguredGates(input: {
  */
 function buildWorkspaceHookCandidatePaths(directories: readonly string[]): string[] {
   return directories.flatMap((directory) => [
-    join(directory, "marid.json"),
-    join(directory, ".marid", "config.json"),
+    join(directory, "qodex.json"),
+    join(directory, ".qodex", "config.json"),
   ]);
 }
 
@@ -236,17 +236,17 @@ export function createWorkspaceHookSourceInput(input: {
   const configDirectory = dirname(canonicalPath);
   return {
     canonicalPath,
-    baseDir: basename(configDirectory) === ".marid" ? dirname(configDirectory) : configDirectory,
+    baseDir: basename(configDirectory) === ".qodex" ? dirname(configDirectory) : configDirectory,
     discoveryOrder: input.discoveryOrder,
     configFileKind: explicitProjectConfig
       ? "explicit"
-      : basename(canonicalPath) === "marid.json"
-        ? "marid.json"
-        : ".marid/config.json",
+      : basename(canonicalPath) === "qodex.json"
+        ? "qodex.json"
+        : ".qodex/config.json",
     explicitProjectConfig,
     editable:
       !explicitProjectConfig &&
-      canonicalPath === resolve(input.workingDirectory, ".marid", "config.json"),
+      canonicalPath === resolve(input.workingDirectory, ".qodex", "config.json"),
     hooks: input.hooks,
   };
 }

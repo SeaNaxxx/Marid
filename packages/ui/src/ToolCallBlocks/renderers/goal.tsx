@@ -1,6 +1,6 @@
 import { GoalIcon } from "lucide-react";
 import { useCallback, useMemo } from "react";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { ToolSnapshotFieldNotice } from "@/ToolCallBlocks/ToolSnapshotFieldNotice.js";
 import { ToolLayout } from "@/ToolCallBlocks/ToolLayout.js";
 import type { ToolCallBlockRenderContext } from "@/ToolCallBlocks/shared.js";
@@ -149,7 +149,7 @@ function formatResultPayload(value: unknown): string {
 }
 
 export function GoalToolCallBlock(context: ToolCallBlockRenderContext) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const { toolCall } = context.toolCallNode;
   const resultPayload = buildGoalResultPayload(toolCall, context.errorText);
   const resultText = formatResultPayload(resultPayload);

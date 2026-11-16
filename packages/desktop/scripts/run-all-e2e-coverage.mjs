@@ -54,8 +54,8 @@ export function createAllE2ECoverageRunPlan({
     ],
     env: {
       ...env,
-      MARID_E2E_COVERAGE: "1",
-      MARID_E2E_MANUAL_REVIEW: "1",
+      QODEX_E2E_COVERAGE: "1",
+      QODEX_E2E_MANUAL_REVIEW: "1",
     },
     notes: upstreamReady
       ? []

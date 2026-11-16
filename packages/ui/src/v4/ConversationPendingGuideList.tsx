@@ -1,6 +1,6 @@
 import { memo, useMemo } from "react";
-import type { QueueItem, UserInputRow } from "@marid/shared/marid-protocol-v4";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import type { QueueItem, UserInputRow } from "@qodex/shared/qodex-protocol-v4";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { ConversationTurnRow } from "@/v4/ConversationTurnRow.js";
 import type { ConversationRowRenderContext } from "@/v4/conversationRowContext.js";
 
@@ -32,7 +32,7 @@ function ConversationPendingGuideListImpl({
   items,
   turnId,
 }: ConversationPendingGuideListProps) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const rows = useMemo(() => items.map((item) => pendingGuideRow(item, turnId)), [items, turnId]);
   const status = intl.formatMessage({ id: "chat.message.turnSteer.pending" });
 

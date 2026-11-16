@@ -1,5 +1,5 @@
 import type { BrowserWindow, Rectangle } from "electron";
-import type { AppSettings } from "@marid/shared";
+import type { AppSettings } from "@qodex/shared";
 
 export const DEFAULT_DESKTOP_WINDOW_WIDTH = 1200;
 export const DEFAULT_DESKTOP_WINDOW_HEIGHT = 800;

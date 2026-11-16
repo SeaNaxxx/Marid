@@ -1,9 +1,9 @@
-import type { MaridMessageWithParts } from "./marid-protocol-legacy-types.js";
-import { textFromMaridMessageParts } from "./marid-protocol-legacy-types.js";
-import type { MaridStreamEvent } from "./marid-task-types-core.js";
-import { subagentResultMetaSchema } from "./marid-protocol-v4/workflow-row-meta.js";
+import type { QodexMessageWithParts } from "./qodex-protocol-legacy-types.js";
+import { textFromQodexMessageParts } from "./qodex-protocol-legacy-types.js";
+import type { QodexStreamEvent } from "./qodex-task-types-core.js";
+import { subagentResultMetaSchema } from "./qodex-protocol-v4/workflow-row-meta.js";
 
-export interface MaridBackgroundTaskNotificationInfo {
+export interface QodexBackgroundTaskNotificationInfo {
   error?: string;
   outputFile?: string;
   result?: string;
@@ -15,8 +15,8 @@ export interface MaridBackgroundTaskNotificationInfo {
 const TASK_NOTIFICATION_OPEN = "<task-notification>";
 const TASK_NOTIFICATION_CLOSE = "</task-notification>";
 
-export interface MaridParsedBackgroundTaskNotification {
-  notification: MaridBackgroundTaskNotificationInfo;
+export interface QodexParsedBackgroundTaskNotification {
+  notification: QodexBackgroundTaskNotificationInfo;
   toolUseId: string;
 }
 
@@ -28,10 +28,10 @@ export interface MaridParsedBackgroundTaskNotification {
  * `subagentResult` 为准，通知正文不带 <error>；它只描述单条通知，所以只在只有一个块时使用。
  * 旧会话和合并轮没有它，读块内的 <status> / <error>。不解析 summary 文本：产品数据不依赖模型可见文案。
  */
-export function parseMaridBackgroundTaskNotifications(
+export function parseQodexBackgroundTaskNotifications(
   text: string | undefined,
   originMeta?: unknown,
-): MaridParsedBackgroundTaskNotification[] {
+): QodexParsedBackgroundTaskNotification[] {
   const trimmed = text?.trim();
   if (!trimmed?.startsWith(TASK_NOTIFICATION_OPEN)) {
     return [];
@@ -78,16 +78,16 @@ function isModelOnlyPartialResult(block: string, status: string | undefined): bo
   return status === "failed" && readTaskNotificationTag(block, "note") !== undefined;
 }
 
-export function collectMaridBackgroundTaskNotificationsByToolUseId(
-  messages: readonly MaridMessageWithParts[],
-): Map<string, MaridBackgroundTaskNotificationInfo> {
-  const notifications = new Map<string, MaridBackgroundTaskNotificationInfo>();
+export function collectQodexBackgroundTaskNotificationsByToolUseId(
+  messages: readonly QodexMessageWithParts[],
+): Map<string, QodexBackgroundTaskNotificationInfo> {
+  const notifications = new Map<string, QodexBackgroundTaskNotificationInfo>();
   for (const message of messages) {
     if (message.info.role !== "user") {
       continue;
     }
-    for (const parsed of parseMaridBackgroundTaskNotifications(
-      textFromMaridMessageParts(message.parts),
+    for (const parsed of parseQodexBackgroundTaskNotifications(
+      textFromQodexMessageParts(message.parts),
       message.info.metadata?.originMeta,
     )) {
       notifications.set(parsed.toolUseId, parsed.notification);
@@ -100,16 +100,16 @@ export function collectMaridBackgroundTaskNotificationsByToolUseId(
  * 失败通知在 App 上展示的原因：优先用结构化结果或 <error> 原文；合并轮两者都没有时，
  * 用这条通知自己的 result / summary 整句（与 V4 投影相同），不从 summary 里截取原因。
  */
-export function maridBackgroundTaskNotificationFailureText(
-  notification: MaridBackgroundTaskNotificationInfo,
+export function qodexBackgroundTaskNotificationFailureText(
+  notification: QodexBackgroundTaskNotificationInfo,
 ): string | undefined {
   return notification.error ?? notification.result ?? notification.summary;
 }
 
-export function maridBackgroundTaskNotificationToolUpdateStatus(
+export function qodexBackgroundTaskNotificationToolUpdateStatus(
   status: string | undefined,
 ): Extract<
-  Extract<MaridStreamEvent, { type: "tool_call_update" }>["status"],
+  Extract<QodexStreamEvent, { type: "tool_call_update" }>["status"],
   "completed" | "failed" | "stopped"
 > {
   if (status === "failed" || status === "lost") {
@@ -122,22 +122,22 @@ export function maridBackgroundTaskNotificationToolUpdateStatus(
   return "completed";
 }
 
-export function attachMaridBackgroundTaskNotificationToRaw(
+export function attachQodexBackgroundTaskNotificationToRaw(
   raw: unknown,
-  notification: MaridBackgroundTaskNotificationInfo | undefined,
+  notification: QodexBackgroundTaskNotificationInfo | undefined,
 ): unknown {
   if (!notification) {
     return raw;
   }
   const record = asPlainRecord(raw);
   const meta = asPlainRecord(record._meta);
-  const marid = asPlainRecord(meta.marid);
+  const qodex = asPlainRecord(meta.qodex);
   return {
     ...record,
     _meta: {
       ...meta,
-      marid: {
-        ...marid,
+      qodex: {
+        ...qodex,
         taskNotification: notification,
       },
     },

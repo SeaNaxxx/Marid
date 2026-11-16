@@ -1,5 +1,5 @@
-import type { BotTopicPreparation as Preparation } from "@marid/shared";
-import type { ConversationRow } from "@marid/shared/marid-protocol-v4";
+import type { BotTopicPreparation as Preparation } from "@qodex/shared";
+import type { ConversationRow } from "@qodex/shared/qodex-protocol-v4";
 import type { ConversationTurnRenderUnit } from "@/v4/conversationTurnRenderUnits.js";
 
 export function pendingTopicPreparations(

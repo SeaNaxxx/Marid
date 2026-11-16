@@ -1,5 +1,5 @@
-import type { ModelSelection } from "@marid/shared";
-import type { IModelSelectionService } from "@marid/services";
+import type { ModelSelection } from "@qodex/shared";
+import type { IModelSelectionService } from "@qodex/services";
 
 /** 在 Automation Select 转为一次 Submission 的边界固定模型身份。 */
 export async function resolveAutomationSubmissionModelSelection(params: {

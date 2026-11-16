@@ -3,7 +3,7 @@ import {
   TID_CHAT_LOADING,
   TID_V4_COMPOSER_SEND,
   TID_V4_TIMELINE_LOAD_OLDER,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { clearAppData } from "#e2e/helpers/desktop-app";
 import {
   getV4TimelineScrollState,

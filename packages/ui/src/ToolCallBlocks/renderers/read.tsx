@@ -6,7 +6,7 @@ import {
   FOLDER_FILE_ICON_SRC,
   resolveFileDisplayDescriptor,
 } from "@/lib/fileDisplay.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { ToolLayout } from "../ToolLayout.js";
 import { ToolSnapshotFieldNotice } from "@/ToolCallBlocks/ToolSnapshotFieldNotice.js";
 import type { ToolCallBlockRenderContext } from "../shared.js";
@@ -248,7 +248,7 @@ export function ReadFileChip({
 }
 
 export function ReadToolCallBlock(context: ToolCallBlockRenderContext) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const { toolCallNode, isRunning, statusLabel, errorText, onOpenCodeViewer } = context;
   const { toolCall } = toolCallNode;
   const summary = buildReadSummary(toolCall);

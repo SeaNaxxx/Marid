@@ -1,17 +1,17 @@
 import { useWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { useCallback, useRef, useState } from "react";
-import type { IServiceAccessor } from "@marid/services";
-import type { MaridProvider } from "@marid/shared";
+import type { IServiceAccessor } from "@qodex/services";
+import type { QodexProvider } from "@qodex/shared";
 import { toast } from "@/components/ui/toast.js";
 import {
   buildWorkspaceSessionReloadDraftError,
   shouldDebounceWorkspaceSessionReload,
 } from "@/lib/workspaceSessionReloadPlan.js";
 import { resolveWorkspaceModelConfigSyncScope } from "@/lib/modelConfigSync.js";
-import { prepareWorkspaceWithMaridSessionService } from "@/hooks/useWorkspacePrepare.js";
+import { prepareWorkspaceWithQodexSessionService } from "@/hooks/useWorkspacePrepare.js";
 import { logger } from "@/logger.js";
-import { useMaridSessionStore } from "@/store/maridSessionStore.js";
+import { useQodexSessionStore } from "@/store/qodexSessionStore.js";
 import { useTabStore } from "@/store/TabStoreProvider.js";
 import { isWorkspaceTab } from "@/store/tabStore.js";
 
@@ -42,7 +42,7 @@ export function useWorkspaceSessionReload({
   const lastReloadSessionTriggeredAtRef = useRef<number | null>(null);
 
   const handleReloadSession = useCallback(
-    async (options?: { resumeTaskId?: string | null; provider?: MaridProvider | null }) => {
+    async (options?: { resumeTaskId?: string | null; provider?: QodexProvider | null }) => {
       if (reloadSessionDisabled || reloadSessionPending) {
         return;
       }
@@ -57,13 +57,13 @@ export function useWorkspaceSessionReload({
       lastReloadSessionTriggeredAtRef.current = now;
       setReloadSessionPending(true);
 
-      const maridSessionStore = useMaridSessionStore.getState();
-      const latestWorkspaceState = maridSessionStore.getWorkspaceState(
+      const qodexSessionStore = useQodexSessionStore.getState();
+      const latestWorkspaceState = qodexSessionStore.getWorkspaceState(
         workspaceAbsPath,
         workspaceIdentity,
       );
       const actionScope = resolveWorkspaceModelConfigSyncScope(latestWorkspaceState);
-      const provider: MaridProvider = options?.provider ?? actionScope.provider;
+      const provider: QodexProvider = options?.provider ?? actionScope.provider;
       const resumeTaskId =
         options?.resumeTaskId?.trim() || latestWorkspaceState.activeTaskId || undefined;
       const shouldPrepareWorkspace = !resumeTaskId;
@@ -71,22 +71,22 @@ export function useWorkspaceSessionReload({
       // Reload session 之前只调用了服务层重建流程，没有同步 workspaceInit 状态到 UI store。
       // 草稿态下后续准备流程会继续读到旧状态，用户会误判本次重建没有生效。
       // 这里显式写入 initializing/ready/failed，保证重建状态和会话流程保持一致。
-      maridSessionStore.setWorkspaceInitState(
+      qodexSessionStore.setWorkspaceInitState(
         workspaceAbsPath,
         "initializing",
         null,
         workspaceIdentity,
       );
       if (shouldPrepareWorkspace) {
-        maridSessionStore.setConfigOptionsStatus(workspaceAbsPath, "loading", workspaceIdentity);
+        qodexSessionStore.setConfigOptionsStatus(workspaceAbsPath, "loading", workspaceIdentity);
         // 草稿态点击 reload 后若不清空旧错误，输入区会继续显示上一轮失败提示，
         // 用户会误判本次重建仍失败。这里在新一轮重建开始时先清空草稿错误。
-        maridSessionStore.setDraftError(workspaceAbsPath, null, workspaceIdentity);
-        maridSessionStore.setTaskState(workspaceAbsPath, "idle", null, workspaceIdentity);
+        qodexSessionStore.setDraftError(workspaceAbsPath, null, workspaceIdentity);
+        qodexSessionStore.setTaskState(workspaceAbsPath, "idle", null, workspaceIdentity);
       }
 
       try {
-        await services.maridTaskService.restartWorkspaceProcess({
+        await services.qodexTaskService.restartWorkspaceProcess({
           workspacePath: workspaceAbsPath,
           ...(workspaceIdentity ? { workspaceIdentity } : {}),
           provider,
@@ -94,45 +94,45 @@ export function useWorkspaceSessionReload({
         });
 
         if (shouldPrepareWorkspace) {
-          const prepareResult = await prepareWorkspaceWithMaridSessionService({
+          const prepareResult = await prepareWorkspaceWithQodexSessionService({
             workspacePath: workspaceAbsPath,
             workspaceIdentity,
             provider,
-            maridSessionService: services.maridSessionService,
+            qodexSessionService: services.qodexSessionService,
           });
 
-          const latestAfterPrepare = maridSessionStore.getWorkspaceState(
+          const latestAfterPrepare = qodexSessionStore.getWorkspaceState(
             workspaceAbsPath,
             workspaceIdentity,
           );
           if (latestAfterPrepare.selectedProvider === provider) {
-            const latestAfterResolve = maridSessionStore.getWorkspaceState(
+            const latestAfterResolve = qodexSessionStore.getWorkspaceState(
               workspaceAbsPath,
               workspaceIdentity,
             );
             if (latestAfterResolve.selectedProvider === provider) {
-              maridSessionStore.setConfigOptions(
+              qodexSessionStore.setConfigOptions(
                 workspaceAbsPath,
                 prepareResult.configOptions ?? [],
                 workspaceIdentity,
               );
-              maridSessionStore.setConfigOptionsStatus(
+              qodexSessionStore.setConfigOptionsStatus(
                 workspaceAbsPath,
                 "ready",
                 workspaceIdentity,
               );
-              maridSessionStore.setSlashCommands(
+              qodexSessionStore.setSlashCommands(
                 workspaceAbsPath,
                 prepareResult.slashCommands ?? [],
                 workspaceIdentity,
               );
-              maridSessionStore.setDraftError(workspaceAbsPath, null, workspaceIdentity);
+              qodexSessionStore.setDraftError(workspaceAbsPath, null, workspaceIdentity);
             }
           }
         }
 
-        maridSessionStore.setWorkspaceInitAttempts(workspaceAbsPath, 0, workspaceIdentity);
-        maridSessionStore.setWorkspaceInitState(workspaceAbsPath, "ready", null, workspaceIdentity);
+        qodexSessionStore.setWorkspaceInitAttempts(workspaceAbsPath, 0, workspaceIdentity);
+        qodexSessionStore.setWorkspaceInitState(workspaceAbsPath, "ready", null, workspaceIdentity);
 
         logger.info(
           `[App] workspace session 重建完成 workspace=${workspaceAbsPath} provider=${provider} resumeTaskId=${resumeTaskId ?? "<none>"}`,
@@ -151,17 +151,17 @@ export function useWorkspaceSessionReload({
             message,
           },
         );
-        maridSessionStore.setWorkspaceInitState(
+        qodexSessionStore.setWorkspaceInitState(
           workspaceAbsPath,
           "failed",
           message,
           workspaceIdentity,
         );
         if (shouldPrepareWorkspace) {
-          maridSessionStore.setConfigOptionsStatus(workspaceAbsPath, "error", workspaceIdentity);
+          qodexSessionStore.setConfigOptionsStatus(workspaceAbsPath, "error", workspaceIdentity);
           // 草稿态下 reload 前会先清空旧错误；如果失败后不回填 draftError，
           // 聊天区只剩 toast，用户看不到可重试的详细报错。这里统一回填标准化错误到输入区。
-          maridSessionStore.setDraftError(workspaceAbsPath, reloadDraftError, workspaceIdentity);
+          qodexSessionStore.setDraftError(workspaceAbsPath, reloadDraftError, workspaceIdentity);
         }
         toast(intl.formatMessage({ id: "appHeader.reloadSessionFailed" }));
       } finally {
@@ -172,8 +172,8 @@ export function useWorkspaceSessionReload({
       intl,
       reloadSessionDisabled,
       reloadSessionPending,
-      services.maridTaskService,
-      services.maridSessionService,
+      services.qodexTaskService,
+      services.qodexSessionService,
       workspaceAbsPath,
       workspaceIdentity,
     ],
@@ -197,7 +197,7 @@ export function useSessionRuntimeRestart(
     remoteSessionId ?? undefined,
     workspaceIdentity,
   );
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const key = `${workspaceIdentity || workspacePath}\0${sessionId ?? ""}`;
   const flight = useRef<{ key: string; promise: Promise<boolean> } | null>(null);
@@ -205,7 +205,7 @@ export function useSessionRuntimeRestart(
     if (!sessionId) return Promise.resolve(false);
     if (flight.current?.key === key) return flight.current.promise;
     setPendingKey(key);
-    const request = services.maridAgentService
+    const request = services.qodexAgentService
       .restartSessionRuntime({
         workspacePath,
         sessionId,
@@ -235,6 +235,6 @@ export function useSessionRuntimeRestart(
       });
     flight.current = { key, promise: request };
     return request;
-  }, [key, services.maridAgentService, workspacePath, workspaceIdentity, sessionId, intl]);
+  }, [key, services.qodexAgentService, workspacePath, workspaceIdentity, sessionId, intl]);
   return { restart, pending: pendingKey === key };
 }

@@ -1,5 +1,5 @@
-import type { IOAuthService } from "@marid/services";
-import type { IPlatformService } from "@marid/shared";
+import type { IOAuthService } from "@qodex/services";
+import type { IPlatformService } from "@qodex/shared";
 import type { WebRemoteControlWorkspaceSwitcherApi } from "@/root/types.js";
 
 export type WebRemoteControlDeviceNavigation = NonNullable<
@@ -10,7 +10,7 @@ export type WebRemoteControlAuthPlatform = Pick<
   "notifyWebRemoteControlAuthStateChanged"
 >;
 export type WebRemoteControlAuthEvents = Pick<IOAuthService, "onDidChangeSession">;
-export type { WebRemoteControlMobileTaskView } from "@marid/shared";
+export type { WebRemoteControlMobileTaskView } from "@qodex/shared";
 export type WebRemoteControlTaskViewSwitcher = Pick<
   WebRemoteControlWorkspaceSwitcherApi,
   "updateMobileTaskView" | "updateMobileViewState"

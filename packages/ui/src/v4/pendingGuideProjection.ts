@@ -1,4 +1,4 @@
-import type { QueueItem, QueueState } from "@marid/shared/marid-protocol-v4";
+import type { QueueItem, QueueState } from "@qodex/shared/qodex-protocol-v4";
 
 export interface PendingGuideQueueProjection {
   pendingGuides: readonly QueueItem[];

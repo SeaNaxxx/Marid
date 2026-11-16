@@ -107,18 +107,18 @@ void app
       "new Promise(resolve => document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', resolve, {once:true}) : resolve())",
     );
     await read(
-      "new Promise(resolve => globalThis.lucide ? resolve() : document.getElementById('marid-visualization-lucide').addEventListener('load', resolve, {once:true}))",
+      "new Promise(resolve => globalThis.lucide ? resolve() : document.getElementById('qodex-visualization-lucide').addEventListener('load', resolve, {once:true}))",
     );
     assert.equal(await read("typeof window.openai"), "undefined");
     assert.equal(await read("typeof window.require"), "undefined");
     await read(
-      "window.marid.setWidgetState({modelContent:{count:7},privateContent:{secret:'local'}})",
+      "window.qodex.setWidgetState({modelContent:{count:7},privateContent:{secret:'local'}})",
     );
     for (let i = 0; i < 6; i++)
       await win.webContents.executeJavaScript(`window.switchPage(${i % 2 === 0})`);
     assert.equal(currentGuest().id, guest.id);
     assert.equal(await read("window.starts"), 1);
-    assert.equal(await read("window.marid.widgetState.modelContent.count"), 7);
+    assert.equal(await read("window.qodex.widgetState.modelContent.count"), 7);
     assert.equal(
       await read("getComputedStyle(document.querySelector('.card')).borderWidth"),
       "1px",
@@ -141,7 +141,7 @@ void app
     await read("new Promise(requestAnimationFrame)");
     assert.equal(await read("document.querySelector('#preview').style.padding"), "35px");
     assert.equal((await win.webContents.executeJavaScript("window.inspect()")).messages.length, 0);
-    await read("window.marid.sendFollowUpMessage({prompt:'Explain count',title:'Demo'})");
+    await read("window.qodex.sendFollowUpMessage({prompt:'Explain count',title:'Demo'})");
     const sent = await win.webContents.executeJavaScript("window.inspect()");
     assert.equal(sent.confirmations, 1);
     assert.equal(sent.messages.length, 1);
@@ -162,7 +162,7 @@ void app
     await win.webContents.executeJavaScript("window.unbind()");
     assert.match(
       await read(
-        "window.marid.sendFollowUpMessage({prompt:'stale'}).then(()=>'',error=>String(error))",
+        "window.qodex.sendFollowUpMessage({prompt:'stale'}).then(()=>'',error=>String(error))",
       ),
       /read-only|disconnected/,
     );
@@ -232,7 +232,7 @@ void app
       ),
     );
     await read(
-      "window.modalFollow = window.marid.sendFollowUpMessage({prompt:'Expanded confirmation'}).then(()=>true,()=>false); 'pending'",
+      "window.modalFollow = window.qodex.sendFollowUpMessage({prompt:'Expanded confirmation'}).then(()=>true,()=>false); 'pending'",
     );
     await waitHost(`document.querySelector('[role="dialog"] textarea')`);
     assert.equal(
@@ -295,7 +295,7 @@ void app
     await clickHost("Submit design changes");
     await waitHost(`window.inspectReact().messages.length === 1`);
     await read(
-      "window.followResult=window.marid.sendFollowUpMessage({prompt:'React confirmation'}).then(()=>true); 'pending'",
+      "window.followResult=window.qodex.sendFollowUpMessage({prompt:'React confirmation'}).then(()=>true); 'pending'",
     );
     await waitHost(
       `document.querySelector('[role="dialog"] textarea')?.value === "React confirmation"`,
@@ -309,7 +309,7 @@ void app
     assert.equal(actual.ports, 1);
     assert.equal(actual.states, 1);
     await read(
-      "window.staleResult=window.marid.sendFollowUpMessage({prompt:'stale confirmation'}).then(()=>'',error=>String(error)); 'pending'",
+      "window.staleResult=window.qodex.sendFollowUpMessage({prompt:'stale confirmation'}).then(()=>'',error=>String(error)); 'pending'",
     );
     await waitHost(
       `document.querySelector('[role="dialog"] textarea')?.value === "stale confirmation"`,

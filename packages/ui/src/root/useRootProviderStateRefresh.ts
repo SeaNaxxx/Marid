@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import type { IServiceAccessor } from "@marid/services";
+import type { IServiceAccessor } from "@qodex/services";
 import { logger } from "@/logger.js";
 
 type RootProviderStateServices = Pick<

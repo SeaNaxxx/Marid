@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import { useStore } from "zustand";
 import { createStore } from "zustand/vanilla";
 import { useShallow } from "zustand/react/shallow";
-import type { IExtensionsService, IExtensionViewsService } from "@marid/services";
+import type { IExtensionsService, IExtensionViewsService } from "@qodex/services";
 import { useOptionalBaseWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
 import { logger } from "@/logger.js";
 import {

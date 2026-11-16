@@ -1,5 +1,5 @@
 import { nativeTheme, type BrowserWindow, type Point } from "electron";
-import { PlatformChannels } from "@marid/shared";
+import { PlatformChannels } from "@qodex/shared";
 import {
   resolveDesktopZoomFactorForLevel,
   resolveDesktopZoomLevelFromFactor,

@@ -7,8 +7,8 @@ import { Workflow } from "lucide-react";
 import type {
   SessionWorkflowActivity,
   SessionWorkflowRunSummary,
-} from "@marid/shared/marid-protocol-v4";
-import { isSessionWorkflowRunLive } from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
+import { isSessionWorkflowRunLive } from "@qodex/shared/qodex-protocol-v4";
 import { cn } from "@/components/lib/utils.js";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
 import {

@@ -1,4 +1,4 @@
-import type { Locale, PostUpdateReleaseNotesPayload } from "@marid/shared";
+import type { Locale, PostUpdateReleaseNotesPayload } from "@qodex/shared";
 
 export type LocalizedUpdateReleaseNotes = {
   title: string;

@@ -7,7 +7,7 @@ import type {
   GitCheckpointRestoreQuery,
   GitCheckpointRestoreResult,
   GitRepositoryRequest,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type { IGitCheckpointService } from "./gitCheckpoint.js";
 import { createGitCheckpointRepo, type GitCheckpointRepo } from "./repo/gitCheckpointRepo.js";
 import { GitCheckpointStore } from "./repo/gitCheckpointStore.js";

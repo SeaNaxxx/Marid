@@ -1,4 +1,4 @@
-import { genUiReferenceSchema, type GenUiReference } from "@marid/shared/gen-ui";
+import { genUiReferenceSchema, type GenUiReference } from "@qodex/shared/gen-ui";
 import {
   extractAssistantDirectives,
   findAssistantDirectivePrefixStart,

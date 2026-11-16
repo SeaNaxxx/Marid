@@ -1,5 +1,5 @@
-import { InternalChannels, PluginSandboxChannels } from "@marid/shared";
-import { buildMcpAppsIframeAllow } from "@marid/shared/mcp-apps";
+import { InternalChannels, PluginSandboxChannels } from "@qodex/shared";
+import { buildMcpAppsIframeAllow } from "@qodex/shared/mcp-apps";
 import type { WebContents, WebPreferences } from "electron";
 import type { PluginSandboxRegistryPort } from "./contract.js";
 import { PLUGIN_SANDBOX_SCHEME, buildPluginSandboxPluginOrigin } from "./contract.js";

@@ -1,20 +1,20 @@
 import { Terminal } from "lucide-react";
-import type { UserCommand, MaridCommand } from "@marid/shared";
-import { isPluginCommand, isUserCommand } from "@marid/shared";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import type { UserCommand, QodexCommand } from "@qodex/shared";
+import { isPluginCommand, isUserCommand } from "@qodex/shared";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { Switch } from "@/components/ui/switch.js";
 import { settingsResourceRowInteraction } from "@/settings/settingsResourceRowInteraction.js";
 import { PluginStoreAvatar } from "@/settings/PluginStoreAvatar.js";
 import type { StorePluginItem } from "@/settings/pluginStoreListing.js";
 
-export function isEditableUserCommand(command: MaridCommand): command is UserCommand {
-  return isUserCommand(command) && command.location.source === "marid";
+export function isEditableUserCommand(command: QodexCommand): command is UserCommand {
+  return isUserCommand(command) && command.location.source === "qodex";
 }
 
 interface CommandCardProps {
-  command: MaridCommand;
-  onEdit?: (command: MaridCommand) => void;
-  onToggle?: (command: MaridCommand, enabled: boolean) => void;
+  command: QodexCommand;
+  onEdit?: (command: QodexCommand) => void;
+  onToggle?: (command: QodexCommand, enabled: boolean) => void;
   isOperating?: boolean;
   pluginIconItem?: Pick<StorePluginItem, "name" | "listing">;
 }
@@ -26,7 +26,7 @@ export function CommandCard({
   isOperating,
   pluginIconItem,
 }: CommandCardProps) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const canEdit = isEditableUserCommand(command);
   const editable = canEdit && Boolean(onEdit) && !isOperating;
 

@@ -4,7 +4,7 @@ import { DropdownMenuItem } from "@/components/ui/dropdown-menu.js";
 import { DefaultFileApplicationLabel } from "@/file-menu/DefaultFileApplicationLabel.js";
 import { FileApplicationIcon } from "@/file-menu/FileApplicationIcon.js";
 import { FileApplicationSubmenu } from "@/file-menu/FileApplicationSubmenu.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 interface ApplicationChoice {
   id: string;
@@ -29,7 +29,7 @@ export function FileApplicationChoices<T extends ApplicationChoice>({
   onSelect: (application: T) => void;
   onOpenDefault?: () => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const ordered = useMemo(() => {
     const unique = new Map<string, T>();
     for (const application of applications)

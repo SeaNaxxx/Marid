@@ -1,9 +1,9 @@
 import {
-  type MaridPersistedToolCall,
-  type MaridSessionFile,
-  type MaridStreamEvent,
-  type MaridTaskMeta,
-} from "@marid/shared";
+  type QodexPersistedToolCall,
+  type QodexSessionFile,
+  type QodexStreamEvent,
+  type QodexTaskMeta,
+} from "@qodex/shared";
 import { buildPerTurnChangeSummaries } from "../session/taskChangeSummary.js";
 
 const MS_IN_SECOND = 1_000;
@@ -11,7 +11,7 @@ const MS_IN_MINUTE = 60 * MS_IN_SECOND;
 const MS_IN_HOUR = 60 * MS_IN_MINUTE;
 const MS_IN_DAY = 24 * MS_IN_HOUR;
 
-export function taskStatus(task: MaridTaskMeta): string {
+export function taskStatus(task: QodexTaskMeta): string {
   return task.status ?? "running";
 }
 
@@ -39,7 +39,7 @@ export function formatTaskRunningDuration(durationMs: number): string {
   return parts.join(" ");
 }
 
-function readRunningTaskStartedAt(snapshot: MaridSessionFile | null, task: MaridTaskMeta): number | null {
+function readRunningTaskStartedAt(snapshot: QodexSessionFile | null, task: QodexTaskMeta): number | null {
   const messages = snapshot?.messages ?? [];
   const assistantStartedAt = messages.findLast((message) => message.role === "assistant")?.timestamp;
   if (assistantStartedAt !== undefined) {
@@ -52,11 +52,11 @@ function readRunningTaskStartedAt(snapshot: MaridSessionFile | null, task: Marid
   return task.createdAt ?? task.updatedAt ?? null;
 }
 
-export function formatStatusTaskLine(task: MaridTaskMeta, label = "Task"): string {
+export function formatStatusTaskLine(task: QodexTaskMeta, label = "Task"): string {
   return `${label}: ${task.title} (${task.taskId})`;
 }
 
-export function readTaskWorkedDurationMs(snapshot: MaridSessionFile | null, task: MaridTaskMeta): number | null {
+export function readTaskWorkedDurationMs(snapshot: QodexSessionFile | null, task: QodexTaskMeta): number | null {
   const status = taskStatus(task);
   if (status === "running") {
     const startedAt = readRunningTaskStartedAt(snapshot, task);
@@ -76,7 +76,7 @@ export function readTaskWorkedDurationMs(snapshot: MaridSessionFile | null, task
   return null;
 }
 
-export function readLatestAssistantTurnChangeSummary(snapshot: MaridSessionFile | null): MaridTaskMeta["changeSummary"] | null {
+export function readLatestAssistantTurnChangeSummary(snapshot: QodexSessionFile | null): QodexTaskMeta["changeSummary"] | null {
   if (!snapshot?.fileChanges || snapshot.fileChanges.length === 0) {
     return null;
   }
@@ -126,7 +126,7 @@ function readStatusStringField(value: unknown, keys: readonly string[]): string 
   return null;
 }
 
-function formatStatusToolProgress(tool: MaridPersistedToolCall | undefined): string | null {
+function formatStatusToolProgress(tool: QodexPersistedToolCall | undefined): string | null {
   if (!tool) {
     return null;
   }
@@ -139,7 +139,7 @@ function formatStatusToolProgress(tool: MaridPersistedToolCall | undefined): str
   return detail ? `${title}${status}: ${detail}` : `${title}${status}`;
 }
 
-export function formatStatusStreamToolProgress(event: Extract<MaridStreamEvent, { type: "tool_call" | "tool_call_update" }>): string | null {
+export function formatStatusStreamToolProgress(event: Extract<QodexStreamEvent, { type: "tool_call" | "tool_call_update" }>): string | null {
   const title = normalizeStatusProgressText(event.title ?? event.kind ?? "tool");
   const detail =
     readStatusStringField(event.input, ["command", "path", "file_path", "filePath", "prompt"]) ??
@@ -149,7 +149,7 @@ export function formatStatusStreamToolProgress(event: Extract<MaridStreamEvent, 
   return detail ? `${title}${status}: ${detail}` : `${title}${status}`;
 }
 
-export function readLatestTaskProgress(snapshot: MaridSessionFile | null): string | null {
+export function readLatestTaskProgress(snapshot: QodexSessionFile | null): string | null {
   const messages = snapshot?.messages ?? [];
   for (const latestMessage of [...messages].reverse()) {
     if (latestMessage.role !== "assistant") {

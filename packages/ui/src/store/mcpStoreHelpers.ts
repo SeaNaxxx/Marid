@@ -3,16 +3,16 @@ import type {
   McpServerConfig,
   McpSource,
   NativeMcpServerRecord,
-  MaridMcpServer,
-} from "@marid/shared";
+  QodexMcpServer,
+} from "@qodex/shared";
 
-export const MCP_CONFIG_KEY = "marid-mcp-config";
-export const MCP_ENABLED_STATES_KEY = "marid-mcp-enabled-states";
-export const MCP_DELETED_PRELOAD_KEY = "marid-mcp-deleted-preload";
+export const MCP_CONFIG_KEY = "qodex-mcp-config";
+export const MCP_ENABLED_STATES_KEY = "qodex-mcp-enabled-states";
+export const MCP_DELETED_PRELOAD_KEY = "qodex-mcp-deleted-preload";
 
 export const DEFAULT_MCP_CONFIG: McpConfig = {
   mcp: { mcpServers: {} },
-  maridagentmcp: { mcpServers: {}, projects: {} },
+  qodexagentmcp: { mcpServers: {}, projects: {} },
   claudeclimcp: { mcpServers: {}, projects: {} },
   geminiclimcp: { mcpServers: {}, projects: {} },
   codexclimcp: { mcpServers: {}, projects: {} },
@@ -88,7 +88,7 @@ function toIdKey(value: string): string {
 }
 
 export function makeServerId(source: McpSource, name: string, projectPath?: string, directorySource?: NonNullable<NativeMcpServerRecord["location"]>["source"]): string {
-  const sourceKey = source === "maridagentmcp" && directorySource && directorySource !== "marid"
+  const sourceKey = source === "qodexagentmcp" && directorySource && directorySource !== "qodex"
     ? `${source}-${directorySource}`
     : source;
   return `${sourceKey}-${toIdKey(toScopeKey(projectPath))}-${toIdKey(name)}`;
@@ -99,8 +99,8 @@ export function buildServerList(
   nativeServers: NativeMcpServerRecord[],
   enabledStates: Record<string, boolean>,
   deletedPreload: Set<string>,
-  existingServers: MaridMcpServer[],
-): MaridMcpServer[] {
+  existingServers: QodexMcpServer[],
+): QodexMcpServer[] {
   const existingById = new Map(existingServers.map((s) => [s.id, s]));
 
   function makeServer(
@@ -108,12 +108,12 @@ export function buildServerList(
     name: string,
     serverConfig: McpServerConfig,
     source: McpSource,
-    scope: MaridMcpServer["scope"],
+    scope: QodexMcpServer["scope"],
     enabledBySource?: boolean,
     projectPath?: string,
-    file?: MaridMcpServer["file"],
-    location?: MaridMcpServer["location"],
-  ): MaridMcpServer {
+    file?: QodexMcpServer["file"],
+    location?: QodexMcpServer["location"],
+  ): QodexMcpServer {
     const prev = existingById.get(serverId);
     const configChanged = prev ? !isSameMcpServerConfig(prev.config, serverConfig) : true;
     return {
@@ -136,7 +136,7 @@ export function buildServerList(
     };
   }
 
-  const servers: MaridMcpServer[] = [];
+  const servers: QodexMcpServer[] = [];
 
   for (const server of nativeServers) {
     const serverId = makeServerId(server.source, server.name, server.projectPath, server.location?.source);
@@ -164,7 +164,7 @@ function isSameMcpServerConfig(left: McpServerConfig, right: McpServerConfig): b
   return JSON.stringify(left) === JSON.stringify(right);
 }
 
-export function getServerPriority(server: MaridMcpServer): number {
+export function getServerPriority(server: QodexMcpServer): number {
   if (server.scope === "workspace") return 2;
   if (server.scope === "user") return 1;
   return 0;

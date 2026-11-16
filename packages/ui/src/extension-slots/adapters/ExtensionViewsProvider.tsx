@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, type ReactNode } from "react";
 import { useOptionalPlatform } from "@/hooks/usePlatform.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
-import { useMaridStore } from "@/store/StoreProvider.js";
+import { useQodexStore } from "@/store/StoreProvider.js";
 import {
   OpenExtensionLogsContext,
   OpenExtensionViewContext,
@@ -14,7 +14,7 @@ import {
 } from "@/extension-slots/adapters/useExtensionSlots.js";
 import { useExtensionGrantRequests } from "@/extension-slots/adapters/useExtensionGrants.js";
 import { selectStaticViews } from "@/extension-slots/domain/slotSelectors.js";
-import type { NotificationsShowResult } from "@marid/shared/extension-host";
+import type { NotificationsShowResult } from "@qodex/shared/extension-host";
 import type {
   ExtensionViewSidePaneTab,
   OpenExtensionLogs,
@@ -50,9 +50,9 @@ export function ExtensionViewsProvider({
 }) {
   const service = useExtensionsService();
   const viewsService = useExtensionViewsService();
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const platform = useOptionalPlatform();
-  const notificationEnabled = useMaridStore((state) => state.notificationEnabled);
+  const notificationEnabled = useQodexStore((state) => state.notificationEnabled);
   const notificationEnabledRef = useRef(notificationEnabled);
   notificationEnabledRef.current = notificationEnabled;
   const intlRef = useRef(intl);

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import type { IMaridTaskService } from "@marid/services";
-import type { BotProvider, MaridStreamEvent } from "@marid/shared";
+import type { IQodexTaskService } from "@qodex/services";
+import type { BotProvider, QodexStreamEvent } from "@qodex/shared";
 import {
   createBotModelSelectionView,
   createBotsServiceHarness,
@@ -10,7 +10,7 @@ import {
   type RecordedRequest,
 } from "#e2e/bots/helpers/bots-service-harness";
 
-type Prompt = Parameters<IMaridTaskService["sendPrompt"]>[0];
+type Prompt = Parameters<IQodexTaskService["sendPrompt"]>[0];
 type Harness = ReturnType<typeof createBotsServiceHarness>;
 type InboundAttachments = Parameters<Harness["service"]["handleInboundMessage"]>[0]["attachments"];
 
@@ -73,10 +73,10 @@ function setupProvider(provider: BotProvider) {
       },
     },
   });
-  h.maridTaskService.getTaskModelSelection = async () => selection;
+  h.qodexTaskService.getTaskModelSelection = async () => selection;
   // 任务服务替身按 CLI 命令账本回复：同一个 commandId 第二次提交返回 duplicate，不开新一轮。
   const admitted = new Set<string>();
-  h.maridTaskService.sendPrompt = async (params: Prompt) => {
+  h.qodexTaskService.sendPrompt = async (params: Prompt) => {
     h.sendPromptCalls.push(params);
     const duplicate = admitted.has(params.traceId);
     admitted.add(params.traceId);
@@ -87,7 +87,7 @@ function setupProvider(provider: BotProvider) {
     };
   };
   let taskStatus = "running";
-  h.maridTaskService.getTaskSnapshot = async () => ({ meta: { status: taskStatus } });
+  h.qodexTaskService.getTaskSnapshot = async () => ({ meta: { status: taskStatus } });
   const replies: unknown[] = [];
   const send = async (
     providerMessageId: string,
@@ -125,8 +125,8 @@ function setupProvider(provider: BotProvider) {
       type: "task_run_started",
       startedAt: Date.now(),
       inputOrigin: "desktop",
-    } as MaridStreamEvent);
-    await emit({ ...base, type: "task_complete", stopReason: "end_turn" } as MaridStreamEvent);
+    } as QodexStreamEvent);
+    await emit({ ...base, type: "task_complete", stopReason: "end_turn" } as QodexStreamEvent);
   };
   return {
     h,

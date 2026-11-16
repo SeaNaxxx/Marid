@@ -13,7 +13,7 @@ after(async () => {
 });
 
 async function makeRoot() {
-  const root = await mkdtemp(join(tmpdir(), "marid-formal-review-"));
+  const root = await mkdtemp(join(tmpdir(), "qodex-formal-review-"));
   temporaryRoots.push(root);
   return root;
 }

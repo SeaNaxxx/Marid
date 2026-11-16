@@ -1,13 +1,13 @@
-import type { ProjectTask as MaridTaskMeta } from "@/project-sidebar/contract.js";
+import type { ProjectTask as QodexTaskMeta } from "@/project-sidebar/contract.js";
 import type {
-  MaridGroupedTaskView,
-  MaridGroupedTaskViewNode,
+  QodexGroupedTaskView,
+  QodexGroupedTaskViewNode,
   GroupedDraftTaskPlacement,
 } from "@/project-sidebar/grouped/types.js";
 
 import { taskKey } from "@/project-sidebar/grouped/ids.js";
 
-function cloneView(view: MaridGroupedTaskView): MaridGroupedTaskView {
+function cloneView(view: QodexGroupedTaskView): QodexGroupedTaskView {
   return {
     nodes: view.nodes.map((node) =>
       node.type === "task" ? { ...node } : { ...node, tasks: [...node.tasks] },
@@ -15,22 +15,22 @@ function cloneView(view: MaridGroupedTaskView): MaridGroupedTaskView {
   };
 }
 
-function cloneNodes(view: MaridGroupedTaskView): MaridGroupedTaskViewNode[] {
+function cloneNodes(view: QodexGroupedTaskView): QodexGroupedTaskViewNode[] {
   return [...view.nodes];
 }
 
 function cloneGroupNode(
-  node: Extract<MaridGroupedTaskViewNode, { type: "group" }>,
-): Extract<MaridGroupedTaskViewNode, { type: "group" }> {
+  node: Extract<QodexGroupedTaskViewNode, { type: "group" }>,
+): Extract<QodexGroupedTaskViewNode, { type: "group" }> {
   return { ...node, tasks: [...node.tasks] };
 }
 
 function removeTaskFromView(
-  view: MaridGroupedTaskView,
+  view: QodexGroupedTaskView,
   targetTaskKey: string,
 ): {
-  nextView: MaridGroupedTaskView;
-  task: MaridTaskMeta | null;
+  nextView: QodexGroupedTaskView;
+  task: QodexTaskMeta | null;
 } {
   const nodes = cloneNodes(view);
   for (let index = 0; index < nodes.length; index += 1) {
@@ -56,11 +56,11 @@ function removeTaskFromView(
 }
 
 function insertTaskIntoGroup(
-  view: MaridGroupedTaskView,
-  task: MaridTaskMeta,
+  view: QodexGroupedTaskView,
+  task: QodexTaskMeta,
   groupId: string,
   beforeTaskKey: string | null,
-): MaridGroupedTaskView {
+): QodexGroupedTaskView {
   const nodes = cloneNodes(view);
   const groupIndex = nodes.findIndex((node) => node.type === "group" && node.group.id === groupId);
   const groupNode = nodes[groupIndex];
@@ -78,9 +78,9 @@ function insertTaskIntoGroup(
 }
 
 function removeTaskFromGroupedView(
-  view: MaridGroupedTaskView,
+  view: QodexGroupedTaskView,
   targetTaskKey: string,
-): MaridGroupedTaskView {
+): QodexGroupedTaskView {
   const nextView = cloneView(view);
   for (const node of nextView.nodes) {
     if (node.type !== "group") {
@@ -103,15 +103,15 @@ function removeTaskFromGroupedView(
 }
 
 function filterGroupedViewByTaskKeys(
-  view: MaridGroupedTaskView,
+  view: QodexGroupedTaskView,
   hiddenTaskKeys: ReadonlySet<string>,
-): MaridGroupedTaskView {
+): QodexGroupedTaskView {
   if (hiddenTaskKeys.size === 0) {
     return view;
   }
 
   let changed = false;
-  const nodes: MaridGroupedTaskView["nodes"] = [];
+  const nodes: QodexGroupedTaskView["nodes"] = [];
   for (const node of view.nodes) {
     if (node.type === "task") {
       if (!hiddenTaskKeys.has(taskKey(node.task))) {
@@ -135,9 +135,9 @@ function filterGroupedViewByTaskKeys(
 }
 
 function findTaskInGroupedView(
-  view: MaridGroupedTaskView,
+  view: QodexGroupedTaskView,
   targetTaskKey: string,
-): MaridTaskMeta | null {
+): QodexTaskMeta | null {
   for (const node of view.nodes) {
     if (node.type === "task" && taskKey(node.task) === targetTaskKey) {
       return node.task;
@@ -153,9 +153,9 @@ function findTaskInGroupedView(
 }
 
 function replaceTaskInGroupedView(
-  view: MaridGroupedTaskView,
-  nextTask: MaridTaskMeta,
-): MaridGroupedTaskView {
+  view: QodexGroupedTaskView,
+  nextTask: QodexTaskMeta,
+): QodexGroupedTaskView {
   const targetTaskKey = taskKey(nextTask);
   return {
     nodes: view.nodes.map((node) => {
@@ -170,7 +170,7 @@ function replaceTaskInGroupedView(
   };
 }
 
-function getGroupedTaskGroupIds(view: MaridGroupedTaskView): string[] {
+function getGroupedTaskGroupIds(view: QodexGroupedTaskView): string[] {
   return view.nodes.flatMap((node) => (node.type === "group" ? [node.group.id] : []));
 }
 
@@ -189,7 +189,7 @@ function pruneCollapsedGroupedTaskGroupIds(
   return new Set([...collapsedGroupIds].filter((groupId) => knownGroupIds.has(groupId)));
 }
 
-function getTaskGroupIdInView(view: MaridGroupedTaskView, targetTaskKey: string): string | null {
+function getTaskGroupIdInView(view: QodexGroupedTaskView, targetTaskKey: string): string | null {
   for (const node of view.nodes) {
     if (node.type !== "group") {
       continue;
@@ -205,29 +205,29 @@ type GroupedTaskLocation =
   | {
       parent: "root";
       nodeIndex: number;
-      task: MaridTaskMeta;
+      task: QodexTaskMeta;
     }
   | {
       parent: "group";
       groupId: string;
       nodeIndex: number;
       taskIndex: number;
-      task: MaridTaskMeta;
+      task: QodexTaskMeta;
     };
 
 type GroupedTaskInsertPosition = "before" | "after";
 
-function findTopLevelTaskIndex(view: MaridGroupedTaskView, targetTaskKey: string): number {
+function findTopLevelTaskIndex(view: QodexGroupedTaskView, targetTaskKey: string): number {
   return view.nodes.findIndex(
     (node) => node.type === "task" && taskKey(node.task) === targetTaskKey,
   );
 }
 
-function findGroupIndex(view: MaridGroupedTaskView, groupId: string): number {
+function findGroupIndex(view: QodexGroupedTaskView, groupId: string): number {
   return view.nodes.findIndex((node) => node.type === "group" && node.group.id === groupId);
 }
 
-function findGroupIdByTaskKey(view: MaridGroupedTaskView, targetTaskKey: string): string | null {
+function findGroupIdByTaskKey(view: QodexGroupedTaskView, targetTaskKey: string): string | null {
   for (const node of view.nodes) {
     if (node.type !== "group") {
       continue;
@@ -240,7 +240,7 @@ function findGroupIdByTaskKey(view: MaridGroupedTaskView, targetTaskKey: string)
 }
 
 function findTaskLocation(
-  view: MaridGroupedTaskView,
+  view: QodexGroupedTaskView,
   targetTaskKey: string,
 ): GroupedTaskLocation | null {
   for (let nodeIndex = 0; nodeIndex < view.nodes.length; nodeIndex += 1) {
@@ -272,7 +272,7 @@ function findTaskLocation(
 }
 
 function resolveGroupedDraftTaskPlacementForTask(
-  view: MaridGroupedTaskView,
+  view: QodexGroupedTaskView,
   targetTaskKey: string | null | undefined,
 ): GroupedDraftTaskPlacement {
   if (!targetTaskKey) {
@@ -285,11 +285,11 @@ function resolveGroupedDraftTaskPlacementForTask(
 }
 
 function insertTaskNearTask(
-  view: MaridGroupedTaskView,
-  task: MaridTaskMeta,
+  view: QodexGroupedTaskView,
+  task: QodexTaskMeta,
   overTaskKey: string,
   position: GroupedTaskInsertPosition,
-): MaridGroupedTaskView {
+): QodexGroupedTaskView {
   const nodes = cloneNodes(view);
   const overLocation = findTaskLocation({ nodes }, overTaskKey);
   if (!overLocation) {
@@ -314,13 +314,13 @@ function insertTaskNearTask(
 }
 
 function moveTaskOverTask(
-  view: MaridGroupedTaskView,
+  view: QodexGroupedTaskView,
   params: {
     activeTaskKey: string;
     overTaskKey: string;
     position: GroupedTaskInsertPosition;
   },
-): MaridGroupedTaskView {
+): QodexGroupedTaskView {
   if (params.activeTaskKey === params.overTaskKey) {
     return view;
   }
@@ -341,11 +341,11 @@ function moveTaskOverTask(
 }
 
 function insertTaskAroundGroup(
-  view: MaridGroupedTaskView,
-  task: MaridTaskMeta,
+  view: QodexGroupedTaskView,
+  task: QodexTaskMeta,
   groupId: string,
   position: GroupedTaskInsertPosition,
-): MaridGroupedTaskView {
+): QodexGroupedTaskView {
   const nodes = cloneNodes(view);
   const groupIndex = nodes.findIndex((node) => node.type === "group" && node.group.id === groupId);
   if (groupIndex < 0) {
@@ -356,13 +356,13 @@ function insertTaskAroundGroup(
 }
 
 function moveTaskToRootAroundGroup(
-  view: MaridGroupedTaskView,
+  view: QodexGroupedTaskView,
   params: {
     activeTaskKey: string;
     groupId: string;
     position: GroupedTaskInsertPosition;
   },
-): MaridGroupedTaskView {
+): QodexGroupedTaskView {
   const groupNode = view.nodes.find(
     (node) => node.type === "group" && node.group.id === params.groupId,
   );
@@ -379,12 +379,12 @@ function moveTaskToRootAroundGroup(
 }
 
 function moveTaskToGroupStart(
-  view: MaridGroupedTaskView,
+  view: QodexGroupedTaskView,
   params: {
     activeTaskKey: string;
     groupId: string;
   },
-): MaridGroupedTaskView {
+): QodexGroupedTaskView {
   const { nextView, task } = removeTaskFromView(view, params.activeTaskKey);
   if (!task) {
     return view;
@@ -400,12 +400,12 @@ function moveTaskToGroupStart(
 }
 
 function moveTaskToGroupEnd(
-  view: MaridGroupedTaskView,
+  view: QodexGroupedTaskView,
   params: {
     activeTaskKey: string;
     groupId: string;
   },
-): MaridGroupedTaskView {
+): QodexGroupedTaskView {
   const { nextView, task } = removeTaskFromView(view, params.activeTaskKey);
   if (!task) {
     return view;
@@ -423,7 +423,7 @@ function moveTaskToGroupEnd(
 }
 
 function moveGroupAroundTopLevelNode(
-  view: MaridGroupedTaskView,
+  view: QodexGroupedTaskView,
   params: {
     activeGroupId: string;
     over:
@@ -437,7 +437,7 @@ function moveGroupAroundTopLevelNode(
         };
     position: GroupedTaskInsertPosition;
   },
-): MaridGroupedTaskView {
+): QodexGroupedTaskView {
   if (params.over.type === "group" && params.activeGroupId === params.over.groupId) {
     return view;
   }
@@ -474,9 +474,9 @@ function moveGroupAroundTopLevelNode(
 }
 
 function getNodeIdAfterGroup(
-  view: MaridGroupedTaskView,
+  view: QodexGroupedTaskView,
   groupId: string,
-): MaridGroupedTaskViewNode | null {
+): QodexGroupedTaskViewNode | null {
   const groupIndex = view.nodes.findIndex(
     (node) => node.type === "group" && node.group.id === groupId,
   );
@@ -484,10 +484,10 @@ function getNodeIdAfterGroup(
 }
 
 function insertTaskBeforeTopLevelNode(
-  view: MaridGroupedTaskView,
-  task: MaridTaskMeta,
-  beforeNode: MaridGroupedTaskViewNode | null,
-): MaridGroupedTaskView {
+  view: QodexGroupedTaskView,
+  task: QodexTaskMeta,
+  beforeNode: QodexGroupedTaskViewNode | null,
+): QodexGroupedTaskView {
   const nodes = cloneNodes(view);
   const insertIndex =
     beforeNode === null
@@ -505,10 +505,10 @@ function insertTaskBeforeTopLevelNode(
 }
 
 function moveTaskByMenu(
-  view: MaridGroupedTaskView,
-  targetTask: MaridTaskMeta,
+  view: QodexGroupedTaskView,
+  targetTask: QodexTaskMeta,
   targetGroupId: string | null,
-): MaridGroupedTaskView {
+): QodexGroupedTaskView {
   const targetTaskKey = taskKey(targetTask);
   const currentGroupId = getTaskGroupIdInView(view, targetTaskKey);
   if (currentGroupId === targetGroupId) {
@@ -529,9 +529,9 @@ function moveTaskByMenu(
 }
 
 function moveTaskToTopByMenu(
-  view: MaridGroupedTaskView,
-  targetTask: MaridTaskMeta,
-): MaridGroupedTaskView {
+  view: QodexGroupedTaskView,
+  targetTask: QodexTaskMeta,
+): QodexGroupedTaskView {
   const targetTaskKey = taskKey(targetTask);
   const location = findTaskLocation(view, targetTaskKey);
   if (

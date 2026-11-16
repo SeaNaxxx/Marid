@@ -1,16 +1,16 @@
 /* oxlint-disable eslint(max-lines) -- telemetry state lock、deviceMid 编排和上报路径共享同一状态文件，拆分会增加锁语义漂移风险。 */
 import {
   createUuid,
-  MARID_VERSION,
-  MARID_ENV,
-  MARID_TELEMETRY_REPORT_ENDPOINT,
-  buildMaridSourceHeadersFromContext,
-  rewriteMaridEndpointUrl,
+  QODEX_VERSION,
+  QODEX_ENV,
+  QODEX_TELEMETRY_REPORT_ENDPOINT,
+  buildQodexSourceHeadersFromContext,
+  rewriteQodexEndpointUrl,
   sanitizeTelemetryEventDetail,
   type TelemetryEventPayload,
   type TelemetryRendererContext,
   type OAuthLoginAttribution,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { mkdir, open, readFile, stat, unlink, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { version } from "node:os";
@@ -18,11 +18,11 @@ import { dirname, join } from "node:path";
 import { createServiceLogger } from "#src/logger/serviceLogger.js";
 import { getAppConfigDir } from "../paths.js";
 
-const REPORT_ENDPOINT = MARID_TELEMETRY_REPORT_ENDPOINT;
+const REPORT_ENDPOINT = QODEX_TELEMETRY_REPORT_ENDPOINT;
 
 function sessionCreateEventId(userId: string, sessionId: string): string {
   const bytes = createHash("sha256")
-    .update(JSON.stringify(["marid:session_create:v1", userId, sessionId]))
+    .update(JSON.stringify(["qodex:session_create:v1", userId, sessionId]))
     .digest()
     .subarray(0, 16);
   bytes[6] = (bytes[6]! & 0x0f) | 0x80;
@@ -53,7 +53,7 @@ interface TelemetryCoreDependencies {
   releaseChannel?: string;
   osVersion?: string;
   homeDir?: string;
-  resolveMaridEndpointOrigin?: () => Promise<string> | string;
+  resolveQodexEndpointOrigin?: () => Promise<string> | string;
   /**
    * 宿主的实时界面语言（Desktop Main 的 currentApplicationLocale）。
    * 有值时覆盖 renderer context 里的 clientLanguage：那是 Intl 系统语言，UI 切到 English 后
@@ -131,14 +131,14 @@ function toLocalDateKey(timestamp: number, timeZone: string): string {
 
 function resolveTelemetryStateFile(homeDir?: string): string {
   if (homeDir) {
-    return join(homeDir, ".marid", "v2", "telemetry-state.json");
+    return join(homeDir, ".qodex", "v2", "telemetry-state.json");
   }
   return join(getAppConfigDir(), "telemetry-state.json");
 }
 
 function resolveTelemetryLockFile(homeDir?: string): string {
   if (homeDir) {
-    return join(homeDir, ".marid", "v2", "telemetry-state.lock");
+    return join(homeDir, ".qodex", "v2", "telemetry-state.lock");
   }
   return join(getAppConfigDir(), "telemetry-state.lock");
 }
@@ -309,8 +309,8 @@ async function ensureDeviceMidInLockedState(
 /**
  * 确保 telemetry-state.json 里存在 deviceMid 并返回它。
  *
- * Bug 根因：远端 marid-server 所在主机没有 Desktop main 进程，过去没有任何进程会在那里写
- * telemetry-state.json；buildMaridSourceHeaders() 又只读不生成，于是远端发往 Marid endpoint 的
+ * Bug 根因：远端 qodex-server 所在主机没有 Desktop main 进程，过去没有任何进程会在那里写
+ * telemetry-state.json；buildQodexSourceHeaders() 又只读不生成，于是远端发往 Qodex endpoint 的
  * 请求永远缺 X-Device-Mid，billing/balance 被服务端拒绝为 parameter error，Start Plan 在远程
  * 工作区被判成未开通。这里把 telemetry 上报内部的 ensure 逻辑抽成独立入口，供远端 server 启动时
  * 调用：同一个文件、同一个字段、同一把 telemetry-state.lock，与同机 CLI 得到同一个设备身份。
@@ -348,7 +348,7 @@ export function createTelemetryCore(dependencies: TelemetryCoreDependencies = {}
   let didWarnMarketingParamsLoadFailure = false;
   const randomUUID = dependencies.randomUUID ?? (() => createUuid());
   const now = dependencies.now ?? Date.now;
-  const appVersion = dependencies.appVersion ?? MARID_VERSION;
+  const appVersion = dependencies.appVersion ?? QODEX_VERSION;
   const platform = dependencies.platform ?? process.platform;
   const osVersion = dependencies.osVersion ?? version();
   const requestTimeoutMs = dependencies.requestTimeoutMs ?? REPORT_REQUEST_TIMEOUT_MS;
@@ -466,18 +466,18 @@ export function createTelemetryCore(dependencies: TelemetryCoreDependencies = {}
     });
 
     const endpoint = String(
-      rewriteMaridEndpointUrl(
+      rewriteQodexEndpointUrl(
         REPORT_ENDPOINT,
-        (await dependencies.resolveMaridEndpointOrigin?.()) ?? REPORT_ENDPOINT,
+        (await dependencies.resolveQodexEndpointOrigin?.()) ?? REPORT_ENDPOINT,
       ),
     );
 
-    const headers = buildMaridSourceHeadersFromContext({
+    const headers = buildQodexSourceHeadersFromContext({
       appVersion,
       platform,
       arch: dependencies.arch ?? process.arch,
       osVersion,
-      releaseChannel: dependencies.releaseChannel ?? MARID_ENV,
+      releaseChannel: dependencies.releaseChannel ?? QODEX_ENV,
       clientLanguage: context.clientLanguage,
       clientTimezone: context.clientTimezone,
       deviceMid,

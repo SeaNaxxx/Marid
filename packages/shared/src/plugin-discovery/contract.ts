@@ -2,4 +2,4 @@ export { isDiscoverableOfficialPlugin, isPluginStoreVisible } from "../plugin-st
 export {
   pluginInstallRequestPayloadSchema,
   type PluginInstallRequestPayload,
-} from "../marid-protocol-v4/pluginInstall.js";
+} from "../qodex-protocol-v4/pluginInstall.js";

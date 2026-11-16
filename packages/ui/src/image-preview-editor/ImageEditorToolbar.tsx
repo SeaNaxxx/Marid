@@ -9,7 +9,7 @@ import {
   Redo2Icon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import type { AnnotationTool } from "@/image-preview-editor/geometry.js";
 const TOOLS = [
   ["select", MousePointer2Icon],
@@ -40,7 +40,7 @@ export function ImageEditorToolbar({
   canRedo: boolean;
   disabled: boolean;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   return (
     <div
       role="toolbar"

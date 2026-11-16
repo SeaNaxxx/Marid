@@ -5,12 +5,12 @@
  * OAuth 回调监听在 Root/App 常驻层，不在此 hook 中。
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { OAuthProviderId, OAuthProviderMeta } from "@marid/shared";
-import { isBuiltinOAuthProvider, resolveSafeTelemetryHostname } from "@marid/shared";
+import type { OAuthProviderId, OAuthProviderMeta } from "@qodex/shared";
+import { isBuiltinOAuthProvider, resolveSafeTelemetryHostname } from "@qodex/shared";
 import { reportAppTelemetryEvent } from "@/lib/appTelemetry.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import type { LoginEntryPurpose } from "@/store/index.js";
-import { useMaridStore } from "@/store/StoreProvider.js";
+import { useQodexStore } from "@/store/StoreProvider.js";
 import { logger } from "@/logger.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
 import { useServices } from "@/hooks/useServices.js";
@@ -20,7 +20,7 @@ type OAuthStatus = "idle" | "waiting" | "error";
 export function useOAuth() {
   const { oauthService } = useServices();
   const platform = usePlatform();
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const [status, setStatus] = useState<OAuthStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const [providers, setProviders] = useState<OAuthProviderMeta[]>([]);
@@ -30,7 +30,7 @@ export function useOAuth() {
   const [authorizeUrl, setAuthorizeUrl] = useState<string | null>(null);
   const loginAttemptRef = useRef(0);
   const providerRefreshRef = useRef(0);
-  const setOAuthPollingActive = useMaridStore((state) => state.setOAuthPollingActive);
+  const setOAuthPollingActive = useQodexStore((state) => state.setOAuthPollingActive);
 
   const refreshProviders = useCallback(async () => {
     const refresh = ++providerRefreshRef.current;

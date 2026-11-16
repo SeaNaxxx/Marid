@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import type { ApplicationIconRequest } from "@marid/shared";
+import type { ApplicationIconRequest } from "@qodex/shared";
 import { cn } from "@/components/lib/utils.js";
 import { useToolPresentationCapabilities } from "@/ToolCallBlocks/presentationCapabilities.js";
 import { CUA_TOOL_ICON } from "@/ToolCallBlocks/renderers/cuaIcon.js";

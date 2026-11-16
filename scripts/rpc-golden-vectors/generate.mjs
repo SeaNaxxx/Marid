@@ -6,12 +6,12 @@
  *
  * The Kotlin unit test (RpcGoldenVectorTest) asserts byte-identical output.
  */
-import { serialize } from "/home/z/marid-repo/packages/rpc/src/serialization.ts";
+import { serialize } from "/home/z/qodex-repo/packages/rpc/src/serialization.ts";
 import {
   writeProtocolMessage,
   ProtocolMessageType,
-} from "/home/z/marid-repo/packages/rpc/src/protocol.ts";
-import { BufferWriter } from "/home/z/marid-repo/packages/rpc/src/serialization.ts";
+} from "/home/z/qodex-repo/packages/rpc/src/protocol.ts";
+import { BufferWriter } from "/home/z/qodex-repo/packages/rpc/src/serialization.ts";
 import { writeFileSync, mkdirSync } from "node:fs";
 
 function hex(bytes) {
@@ -33,13 +33,13 @@ function frameCase(name, payloadHex) {
 const vectors = {
   cases: [
     // Request: Promise initialize
-    serializeCase("request-initialize", [100, 0, "marid-agent", "initialize"], { workspacePath: "/data/data/com.marid.app/files/workspace" }),
+    serializeCase("request-initialize", [100, 0, "qodex-agent", "initialize"], { workspacePath: "/data/data/com.qodex.app/files/workspace" }),
     // Request: sendConversationCommandV4 with v4 envelope
-    serializeCase("request-send-text", [100, 1, "marid-agent", "sendConversationCommandV4"], {
-      workspacePath: "/data/data/com.marid.app/files/workspace",
+    serializeCase("request-send-text", [100, 1, "qodex-agent", "sendConversationCommandV4"], {
+      workspacePath: "/data/data/com.qodex.app/files/workspace",
       envelope: {
         commandId: "0194a2b3-c4d5-7e89-f012-3456789abcde",
-        clientId: "marid-android",
+        clientId: "qodex-android",
         sessionId: null,
         type: "sendText",
         payload: { text: "هلا" },
@@ -48,8 +48,8 @@ const vectors = {
       },
     }),
     // Event listen
-    serializeCase("request-event-listen", [102, 2, "marid-agent", "onDynamicSessionEvent"], {
-      workspacePath: "/data/data/com.marid.app/files/workspace",
+    serializeCase("request-event-listen", [102, 2, "qodex-agent", "onDynamicSessionEvent"], {
+      workspacePath: "/data/data/com.qodex.app/files/workspace",
       deliveryKind: "live",
     }),
     // Event dispose
@@ -79,7 +79,7 @@ const vectors = {
     // Int edge values
     serializeCase("value-int-zero", [0], 0),
     serializeCase("value-int-maxish", [6], 268435455),
-    serializeCase("value-string-unicode", [1], "مرحبا Marid"),
+    serializeCase("value-string-unicode", [1], "مرحبا Qodex"),
     serializeCase("value-array-mixed", [4], [1, "two", true, null, { three: 3 }]),
   ],
   frames: [],
@@ -90,9 +90,9 @@ for (const c of vectors.cases.slice(0, 3)) {
   vectors.frames.push(frameCase(`frame-of-${c.name}`, c.hex));
 }
 
-mkdirSync("/home/z/marid-repo/android/app/src/test/resources", { recursive: true });
+mkdirSync("/home/z/qodex-repo/android/app/src/test/resources", { recursive: true });
 writeFileSync(
-  "/home/z/marid-repo/android/app/src/test/resources/rpc-golden-vectors.json",
+  "/home/z/qodex-repo/android/app/src/test/resources/rpc-golden-vectors.json",
   JSON.stringify(vectors, null, 2),
 );
 console.log(`wrote ${vectors.cases.length} cases + ${vectors.frames.length} frames`);

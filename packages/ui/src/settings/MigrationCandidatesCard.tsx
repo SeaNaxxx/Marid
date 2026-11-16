@@ -1,19 +1,19 @@
 import { Check, Download, LoaderCircle, TriangleAlert } from "lucide-react";
 import type {
-  MaridImportSessionsResult,
-  MaridImportableSessionCandidate,
-  MaridImportedSessionSkippedItem,
-} from "@marid/shared";
+  QodexImportSessionsResult,
+  QodexImportableSessionCandidate,
+  QodexImportedSessionSkippedItem,
+} from "@qodex/shared";
 import type { ClaudeSessionMigrationSupportState } from "@/hooks/useClaudeSessionMigration.js";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert.js";
 import { Badge } from "@/components/ui/badge.js";
 import { Button } from "@/components/ui/button.js";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { cn } from "@/components/lib/utils.js";
 
 function getKnownReasonLabel(
-  intl: ReturnType<typeof useMaridIntl>["intl"],
+  intl: ReturnType<typeof useQodexIntl>["intl"],
   reason: string,
 ): string {
   if (reason === "session_not_found_or_workspace_mismatch") {
@@ -30,9 +30,9 @@ function ImportIssuesList({
   items,
 }: {
   title: string;
-  items: MaridImportedSessionSkippedItem[];
+  items: QodexImportedSessionSkippedItem[];
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
 
   if (items.length === 0) {
     return null;
@@ -83,11 +83,11 @@ export function MigrationCandidatesCard({
   onImportSelected,
 }: {
   supportState: ClaudeSessionMigrationSupportState;
-  candidates: MaridImportableSessionCandidate[];
+  candidates: QodexImportableSessionCandidate[];
   selectedSessionIds: string[];
   selectedCount: number;
   importError: string | null;
-  lastImportResult: MaridImportSessionsResult | null;
+  lastImportResult: QodexImportSessionsResult | null;
   isImporting: boolean;
   dateTimeFormatter: Intl.DateTimeFormat;
   onToggleSelection: (sessionId: string) => void;
@@ -95,7 +95,7 @@ export function MigrationCandidatesCard({
   onClearSelection: () => void;
   onImportSelected: () => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
 
   return (
     <Card className="border border-border bg-card py-0 shadow-none">

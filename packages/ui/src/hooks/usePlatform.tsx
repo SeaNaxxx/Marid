@@ -2,10 +2,10 @@
  * usePlatform —— 通过 React Context 提供 IPlatformService
  *
  * 平台操作（native dialog、窗口生命周期等）通过此 hook 访问，
- * 替代直接调用 window.marid。
+ * 替代直接调用 window.qodex。
  */
 import { createContext, useContext, useCallback, type ReactNode } from "react";
-import type { IPlatformService, RemoteTarget } from "@marid/shared";
+import type { IPlatformService, RemoteTarget } from "@qodex/shared";
 
 const PlatformContext = createContext<IPlatformService | null>(null);
 

@@ -1,4 +1,4 @@
-import { PlatformChannels } from "@marid/shared";
+import { PlatformChannels } from "@qodex/shared";
 import { DesktopBrowserScreenshotActivityController } from "./browserScreenshotActivityController.js";
 import { DesktopBrowserScreenshotSurfaceCoordinator } from "./browserScreenshotSurfaceCoordinator.js";
 

@@ -1,5 +1,5 @@
 import type { DatabaseSync } from "node:sqlite";
-import type { ModelSelection } from "@marid/shared";
+import type { ModelSelection } from "@qodex/shared";
 
 // 冻结 0002 的发布前已裁决编码；不能调用将来可能修改的运行时 parser/身份表。
 // 保持与旧 decodeCustomModelValue / parseModelPickerValue 的转义和分隔优先级一致。
@@ -54,8 +54,8 @@ function decodeLegacySelection(row: LegacySelectionRow): ModelSelection | undefi
       if (!reasoningLevel) return undefined;
       model = model.slice(0, levelSeparator);
     }
-  } else if (["glm", "marid"].includes(provider)) {
-    // 旧 provider=glm/marid 是执行后端，不是供应商身份。
+  } else if (["glm", "qodex"].includes(provider)) {
+    // 旧 provider=glm/qodex 是执行后端，不是供应商身份。
     return undefined;
   }
   provider = provider.trim();

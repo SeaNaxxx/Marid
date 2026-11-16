@@ -43,7 +43,7 @@ function expectStatus(result, status, label) {
 function verifyBashEmbeddedSearch(plan) {
   const buildResult = execute(
     "pnpm",
-    ["--dir", repoRoot, "--filter", "@marid/bootstrap^...", "--if-present", "build"],
+    ["--dir", repoRoot, "--filter", "@qodex/bootstrap^...", "--if-present", "build"],
     { cwd: repoRoot, env: process.env },
   );
   expectStatus(buildResult, 0, "Bash embedded search dependency build");
@@ -52,7 +52,7 @@ function verifyBashEmbeddedSearch(plan) {
     "pnpm",
     [
       "--dir",
-      join(repoRoot, "apps/marid-cli"),
+      join(repoRoot, "apps/qodex-cli"),
       "exec",
       "vitest",
       "run",
@@ -64,10 +64,10 @@ function verifyBashEmbeddedSearch(plan) {
       cwd: repoRoot,
       env: {
         ...process.env,
-        ...(plan.bfsPath ? { MARID_BFS_BINARY: plan.bfsPath } : {}),
-        MARID_REQUIRE_NATIVE_SEARCH_E2E: "1",
-        MARID_RG_BINARY: plan.rgPath,
-        MARID_UGREP_BINARY: plan.ugrepPath,
+        ...(plan.bfsPath ? { QODEX_BFS_BINARY: plan.bfsPath } : {}),
+        QODEX_REQUIRE_NATIVE_SEARCH_E2E: "1",
+        QODEX_RG_BINARY: plan.rgPath,
+        QODEX_UGREP_BINARY: plan.ugrepPath,
       },
     },
   );
@@ -80,11 +80,11 @@ function verifyBashEmbeddedSearch(plan) {
 }
 
 async function resolveNativeSearchPlan(outputDir) {
-  const targetPlatform = process.env.MARID_TARGET_OS?.trim() || process.platform;
-  const targetArch = process.env.MARID_TARGET_ARCH?.trim() || process.arch;
-  const bfsPath = process.env.MARID_BFS_BINARY?.trim();
-  const rgPath = process.env.MARID_RG_BINARY?.trim();
-  const ugrepPath = process.env.MARID_UGREP_BINARY?.trim();
+  const targetPlatform = process.env.QODEX_TARGET_OS?.trim() || process.platform;
+  const targetArch = process.env.QODEX_TARGET_ARCH?.trim() || process.arch;
+  const bfsPath = process.env.QODEX_BFS_BINARY?.trim();
+  const rgPath = process.env.QODEX_RG_BINARY?.trim();
+  const ugrepPath = process.env.QODEX_UGREP_BINARY?.trim();
   const normalizedPlatform = normalizeNativeSearchPlatform(targetPlatform);
   const requiresBfs = normalizedPlatform !== "win32";
   if (!requiresBfs) {
@@ -101,8 +101,8 @@ async function resolveNativeSearchPlan(outputDir) {
       Boolean(bfsPath || rgPath || ugrepPath),
       false,
       requiresBfs
-        ? "MARID_BFS_BINARY, MARID_RG_BINARY, and MARID_UGREP_BINARY must be provided together"
-        : "MARID_RG_BINARY and MARID_UGREP_BINARY must be provided together",
+        ? "QODEX_BFS_BINARY, QODEX_RG_BINARY, and QODEX_UGREP_BINARY must be provided together"
+        : "QODEX_RG_BINARY and QODEX_UGREP_BINARY must be provided together",
     );
     buildNativeSearchTools({
       platform: targetPlatform,
@@ -146,7 +146,7 @@ async function main() {
     process.platform === "darwin" || process.platform === "linux" || process.platform === "win32",
     "this E2E must run on macOS, Linux, or Windows",
   );
-  const e2eRoot = mkdtempSync(join(tmpdir(), "marid-native-search-e2e-"));
+  const e2eRoot = mkdtempSync(join(tmpdir(), "qodex-native-search-e2e-"));
 
   try {
     const plan = await resolveNativeSearchPlan(join(e2eRoot, "runtime-tools"));

@@ -8,11 +8,11 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
-import { type BrowserViewportSize } from "@marid/shared";
+import { type BrowserViewportSize } from "@qodex/shared";
 import {
   TID_BROWSER_RESPONSIVE_SCALED_FRAME,
   TID_BROWSER_RESPONSIVE_VIEWPORT,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   resolveBrowserViewportRendererScale,
   resolveBrowserViewportScale,
@@ -25,7 +25,7 @@ import {
   type ResizeHandleDirections,
 } from "@/browser-use/ResponsiveBrowserResizeHandles.js";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 
 export const DEFAULT_RESPONSIVE_BROWSER_VIEWPORT_SIZE = {
@@ -91,7 +91,7 @@ export function ResponsiveBrowserViewport({
   viewportSize: BrowserViewportSize;
   zoom: BrowserViewportZoom;
 }): React.JSX.Element {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const viewportSizeRef = useRef<BrowserViewportSize>(viewportSize);
   const rendererScaleRef = useRef(1);

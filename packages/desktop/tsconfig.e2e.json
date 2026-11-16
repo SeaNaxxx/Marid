@@ -7,7 +7,7 @@
     "types": ["node", "@wdio/globals/types", "@wdio/electron-types", "mocha"],
     "noEmit": true,
     "paths": {
-      "@marid/e2e-report": ["../e2e-report/src/node/index.ts"]
+      "@qodex/e2e-report": ["../e2e-report/src/node/index.ts"]
     }
   },
   "include": [
@@ -22,6 +22,6 @@
     { "path": "../shared" },
     { "path": "../ui" },
     { "path": "../e2e-report" },
-    { "path": "../marid-server-cli" }
+    { "path": "../qodex-server-cli" }
   ]
 }

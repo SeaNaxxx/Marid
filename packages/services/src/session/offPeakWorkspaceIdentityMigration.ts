@@ -1,4 +1,4 @@
-import { OFF_PEAK_TERMINAL_STATUSES } from "@marid/shared";
+import { OFF_PEAK_TERMINAL_STATUSES } from "@qodex/shared";
 import type { DatabaseSync } from "node:sqlite";
 
 const terminalStatuses = OFF_PEAK_TERMINAL_STATUSES.map((status) => `'${status}'`).join(", ");

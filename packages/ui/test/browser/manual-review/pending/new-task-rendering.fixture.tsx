@@ -1,13 +1,13 @@
 import { useCallback, useState } from "react";
-import { Event, ProxyChannel } from "@marid/rpc";
+import { Event, ProxyChannel } from "@qodex/rpc";
 import { useRemoteWorkspaceHistory } from "@/root/useRemoteWorkspaceHistory.js";
 import { createRoot } from "react-dom/client";
-import { MaridIntlProvider } from "@/i18n/IntlProvider.js";
+import { QodexIntlProvider } from "@/i18n/IntlProvider.js";
 import { ChatLoading } from "@/components/ai-elements/chat-loading.js";
 import { Spinner } from "@/components/ui/spinner.js";
 import { ServiceProvider } from "@/hooks/useServices.js";
 import { WorkspaceHeaderTitleSection } from "@/WorkspaceHeaderSections.js";
-import { buildRemoteHostWorkspaceIdentity } from "@marid/shared";
+import { buildRemoteHostWorkspaceIdentity } from "@qodex/shared";
 import { TooltipProvider } from "@/components/ui/tooltip.js";
 import {
   ProjectDirectoryProvider,
@@ -17,9 +17,9 @@ import {
   ProjectComposerMenu,
 } from "@/project-sidebar/index.js";
 import { useRootWorkspaceActions } from "@/root/useRootWorkspaceActions.js";
-import { useMaridSessionStore } from "@/store/maridSessionStore.js";
+import { useQodexSessionStore } from "@/store/qodexSessionStore.js";
 import type { ProjectTree, ProjectSidebarProps } from "@/project-sidebar/contract.js";
-import type { IServiceAccessor } from "@marid/services";
+import type { IServiceAccessor } from "@qodex/services";
 import { attachTaskListRowActivity } from "@/v4/taskListRowActivity.js";
 import "@/styles.css";
 
@@ -131,7 +131,7 @@ const activityStore = {
       items: [
         attachTaskListRowActivity(tree.tasks[0]!, {
           phase: complete ? "completedSuccess" : "running",
-          lastActivityAt: activitySnapshot.items[0]!.__maridSessionActivity.lastActivityAt + 1,
+          lastActivityAt: activitySnapshot.items[0]!.__qodexSessionActivity.lastActivityAt + 1,
           hasBackgroundWork: false,
         }),
       ],
@@ -180,7 +180,7 @@ const services = {
       expansion ? structuredClone(remoteDirectory) : { hosts: [], entries: [] },
   },
   broadcastService: { onMessage: dispose },
-  maridTaskService: {
+  qodexTaskService: {
     onDynamicWorkspaceEvent: () => dispose,
     getTaskSessionFilePath: async () => ({ path: null, exists: false }),
     getTaskNativeSessionLogFile: async () => ({ path: null, exists: false }),
@@ -188,7 +188,7 @@ const services = {
   },
 } as unknown as IServiceAccessor;
 Object.assign(window, { __renderFixture: { services, tabStore, activityStore } });
-useMaridSessionStore.getState().setActiveTaskId("/example", sessionSwitch ? null : "old-session");
+useQodexSessionStore.getState().setActiveTaskId("/example", sessionSwitch ? null : "old-session");
 const common = {
   workspacePath: "/example",
   theme,
@@ -197,7 +197,7 @@ const common = {
   onSelectTask: (...args: unknown[]) => {
     Object.assign(window, { __selectedTask: args });
     if (sessionSwitch)
-      useMaridSessionStore.getState().setActiveTaskId(args[0] as string, args[1] as string);
+      useQodexSessionStore.getState().setActiveTaskId(args[0] as string, args[1] as string);
   },
   onStartDraftInWorkspace: noop,
   onOpenFolderFromWorkspaceMenu: noop,
@@ -233,7 +233,7 @@ const actions = {
     : ("desktop-continuous" as const),
   // 手机 bridge 只模拟导航完成；Renderer 仍走实际 replayable 分支。
   openMobileProjectDraft: async () => {
-    useMaridSessionStore.getState().startDraft("/example");
+    useQodexSessionStore.getState().startDraft("/example");
   },
 };
 function Controls() {
@@ -241,7 +241,7 @@ function Controls() {
   const [refreshes, setRefreshes] = useState(0);
   const taskActivity = (
     directory.tree.tasks[0] as (typeof activitySnapshot.items)[number] | undefined
-  )?.__maridSessionActivity;
+  )?.__qodexSessionActivity;
   return (
     <>
       {activity && (
@@ -253,7 +253,7 @@ function Controls() {
           <button
             data-testid="activate-task"
             onClick={() =>
-              useMaridSessionStore.getState().setActiveTaskId("/example", "running-task")
+              useQodexSessionStore.getState().setActiveTaskId("/example", "running-task")
             }
           >
             Activate task
@@ -276,7 +276,7 @@ function Controls() {
           <output data-testid="activity-version">
             {
               (directory.tree.tasks[0] as (typeof activitySnapshot.items)[number])
-                ?.__maridSessionActivity?.lastActivityAt
+                ?.__qodexSessionActivity?.lastActivityAt
             }
           </output>
         </>
@@ -327,7 +327,7 @@ function Fixture() {
   const [navigationPage, setNavigationPage] = useState("chat");
   const openAutomations = useCallback(() => setNavigationPage("automations"), []);
   const openPlugins = useCallback(() => setNavigationPage("plugins"), []);
-  const task = useMaridSessionStore((state) => state.workspaces["/example"]?.activeTaskId);
+  const task = useQodexSessionStore((state) => state.workspaces["/example"]?.activeTaskId);
   // 模拟 Root 每轮装配导航实现；执行和侧栏均使用真实生产 hook/组件。
   const remote = useRemoteWorkspaceHistory({
     intl: actions.intl,
@@ -440,7 +440,7 @@ function Fixture() {
   );
 }
 createRoot(document.getElementById("root")!).render(
-  <MaridIntlProvider initialLocale={params.get("locale") === "zh-CN" ? "zh-CN" : "en-US"}>
+  <QodexIntlProvider initialLocale={params.get("locale") === "zh-CN" ? "zh-CN" : "en-US"}>
     <TooltipProvider>
       {params.get("spinner") === "1" ? (
         <Spinner className="size-5 text-foreground-subtle" />
@@ -451,5 +451,5 @@ createRoot(document.getElementById("root")!).render(
         </ServiceProvider>
       )}
     </TooltipProvider>
-  </MaridIntlProvider>,
+  </QodexIntlProvider>,
 );

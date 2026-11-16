@@ -1,4 +1,4 @@
-import type { ArmsCustomEventPayload } from "@marid/shared";
+import type { ArmsCustomEventPayload } from "@qodex/shared";
 import { logger } from "@/logger.js";
 
 export const SESSION_OPEN_ARMS_GROUP = "ui_perf";

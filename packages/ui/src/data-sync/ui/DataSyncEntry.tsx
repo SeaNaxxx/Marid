@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu.js";
 import { useOptionalPlatform } from "@/hooks/usePlatform.js";
 import { useRemoteDevicePresentationInput } from "@/hooks/useSourceServerStatuses.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import type { DataSyncCategoryId, DataSyncDialogRequest } from "@/data-sync/contract.js";
 import { isDataSyncDeviceOnline } from "@/data-sync/ui/DataSyncDialogContainer.js";
 import {
@@ -80,7 +80,7 @@ export function DataSyncEntryMenuItems(props: {
   stopMouseDownPropagation?: boolean;
   onSelect(category: DataSyncEntryCategory): void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const handleMouseDown = props.stopMouseDownPropagation
     ? (event: MouseEvent) => event.stopPropagation()
     : undefined;
@@ -107,7 +107,7 @@ export function DataSyncEntryDropdownButton(props: {
   disabled?: boolean;
   onSelect(category: DataSyncEntryCategory): void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

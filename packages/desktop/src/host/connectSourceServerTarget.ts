@@ -1,4 +1,4 @@
-import type { RemoteTarget } from "@marid/shared";
+import type { RemoteTarget } from "@qodex/shared";
 import type { SourceServerDirectory } from "./sourceServerDirectory.js";
 import {
   type ConnectSourceServerOptions,

@@ -1,6 +1,6 @@
 import { ToolPresentation } from "@/ToolCallBlocks/ToolPresentation.js";
 import { useMemo, type ComponentType } from "react";
-import type { ToolCallDisplay, ToolCallRow } from "@marid/shared/marid-protocol-v4";
+import type { ToolCallDisplay, ToolCallRow } from "@qodex/shared/qodex-protocol-v4";
 import type { Theme } from "@/useTheme.js";
 import type { ToolCallBlockRenderContext } from "@/ToolCallBlocks/fileSummaryTypes.js";
 import { CreateWorkflowToolCallBlock } from "@/ToolCallBlocks/renderers/create-workflow.js";
@@ -10,7 +10,7 @@ import { EvalWorkflowSnippetToolCallBlock } from "@/ToolCallBlocks/renderers/eva
 import { ListSavedWorkflowsPresentation } from "@/ToolCallBlocks/renderers/list-saved-workflows-presentation.js";
 import { ResumeWorkflowRunToolCallBlock } from "@/ToolCallBlocks/renderers/resume-workflow-run.js";
 import { toolCallRowToLegacyNode } from "@/v4/toolCallRowAdapter.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 const RENDERERS: Partial<
   Record<ToolCallDisplay["kind"], ComponentType<ToolCallBlockRenderContext>>
@@ -28,7 +28,7 @@ export function hasConversationShareWorkflowDisplay(row: ToolCallRow): boolean {
 }
 
 export function ConversationShareWorkflow({ row, theme }: { row: ToolCallRow; theme: Theme }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const context = useMemo<ToolCallBlockRenderContext>(
     () => ({
       nestedToolRenderer: ToolPresentation,

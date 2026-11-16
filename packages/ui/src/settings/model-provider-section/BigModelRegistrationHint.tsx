@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 export function BigModelRegistrationHint({
   onOpenRegistration,
 }: {
   onOpenRegistration?: () => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
 
   return (
     <span className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-ui-base text-foreground-subtle">

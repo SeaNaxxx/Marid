@@ -1,4 +1,4 @@
-import { modelSelectionSchema, type ModelSelection } from "@marid/shared";
+import { modelSelectionSchema, type ModelSelection } from "@qodex/shared";
 
 export function normalizeSubagentModelSelection(
   selection: ModelSelection | undefined,

@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
-import type { MaridTaskSnapshotToolFieldRef } from "@marid/shared";
+import type { QodexTaskSnapshotToolFieldRef } from "@qodex/shared";
 import { Button } from "@/components/ui/button.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 export function ToolSnapshotFieldNotice({
   refs,
   onLoadFullToolCallFields,
 }: {
-  refs: readonly MaridTaskSnapshotToolFieldRef[];
+  refs: readonly QodexTaskSnapshotToolFieldRef[];
   onLoadFullToolCallFields?: () => Promise<boolean | void> | boolean | void;
 }) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
   if (refs.length === 0 || !onLoadFullToolCallFields) {

@@ -1,6 +1,6 @@
-import type { RemoteTargetSnapshot, RemoteWorkspaceSessionEntry } from "@marid/shared";
+import type { RemoteTargetSnapshot, RemoteWorkspaceSessionEntry } from "@qodex/shared";
 import type { ProjectRoot } from "#src/project-storage/contract.js";
-import { ServiceChannels } from "@marid/shared";
+import { ServiceChannels } from "@qodex/shared";
 import { createServiceDescriptor } from "#src/descriptors.js";
 
 export interface RemoteProjectHost {

@@ -6,7 +6,7 @@ import {
   rendererActionTraceBatchSchema,
   type RendererActionTraceBatchV1,
   type RendererActionTraceSpanV1,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 const RENDERER_ACTION_TRACE_MAX_INGRESS_BATCHES = 32;
 const RENDERER_ACTION_TRACE_EXPORT_TIMEOUT_MS = 3_000;
@@ -241,7 +241,7 @@ function toReadableSpan(
     ended: true,
     resource,
     instrumentationScope: {
-      name: "@marid/desktop-renderer-action-trace",
+      name: "@qodex/desktop-renderer-action-trace",
       version: "1",
     },
     droppedAttributesCount: 0,

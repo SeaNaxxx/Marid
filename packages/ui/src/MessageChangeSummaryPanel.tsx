@@ -1,17 +1,17 @@
 import { useMemo, useState, type CSSProperties } from "react";
 import type {
-  MaridPersistedFileChange,
-  MaridTaskChangeSummary,
-  MaridTurnFileState,
-} from "@marid/shared";
-import { TID_CHAT_CHANGE_SUMMARY_TOGGLE_FILES_BUTTON, testId } from "@marid/shared/test-ids";
+  QodexPersistedFileChange,
+  QodexTaskChangeSummary,
+  QodexTurnFileState,
+} from "@qodex/shared";
+import { TID_CHAT_CHANGE_SUMMARY_TOGGLE_FILES_BUTTON, testId } from "@qodex/shared/test-ids";
 import { ChevronRightIcon, Undo2 } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import type { CodeViewerSource } from "@/lib/codeViewer.js";
 import { FileDisplayInline } from "@/lib/fileDisplay.js";
 import { buildTurnChangeSummary, toWorkspaceRelativePath } from "@/lib/taskChangeSummary.js";
@@ -30,13 +30,13 @@ export {
 } from "@/messageChangeSummaryPreview.js";
 
 interface MessageChangeSummaryPanelProps {
-  summary: MaridTaskChangeSummary;
+  summary: QodexTaskChangeSummary;
   workspacePath: string;
   workspaceIdentity?: string;
   workspaceRemoteSessionId?: string;
-  changeDetails?: MaridPersistedFileChange | null;
+  changeDetails?: QodexPersistedFileChange | null;
   readonlyDiffPatchesByPath?: ReadonlyMap<string, string>;
-  fileState?: MaridTurnFileState;
+  fileState?: QodexTurnFileState;
   messageId?: string;
   compactForRemoteControl?: boolean;
   animationDelayMs?: number;
@@ -61,7 +61,7 @@ export function MessageChangeSummaryPanel({
   onToggleFiles,
   onOpenCodeViewer,
 }: MessageChangeSummaryPanelProps) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const [isFileListOpen, setIsFileListOpen] = useState(false);
 
   const turnSummary = useMemo(() => {
@@ -105,11 +105,11 @@ export function MessageChangeSummaryPanel({
       onOpenChange={setIsFileListOpen}
       // Bugfix: 历史消息里的文件卡会等二次校验后再出现；
       // summary 如果没有同样的渐入，会在文件卡稳定前后显得像突兀跳出。
-      data-marid-stream-animate="true"
+      data-qodex-stream-animate="true"
       className="overflow-hidden rounded-xl border border-border bg-card shadow-none"
       style={
         {
-          "--marid-stream-animation-delay": `${animationDelayMs}ms`,
+          "--qodex-stream-animation-delay": `${animationDelayMs}ms`,
         } as CSSProperties
       }
     >

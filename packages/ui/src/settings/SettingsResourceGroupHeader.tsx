@@ -1,4 +1,4 @@
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 interface SettingsResourceGroupHeaderProps {
   count: number;
@@ -11,7 +11,7 @@ export function SettingsResourceGroupHeader({
   hint,
   title,
 }: SettingsResourceGroupHeaderProps) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const itemCountLabel = intl.formatMessage(
     {
       id: count === 1 ? "settings.resourceGroup.item.one" : "settings.resourceGroup.item.other",

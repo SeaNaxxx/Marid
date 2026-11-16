@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { rename, rm, writeFile } from "node:fs/promises";
-import type { SourceServerReleaseArchive, SourceServerReleaseDescriptor } from "@marid/shared";
-import { normalizeRemoteArch, normalizeRemotePlatform } from "@marid/server/remote/detectEnv.js";
+import type { SourceServerReleaseArchive, SourceServerReleaseDescriptor } from "@qodex/shared";
+import { normalizeRemoteArch, normalizeRemotePlatform } from "@qodex/server/remote/detectEnv.js";
 
 export function selectSourceServerReleaseArchive(
   descriptor: SourceServerReleaseDescriptor,

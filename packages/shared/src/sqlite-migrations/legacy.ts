@@ -62,11 +62,11 @@ export const SESSION_DATABASE_IDENTITY_MIGRATION: SqliteSchemaMigration = {
   id: "0024_session_database_identity",
   appVersion: "0.16.9",
   sql: `
-    CREATE TABLE IF NOT EXISTS marid_database_identity (
+    CREATE TABLE IF NOT EXISTS qodex_database_identity (
       scope TEXT PRIMARY KEY,
       identity TEXT NOT NULL
     );
-    SELECT scope, identity FROM marid_database_identity WHERE 0;
+    SELECT scope, identity FROM qodex_database_identity WHERE 0;
   `,
 };
 

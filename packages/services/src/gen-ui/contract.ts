@@ -1,4 +1,4 @@
-import type { Event } from "@marid/rpc";
+import type { Event } from "@qodex/rpc";
 import type {
   GenUiDocument,
   GenUiScope,
@@ -6,8 +6,8 @@ import type {
   GenUiStateEntry,
   GenUiStateTarget,
   GenUiWidgetState,
-} from "@marid/shared/gen-ui";
-import type { PluginSandboxHandle } from "@marid/shared/mcp-apps";
+} from "@qodex/shared/gen-ui";
+import type { PluginSandboxHandle } from "@qodex/shared/mcp-apps";
 import { createServiceDescriptor } from "../descriptors.js";
 
 export interface GenUiPrepareParams extends GenUiStateTarget {

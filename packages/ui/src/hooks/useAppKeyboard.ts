@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { SHORTCUT_COMMANDS, type ShortcutCommandId } from "@marid/shared";
+import { SHORTCUT_COMMANDS, type ShortcutCommandId } from "@qodex/shared";
 import {
   isEditableShortcutEventTarget,
   isShiftOnlyPrintableBinding,

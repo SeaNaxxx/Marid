@@ -1,5 +1,5 @@
 import { WebSocket, type RawData } from "ws";
-import { RemoteServiceAccess } from "@marid/client";
+import { RemoteServiceAccess } from "@qodex/client";
 import {
   ChannelClient,
   ChannelServer,
@@ -8,16 +8,16 @@ import {
   VSBuffer,
   type ISocket,
   type IServerChannel,
-} from "@marid/rpc";
-import type { IServiceAccessor } from "@marid/services";
+} from "@qodex/rpc";
+import type { IServiceAccessor } from "@qodex/services";
 import {
-  MARID_RPC_HOST_CAPABILITY_HEADER,
+  QODEX_RPC_HOST_CAPABILITY_HEADER,
   TOPIC_RESOURCE_RELAY_CHANNEL,
   serverRemoteHostCapabilitySchema,
   serverRemoteInfoSchema,
   type ServerConnectOptions,
   type ServerRemoteInfo,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   connectWebSocketOverDuplex,
   createReusableDuplexHttpAgent,
@@ -264,7 +264,7 @@ function connectNodeWebSocket(
     const socket = new WebSocket(authenticatedUrl(wsUrl, target), {
       headers: {
         ...(token ? { authorization: `Bearer ${token}` } : {}),
-        [MARID_RPC_HOST_CAPABILITY_HEADER]: capability,
+        [QODEX_RPC_HOST_CAPABILITY_HEADER]: capability,
       },
     });
     let settled = false;
@@ -393,7 +393,7 @@ export async function connectServerRemoteOverDuplex(
       url: endpoints.hostWsUrl,
       headers: {
         ...authorization,
-        [MARID_RPC_HOST_CAPABILITY_HEADER]: capability.data.capability,
+        [QODEX_RPC_HOST_CAPABILITY_HEADER]: capability.data.capability,
       },
       createConnection: options.createConnection,
       agent,

@@ -2,7 +2,7 @@ import type {
   WebRemoteControlExternalWorkspaceBridge,
   WebRemoteControlMobileTaskView,
   WebRemoteControlMobileTaskViewUpdatePayload,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type { WebRemoteControlTerminalTransportState } from "#src/web-remote-control/contract.js";
 
 /** 只保留 Reporter 的当前投影供传输恢复重申；任务已读仍由桌面唯一 writer 提交。 */
@@ -20,7 +20,7 @@ export function createWebRemoteControlTaskViewPublisher(
   const flush = () => {
     if (!bridge || !epoch || !dirty) return;
     dirty = !send({
-      marid_type: "mobile-task-view-update",
+      qodex_type: "mobile-task-view-update",
       epoch,
       seq: ++seq,
       bridgeSessionId: bridge.bridgeSessionId,

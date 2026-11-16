@@ -1,4 +1,4 @@
-import { resolveWorkspaceKey } from "@marid/shared";
+import { resolveWorkspaceKey } from "@qodex/shared";
 
 export interface HostWorkspaceTaskContext {
   workspacePath: string;

@@ -1,4 +1,4 @@
-import type { IPlatformService } from "@marid/shared";
+import type { IPlatformService } from "@qodex/shared";
 import type { RequestSecurityWorkspaceTab } from "@/request-security.js";
 export function RequestSecurityHost() {
   return null;

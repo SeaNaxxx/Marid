@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import type { BotsStateFile } from "@marid/shared";
+import type { BotsStateFile } from "@qodex/shared";
 import {
   createBotsServiceHarness,
   createFeishuCallback,
@@ -50,13 +50,13 @@ describe("BOT-E2E-DT-01 deleted task recovery", () => {
       },
     });
     let deletionReads = 0;
-    h.maridTaskService.listDeletedTaskIds = async (params: unknown) => {
+    h.qodexTaskService.listDeletedTaskIds = async (params: unknown) => {
       expect(params).toEqual({ workspacePath, workspaceIdentity: undefined });
       deletionReads += 1;
       return ["task-deleted"];
     };
     let resumeCalls = 0;
-    h.maridTaskService.resumeTask = async () => {
+    h.qodexTaskService.resumeTask = async () => {
       resumeCalls += 1;
       throw new Error("deleted task must not resume");
     };

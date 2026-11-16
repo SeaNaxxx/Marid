@@ -8,7 +8,7 @@ import { test } from "node:test";
 import { resolveRuntimeHostBuild, verifyRuntimeHostPe } from "../build-windows-runtime-host.mjs";
 
 const source = resolve(import.meta.dirname, "../windows-runtime-host");
-const logName = "Marid-process-cleanup.log";
+const logName = "Qodex-process-cleanup.log";
 const sentinel = "existing log must survive\r\n";
 
 function launch(executable, args, options = {}) {
@@ -130,16 +130,16 @@ test(
         "--config",
         "Release",
         "--target",
-        "marid-installer-process-helper",
-        "marid-installer-process-fixture",
+        "qodex-installer-process-helper",
+        "qodex-installer-process-fixture",
       ],
     ]) {
       const cmake = launch(process.env.CMAKE || "cmake", args, { timeout: 120000 });
       cmake.child.stdin.end();
       await expectExit(cmake, 0);
     }
-    const helper = join(build, "Release/marid-installer-process-helper.exe");
-    const fixture = join(build, "Release/marid-installer-process-fixture.exe");
+    const helper = join(build, "Release/qodex-installer-process-helper.exe");
+    const fixture = join(build, "Release/qodex-installer-process-fixture.exe");
     for (const executable of [helper, fixture]) {
       verifyRuntimeHostPe(await readFile(executable), arch);
     }

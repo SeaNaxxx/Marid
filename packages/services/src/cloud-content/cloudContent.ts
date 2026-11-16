@@ -1,4 +1,4 @@
-import { ServiceChannels, type CloudContentBundle, type MarketingAsset } from "@marid/shared";
+import { ServiceChannels, type CloudContentBundle, type MarketingAsset } from "@qodex/shared";
 import { createServiceDescriptor } from "#src/descriptors.js";
 
 export interface ICloudContentService {

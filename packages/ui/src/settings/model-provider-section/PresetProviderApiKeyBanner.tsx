@@ -1,7 +1,7 @@
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 export function PresetProviderApiKeyBanner({ onOpenApiKey }: { onOpenApiKey: () => void }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
 
   // 获取入口不区分个人／团队；两个按钮和专用字段会偏离单一控制台入口的预期。
   return (

@@ -76,7 +76,7 @@ export function getV4ComposerDraftScopeSnapshot(
       const scopeId = taskIdArg ?? "__draft__";
       const workspaceKey = workspaceIdentityArg?.trim() || workspacePathArg;
       const intentRaw = window.localStorage.getItem(
-        `marid-composer-workspace-scope:v1:${JSON.stringify(["desktop", workspaceKey])}`,
+        `qodex-composer-workspace-scope:v1:${JSON.stringify(["desktop", workspaceKey])}`,
       );
       const intent = intentRaw
         ? (JSON.parse(intentRaw) as {
@@ -87,8 +87,8 @@ export function getV4ComposerDraftScopeSnapshot(
         : null;
       const storageKey =
         taskIdArg === null && intent
-          ? `marid-v4-composer-project-drafts:v1:${JSON.stringify([intent.clientNamespace, intent.hostId, intent.projectId])}`
-          : `marid-v4-composer-drafts:v1:${encodeURIComponent(workspaceKey)}`;
+          ? `qodex-v4-composer-project-drafts:v1:${JSON.stringify([intent.clientNamespace, intent.hostId, intent.projectId])}`
+          : `qodex-v4-composer-drafts:v1:${encodeURIComponent(workspaceKey)}`;
       let draft: Record<string, unknown> | null = null;
       try {
         const raw = window.localStorage.getItem(storageKey);

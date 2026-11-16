@@ -1,4 +1,4 @@
-import { resolveWorkspaceStateKey } from "@/store/maridSessionStoreSelectors.js";
+import { resolveWorkspaceStateKey } from "@/store/qodexSessionStoreSelectors.js";
 
 interface PendingModeSwitchGuard {
   taskId: string;

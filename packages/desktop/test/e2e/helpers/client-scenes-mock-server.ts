@@ -1,6 +1,6 @@
 import { once } from "node:events";
 import { createServer, type ServerResponse } from "node:http";
-import type { ClientScenesResponse } from "@marid/services";
+import type { ClientScenesResponse } from "@qodex/services";
 
 /** 只给需要验证真实模板网格的 case 注入 Client Scenes，避免布局断言依赖远端目录。 */
 export const CLIENT_SCENES_AUTOMATIONS_HOME_SPEC = "off-peak-automations-home-layout.test.ts";
@@ -10,7 +10,7 @@ export const AUTOMATIONS_HOME_CLIENT_SCENES_FIXTURE = {
   msg: "",
   data: [
     {
-      namespace: "marid",
+      namespace: "qodex",
       scene: "off-peak-task",
       options: {
         prompts: {
@@ -53,7 +53,7 @@ export const AUTOMATIONS_HOME_CLIENT_SCENES_FIXTURE = {
       },
     },
     {
-      namespace: "marid",
+      namespace: "qodex",
       scene: "scheduled-task",
       options: {
         prompts: {
@@ -152,16 +152,16 @@ export function applyClientScenesMockEnv(
   environment: Record<string, string | undefined>,
   baseUrl: string,
 ): void {
-  environment.MARID_BASE_URL = baseUrl;
-  environment.MARID_TEST_BASE_URL = baseUrl;
-  environment.MARID_ENDPOINT_ORIGIN = baseUrl;
+  environment.QODEX_BASE_URL = baseUrl;
+  environment.QODEX_TEST_BASE_URL = baseUrl;
+  environment.QODEX_ENDPOINT_ORIGIN = baseUrl;
 }
 
 export function clearClientScenesMockEnv(
   environment: Record<string, string | undefined>,
   baseUrl: string,
 ): void {
-  for (const key of ["MARID_BASE_URL", "MARID_TEST_BASE_URL", "MARID_ENDPOINT_ORIGIN"] as const) {
+  for (const key of ["QODEX_BASE_URL", "QODEX_TEST_BASE_URL", "QODEX_ENDPOINT_ORIGIN"] as const) {
     if (environment[key] === baseUrl) {
       delete environment[key];
     }
@@ -192,7 +192,7 @@ export async function startClientScenesMockServer(): Promise<ClientScenesMockSer
       return;
     }
 
-    if (request.method === "GET" && url.pathname === "/api/v1/marid-plan/billing/balance") {
+    if (request.method === "GET" && url.pathname === "/api/v1/qodex-plan/billing/balance") {
       writeJson(response, { code: 0, data: { balances: [], plans: [] }, msg: "", success: true });
       return;
     }

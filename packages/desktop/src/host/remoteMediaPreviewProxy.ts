@@ -1,7 +1,7 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
-import type { IFileService, IMediaPreviewService, MediaPreviewPreparation } from "@marid/services";
-import { getMediaPreviewFormat, type WindowHostAttachmentScope } from "@marid/shared";
+import type { IFileService, IMediaPreviewService, MediaPreviewPreparation } from "@qodex/services";
+import { getMediaPreviewFormat, type WindowHostAttachmentScope } from "@qodex/shared";
 import {
   isPathWithinWorkspace,
   listen,
@@ -12,7 +12,7 @@ import {
 
 export { waitForDrainOrDisconnect } from "./remoteMediaPreviewProxyHelpers.js";
 
-const MEDIA_ROUTE_PREFIX = "/__marid_media/";
+const MEDIA_ROUTE_PREFIX = "/__qodex_media/";
 const DEFAULT_MAX_FILE_BYTES = 512 * 1024 * 1024;
 const DEFAULT_MAX_CONCURRENT_REQUESTS = 2;
 const DEFAULT_CHUNK_BYTES = 1024 * 1024;

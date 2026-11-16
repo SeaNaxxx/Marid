@@ -10,8 +10,8 @@ import type {
   StaticSlotItem,
   StaticView,
   WorkspaceRef,
-} from "@marid/shared/extension-host";
-import type { ModelSelection, MaridPluginMentionItem } from "@marid/shared";
+} from "@qodex/shared/extension-host";
+import type { ModelSelection, QodexPluginMentionItem } from "@qodex/shared";
 import type { DraftPluginUiOpenRequest } from "@/plugin-ui/contract.js";
 
 // extension-slots 的公开契约（docs/plugins/extension-host.md §4、§6、§16.1）。
@@ -54,7 +54,7 @@ export interface ComposerMentionGroup {
    * error：组内一行错误（errorCode）；stopped：扩展进程已停止，command 条目不可用。
    */
   state: "loading" | "ready" | "error" | "stopped";
-  items: MaridPluginMentionItem[];
+  items: QodexPluginMentionItem[];
   errorCode?: string;
 }
 

@@ -1,4 +1,4 @@
-import type { BotsConfigFile, BotsStateFile } from "@marid/shared";
+import type { BotsConfigFile, BotsStateFile } from "@qodex/shared";
 
 import {
   createBotsServiceHarness,
@@ -78,9 +78,9 @@ describe("Bot remote workspace delivery E2E", () => {
           ensureConnectedCalls += 1;
           return { ok: true };
         },
-        getMaridTaskService: async () => {
+        getQodexTaskService: async () => {
           remoteTaskServiceCalls += 1;
-          return harness.maridTaskService;
+          return harness.qodexTaskService;
         },
       },
     });

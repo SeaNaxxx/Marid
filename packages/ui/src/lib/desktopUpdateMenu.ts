@@ -1,12 +1,12 @@
 import {
-  MARID_PRODUCT_FLAVOR,
-  type MaridProductFlavor,
+  QODEX_PRODUCT_FLAVOR,
+  type QodexProductFlavor,
   type UpdateStatePayload,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 // 更新入口跟随产品身份而不是后端环境：Preview 身份（含生产后端的 Preview）禁用更新器。
 export function shouldShowDesktopUpdateEntry(
-  flavor: MaridProductFlavor = MARID_PRODUCT_FLAVOR,
+  flavor: QodexProductFlavor = QODEX_PRODUCT_FLAVOR,
 ): boolean {
   return flavor === "production";
 }

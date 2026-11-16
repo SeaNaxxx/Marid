@@ -1,11 +1,11 @@
 /* eslint-disable max-lines -- 旧版临时驱动必须逐项翻译统一场景，并通过旧 production builder/reporter 发到最终出口。 */
 import {
   type IPlatformService,
-  type MaridContextCompactionTimelineMeta,
-  type MaridProvider,
-  type MaridStreamEvent,
-  type MaridUsage,
-} from "@marid/shared";
+  type QodexContextCompactionTimelineMeta,
+  type QodexProvider,
+  type QodexStreamEvent,
+  type QodexUsage,
+} from "@qodex/shared";
 import { reportAppTelemetryEvent } from "@/lib/appTelemetry.js";
 import { reportChatErrorBannerTelemetry } from "@/lib/chatErrorBannerTelemetry.js";
 import {
@@ -57,7 +57,7 @@ interface LegacyLifecycle {
   active: boolean;
   turnId?: string;
   startedTools: Set<string>;
-  terminalUsage?: MaridUsage;
+  terminalUsage?: QodexUsage;
   lastErrorMessage?: string;
 }
 
@@ -84,7 +84,7 @@ interface LegacyScenarioResult {
 
 declare global {
   interface Window {
-    __maridConversationTelemetryParityE2E?: {
+    __qodexConversationTelemetryParityE2E?: {
       variant: "current" | "legacy";
       run(caseId: string): Promise<LegacyScenarioResult>;
     };
@@ -100,10 +100,10 @@ export function installLegacyConversationTelemetryParityE2EBridge(input: {
     variant: "legacy" as const,
     run: (caseId: string) => runLegacyScenario(input.platform, caseId),
   };
-  window.__maridConversationTelemetryParityE2E = bridge;
+  window.__qodexConversationTelemetryParityE2E = bridge;
   return () => {
-    if (window.__maridConversationTelemetryParityE2E === bridge) {
-      delete window.__maridConversationTelemetryParityE2E;
+    if (window.__qodexConversationTelemetryParityE2E === bridge) {
+      delete window.__qodexConversationTelemetryParityE2E;
     }
   };
 }
@@ -283,7 +283,7 @@ async function applyLegacyOperation(input: {
         inputId: operation.commandId,
         content: "",
         ...(operation.parentToolCallId ? { parentToolUseId: operation.parentToolCallId } : {}),
-      } as Extract<MaridStreamEvent, { type: "agent_thought_chunk" | "agent_message_chunk" }>;
+      } as Extract<QodexStreamEvent, { type: "agent_thought_chunk" | "agent_message_chunk" }>;
       await reportFinalizedSteps(
         input.platform,
         lifecycle,
@@ -354,7 +354,7 @@ async function applyLegacyOperation(input: {
               kind: operation.toolName,
               title: "",
               raw: {},
-            } as Extract<MaridStreamEvent, { type: "tool_call" }>)
+            } as Extract<QodexStreamEvent, { type: "tool_call" }>)
           : ({
               type: "tool_call_update",
               taskId: operation.sessionId,
@@ -372,7 +372,7 @@ async function applyLegacyOperation(input: {
               kind: operation.toolName,
               error: operation.errorMessage,
               raw: {},
-            } as Extract<MaridStreamEvent, { type: "tool_call_update" }>);
+            } as Extract<QodexStreamEvent, { type: "tool_call_update" }>);
       await reportFinalizedSteps(
         input.platform,
         lifecycle,
@@ -448,7 +448,7 @@ async function applyLegacyOperation(input: {
               traceId: operation.eventId,
               inputId: operation.commandId,
               stopReason: "complete",
-            } as Extract<MaridStreamEvent, { type: "task_complete" }>)
+            } as Extract<QodexStreamEvent, { type: "task_complete" }>)
           : ({
               type: "task_error",
               taskId: operation.sessionId,
@@ -457,7 +457,7 @@ async function applyLegacyOperation(input: {
               error:
                 operation.errorMessage ?? lifecycle.lastErrorMessage ?? operation.errorCode ?? "",
               code: operation.errorCode,
-            } as Extract<MaridStreamEvent, { type: "task_error" }>);
+            } as Extract<QodexStreamEvent, { type: "task_error" }>);
       await reportFinalizedSteps(
         input.platform,
         lifecycle,
@@ -505,7 +505,7 @@ async function applyLegacyOperation(input: {
       const dedupeKey = `${operation.sessionId}\u0000${operation.operationId}\u0000context_compaction`;
       if (!remember(scope.compactionKeys, dedupeKey) || !isForeground(scope, operation.sessionId))
         return;
-      const timeline: MaridContextCompactionTimelineMeta = {
+      const timeline: QodexContextCompactionTimelineMeta = {
         version: 1,
         kind: "synthetic",
         type: "context_compaction",
@@ -524,7 +524,7 @@ async function applyLegacyOperation(input: {
       };
       const detail = buildCompactionTelemetryExtraDetail({
         timeline,
-        provider: "glm" as MaridProvider,
+        provider: "glm" as QodexProvider,
         modelName: operation.modelName,
       });
       if (detail) {
@@ -710,7 +710,7 @@ async function reportLegacyEvent(
 
 function toNetworkEvent(
   operation: Extract<ConversationTelemetryParityOperation, { kind: "model.status" }>,
-): Extract<MaridStreamEvent, { type: "task_network_debug_status" }> {
+): Extract<QodexStreamEvent, { type: "task_network_debug_status" }> {
   return {
     type: "task_network_debug_status",
     taskId: operation.sessionId,
@@ -735,7 +735,7 @@ function toNetworkEvent(
     nextAttempt: operation.nextAttempt,
     idleMs: operation.idleMs,
     timeoutMs: operation.timeoutMs,
-  } as Extract<MaridStreamEvent, { type: "task_network_debug_status" }>;
+  } as Extract<QodexStreamEvent, { type: "task_network_debug_status" }>;
 }
 
 function activeLifecycle(scope: LegacyScope, commandId: string): LegacyLifecycle | undefined {
@@ -767,7 +767,7 @@ function remember(set: Set<string>, key: string): boolean {
   return true;
 }
 
-function mergeUsage(left: MaridUsage | undefined, right: MaridUsage): MaridUsage {
+function mergeUsage(left: QodexUsage | undefined, right: QodexUsage): QodexUsage {
   if (!left) return right;
   return {
     inputTokens: left.inputTokens + right.inputTokens,

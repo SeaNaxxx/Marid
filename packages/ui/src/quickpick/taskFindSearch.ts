@@ -1,10 +1,10 @@
-import type { MaridTaskMeta } from "@marid/shared";
+import type { QodexTaskMeta } from "@qodex/shared";
 import { formatTaskChangedFileLabel } from "@/lib/taskChangeSummary.js";
 
 type TaskFindScope = "conversation" | "changes";
 
 interface TaskFindEntry {
-  task: MaridTaskMeta;
+  task: QodexTaskMeta;
   searchText: string;
 }
 
@@ -19,7 +19,7 @@ function normalizeTaskFindText(value: string): string {
   return value.trim().toLocaleLowerCase();
 }
 
-function getTaskChangeSearchText(task: MaridTaskMeta): string {
+function getTaskChangeSearchText(task: QodexTaskMeta): string {
   const summary = task.changeSummary;
   if (!summary || summary.files.length === 0) {
     return "";
@@ -31,7 +31,7 @@ function getTaskChangeSearchText(task: MaridTaskMeta): string {
 }
 
 export function createTaskFindEntries(
-  tasks: readonly MaridTaskMeta[],
+  tasks: readonly QodexTaskMeta[],
   scope: TaskFindScope,
 ): TaskFindEntry[] {
   return tasks.map((task) => ({

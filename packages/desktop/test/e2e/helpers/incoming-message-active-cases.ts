@@ -1,6 +1,6 @@
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { TID_V4_SESSION_PANE, testId } from "@marid/shared/test-ids";
+import { TID_V4_SESSION_PANE, testId } from "@qodex/shared/test-ids";
 import { waitForDefaultWorkspaceReady } from "./desktop-app.js";
 import {
   INCOMING_MESSAGE_MODES,
@@ -282,7 +282,7 @@ export function registerIncomingMessageActiveCases(): void {
               trajectory.filter((request) => request.fixtureId === `${fixture}-${stage}`),
             ).toHaveLength(1);
           }
-          const artifactDir = process.env.MARID_E2E_ARTIFACT_DIR;
+          const artifactDir = process.env.QODEX_E2E_ARTIFACT_DIR;
           if (artifactDir) {
             await mkdir(join(artifactDir, "incoming-message-wire"), { recursive: true });
             await writeFile(

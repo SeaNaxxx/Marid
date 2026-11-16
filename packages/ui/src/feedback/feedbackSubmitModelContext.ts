@@ -1,5 +1,5 @@
-import { decodeCustomModelValue } from "@marid/shared";
-import type { MaridConfigOption } from "@marid/shared";
+import { decodeCustomModelValue } from "@qodex/shared";
+import type { QodexConfigOption } from "@qodex/shared";
 
 const FEEDBACK_MODEL_OPTIONS_PREVIEW_LIMIT = 12;
 
@@ -11,7 +11,7 @@ export interface FeedbackAgentModelContext {
 }
 
 export function readCurrentAgentModelContext(
-  configOptions?: readonly MaridConfigOption[] | null,
+  configOptions?: readonly QodexConfigOption[] | null,
 ): FeedbackAgentModelContext {
   const modelOption = configOptions?.find(
     (option) => option.category === "model" && option.type === "select",

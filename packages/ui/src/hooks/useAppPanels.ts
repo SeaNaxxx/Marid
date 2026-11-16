@@ -1,13 +1,13 @@
-import { useMaridSessionStore } from "@/store/maridSessionStore.js";
+import { useQodexSessionStore } from "@/store/qodexSessionStore.js";
 import { clearBrowserRecentVisitsForTask } from "@/store/browserRecentVisitsStore.js";
 
 import { forgetWorkspaceConversation } from "@/v4/workspaceConnectionRegistry.js";
-import type { IDisposable } from "@marid/rpc";
+import type { IDisposable } from "@qodex/rpc";
 import type {
   IWindowControllerService,
-  IMaridTaskService,
+  IQodexTaskService,
   WindowHostTasksRemovedSignal,
-} from "@marid/services";
+} from "@qodex/services";
 import { useOptionalTabStore } from "@/store/TabStoreProvider.js";
 import {
   openFileManagerSidePane,
@@ -16,8 +16,8 @@ import {
 } from "@/lib/workspaceSidePane.js";
 /* eslint-disable max-lines */
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { BROWSER_VIEW_DRAFT_SESSION_ID, createUuid } from "@marid/shared";
-import type { EmbeddedBrowserOpenUrlRequest, IPlatformService } from "@marid/shared";
+import { BROWSER_VIEW_DRAFT_SESSION_ID, createUuid } from "@qodex/shared";
+import type { EmbeddedBrowserOpenUrlRequest, IPlatformService } from "@qodex/shared";
 import type { CodeViewerSource } from "@/lib/codeViewer.js";
 // 保活：side pane terminal 跨 workspace 会话上移到模块级 registry。
 // 关闭 terminal tab 时必须显式 release，杀掉 PTY，避免常驻 registry 造成孤儿进程。
@@ -111,7 +111,7 @@ import {
   queueOfficeViewerPendingOpen,
   resolveOfficeViewerDocumentPath,
 } from "@/plugin-ui/officeViewerOpen.js";
-import { isRemoteWorkspaceIdentity } from "@marid/shared";
+import { isRemoteWorkspaceIdentity } from "@qodex/shared";
 import { useOptionalPlatform } from "@/hooks/usePlatform.js";
 import { areWorkspaceFilePathsEqual } from "@/workspace-file-tree/model.js";
 import { logger } from "@/logger.js";
@@ -137,7 +137,7 @@ import { useRemoteWorkspaceSessionStore } from "@/store/remoteWorkspaceSessionSt
 function subscribeTasksRemoved(
   params: {
     windowControllerService?: IWindowControllerService;
-    maridTaskService?: IMaridTaskService;
+    qodexTaskService?: IQodexTaskService;
     workspacePath: string;
     workspaceIdentity?: string;
   },
@@ -146,7 +146,7 @@ function subscribeTasksRemoved(
   if (params.windowControllerService) {
     return params.windowControllerService.onDynamicTasksRemovedSignal()(listener);
   }
-  return params.maridTaskService?.onDynamicWorkspaceEvent({
+  return params.qodexTaskService?.onDynamicWorkspaceEvent({
     workspacePath: params.workspacePath,
     ...(params.workspaceIdentity ? { workspaceIdentity: params.workspaceIdentity } : {}),
   })((event) => {
@@ -268,14 +268,14 @@ export function useAppPanels(options: {
   });
   pluginUiScopeRef.current = { pluginUiSessionId: pluginUiTarget.sessionId, pluginUiWorkspaceKey };
   const services = useServices();
-  const { maridAgentService, maridSessionService } = services;
+  const { qodexAgentService, qodexSessionService } = services;
   // 插件声明的文件查看器（file.viewer）：只在调用时读静态表，不随贡献表增量重渲染。
   const routeFileViewer = useFileViewerRouter({
     workspacePath: workspaceAbsPath,
     ...(workspaceIdentity ? { workspaceIdentity } : {}),
   });
   const optionalPlatform = useOptionalPlatform();
-  const { windowControllerService, maridTaskService } = useBaseWorkspaceServices();
+  const { windowControllerService, qodexTaskService } = useBaseWorkspaceServices();
   const isOfficeMode = useIsOfficeMode();
   const sidePaneMemoryKey = useMemo(
     () =>
@@ -1636,7 +1636,7 @@ export function useAppPanels(options: {
         try {
           // 判据已经保证是本地 workspace（无 workspaceIdentity / remoteSessionId），
           // 这里只带 workspacePath。
-          const result = await maridAgentService.conversationWorkflowRunArtifactsV4({
+          const result = await qodexAgentService.conversationWorkflowRunArtifactsV4({
             workspacePath: request.workspacePath,
             sessionId: request.parentSessionId,
             runId: request.runId,
@@ -1667,14 +1667,14 @@ export function useAppPanels(options: {
       commitOpenedSidePaneState,
       openFileUrlInBrowserSidePane,
       supportsEmbeddedBrowser,
-      maridAgentService,
+      qodexAgentService,
     ],
   );
 
   const closeSelectionSideChatRuntime = useCallback(
     (
       tab: Extract<WorkspaceSidePaneTab, { type: "selection-side-chat" }>,
-      sessionService = maridSessionService,
+      sessionService = qodexSessionService,
     ) => {
       clearSelectionSideChat(tab.childSessionId);
       clearConversationSelectionReferenceScope(tab.childSessionId, tab.workspaceKey);
@@ -1692,14 +1692,14 @@ export function useAppPanels(options: {
           });
         });
     },
-    [maridSessionService],
+    [qodexSessionService],
   );
 
   useEffect(() => {
     const subscription = subscribeTasksRemoved(
       {
         windowControllerService,
-        maridTaskService,
+        qodexTaskService,
         workspacePath: workspaceAbsPath,
         workspaceIdentity,
       },
@@ -1716,7 +1716,7 @@ export function useAppPanels(options: {
                 taskId,
               );
             }
-            useMaridSessionStore
+            useQodexSessionStore
               .getState()
               .removeTaskState(signal.workspacePath, taskId, signal.workspaceIdentity);
             forgetWorkspaceConversation(signal, taskId);
@@ -1738,7 +1738,7 @@ export function useAppPanels(options: {
           baseServices,
           sessionsById,
           isRemoteTarget: Boolean(signal.remoteSessionId),
-        }).maridSessionService;
+        }).qodexSessionService;
         const releaseRuntimes = (tabs: WorkspaceSidePaneTab[]) => {
           for (const tab of tabs) {
             if (tab.type === "selection-side-chat") {
@@ -1788,7 +1788,7 @@ export function useAppPanels(options: {
     windowControllerService,
     workspaceAbsPath,
     workspaceIdentity,
-    maridTaskService,
+    qodexTaskService,
   ]);
 
   // 订阅“打开模型调用轨迹”请求：菜单深处通过单例 store 发起，这里按 workspaceKey 匹配后消费。

@@ -3,10 +3,10 @@ import type {
   CommandAck,
   CommandEnvelope,
   WorkspaceHookReviewRequestPayload,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 // review 单调性裁决单一来源；store 的应用策略是 cross_flow 接受新 Runtime 权威
 // （renderer 服从 canonical snapshot 的最新投递）。
-import { verdictWorkspaceHookReviewRequest } from "@marid/shared/workspace-hook-review-monotonicity";
+import { verdictWorkspaceHookReviewRequest } from "@qodex/shared/workspace-hook-review-monotonicity";
 
 export interface WorkspaceHookCommandBinding {
   sessionId: string;

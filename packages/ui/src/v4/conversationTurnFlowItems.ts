@@ -3,7 +3,7 @@ import type {
   ConversationRow,
   TurnHeaderRow,
   UserInputRow,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 
 export type AssistantWorkRow = Exclude<ConversationRow, TurnHeaderRow | UserInputRow>;
 

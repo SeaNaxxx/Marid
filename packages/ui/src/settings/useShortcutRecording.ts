@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import type { ShortcutCommandId } from "@marid/shared";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import type { ShortcutCommandId } from "@qodex/shared";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { checkShortcutBindingConflict, isSamePhysicalBinding } from "@/shortcuts/conflicts.js";
 import { formatShortcutBindingLabel } from "@/shortcuts/label.js";
 import { recordShortcutBinding, type EffectiveShortcutBindings } from "@/shortcuts/bindings.js";
@@ -36,7 +36,7 @@ export function useShortcutRecording({
   appendBinding,
   replaceBindingAt,
 }: UseShortcutRecordingOptions): void {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
 
   useEffect(() => {
     if (!recording) {

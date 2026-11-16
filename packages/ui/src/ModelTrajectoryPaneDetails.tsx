@@ -1,14 +1,14 @@
 import type { ReactNode } from "react";
 import type {
-  MaridModelTrajectoryContentPart,
-  MaridModelTrajectoryRecord,
-  MaridModelTrajectoryUsage,
-} from "@marid/services";
+  QodexModelTrajectoryContentPart,
+  QodexModelTrajectoryRecord,
+  QodexModelTrajectoryUsage,
+} from "@qodex/services";
 import { Badge } from "@/components/ui/badge.js";
 import { cn } from "@/components/lib/utils.js";
-import type { useMaridIntl } from "@/i18n/IntlProvider.js";
+import type { useQodexIntl } from "@/i18n/IntlProvider.js";
 
-type IntlShape = ReturnType<typeof useMaridIntl>["intl"];
+type IntlShape = ReturnType<typeof useQodexIntl>["intl"];
 
 export function ContentPartView({
   part,
@@ -16,7 +16,7 @@ export function ContentPartView({
   sectionLabel,
   showToolHeader = true,
 }: {
-  part: MaridModelTrajectoryContentPart;
+  part: QodexModelTrajectoryContentPart;
   intl: IntlShape;
   sectionLabel?: string;
   showToolHeader?: boolean;
@@ -164,7 +164,7 @@ export function UsageBadges({
   usage,
   intl,
 }: {
-  usage?: MaridModelTrajectoryUsage;
+  usage?: QodexModelTrajectoryUsage;
   intl: IntlShape;
 }) {
   if (!usage) {
@@ -225,7 +225,7 @@ export function EmptyState({
   );
 }
 
-export function summarizeRecords(records: MaridModelTrajectoryRecord[]): {
+export function summarizeRecords(records: QodexModelTrajectoryRecord[]): {
   totalTokens: number;
   models: string[];
 } {

@@ -1,7 +1,7 @@
-import type { MaridEnv } from "@marid/shared";
+import type { QodexEnv } from "@qodex/shared";
 
 export function shouldShowRemoteConnectionEntry(params: {
-  env: MaridEnv;
+  env: QodexEnv;
   isIntranet: boolean;
 }): boolean {
   void params;

@@ -1,13 +1,13 @@
-import { getRemoteRuntimeToolsForPlatform, type RemoteResourcePackageId } from "@marid/shared";
-import type { IRemoteBackend, RemoteEnvironment } from "@marid/server/remote/backend.js";
+import { getRemoteRuntimeToolsForPlatform, type RemoteResourcePackageId } from "@qodex/shared";
+import type { IRemoteBackend, RemoteEnvironment } from "@qodex/server/remote/backend.js";
 import {
   REMOTE_BASE,
   type DeployLoggers,
   type RemoteAssetDeployOptions,
   waitForClose,
-} from "@marid/server/remote/deployShared.js";
-import type { RemoteAssetInstaller } from "@marid/server/remote/remoteAssetInstaller.js";
-import { buildWriteLiteralFileCommand } from "@marid/server/remote/posixShell.js";
+} from "@qodex/server/remote/deployShared.js";
+import type { RemoteAssetInstaller } from "@qodex/server/remote/remoteAssetInstaller.js";
+import { buildWriteLiteralFileCommand } from "@qodex/server/remote/posixShell.js";
 
 const REMOTE_TOOLS_BASE = `${REMOTE_BASE}/tools`;
 

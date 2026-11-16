@@ -1,4 +1,4 @@
-import { isMaridAgentModelSelectionBasisUnsupportedError } from "#src/marid-agent/maridAgentErrors.js";
+import { isQodexAgentModelSelectionBasisUnsupportedError } from "#src/qodex-agent/qodexAgentErrors.js";
 import { replyToBotChannel } from "#src/bots/channelReply.js";
 import {
   BotAdminRequiredError,
@@ -22,42 +22,42 @@ import {
   isGroupOwnerCommand,
   canAnswerGroupQuestion,
 } from "./groupSessions.js";
-/* eslint-disable max-lines -- Bots 服务仍复用原 RPC 文件名，先把鉴权、命令路由、Marid Agent 桥接收口集中在同一服务内。 */
+/* eslint-disable max-lines -- Bots 服务仍复用原 RPC 文件名，先把鉴权、命令路由、Qodex Agent 桥接收口集中在同一服务内。 */
 import { Buffer } from "node:buffer";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import type { IDisposable } from "@marid/rpc";
-import { completeNewModelSelection } from "@marid/provider";
+import type { IDisposable } from "@qodex/rpc";
+import { completeNewModelSelection } from "@qodex/provider";
 import {
   ALL_BOT_WORKSPACES,
   parseRemoteWorkspaceIdentity,
   CONVERSATION_SELECTION_MAX_TEXT_LENGTH,
   generateTraceId,
-  normalizeAgentProviderToMaridAgent,
-  MARID_AGENT_PROVIDER,
+  normalizeAgentProviderToQodexAgent,
+  QODEX_AGENT_PROVIDER,
   BOT_TASK_BROADCAST_CHANNEL,
   BOT_TASK_STREAM_BROADCAST_CHANNEL,
   appendAssistantMessagePart,
-  buildMaridAssistantPresentation,
+  buildQodexAssistantPresentation,
   decodeCustomModelValue,
   encodeCustomModelValue,
   getPermissionRequestPreview,
   getSupportedBotReplyGranularities,
   normalizeBotReplyGranularity,
-  type MaridConfigOption,
-  type MaridElicitationRequest,
-  type MaridElicitationQuestion,
-  type MaridPermissionOption,
-  type MaridPermissionRequest,
-  type MaridPromptAttachment,
-  type MaridTaskMode,
-  type MaridAssistantMessagePart,
-  type MaridAutomationBotDeliveryTarget,
-  type MaridProvider,
-  type MaridStreamEvent,
+  type QodexConfigOption,
+  type QodexElicitationRequest,
+  type QodexElicitationQuestion,
+  type QodexPermissionOption,
+  type QodexPermissionRequest,
+  type QodexPromptAttachment,
+  type QodexTaskMode,
+  type QodexAssistantMessagePart,
+  type QodexAutomationBotDeliveryTarget,
+  type QodexProvider,
+  type QodexStreamEvent,
   type TaskStreamMirrorableEvent,
-  type MaridTaskMeta,
+  type QodexTaskMeta,
   type BotActor,
   type BotTaskBroadcastPayload,
   type BotTaskStreamBroadcastPayload,
@@ -83,7 +83,7 @@ import {
   type BotsConfigFile,
   type Locale,
   type SelectionPrompt,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type { BotRemoteRuntimeService } from "#src/bot-project-runtime/contract.js";
 import {
   readProjectCatalog,
@@ -97,8 +97,8 @@ import {
   formatBotInputClientId,
   remoteHostIdFromWorkspaceIdentity,
   toZhOrEnLocale,
-} from "@marid/shared";
-import type { IMaridTaskService } from "../session/maridTaskService.js";
+} from "@qodex/shared";
+import type { IQodexTaskService } from "../session/qodexTaskService.js";
 import { resolveProviderModeIdFromConfigOptions } from "#src/session/sessionModeOptions.js";
 import { deriveSessionTitle as deriveTaskTitle } from "#src/session/sessionTitle.js";
 import type { IBroadcastService } from "../broadcast/broadcast.js";
@@ -204,7 +204,7 @@ const botsLogger = createServiceLogger("bots");
 
 function formatBotModelSelectionValue(selection: ModelSelection | undefined): string | undefined {
   if (!selection) return undefined;
-  return selection.providerId === MARID_AGENT_PROVIDER
+  return selection.providerId === QODEX_AGENT_PROVIDER
     ? selection.modelId
     : encodeCustomModelValue(selection.providerId, selection.modelId);
 }
@@ -221,7 +221,7 @@ function parseBotModelOptionValue(value: string): ModelSelection | undefined {
       modelId: value.slice(separatorIndex + 1),
     };
   }
-  return value.trim() ? { providerId: MARID_AGENT_PROVIDER, modelId: value.trim() } : undefined;
+  return value.trim() ? { providerId: QODEX_AGENT_PROVIDER, modelId: value.trim() } : undefined;
 }
 
 const BOT_REPLY_GRANULARITY_OPTIONS = [
@@ -317,7 +317,7 @@ function validateBotConfig(config: BotsConfigFile, candidate: BotConfig): void {
 
 interface BotsServiceDeps {
   credentialService: ICredentialService;
-  maridTaskService: IMaridTaskService;
+  qodexTaskService: IQodexTaskService;
   projectService: Pick<IProjectService, "readProjects" | "readTree" | "prepareSession">;
   remoteProjectService?: Pick<IRemoteProjectService, "readDirectory">;
   ownerHostId?: string;
@@ -350,7 +350,7 @@ interface PreparedTopicMessage {
 
 interface PreparedBotMessageContent {
   content: string;
-  maridAttachments: MaridPromptAttachment[];
+  qodexAttachments: QodexPromptAttachment[];
 }
 
 type BotAuthorizedCommand =
@@ -389,7 +389,7 @@ interface BotModelProviderOption {
 }
 
 interface BotTaskSelectionEntry {
-  task: MaridTaskMeta;
+  task: QodexTaskMeta;
   workspacePath: string;
   workspaceIdentity?: string;
 }
@@ -533,7 +533,7 @@ function createOutbound(
 function groupCardFor(
   actor: BotActor,
   context: BotContextState,
-): import("@marid/shared").BotGroupCard {
+): import("@qodex/shared").BotGroupCard {
   const group = context.group!;
   const threadId = actor.threadId ?? group.threadId;
   return {
@@ -547,7 +547,7 @@ function groupCardFor(
 
 function resolveAutomationBotDeliveryTarget(
   actor: BotActor,
-): MaridAutomationBotDeliveryTarget | undefined {
+): QodexAutomationBotDeliveryTarget | undefined {
   if (actor.provider !== "feishu" && actor.provider !== "lark" && actor.provider !== "weixin") {
     return undefined;
   }
@@ -592,7 +592,7 @@ const BOT_PERMISSION_OPTION_PRIORITY = {
 } as const satisfies Record<BotPermissionOptionDisplayKind, number>;
 
 function getBotPermissionOptionDisplayKind(
-  option: MaridPermissionOption,
+  option: QodexPermissionOption,
 ): BotPermissionOptionDisplayKind {
   const text = `${option.optionId} ${option.kind} ${option.name}`.toLowerCase();
   const isAlways =
@@ -610,8 +610,8 @@ function getBotPermissionOptionDisplayKind(
 }
 
 function sortBotPermissionOptions(
-  options: readonly MaridPermissionOption[],
-): MaridPermissionOption[] {
+  options: readonly QodexPermissionOption[],
+): QodexPermissionOption[] {
   return [...options].sort((left, right) => {
     const leftPriority = BOT_PERMISSION_OPTION_PRIORITY[getBotPermissionOptionDisplayKind(left)];
     const rightPriority = BOT_PERMISSION_OPTION_PRIORITY[getBotPermissionOptionDisplayKind(right)];
@@ -619,7 +619,7 @@ function sortBotPermissionOptions(
   });
 }
 
-function formatBotPermissionOptionLabel(option: MaridPermissionOption, locale?: Locale): string {
+function formatBotPermissionOptionLabel(option: QodexPermissionOption, locale?: Locale): string {
   const displayKind = getBotPermissionOptionDisplayKind(option);
   if (locale === "en-US") {
     switch (displayKind) {
@@ -650,8 +650,8 @@ function formatBotPermissionOptionLabel(option: MaridPermissionOption, locale?: 
 }
 
 function formatBotPermissionOptionDescription(
-  option: MaridPermissionOption,
-  request: Pick<MaridPermissionRequest, "title" | "description" | "kind" | "raw">,
+  option: QodexPermissionOption,
+  request: Pick<QodexPermissionRequest, "title" | "description" | "kind" | "raw">,
   locale?: Locale,
 ): string | undefined {
   const displayKind = getBotPermissionOptionDisplayKind(option);
@@ -699,7 +699,7 @@ function formatBotPermissionOptionDescription(
       : "后续相同权限请求也会直接拒绝";
 }
 
-function isBotPermissionRejectOption(option: MaridPermissionOption): boolean {
+function isBotPermissionRejectOption(option: QodexPermissionOption): boolean {
   const displayKind = getBotPermissionOptionDisplayKind(option);
   return displayKind === "rejectOnce" || displayKind === "rejectAlways";
 }
@@ -731,7 +731,7 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-const DEFAULT_BOT_MARID_PROVIDER: MaridProvider = MARID_AGENT_PROVIDER;
+const DEFAULT_BOT_QODEX_PROVIDER: QodexProvider = QODEX_AGENT_PROVIDER;
 // Bot 模式硬锁 yolo：所有 bot task 一律免交互权限，且禁止通过 /mode 切换运行模式。
 const BOT_FORCED_MODE = "yolo";
 const BOT_TYPING_INTERVAL_MS = 4_000;
@@ -758,7 +758,7 @@ export function createBotsService(
     string,
     IDisposable & { automation(runId?: string): void; imInput(): void }
   >();
-  const taskStreamHub = createBotTaskStreamHub<MaridStreamEvent | TaskStreamMirrorableEvent>();
+  const taskStreamHub = createBotTaskStreamHub<QodexStreamEvent | TaskStreamMirrorableEvent>();
   const failedPrivateDeliveries = new Map<
     string,
     {
@@ -1471,7 +1471,7 @@ export function createBotsService(
     }
     if (!valid || !bot || !context || !signature || privateWatches.has(botId)) return;
     if (!(await isRemoteWorkspaceConnected(context))) return;
-    const taskService = await resolveMaridTaskServiceForContext(context);
+    const taskService = await resolveQodexTaskServiceForContext(context);
     const deleted = await taskService.listDeletedTaskIds?.({
       workspacePath: context.workspacePath,
       workspaceIdentity: context.workspaceIdentity,
@@ -1855,7 +1855,7 @@ export function createBotsService(
 
   function formatUserFacingBotError(error: unknown, locale: Locale | undefined): string {
     // 旧 Worker 缺少选模并发保护时保持拒绝，用稳定错误码提示升级，不自动重发。
-    if (isMaridAgentModelSelectionBasisUnsupportedError(error)) {
+    if (isQodexAgentModelSelectionBasisUnsupportedError(error)) {
       return msg(locale, "modelSelectionBasisUnsupported");
     }
     // Bugfix: 旧 bot 消息或脏 task index 会让协议层抛出 Session not found。
@@ -2008,7 +2008,7 @@ export function createBotsService(
       );
     }
     const rawAttachments = (message.attachments ?? []).slice(0, BOT_MAX_ATTACHMENTS_PER_MESSAGE);
-    const maridAttachments: MaridPromptAttachment[] = [];
+    const qodexAttachments: QodexPromptAttachment[] = [];
     const fileLines: string[] = [];
     for (const rawAttachment of rawAttachments) {
       const resolved = await resolveAttachmentBytes(bot, rawAttachment, message.actor);
@@ -2029,7 +2029,7 @@ export function createBotsService(
       const dataBase64 = Buffer.from(resolved.data).toString("base64");
       if (isGroup) {
         // 旧兼容入口只把文件路径拼进正文，既丢失 V4 附件又破坏末尾引用块；群输入只走标准寄存。
-        maridAttachments.push({
+        qodexAttachments.push({
           kind: cached.kind === "image" || cached.kind === "audio" ? cached.kind : "file",
           filename: cached.filename,
           mimeType: cached.mimeType,
@@ -2040,16 +2040,16 @@ export function createBotsService(
         continue;
       }
       if (cached.kind === "image" || cached.kind === "audio") {
-        maridAttachments.push({
+        qodexAttachments.push({
           kind: cached.kind,
           filename: cached.filename,
           mimeType: cached.mimeType,
           dataBase64,
-          // Bugfix：Bot 已把附件缓存到本地，MaridPromptAttachment 也必须携带该路径。
+          // Bugfix：Bot 已把附件缓存到本地，QodexPromptAttachment 也必须携带该路径。
           // 只在 prompt 文本里描述路径会让下游附件策略无法选择本地文件读取。
           localPath: cached.localPath,
         });
-        // Bugfix: bot 附件已经被 gateway 下载并缓存到本地。只把图片作为 Marid Agent image block 传入时，
+        // Bugfix: bot 附件已经被 gateway 下载并缓存到本地。只把图片作为 Qodex Agent image block 传入时，
         // 下游 agent 可能把内部临时 URL 再 curl 到 /tmp，导致重复下载、额外权限请求和模型安全拦截。
         // 因此同时把本地缓存路径写进 prompt，明确后续工具操作只能围绕本地文件进行。
         fileLines.push(
@@ -2066,7 +2066,7 @@ export function createBotsService(
       trimmed || (rawAttachments.length > 0 ? msg(locale, "attachmentOnlyPrompt") : "");
     return {
       content: [baseContent, ...fileLines].filter(Boolean).join("\n\n"),
-      maridAttachments,
+      qodexAttachments,
     };
   }
 
@@ -2119,21 +2119,21 @@ export function createBotsService(
     });
   }
 
-  async function resolveMaridTaskServiceForContext(
+  async function resolveQodexTaskServiceForContext(
     context: Pick<BotContextState, "workspacePath" | "workspaceIdentity" | "hostId">,
-  ): Promise<IMaridTaskService> {
+  ): Promise<IQodexTaskService> {
     if (!context.workspaceIdentity) {
-      return deps.maridTaskService;
+      return deps.qodexTaskService;
     }
-    const remoteMaridTaskService = await deps.remoteWorkspaceService?.getMaridTaskService?.({
+    const remoteQodexTaskService = await deps.remoteWorkspaceService?.getQodexTaskService?.({
       workspacePath: context.workspacePath,
       workspaceIdentity: context.workspaceIdentity,
       ...(context.hostId ? { hostId: context.hostId } : {}),
     });
-    if (remoteMaridTaskService) {
-      return remoteMaridTaskService;
+    if (remoteQodexTaskService) {
+      return remoteQodexTaskService;
     }
-    // Bugfix: 远端 workspace 的 bot 请求不能缺 runtime 时静默走本地 maridTaskService。
+    // Bugfix: 远端 workspace 的 bot 请求不能缺 runtime 时静默走本地 qodexTaskService。
     // 否则 /root 这类远端路径会在 macOS/Windows 本地 host 创建任务，模型和文件系统都错位。
     throw new BotAdminRequiredError(
       "remote",
@@ -2230,7 +2230,7 @@ export function createBotsService(
 
   async function listUserConfigOptions(
     _params: BotUserConfigOptionsParams,
-  ): Promise<MaridConfigOption[]> {
+  ): Promise<QodexConfigOption[]> {
     return [];
   }
   async function ensureBotStorageMigrated(): Promise<void> {
@@ -2249,26 +2249,26 @@ export function createBotsService(
   async function listActiveTaskConfigOptions(
     context: Pick<BotContextState, "workspacePath" | "workspaceIdentity" | "hostId">,
     taskId: string,
-  ): Promise<MaridConfigOption[]> {
-    const maridTaskService = await resolveMaridTaskServiceForContext(context);
-    return maridTaskService.getTaskConfigOptions({ taskId });
+  ): Promise<QodexConfigOption[]> {
+    const qodexTaskService = await resolveQodexTaskServiceForContext(context);
+    return qodexTaskService.getTaskConfigOptions({ taskId });
   }
 
   function findSelectConfigOption(
-    options: readonly MaridConfigOption[],
+    options: readonly QodexConfigOption[],
     configId: "model" | "mode" | "thoughtLevel",
-  ): (MaridConfigOption & { type: "select" }) | undefined {
+  ): (QodexConfigOption & { type: "select" }) | undefined {
     const category = configId === "thoughtLevel" ? "thought_level" : configId;
     return options.find(
-      (item): item is MaridConfigOption & { type: "select" } =>
+      (item): item is QodexConfigOption & { type: "select" } =>
         item.type === "select" && (item.category === category || item.id === category),
     );
   }
 
   function listConfigSelectOptions(
-    options: readonly MaridConfigOption[],
+    options: readonly QodexConfigOption[],
     configId: "model" | "mode" | "thoughtLevel",
-    context: { locale?: Locale; provider?: MaridProvider } = {},
+    context: { locale?: Locale; provider?: QodexProvider } = {},
   ): BotModelOption[] {
     const option = findSelectConfigOption(options, configId);
     return (option?.options ?? []).map((item) => {
@@ -2295,14 +2295,14 @@ export function createBotsService(
 
   function getModeDisplayLabel(
     locale: Locale | undefined,
-    provider: MaridProvider | undefined,
+    provider: QodexProvider | undefined,
     option: Pick<BotModelOption, "id" | "label">,
   ): string {
     if (!provider) {
       return option.label;
     }
     const isEnglish = locale === "en-US";
-    const labels: Partial<Record<MaridProvider, Record<string, string>>> = {
+    const labels: Partial<Record<QodexProvider, Record<string, string>>> = {
       glm: {
         default: isEnglish ? "Default" : "默认",
         yolo: "Yolo",
@@ -2317,7 +2317,7 @@ export function createBotsService(
     context: {
       configId: "model" | "mode" | "thoughtLevel";
       locale?: Locale;
-      provider?: MaridProvider;
+      provider?: QodexProvider;
     },
   ): string {
     if (context.configId !== "mode") {
@@ -2369,15 +2369,15 @@ export function createBotsService(
   }
 
   async function listModelProviderOptionsForActiveTask(
-    task: Pick<MaridTaskMeta, "model" | "workspacePath" | "workspaceIdentity">,
-    _activeProvider: MaridProvider,
+    task: Pick<QodexTaskMeta, "model" | "workspacePath" | "workspaceIdentity">,
+    _activeProvider: QodexProvider,
   ): Promise<BotModelProviderOption[]> {
     return listModelSelectionProviderOptions(task);
   }
 
   async function listModelOptionsForProviderFromActiveTask(
-    task: Pick<MaridTaskMeta, "model" | "workspacePath" | "workspaceIdentity">,
-    activeProvider: MaridProvider,
+    task: Pick<QodexTaskMeta, "model" | "workspacePath" | "workspaceIdentity">,
+    activeProvider: QodexProvider,
     providerId: string,
   ): Promise<BotModelOption[]> {
     return (
@@ -2399,8 +2399,8 @@ export function createBotsService(
   }
 
   async function listAllModelOptionsForActiveTask(
-    task: Pick<MaridTaskMeta, "model" | "workspacePath" | "workspaceIdentity">,
-    activeProvider: MaridProvider,
+    task: Pick<QodexTaskMeta, "model" | "workspacePath" | "workspaceIdentity">,
+    activeProvider: QodexProvider,
   ): Promise<BotModelOption[]> {
     return (await listModelProviderOptionsForActiveTask(task, activeProvider)).flatMap(
       (provider) => provider.models,
@@ -2408,8 +2408,8 @@ export function createBotsService(
   }
 
   function readCurrentActiveTaskModel(
-    task: Pick<MaridTaskMeta, "model">,
-    options: readonly MaridConfigOption[],
+    task: Pick<QodexTaskMeta, "model">,
+    options: readonly QodexConfigOption[],
   ): string | undefined {
     return readConfigSelectCurrentValue(options, "model") ?? task.model;
   }
@@ -2446,9 +2446,9 @@ export function createBotsService(
   }
 
   async function readCurrentModelProviderId(
-    task: Pick<MaridTaskMeta, "model" | "workspacePath" | "workspaceIdentity">,
-    options: readonly MaridConfigOption[],
-    activeProvider: MaridProvider,
+    task: Pick<QodexTaskMeta, "model" | "workspacePath" | "workspaceIdentity">,
+    options: readonly QodexConfigOption[],
+    activeProvider: QodexProvider,
   ): Promise<string | undefined> {
     const currentValue = readCurrentActiveTaskModel(task, options);
     if (!currentValue) {
@@ -2466,7 +2466,7 @@ export function createBotsService(
   }
 
   function resolveCustomModelRuntimeModelId(
-    _activeProvider: MaridProvider,
+    _activeProvider: QodexProvider,
     customModel: { providerId: string; modelName?: string },
   ): string | undefined {
     if (!customModel.modelName) {
@@ -2476,7 +2476,7 @@ export function createBotsService(
   }
 
   function readConfigSelectCurrentValue(
-    options: readonly MaridConfigOption[],
+    options: readonly QodexConfigOption[],
     configId: "model" | "mode" | "thoughtLevel",
   ): string | undefined {
     const currentValue = findSelectConfigOption(options, configId)?.currentValue;
@@ -2484,9 +2484,9 @@ export function createBotsService(
   }
 
   function resolveSupportedDraftMode(
-    options: readonly MaridConfigOption[],
+    options: readonly QodexConfigOption[],
     mode: string | undefined,
-    provider: MaridProvider,
+    provider: QodexProvider,
   ): string | undefined {
     if (!mode) {
       return undefined;
@@ -2501,9 +2501,9 @@ export function createBotsService(
   }
 
   function readConfigSelectCurrentLabel(
-    options: readonly MaridConfigOption[],
+    options: readonly QodexConfigOption[],
     configId: "model" | "mode" | "thoughtLevel",
-    context: { locale?: Locale; provider?: MaridProvider } = {},
+    context: { locale?: Locale; provider?: QodexProvider } = {},
   ): string | undefined {
     const currentValue = readConfigSelectCurrentValue(options, configId);
     if (!currentValue) {
@@ -2517,10 +2517,10 @@ export function createBotsService(
   }
 
   function readConfigSelectLabelForValue(
-    options: readonly MaridConfigOption[],
+    options: readonly QodexConfigOption[],
     configId: "model" | "mode" | "thoughtLevel",
     value: string | undefined,
-    context: { locale?: Locale; provider?: MaridProvider } = {},
+    context: { locale?: Locale; provider?: QodexProvider } = {},
   ): string | undefined {
     if (!value) {
       return undefined;
@@ -2532,16 +2532,16 @@ export function createBotsService(
   }
 
   function readCurrentActiveTaskMode(
-    task: Pick<MaridTaskMeta, "mode">,
-    options: readonly MaridConfigOption[],
+    task: Pick<QodexTaskMeta, "mode">,
+    options: readonly QodexConfigOption[],
   ): string | undefined {
     return readConfigSelectCurrentValue(options, "mode") ?? task.mode;
   }
 
   async function listProviderConfigOptionsForActiveTask(
-    task: Pick<MaridTaskMeta, "workspacePath" | "workspaceIdentity">,
-    activeProvider: MaridProvider,
-  ): Promise<MaridConfigOption[]> {
+    task: Pick<QodexTaskMeta, "workspacePath" | "workspaceIdentity">,
+    activeProvider: QodexProvider,
+  ): Promise<QodexConfigOption[]> {
     return listUserConfigOptions({
       workspacePath: task.workspacePath,
       workspaceIdentity: task.workspaceIdentity,
@@ -2551,22 +2551,22 @@ export function createBotsService(
 
   function normalizeBotDraftOptions(draftOptions: BotDraftOptions): BotDraftOptions {
     // Bugfix: bot-state 里可能还残留旧三方 CLI 草稿 provider。
-    // 如果直接复用，/new 后首条消息会重新创建第三方 runtime，绕过 Marid Agent 单一事实源。
+    // 如果直接复用，/new 后首条消息会重新创建第三方 runtime，绕过 Qodex Agent 单一事实源。
     return {
       ...draftOptions,
-      provider: normalizeAgentProviderToMaridAgent(draftOptions.provider),
+      provider: normalizeAgentProviderToQodexAgent(draftOptions.provider),
     };
   }
 
   async function buildInitializedDraftOptions(
     context: Pick<BotContextState, "workspacePath" | "workspaceIdentity" | "hostId">,
-    provider?: MaridProvider,
+    provider?: QodexProvider,
   ): Promise<BotDraftOptions> {
-    const requestedProvider = normalizeAgentProviderToMaridAgent(
-      provider ?? DEFAULT_BOT_MARID_PROVIDER,
+    const requestedProvider = normalizeAgentProviderToQodexAgent(
+      provider ?? DEFAULT_BOT_QODEX_PROVIDER,
     );
     if (context.workspaceIdentity && !(await isRemoteWorkspaceConnected(context))) {
-      // Bugfix: 远端断连时初始化草稿也不能偷偷申请远端 Marid Agent runtime。
+      // Bugfix: 远端断连时初始化草稿也不能偷偷申请远端 Qodex Agent runtime。
       // 只有 /reconnect 能恢复连接；草稿先保留最小默认值，重连成功后再刷新。
       return { provider: requestedProvider };
     }
@@ -2587,7 +2587,7 @@ export function createBotsService(
     const configOptions = await listActiveTaskConfigOptions(context, context.activeTaskId).catch(
       () => [],
     );
-    const resolvedProvider = normalizeAgentProviderToMaridAgent(activeTask.provider);
+    const resolvedProvider = normalizeAgentProviderToQodexAgent(activeTask.provider);
     // Bot 硬锁 yolo：继承当前 task 时也强制 yolo，不沿用原 task 的 mode。
     const forcedMode = resolveSupportedDraftMode(
       configOptions,
@@ -2596,7 +2596,7 @@ export function createBotsService(
     );
     // 继承的是领域选择，不是菜单显示值；显示值中的 $max 曾被误存为 modelId。
     // 由同一工作区的任务服务读取真实选择，保留 Provider、模型和显式思考等级。
-    const taskService = await resolveMaridTaskServiceForContext(context);
+    const taskService = await resolveQodexTaskServiceForContext(context);
     const modelSelection = await taskService.getTaskModelSelection({
       taskId: context.activeTaskId,
     });
@@ -2651,7 +2651,7 @@ export function createBotsService(
     context: BotContextState,
     draftOptions: BotDraftOptions,
     resolvedView?: ModelSelectionView | null,
-  ): Promise<MaridConfigOption[]> {
+  ): Promise<QodexConfigOption[]> {
     const view =
       resolvedView === undefined
         ? await readModelSelectionView(context, draftOptions.modelSelection)
@@ -2700,13 +2700,13 @@ export function createBotsService(
       draftOptions.provider,
     );
     if ((modeOption?.id && forcedDraftMode) || context.group) {
-      const maridTaskService = await resolveMaridTaskServiceForContext(context);
-      await maridTaskService.setMode({
+      const qodexTaskService = await resolveQodexTaskServiceForContext(context);
+      await qodexTaskService.setMode({
         taskId,
-        mode: (forcedDraftMode ?? "default") as MaridTaskMode,
+        mode: (forcedDraftMode ?? "default") as QodexTaskMode,
       });
     } else if (modeOption?.id) {
-      // provider 不支持 yolo（非 Marid Agent）：保持其自身默认模式，避免首条消息回调失败。
+      // provider 不支持 yolo（非 Qodex Agent）：保持其自身默认模式，避免首条消息回调失败。
       botsLogger.debug(
         traceId,
         `skip forced yolo mode unsupported provider=${draftOptions.provider}`,
@@ -3269,7 +3269,7 @@ export function createBotsService(
     typingIntervals.delete(taskId);
   }
 
-  function updateLiveStatusProgress(event: MaridStreamEvent): void {
+  function updateLiveStatusProgress(event: QodexStreamEvent): void {
     if (event.type === "agent_message_chunk" || event.type === "agent_thought_chunk") {
       const text = normalizeStatusProgressText(event.content);
       if (!text) {
@@ -3328,7 +3328,7 @@ export function createBotsService(
 
   async function broadcastTaskStreamEvent(
     context: Pick<BotContextState, "workspacePath" | "workspaceIdentity" | "hostId">,
-    event: MaridStreamEvent,
+    event: QodexStreamEvent,
   ): Promise<void> {
     const payload: BotTaskStreamBroadcastPayload = {
       workspacePath: context.workspacePath,
@@ -3531,9 +3531,9 @@ export function createBotsService(
   async function readTaskMeta(
     context: Pick<BotContextState, "workspacePath" | "workspaceIdentity" | "hostId">,
     taskId: string,
-  ): Promise<MaridTaskMeta | null> {
-    const maridTaskService = await resolveMaridTaskServiceForContext(context);
-    const tasks = await maridTaskService.listTasks({
+  ): Promise<QodexTaskMeta | null> {
+    const qodexTaskService = await resolveQodexTaskServiceForContext(context);
+    const tasks = await qodexTaskService.listTasks({
       workspacePath: context.workspacePath,
       workspaceIdentity: context.workspaceIdentity,
     });
@@ -3605,7 +3605,7 @@ export function createBotsService(
 
   async function readContextActiveTaskMeta(
     context: BotContextState,
-  ): Promise<MaridTaskMeta | null> {
+  ): Promise<QodexTaskMeta | null> {
     if (!context.activeTaskId) {
       return null;
     }
@@ -3616,7 +3616,7 @@ export function createBotsService(
     return (
       (
         await (
-          await resolveMaridTaskServiceForContext(context)
+          await resolveQodexTaskServiceForContext(context)
         )
           .getTaskSnapshot({
             taskId: context.activeTaskId,
@@ -3638,8 +3638,8 @@ export function createBotsService(
     | {
         ok: true;
         taskId: string;
-        task: MaridTaskMeta;
-        configOptions: MaridConfigOption[];
+        task: QodexTaskMeta;
+        configOptions: QodexConfigOption[];
       }
     | { ok: false; reply: BotOutboundMessage[] }
   > {
@@ -3671,9 +3671,9 @@ export function createBotsService(
   async function broadcastTaskConfigSync(params: {
     context: BotContextState;
     taskId: string;
-    task?: MaridTaskMeta | null;
-    provider?: MaridProvider;
-    configOptions?: MaridConfigOption[];
+    task?: QodexTaskMeta | null;
+    provider?: QodexProvider;
+    configOptions?: QodexConfigOption[];
   }): Promise<void> {
     await broadcastTaskListChange(params.context, params.taskId, "updated", {
       ...(params.task ? { task: params.task } : {}),
@@ -3683,7 +3683,7 @@ export function createBotsService(
   }
 
   function isTerminalTaskMeta(
-    task: MaridTaskMeta | null,
+    task: QodexTaskMeta | null,
     eventType: "task_complete" | "task_error",
   ): boolean {
     if (!task) {
@@ -3699,7 +3699,7 @@ export function createBotsService(
     context: Pick<BotContextState, "workspacePath" | "workspaceIdentity" | "hostId">,
     taskId: string,
     eventType: "task_complete" | "task_error",
-  ): Promise<MaridTaskMeta | null> {
+  ): Promise<QodexTaskMeta | null> {
     let latestTask = await readTaskMeta(context, taskId).catch(() => null);
     if (isTerminalTaskMeta(latestTask, eventType)) {
       return latestTask;
@@ -3759,7 +3759,7 @@ export function createBotsService(
       // 只信服务记录，外部回调不能声称已接收来跳过首次材料准备。
       materialPayload = {
         ...payload,
-        maridTopicHasAcceptedInput: Object.values(topic?.group?.inputs ?? {}).some(
+        qodexTopicHasAcceptedInput: Object.values(topic?.group?.inputs ?? {}).some(
           (input) => input.admission === "accepted",
         ),
       };
@@ -3768,17 +3768,17 @@ export function createBotsService(
       ? ((await adapter
           .prepareCallbackPayload?.(callbackBot, materialPayload)
           .catch((error: unknown) => ({
-            maridCallbackPrepareError: error instanceof Error ? error.message : String(error),
+            qodexCallbackPrepareError: error instanceof Error ? error.message : String(error),
           }))) ?? payload)
       : payload;
     if (
       isRecord(preparedPayload) &&
-      typeof preparedPayload.maridCallbackPrepareError === "string"
+      typeof preparedPayload.qodexCallbackPrepareError === "string"
     ) {
       return {
         ok: false,
         replies: [],
-        responseBody: { error: preparedPayload.maridCallbackPrepareError },
+        responseBody: { error: preparedPayload.qodexCallbackPrepareError },
         status: 401,
       };
     }
@@ -3797,7 +3797,7 @@ export function createBotsService(
       callbackBot &&
       isFeishuBotProvider(provider) &&
       isRecord(preparedPayload) &&
-      preparedPayload.maridBotRemoved === true
+      preparedPayload.qodexBotRemoved === true
     ) {
       const event = isRecord(preparedPayload.event) ? preparedPayload.event : preparedPayload;
       const chatId = readNestedString(event, "chat_id");
@@ -3823,7 +3823,7 @@ export function createBotsService(
     }
     let parsePayload =
       isFeishuBotProvider(provider) && isRecord(preparedPayload)
-        ? { ...preparedPayload, maridProvider: provider }
+        ? { ...preparedPayload, qodexProvider: provider }
         : preparedPayload;
     if (callbackBot && isFeishuBotProvider(provider) && isRecord(parsePayload)) {
       const event = isRecord(parsePayload.event) ? parsePayload.event : parsePayload;
@@ -3836,7 +3836,7 @@ export function createBotsService(
           states.bots[
             getBotConversationKey({ botId: callbackBot.id, chatType: "group", chatId: cardChatId })
           ];
-        if (group?.group) parsePayload = { ...parsePayload, maridChatType: "group" };
+        if (group?.group) parsePayload = { ...parsePayload, qodexChatType: "group" };
       }
     }
     const parsedInboundMessages = adapter.parseCallback(parsePayload);
@@ -3988,10 +3988,10 @@ export function createBotsService(
         const handledByFeishuSynchronousCardAction =
           isFeishuBotProvider(provider) &&
           isRecord(preparedPayload) &&
-          ((preparedPayload.maridFeishuSynchronousCardAction === true &&
+          ((preparedPayload.qodexFeishuSynchronousCardAction === true &&
             !(
-              isRecord(preparedPayload.maridFeishuCardResponseState) &&
-              preparedPayload.maridFeishuCardResponseState.deferred === true
+              isRecord(preparedPayload.qodexFeishuCardResponseState) &&
+              preparedPayload.qodexFeishuCardResponseState.deferred === true
             ) &&
             Boolean(outbound[0])) ||
             (inboundMessage.groupCardAction === true && outbound[0]?.callbackToastOnly === true));
@@ -4119,14 +4119,14 @@ export function createBotsService(
   }
 
   function createAssistantReplyBlocks(
-    parts: readonly MaridAssistantMessagePart[],
+    parts: readonly QodexAssistantMessagePart[],
     toolCalls: ReadonlyMap<string, BotReplyToolCallState>,
     mode: BotReplyGranularity | undefined,
-    changeSummary: MaridTaskMeta["changeSummary"] | null | undefined,
+    changeSummary: QodexTaskMeta["changeSummary"] | null | undefined,
   ): BotAssistantReplyBlock[] {
     const blocks: BotAssistantReplyBlock[] = [];
     const resolvedMode = mode ?? getDefaultBotReplyGranularity();
-    const presentation = buildMaridAssistantPresentation({
+    const presentation = buildQodexAssistantPresentation({
       content: "",
       toolCalls: [...toolCalls.values()].map((toolCall) => ({
         ...toolCall,
@@ -4167,9 +4167,9 @@ export function createBotsService(
   }
 
   function normalizeBotElicitationQuestions(
-    event: Extract<MaridStreamEvent, { type: "elicitation_request" }>,
+    event: Extract<QodexStreamEvent, { type: "elicitation_request" }>,
     locale: Locale | undefined,
-  ): MaridElicitationQuestion[] {
+  ): QodexElicitationQuestion[] {
     const schema = isRecord(event.schema) ? event.schema : null;
     const isPlanApproval = schema?.interaction === "plan_approval";
     if (isPlanApproval) {
@@ -4211,7 +4211,7 @@ export function createBotsService(
   }
 
   function readBotElicitationRenderContext(
-    event: Extract<MaridStreamEvent, { type: "elicitation_request" }>,
+    event: Extract<QodexStreamEvent, { type: "elicitation_request" }>,
   ): BotPendingElicitation["renderContext"] {
     const schema = isRecord(event.schema) ? event.schema : null;
     if (
@@ -4283,7 +4283,7 @@ export function createBotsService(
   }
 
   function mergeElicitationFormValues(
-    question: MaridElicitationQuestion,
+    question: QodexElicitationQuestion,
     selectedValues: readonly string[],
     formValues: readonly string[],
   ): string[] {
@@ -4317,7 +4317,7 @@ export function createBotsService(
   }
 
   function resolveElicitationQuestionValue(
-    question: MaridElicitationQuestion,
+    question: QodexElicitationQuestion,
     value: string,
     options: { includeSubmit?: boolean } = {},
   ): string {
@@ -4407,7 +4407,7 @@ export function createBotsService(
 
   function createBotElicitationRequestSnapshot(
     pending: BotPendingElicitation,
-  ): MaridElicitationRequest {
+  ): QodexElicitationRequest {
     const currentQuestion = pending.questions[pending.currentQuestionIndex] ?? pending.questions[0];
     const answerDrafts = Object.fromEntries(
       Object.entries(pending.answers).map(([index, values]) => [`answer_${index}`, values]),
@@ -4632,8 +4632,8 @@ export function createBotsService(
     if (pending.handledAt) {
       return [createOutbound(actor, msg(auth.locale, "elicitationHandled"))];
     }
-    const maridTaskService = await resolveMaridTaskServiceForContext(auth.context);
-    const submitted = await maridTaskService.respondElicitation({
+    const qodexTaskService = await resolveQodexTaskServiceForContext(auth.context);
+    const submitted = await qodexTaskService.respondElicitation({
       taskId: pending.taskId,
       workspacePath: auth.context.workspacePath,
       workspaceIdentity: auth.context.workspaceIdentity,
@@ -4782,7 +4782,7 @@ export function createBotsService(
         answers: { ...pending.answers, [answerKey]: nextValues },
       };
       await writeContext({ ...auth.context, pendingElicitation: nextPending });
-      // Bugfix: 多选题在 Bot 里 toggle 后不会触发 Marid Agent response，必须主动同步草稿给 UI。
+      // Bugfix: 多选题在 Bot 里 toggle 后不会触发 Qodex Agent response，必须主动同步草稿给 UI。
       await broadcastPendingElicitationProgress(auth.context, nextPending);
       return createElicitationReply(actor, nextPending, auth.locale);
     }
@@ -4873,7 +4873,7 @@ export function createBotsService(
     user: BotConfig,
     actor: BotActor,
     context: BotContextState,
-    event: Extract<MaridStreamEvent, { type: "elicitation_request" }>,
+    event: Extract<QodexStreamEvent, { type: "elicitation_request" }>,
     mentionedUserIds?: string[],
   ): Promise<void> {
     const locale = await readMessageLocale();
@@ -4897,7 +4897,7 @@ export function createBotsService(
         ? { renderContext: readBotElicitationRenderContext(event) }
         : {}),
     };
-    // Bugfix: Bot 原先只消费 permission_request，没有把 Marid Agent 的
+    // Bugfix: Bot 原先只消费 permission_request，没有把 Qodex Agent 的
     // AskUserQuestion/elicitation_request 转成第三方可回答消息，任务会一直卡在等待用户输入。
     if (context.pendingElicitation) {
       clearPendingElicitationSelection(context.pendingElicitation);
@@ -5031,11 +5031,11 @@ export function createBotsService(
           getWorkspaceKey(context.workspacePath, context.workspaceIdentity),
       );
     };
-    const maridTaskService = await resolveMaridTaskServiceForContext(context);
+    const qodexTaskService = await resolveQodexTaskServiceForContext(context);
     if (context.group) {
       // Bug 原因：旧会话尚未冷恢复时建立结果订阅会耗尽重试；先读取权威状态，
       // 再监听未来事件，避免新请求执行结束后无人消费结果。这里不提交历史输入。
-      await maridTaskService.getBotGroupTaskBlockReason?.({
+      await qodexTaskService.getBotGroupTaskBlockReason?.({
         taskId: context.activeTaskId,
         workspacePath: context.workspacePath,
         workspaceIdentity: context.workspaceIdentity,
@@ -5142,7 +5142,7 @@ export function createBotsService(
         privateDeliveryFailed = true;
       }
     };
-    let assistantParts: MaridAssistantMessagePart[] = [];
+    let assistantParts: QodexAssistantMessagePart[] = [];
     let assistantReplyBuffer = "";
     let sentAnyAssistantReply = false;
     const assistantPartToolIds = new Set<string>();
@@ -5398,7 +5398,7 @@ export function createBotsService(
       }
     };
     const handleStreamEventImpl = async (
-      event: MaridStreamEvent | TaskStreamMirrorableEvent,
+      event: QodexStreamEvent | TaskStreamMirrorableEvent,
       shouldBroadcast = true,
     ): Promise<void> => {
       if (disposed) return;
@@ -5669,7 +5669,7 @@ export function createBotsService(
         await broadcastTaskListChange(context, event.taskId, "permission_request", {
           permissionRequest: event,
         });
-        // Bugfix: UI 会把 Marid Agent 原始权限选项规整成“允许/始终允许/拒绝”的固定顺序和文案；
+        // Bugfix: UI 会把 Qodex Agent 原始权限选项规整成“允许/始终允许/拒绝”的固定顺序和文案；
         // 机器人之前直接展示 provider 原始英文 name，还额外加取消按钮，导致同一个权限请求在飞书和 UI 看起来不一致。
         const permissionOptions = sortBotPermissionOptions(event.options);
         const permissionSelection: SelectionPrompt = {
@@ -5805,7 +5805,7 @@ export function createBotsService(
                 ),
           );
         }
-        // Bugfix: Marid Agent 终态事件可能先于 task index/meta 落盘广播到 Bots。
+        // Bugfix: Qodex Agent 终态事件可能先于 task index/meta 落盘广播到 Bots。
         // 如果这里立刻用旧 meta 更新 sidebar，随后列表再刷新到终态 meta，会出现状态/摘要跳一下。
         // 因此终态广播前短重试读取一次稳定 meta，尽量用同一帧完成 UI 增量更新。
         const completedTask = await readTerminalTaskMeta(context, event.taskId, event.type).catch(
@@ -5855,7 +5855,7 @@ export function createBotsService(
         }
         const mode = getMode();
         const locale = await readMessageLocale();
-        const completedSnapshot = await maridTaskService
+        const completedSnapshot = await qodexTaskService
           .getTaskSnapshot({
             taskId: event.taskId,
             workspacePath: context.workspacePath,
@@ -5929,7 +5929,7 @@ export function createBotsService(
       }
     };
     const handleStreamEvent = async (
-      event: MaridStreamEvent | TaskStreamMirrorableEvent,
+      event: QodexStreamEvent | TaskStreamMirrorableEvent,
       shouldBroadcast = true,
     ): Promise<void> => {
       try {
@@ -5970,14 +5970,14 @@ export function createBotsService(
     };
     let streamEventQueue: Promise<void> = Promise.resolve();
     const enqueueStreamEvent = (
-      event: MaridStreamEvent | TaskStreamMirrorableEvent,
+      event: QodexStreamEvent | TaskStreamMirrorableEvent,
     ): Promise<void> => {
       const shouldBroadcast = !forwardedTaskEvents.has(event);
       forwardedTaskEvents.add(event);
       const nextStreamEvent = streamEventQueue.then(() =>
         handleStreamEvent(event, shouldBroadcast),
       );
-      // Bugfix: Marid Agent 事件分发不保证等待 async listener。微信这类离散消息如果并发发送，
+      // Bugfix: Qodex Agent 事件分发不保证等待 async listener。微信这类离散消息如果并发发送，
       // task_complete 的 Change summary 可能抢在前面正文 flush 之前到达客户端，所以这里按任务串行消费。
       streamEventQueue = nextStreamEvent.catch((error: unknown) => {
         botsLogger.warn(
@@ -5990,7 +5990,7 @@ export function createBotsService(
       return streamEventQueue;
     };
     const dynamicTaskEvent = (
-      maridTaskService as Partial<Pick<IMaridTaskService, "onDynamicTaskEvent">>
+      qodexTaskService as Partial<Pick<IQodexTaskService, "onDynamicTaskEvent">>
     ).onDynamicTaskEvent;
     // Bugfix: 远控/共享 host 场景会通过 workspace+task mirror 分发流事件。
     // 这里优先订阅 workspace 级事件，避免只监听本地 taskId relay 时漏掉 channel 回复。
@@ -6011,7 +6011,7 @@ export function createBotsService(
               // 这里使用 bot 专属 continuous 订阅，避免远控恢复逻辑影响飞书/微信等 channel。
               deliveryKind: "bot-channel-continuous",
             })(receive)
-          : maridTaskService.onDynamicStreamEvent(context.activeTaskId!)(receive),
+          : qodexTaskService.onDynamicStreamEvent(context.activeTaskId!)(receive),
       enqueueStreamEvent,
     );
     streamSubscriptions.set(streamSubscriptionKey, {
@@ -6610,8 +6610,8 @@ export function createBotsService(
         }),
       ].join("\n");
     }
-    const maridTaskService = await resolveMaridTaskServiceForContext(context);
-    const tasks = await maridTaskService.listTasks({
+    const qodexTaskService = await resolveQodexTaskServiceForContext(context);
+    const tasks = await qodexTaskService.listTasks({
       workspacePath: context.workspacePath,
       workspaceIdentity: context.workspaceIdentity,
     });
@@ -6619,7 +6619,7 @@ export function createBotsService(
       ? tasks.find((task) => task.taskId === context.activeTaskId)
       : null;
     const activeTaskSnapshot = context.activeTaskId
-      ? await maridTaskService
+      ? await qodexTaskService
           .getTaskSnapshot({
             taskId: context.activeTaskId,
             workspacePath: context.workspacePath,
@@ -6750,7 +6750,7 @@ export function createBotsService(
   ) {
     const messageId = message.actor.providerMessageId!;
     if (!context.group) return {};
-    let topicContext: import("@marid/shared").BotTopicHistoryBatch | undefined;
+    let topicContext: import("@qodex/shared").BotTopicHistoryBatch | undefined;
     let historyError: unknown;
 
     const generation = historyGeneration(context);
@@ -6828,7 +6828,7 @@ export function createBotsService(
   ): Promise<BotOutboundMessage[]> {
     if (!context.group || !context.activeTaskId || !isFeishuBotProvider(bot.provider))
       throw new Error("Group context is missing");
-    const service = await resolveMaridTaskServiceForContext(context);
+    const service = await resolveQodexTaskServiceForContext(context);
     if (!service.submitBotGroupInput)
       throw new Error("Runtime does not support group input admission");
     const messageId = message.actor.providerMessageId;
@@ -6849,7 +6849,7 @@ export function createBotsService(
     )
       throw new Error("Group authorization changed before input admission");
     let attachmentOffset = 0;
-    const admittedAttachments: MaridPromptAttachment[] = [];
+    const admittedAttachments: QodexPromptAttachment[] = [];
     // 多个回调可能在首次接收前已各自准备根引用；提交时再按权威记录去重。
     let rootIncluded = Object.values(admissionContext.group.inputs ?? {}).some(
       (input) => input.admission === "accepted",
@@ -6860,7 +6860,7 @@ export function createBotsService(
       const includeQuote = quote && !(isRoot && rootIncluded);
       const attachmentIndexes: number[] = [];
       let hasRootAttachment = false;
-      material.maridAttachments.forEach((attachment, index) => {
+      material.qodexAttachments.forEach((attachment, index) => {
         const resourceMessageId =
           original.attachments?.[index]?.providerMetadata?.resourceMessageId;
         const rootAttachment = !!inputRootMessageId && resourceMessageId === inputRootMessageId;
@@ -6870,7 +6870,7 @@ export function createBotsService(
         attachmentIndexes.push(admittedAttachments.length);
         admittedAttachments.push(attachment);
       });
-      attachmentOffset += material.maridAttachments.length;
+      attachmentOffset += material.qodexAttachments.length;
       if ((isRoot && includeQuote) || hasRootAttachment) rootIncluded = true;
       return {
         messageId: original.actor.providerMessageId!,
@@ -6884,7 +6884,7 @@ export function createBotsService(
       };
     });
     // 历史文本附件在各条原始附件之后追加，保留它且不归给后续消息。
-    if (topicBatch) admittedAttachments.push(...prepared.maridAttachments.slice(attachmentOffset));
+    if (topicBatch) admittedAttachments.push(...prepared.qodexAttachments.slice(attachmentOffset));
     const source = {
       authorizationId: context.group.authorizationId,
       botIdentity: { name: bot.name, ...(message.botOpenId ? { openId: message.botOpenId } : {}) },
@@ -6928,7 +6928,7 @@ export function createBotsService(
         : message.referencedMessage
           ? { conversationQuotes: [message.referencedMessage] }
           : {}),
-      attachments: topicBatch ? admittedAttachments : prepared.maridAttachments,
+      attachments: topicBatch ? admittedAttachments : prepared.qodexAttachments,
       source: {
         ...runtimeSource,
         ...(archive
@@ -7131,7 +7131,7 @@ export function createBotsService(
         },
       ];
     }
-    const taskService = await resolveMaridTaskServiceForContext(auth.context);
+    const taskService = await resolveQodexTaskServiceForContext(auth.context);
     if (!taskService.cancelBotGroupInput) throw new Error("Runtime cannot cancel queued input");
     const ack = await taskService.cancelBotGroupInput({
       taskId: input.taskId,
@@ -7166,8 +7166,8 @@ export function createBotsService(
     taskId: string,
     traceId: string,
     content: string,
-    attachments: MaridPromptAttachment[],
-    botDeliveryTarget?: MaridAutomationBotDeliveryTarget,
+    attachments: QodexPromptAttachment[],
+    botDeliveryTarget?: QodexAutomationBotDeliveryTarget,
     modelSelection?: ModelSelection,
     modelSelectionBasis?: ModelSelection,
   ): void {
@@ -7179,15 +7179,15 @@ export function createBotsService(
     // Bugfix: Telegram polling 是单循环顺序处理 update。如果这里 await session/prompt，
     // 权限按钮 callback 会一直排队到整轮任务结束，导致用户点 inline keyboard 没反应。
     // 因此 prompt 必须后台跑，polling loop 才能继续接收 /permission 回调。
-    void resolveMaridTaskServiceForContext(context)
-      .then((maridTaskService) =>
-        maridTaskService.sendPrompt({
+    void resolveQodexTaskServiceForContext(context)
+      .then((qodexTaskService) =>
+        qodexTaskService.sendPrompt({
           taskId,
           traceId,
           content,
           attachments: attachments.length > 0 ? attachments : undefined,
           botDeliveryTarget,
-          // 与群聊入口（maridTaskServiceAdapter 的 bot 群输入）同一契约：formatBotInputClientId。
+          // 与群聊入口（qodexTaskServiceAdapter 的 bot 群输入）同一契约：formatBotInputClientId。
           // 所有渠道（含 Telegram / Discord / 企业微信这类没有回推目标的）都带，CLI 据此识别 Bot 输入，
           // 不对 IM 用户声明桌面才有的设计模式（Host 的 inputOrigin 对 Bot 也是 desktop）。
           clientId: formatBotInputClientId({
@@ -7262,7 +7262,7 @@ export function createBotsService(
     ]);
     const existing = topicStops.get(key);
     if (existing) return existing;
-    const stopping = resolveMaridTaskServiceForContext(context).then(async (service) => {
+    const stopping = resolveQodexTaskServiceForContext(context).then(async (service) => {
       if (!service.stopBotTopicExecution) throw new Error("Topic stop is unavailable");
       await service.stopBotTopicExecution({
         taskId,
@@ -7332,7 +7332,7 @@ export function createBotsService(
       );
     }
     if (context?.activeTaskId) {
-      const service = await resolveMaridTaskServiceForContext(context);
+      const service = await resolveQodexTaskServiceForContext(context);
       if (!service.invalidateBotTopicInputs)
         throw new Error("Topic preparation cancellation is unavailable");
       await service.invalidateBotTopicInputs({
@@ -7436,7 +7436,7 @@ export function createBotsService(
         readRunningRun: async () => {
           const context = await current();
           if (!context?.activeTaskId) return undefined;
-          const service = await resolveMaridTaskServiceForContext(context);
+          const service = await resolveQodexTaskServiceForContext(context);
           if (!service.readBotTopicExecution)
             throw new Error("Topic runtime control is unavailable");
           const execution = await service.readBotTopicExecution({
@@ -7707,7 +7707,7 @@ export function createBotsService(
     }
     let deletedTaskId: string | undefined;
     if (auth.context.mode === "task" && auth.context.activeTaskId) {
-      const taskService = await resolveMaridTaskServiceForContext(auth.context);
+      const taskService = await resolveQodexTaskServiceForContext(auth.context);
       const deletedTaskIds = await taskService.listDeletedTaskIds({
         workspacePath: auth.context.workspacePath,
         workspaceIdentity: auth.context.workspaceIdentity,
@@ -7739,7 +7739,7 @@ export function createBotsService(
       preparedMessage = topicBatch
         ? {
             content: message.text,
-            maridAttachments: topicBatch.flatMap((entry) => entry.prepared.maridAttachments),
+            qodexAttachments: topicBatch.flatMap((entry) => entry.prepared.qodexAttachments),
           }
         : await prepareBotMessageContent(auth.bot, message, auth.locale);
       const historyMaterial = history.topicContext;
@@ -7753,7 +7753,7 @@ export function createBotsService(
           ),
           auth.context.group.topicTitle || auth.context.group.name,
         );
-        if (attachment) preparedMessage.maridAttachments.push(attachment);
+        if (attachment) preparedMessage.qodexAttachments.push(attachment);
       }
     } catch (error) {
       return [
@@ -7791,8 +7791,8 @@ export function createBotsService(
             : {}),
         },
       };
-      const maridTaskService = await resolveMaridTaskServiceForContext(auth.context);
-      const task = await maridTaskService.createTask({
+      const qodexTaskService = await resolveQodexTaskServiceForContext(auth.context);
+      const task = await qodexTaskService.createTask({
         workspacePath: auth.context.workspacePath,
         workspaceIdentity: auth.context.workspaceIdentity,
         projectId: auth.context.projectId ?? null,
@@ -7813,12 +7813,12 @@ export function createBotsService(
               ? [auth.context.group.topicTitle || auth.context.group.threadId]
               : []),
           ].join(" · ")
-        : deriveTaskTitle(preparedMessage.content, preparedMessage.maridAttachments);
+        : deriveTaskTitle(preparedMessage.content, preparedMessage.qodexAttachments);
       const broadcastTask = taskTitle ? { ...task, title: taskTitle } : task;
       const traceId = createInputTraceId(
         message,
         task.taskId,
-        preparedMessage.maridAttachments.length > 0,
+        preparedMessage.qodexAttachments.length > 0,
       );
       try {
         await applyDraftConfigOptions(
@@ -7829,7 +7829,7 @@ export function createBotsService(
       } catch (error) {
         // Bugfix: 初始配置失败时旧流程已把 context 切到 task，留下无法继续的空任务。
         // 在持久化 Bot task 状态前完成配置，并删除临时 task，让用户修正配置后可以直接重试。
-        await maridTaskService
+        await qodexTaskService
           .deleteTask({
             taskId: task.taskId,
             workspacePath: auth.context.workspacePath,
@@ -7884,8 +7884,8 @@ export function createBotsService(
         prompt: {
           content: preparedMessage.content,
           attachments:
-            preparedMessage.maridAttachments.length > 0
-              ? preparedMessage.maridAttachments
+            preparedMessage.qodexAttachments.length > 0
+              ? preparedMessage.qodexAttachments
               : undefined,
           messageId: `bot-${traceId}`,
           sentAt: Date.now(),
@@ -7898,7 +7898,7 @@ export function createBotsService(
         task.taskId,
         traceId,
         preparedMessage.content,
-        preparedMessage.maridAttachments,
+        preparedMessage.qodexAttachments,
         resolveAutomationBotDeliveryTarget(message.actor),
         submissionDraftOptions.modelSelection,
       );
@@ -7915,15 +7915,15 @@ export function createBotsService(
         topicBatch,
         isCurrent,
       );
-    const maridTaskService = await resolveMaridTaskServiceForContext(auth.context);
-    await maridTaskService.resumeTask({
+    const qodexTaskService = await resolveQodexTaskServiceForContext(auth.context);
+    await qodexTaskService.resumeTask({
       taskId: auth.context.activeTaskId,
       workspacePath: auth.context.workspacePath,
       workspaceIdentity: auth.context.workspaceIdentity,
     });
     // Bot 只是同一 Session 的输入端。菜单可能过滤无效值，不能拿它反推原选择，
     // 更不能重新套用 Bot 创建默认值。解析只确定本次输入，不在此改写 Session。
-    const originalSelection = await maridTaskService.getTaskModelSelection({
+    const originalSelection = await qodexTaskService.getTaskModelSelection({
       taskId: auth.context.activeTaskId,
     });
     const selectionView = originalSelection
@@ -7939,14 +7939,14 @@ export function createBotsService(
     const traceId = createInputTraceId(
       message,
       auth.context.activeTaskId,
-      preparedMessage.maridAttachments.length > 0,
+      preparedMessage.qodexAttachments.length > 0,
     );
     await broadcastTaskListChange(auth.context, auth.context.activeTaskId, "prompt_sent", {
       prompt: {
         content: preparedMessage.content,
         attachments:
-          preparedMessage.maridAttachments.length > 0
-            ? preparedMessage.maridAttachments
+          preparedMessage.qodexAttachments.length > 0
+            ? preparedMessage.qodexAttachments
             : undefined,
         messageId: `bot-${traceId}`,
         sentAt: Date.now(),
@@ -7959,7 +7959,7 @@ export function createBotsService(
       auth.context.activeTaskId,
       traceId,
       preparedMessage.content,
-      preparedMessage.maridAttachments,
+      preparedMessage.qodexAttachments,
       resolveAutomationBotDeliveryTarget(message.actor),
       effectiveSelection,
       originalSelection ?? undefined,
@@ -8043,7 +8043,7 @@ export function createBotsService(
     if (context.group) {
       if (context.workspaceIdentity && !(await isRemoteWorkspaceConnected(context)))
         return "groupTaskDisconnected";
-      const taskService = await resolveMaridTaskServiceForContext(context);
+      const taskService = await resolveQodexTaskServiceForContext(context);
       if (!taskService.getBotGroupTaskBlockReason)
         throw new Error("Runtime cannot verify group queue state");
       const reason = await taskService.getBotGroupTaskBlockReason({
@@ -8083,8 +8083,8 @@ export function createBotsService(
       // 断连时把内存 running 状态视为不可确认，交给显式 /reconnect 后再恢复查询。
       return null;
     }
-    const maridTaskService = await resolveMaridTaskServiceForContext(context);
-    const activeTaskSnapshot = await maridTaskService
+    const qodexTaskService = await resolveQodexTaskServiceForContext(context);
+    const activeTaskSnapshot = await qodexTaskService
       .getTaskSnapshot({
         taskId: context.activeTaskId,
         workspacePath: context.workspacePath,
@@ -8096,7 +8096,7 @@ export function createBotsService(
       activeTaskSnapshot?.meta.status === "error"
     ) {
       // Bugfix: Bots 进程内 runningTasks 可能因重启/流式终态事件丢失而和持久化状态不一致。
-      // Marid Agent 历史任务的 status 为空也可能只是旧数据，不代表 UI 仍在运行；只有本进程确实发起
+      // Qodex Agent 历史任务的 status 为空也可能只是旧数据，不代表 UI 仍在运行；只有本进程确实发起
       // 且尚未观察到终态的 task 才阻止 /task、/new 等上下文切换。
       runningTasks.delete(context.activeTaskId);
       stopTyping(context.activeTaskId);
@@ -8106,7 +8106,7 @@ export function createBotsService(
   }
 
   function warnAutomationDeliveryOnce(params: {
-    target: MaridAutomationBotDeliveryTarget;
+    target: QodexAutomationBotDeliveryTarget;
     reason: string;
   }): void {
     const key = `${params.target.provider}:${params.target.botId}:${params.reason}`;
@@ -8508,7 +8508,7 @@ export function createBotsService(
         state.bots[
           getBotConversationKey({ botId: params.botId, chatId: params.chatId, chatType: "group" })
         ];
-      const service = await resolveMaridTaskServiceForContext({ ...context, ...workspace });
+      const service = await resolveQodexTaskServiceForContext({ ...context, ...workspace });
       const summaries =
         (await service.readBotTopicSummaries?.({
           taskId: params.taskId,
@@ -8762,7 +8762,7 @@ export function createBotsService(
             if (!alias) continue;
             // 默认会话可能已切换工作区；迁移检查必须使用旧任务自己的完整工作区身份。
             const workspace = group.taskWorkspaces?.[alias.taskId] ?? candidate;
-            const service = await resolveMaridTaskServiceForContext({ ...candidate, ...workspace });
+            const service = await resolveQodexTaskServiceForContext({ ...candidate, ...workspace });
             if (
               !service.getBotGroupTaskBlockReason ||
               (await service.getBotGroupTaskBlockReason({
@@ -9038,7 +9038,7 @@ export function createBotsService(
             }
             const active = await requireActiveTask(message, auth);
             if (!active.ok) return active.reply;
-            const activeProvider = normalizeAgentProviderToMaridAgent(active.task.provider);
+            const activeProvider = normalizeAgentProviderToQodexAgent(active.task.provider);
             if (!activeProvider) {
               return [createOutbound(message.actor, msg(auth.locale, "modelProviderMissing"))];
             }
@@ -9127,7 +9127,7 @@ export function createBotsService(
             }
             const active = await requireActiveTask(message, auth);
             if (!active.ok) return active.reply;
-            const activeProvider = normalizeAgentProviderToMaridAgent(active.task.provider);
+            const activeProvider = normalizeAgentProviderToQodexAgent(active.task.provider);
             if (!activeProvider) {
               return [createOutbound(message.actor, msg(auth.locale, "modelProviderMissing"))];
             }
@@ -9212,7 +9212,7 @@ export function createBotsService(
             }
             const active = await requireActiveTask(message, auth);
             if (!active.ok) return active.reply;
-            const activeProvider = normalizeAgentProviderToMaridAgent(active.task.provider);
+            const activeProvider = normalizeAgentProviderToQodexAgent(active.task.provider);
             if (!activeProvider) {
               return [createOutbound(message.actor, msg(auth.locale, "modelProviderMissing"))];
             }
@@ -9246,8 +9246,8 @@ export function createBotsService(
             if (!targetModelSelection)
               return [createOutbound(message.actor, msg(auth.locale, "modelMissing"))];
             const traceId = generateTraceId(active.taskId);
-            const maridTaskService = await resolveMaridTaskServiceForContext(active.task);
-            const configOptions = await maridTaskService.setModel({
+            const qodexTaskService = await resolveQodexTaskServiceForContext(active.task);
+            const configOptions = await qodexTaskService.setModel({
               taskId: active.taskId,
               traceId,
               modelSelection: targetModelSelection,
@@ -9328,7 +9328,7 @@ export function createBotsService(
               commandName === "mode" && active.task.provider
                 ? await listProviderConfigOptionsForActiveTask(
                     active.task,
-                    normalizeAgentProviderToMaridAgent(active.task.provider),
+                    normalizeAgentProviderToQodexAgent(active.task.provider),
                   )
                 : active.configOptions;
             const currentValue =
@@ -9339,16 +9339,16 @@ export function createBotsService(
               commandName === "mode"
                 ? readConfigSelectLabelForValue(optionSource, commandName, currentValue, {
                     locale: auth.locale,
-                    provider: normalizeAgentProviderToMaridAgent(active.task.provider),
+                    provider: normalizeAgentProviderToQodexAgent(active.task.provider),
                   })
                 : readConfigSelectCurrentLabel(active.configOptions, commandName, {
                     locale: auth.locale,
-                    provider: normalizeAgentProviderToMaridAgent(active.task.provider),
+                    provider: normalizeAgentProviderToQodexAgent(active.task.provider),
                   });
             const selectOption = findSelectConfigOption(optionSource, commandName);
             const options = listConfigSelectOptions(optionSource, commandName, {
               locale: auth.locale,
-              provider: normalizeAgentProviderToMaridAgent(active.task.provider),
+              provider: normalizeAgentProviderToQodexAgent(active.task.provider),
             });
             if (options.length === 0) {
               return [
@@ -9487,8 +9487,8 @@ export function createBotsService(
               ];
             }
             const traceId = generateTraceId(active.taskId);
-            const maridTaskService = await resolveMaridTaskServiceForContext(auth.context);
-            const configOptions = await maridTaskService.setConfigOption({
+            const qodexTaskService = await resolveQodexTaskServiceForContext(auth.context);
+            const configOptions = await qodexTaskService.setConfigOption({
               taskId: active.taskId,
               traceId,
               configId: selectOption.id,
@@ -9599,7 +9599,7 @@ export function createBotsService(
               await repo.writeState(state);
             });
             if (auth.context.activeTaskId) {
-              const service = await resolveMaridTaskServiceForContext(auth.context);
+              const service = await resolveQodexTaskServiceForContext(auth.context);
               const target = {
                 taskId: auth.context.activeTaskId,
                 workspacePath: auth.context.workspacePath,
@@ -9627,17 +9627,17 @@ export function createBotsService(
               return [createOutbound(message.actor, msg(auth.locale, "noActiveTask"))];
             }
             try {
-              const maridTaskService = await resolveMaridTaskServiceForContext(auth.context);
+              const qodexTaskService = await resolveQodexTaskServiceForContext(auth.context);
               if (auth.context.group?.threadId) {
-                if (!maridTaskService.readBotTopicExecution)
+                if (!qodexTaskService.readBotTopicExecution)
                   throw new Error("Topic runtime control is unavailable");
-                const executionId = await maridTaskService.readBotTopicExecution({
+                const executionId = await qodexTaskService.readBotTopicExecution({
                   taskId: auth.context.activeTaskId,
                   workspacePath: auth.context.workspacePath,
                   workspaceIdentity: auth.context.workspaceIdentity,
                 });
                 if (executionId) await stopTopicRun(auth.context, executionId.executionId);
-              } else await maridTaskService.stopGeneration({ taskId: auth.context.activeTaskId });
+              } else await qodexTaskService.stopGeneration({ taskId: auth.context.activeTaskId });
             } catch (error) {
               const messageText = error instanceof Error ? error.message : String(error);
               return [
@@ -9672,8 +9672,8 @@ export function createBotsService(
               return [createOutbound(message.actor, msg(auth.locale, "permissionExpired"))];
             if (option.handledAt)
               return [createOutbound(message.actor, msg(auth.locale, "permissionHandled"))];
-            const maridTaskService = await resolveMaridTaskServiceForContext(auth.context);
-            const submitted = await maridTaskService.respondPermission({
+            const qodexTaskService = await resolveQodexTaskServiceForContext(auth.context);
+            const submitted = await qodexTaskService.respondPermission({
               taskId: auth.context.activeTaskId,
               requestId: option.requestId,
               optionId: option.optionId,
@@ -9752,8 +9752,8 @@ export function createBotsService(
             if (!pendingOption) {
               return [createOutbound(message.actor, msg(auth.locale, "permissionHandled"))];
             }
-            const maridTaskService = await resolveMaridTaskServiceForContext(auth.context);
-            const submitted = await maridTaskService.respondPermission({
+            const qodexTaskService = await resolveQodexTaskServiceForContext(auth.context);
+            const submitted = await qodexTaskService.respondPermission({
               taskId: auth.context.activeTaskId,
               requestId: command.requestId,
               optionId: command.optionId,
@@ -9780,8 +9780,8 @@ export function createBotsService(
             const pendingOption = auth.context.pendingPermissionOptions?.find(
               (option) => option.requestId === command.requestId && option.command === "deny",
             );
-            const maridTaskService = await resolveMaridTaskServiceForContext(auth.context);
-            const submitted = await maridTaskService.respondPermission({
+            const qodexTaskService = await resolveQodexTaskServiceForContext(auth.context);
+            const submitted = await qodexTaskService.respondPermission({
               taskId: auth.context.activeTaskId,
               requestId: command.requestId,
               optionId: "deny",
@@ -9868,7 +9868,7 @@ export function createBotsService(
           pendingTopicKeys.map(async (key) => {
             const context = states[key];
             if (!context?.activeTaskId) return;
-            const taskService = await resolveMaridTaskServiceForContext(context);
+            const taskService = await resolveQodexTaskServiceForContext(context);
             await taskService.invalidateBotTopicInputs?.({
               taskId: context.activeTaskId,
               workspacePath: context.workspacePath,

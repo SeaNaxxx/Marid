@@ -89,7 +89,7 @@ import {
   isOffPeakTeamPlanSpec,
 } from "./test/e2e/helpers/coding-plan-mock-env.js";
 import {
-  CN_UNLINKED_E2E_MARID_JWT,
+  CN_UNLINKED_E2E_QODEX_JWT,
   buildCnUnlinkedProfileResponse,
 } from "./test/e2e/helpers/start-plan-cn-unlinked-fixture.js";
 import {
@@ -143,7 +143,7 @@ import {
   BUILTIN_MODEL_PROVIDER_IDS,
   BIGMODEL_PROVIDER_ID,
   ZAI_PROVIDER_ID,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   seedPersonalProviderConfig,
   seedPersonalDefaultModelSelection,
@@ -241,18 +241,18 @@ const E2E_LOCAL_ENV_FILES = [
 // 代理、证书和缓存配置。所有读取 process.env 的 runner 初始化都必须位于该调用之后。
 loadE2ELocalEnv();
 const BUILD_DESKTOP_AGENT_SCRIPT = resolve(REPO_ROOT, "scripts/build-desktop-agent-cli.mjs");
-const MARID_CLI_ENTRYPOINT = resolve(REPO_ROOT, "apps/marid-cli/packages/cli/dist/marid.cjs");
+const QODEX_CLI_ENTRYPOINT = resolve(REPO_ROOT, "apps/qodex-cli/packages/cli/dist/qodex.cjs");
 const E2E_HOME_DIR = resolve(
-  process.env.MARID_E2E_HOME_DIR?.trim() ||
+  process.env.QODEX_E2E_HOME_DIR?.trim() ||
     // 修复原因：多个 WDIO 本地并发时会互相清理默认 .e2e-home，导致窗口白屏、
     // DevTools 断链或登录页等待失败；默认路径保持兼容，调试时允许显式隔离。
     resolve(DESKTOP_DIR, ".e2e-home"),
 );
-const E2E_PACKAGED_APP_BINARY_PATH = process.env.MARID_E2E_PACKAGED_APP_PATH?.trim()
-  ? resolve(process.env.MARID_E2E_PACKAGED_APP_PATH)
+const E2E_PACKAGED_APP_BINARY_PATH = process.env.QODEX_E2E_PACKAGED_APP_PATH?.trim()
+  ? resolve(process.env.QODEX_E2E_PACKAGED_APP_PATH)
   : null;
-// 目录隔离已回滚：所有 Desktop E2E 继续使用历史 ~/.marid 布局。
-const E2E_STORAGE_ROOT = resolve(E2E_HOME_DIR, ".marid");
+// 目录隔离已回滚：所有 Desktop E2E 继续使用历史 ~/.qodex 布局。
+const E2E_STORAGE_ROOT = resolve(E2E_HOME_DIR, ".qodex");
 const E2E_APP_CONFIG_DIR = resolve(E2E_STORAGE_ROOT, "v2");
 const E2E_APP_SETTINGS_FILE = resolve(E2E_APP_CONFIG_DIR, "setting.json");
 const E2E_APP_CREDENTIALS_FILE = resolve(E2E_APP_CONFIG_DIR, "credentials.json");
@@ -261,13 +261,13 @@ const E2E_APP_PROVIDER_CONFIG_FILE = resolve(E2E_APP_CONFIG_DIR, "provider_confi
 // 若让 Host 依据 app.getAppPath() 推导 bundled config，重启后会把不存在的路径当作
 // bundled release，模型配置初始化直接失败。E2E 明确注入同一份只读基线；off-peak
 // spec 会在 startOffPeakE2EMock 中覆盖为带 mock endpoint 的 case-local 文件。
-const E2E_DEFAULT_MARID_BUILTIN_PROVIDER_CONFIG_FILE = resolve(
+const E2E_DEFAULT_QODEX_BUILTIN_PROVIDER_CONFIG_FILE = resolve(
   REPO_ROOT,
-  "config/provider/marid-builtin.json",
+  "config/provider/qodex-builtin.json",
 );
-const INITIAL_MARID_BUILTIN_PROVIDER_CONFIG_FILE =
-  process.env.MARID_BUILTIN_PROVIDER_CONFIG_FILE?.trim();
-const E2E_OFFPEAK_MARID_BUILTIN_PROVIDER_CONFIG_FILE = resolve(
+const INITIAL_QODEX_BUILTIN_PROVIDER_CONFIG_FILE =
+  process.env.QODEX_BUILTIN_PROVIDER_CONFIG_FILE?.trim();
+const E2E_OFFPEAK_QODEX_BUILTIN_PROVIDER_CONFIG_FILE = resolve(
   REPO_ROOT,
   ".cache/desktop-e2e-provider-config/official-offpeak-mock.json",
 );
@@ -277,13 +277,13 @@ const E2E_CLI_CONFIG_FILE = resolve(E2E_CLI_CONFIG_DIR, "config.json");
 const E2E_CLI_AGENTS_DIR = resolve(E2E_CLI_CONFIG_DIR, "agents");
 const E2E_USER_AGENTS_DIR = resolve(E2E_STORAGE_ROOT, "agents");
 const E2E_NETWORK_CAPTURE_DIR = resolve(
-  process.env.MARID_E2E_NETWORK_CAPTURE_DIR?.trim() ||
+  process.env.QODEX_E2E_NETWORK_CAPTURE_DIR?.trim() ||
     // 修复原因：beforeSession 会清空 .e2e-home；抓包代理的 CA 必须放在
     // reset 范围之外，否则 agent 读 httpProxyCaCertPath 时会遇到 ENOENT。
     resolve(DESKTOP_DIR, ".e2e-network-capture"),
 );
 const E2E_CERT_CACHE_ROOT =
-  process.env.MARID_E2E_CERT_CACHE_DIR?.trim() || resolve(REPO_ROOT, ".cache");
+  process.env.QODEX_E2E_CERT_CACHE_DIR?.trim() || resolve(REPO_ROOT, ".cache");
 const E2E_NETWORK_CAPTURE_CA_DIR = resolve(E2E_CERT_CACHE_ROOT, "desktop-e2e-network-capture-ca");
 const E2E_CODING_PLAN_DATA_PLANE_CA_DIR = resolve(
   E2E_CERT_CACHE_ROOT,
@@ -316,7 +316,7 @@ const LEGACY_UPSTREAM_REPLAY_FIXTURE_PATHS = [
 const UPSTREAM_CAPTURE_RESPONSE_PREVIEW_BYTES = 8 * 1024 * 1024;
 const UPSTREAM_CAPTURE_RESPONSE_CHUNK_TIMELINE_BYTES = 16 * 1024 * 1024;
 const E2E_ELECTRON_INSTALL_TIMEOUT_MS =
-  readPositiveIntegerEnv("MARID_E2E_ELECTRON_INSTALL_TIMEOUT_MS") ??
+  readPositiveIntegerEnv("QODEX_E2E_ELECTRON_INSTALL_TIMEOUT_MS") ??
   DEFAULT_E2E_ELECTRON_INSTALL_TIMEOUT_MS;
 const ELECTRON_APP_BINARY_PATH =
   E2E_PACKAGED_APP_BINARY_PATH ??
@@ -423,9 +423,9 @@ const codingPlanDefaultDataPlaneResponse = createCodingPlanDataPlaneResponse(nul
 const E2E_AUTH_PROVIDER_ID = "zai";
 const E2E_AUTH_TOKEN = "e2e-oauth-token";
 const E2E_USER_PROFILE = {
-  displayName: "Marid E2E",
-  id: "marid-e2e-user",
-  username: "marid-e2e-user",
+  displayName: "Qodex E2E",
+  id: "qodex-e2e-user",
+  username: "qodex-e2e-user",
 };
 const GLM_HIGHSPEED_E2E_PROVIDER_ID = "e2e-glmhighspeed";
 const GLM_HIGHSPEED_E2E_MODEL = "glm-5.1-highspeed";
@@ -485,10 +485,10 @@ const E2E_PROVIDER_PRESETS = {
 } as const;
 type E2EProviderPresetName = keyof typeof E2E_PROVIDER_PRESETS;
 const upstreamE2EContextWindowOverride = readPositiveIntegerEnv(
-  "MARID_E2E_UPSTREAM_CONTEXT_WINDOW",
+  "QODEX_E2E_UPSTREAM_CONTEXT_WINDOW",
 );
 const upstreamE2EMaxOutputTokensOverride = readPositiveIntegerEnv(
-  "MARID_E2E_UPSTREAM_MAX_OUTPUT_TOKENS",
+  "QODEX_E2E_UPSTREAM_MAX_OUTPUT_TOKENS",
 );
 const DESKTOP_PACKAGE_JSON = JSON.parse(
   readFileSync(resolve(DESKTOP_DIR, "package.json"), "utf-8"),
@@ -497,22 +497,22 @@ const ELECTRON_VERSION = DESKTOP_PACKAGE_JSON.devDependencies?.electron ?? "";
 let e2eChromedriverServer: Awaited<ReturnType<typeof startE2EChromedriverServer>> | undefined;
 const PNPM_COMMAND = "pnpm";
 const E2E_ELECTRON_APP_QUIT_TIMEOUT_MS =
-  readPositiveIntegerEnv("MARID_E2E_ELECTRON_APP_QUIT_TIMEOUT_MS") ?? 1000;
+  readPositiveIntegerEnv("QODEX_E2E_ELECTRON_APP_QUIT_TIMEOUT_MS") ?? 1000;
 const E2E_ELECTRON_FORCE_KILL_GRACE_MS =
-  readPositiveIntegerEnv("MARID_E2E_ELECTRON_FORCE_KILL_GRACE_MS") ?? 3000;
+  readPositiveIntegerEnv("QODEX_E2E_ELECTRON_FORCE_KILL_GRACE_MS") ?? 3000;
 const E2E_RENDERER_BRIDGE_PREFLIGHT_TIMEOUT_MS =
-  readPositiveIntegerEnv("MARID_E2E_RENDERER_BRIDGE_PREFLIGHT_TIMEOUT_MS") ?? 15000;
+  readPositiveIntegerEnv("QODEX_E2E_RENDERER_BRIDGE_PREFLIGHT_TIMEOUT_MS") ?? 15000;
 const E2E_RUNNER_FORCE_EXIT_TIMEOUT_MS =
-  readPositiveIntegerEnv("MARID_E2E_RUNNER_FORCE_EXIT_TIMEOUT_MS") ?? 5000;
+  readPositiveIntegerEnv("QODEX_E2E_RUNNER_FORCE_EXIT_TIMEOUT_MS") ?? 5000;
 const E2E_RUNNER_FINALIZATION_GUARD_TIMEOUT_MS =
-  readPositiveIntegerEnv("MARID_E2E_RUNNER_FINALIZATION_GUARD_TIMEOUT_MS") ?? 30000;
+  readPositiveIntegerEnv("QODEX_E2E_RUNNER_FINALIZATION_GUARD_TIMEOUT_MS") ?? 30000;
 const E2E_FAILURE_ARTIFACT_COLLECTION_TIMEOUT_MS = Math.min(
-  readPositiveIntegerEnv("MARID_E2E_FAILURE_ARTIFACT_COLLECTION_TIMEOUT_MS") ?? 60_000,
+  readPositiveIntegerEnv("QODEX_E2E_FAILURE_ARTIFACT_COLLECTION_TIMEOUT_MS") ?? 60_000,
   5 * 60_000,
 );
 const E2E_WEBDRIVER_REQUEST_LIMITS = resolveE2EWebDriverRequestLimits({
-  retryCount: process.env.MARID_E2E_WEBDRIVER_REQUEST_RETRY_COUNT,
-  timeoutMs: process.env.MARID_E2E_WEBDRIVER_REQUEST_TIMEOUT_MS,
+  retryCount: process.env.QODEX_E2E_WEBDRIVER_REQUEST_RETRY_COUNT,
+  timeoutMs: process.env.QODEX_E2E_WEBDRIVER_REQUEST_TIMEOUT_MS,
 });
 const E2E_HOME_REMOVE_RETRY_DELAYS_MS = [200, 500, 1000, 2000, 3000, 5000, 8000];
 const HOST_HOME_DIR = process.env.HOME?.trim();
@@ -547,10 +547,10 @@ const E2E_RENDERER_BRIDGE_REQUIRED_STATE_METHODS = [
 
 const requestedE2ESpecs = readRequestedE2ESpecs();
 const requestedE2EExcludeSpecs = readRequestedE2EExcludeSpecs();
-const configuredModelRetryMaxRetries = process.env.MARID_MODEL_RETRY_MAX_RETRIES;
+const configuredModelRetryMaxRetries = process.env.QODEX_MODEL_RETRY_MAX_RETRIES;
 const configuredE2EWorkerNetworkEnv = {
-  httpProxy: process.env.MARID_HTTP_PROXY,
-  noProxy: process.env.MARID_NO_PROXY,
+  httpProxy: process.env.QODEX_HTTP_PROXY,
+  noProxy: process.env.QODEX_NO_PROXY,
 };
 const upstreamProviderSpecRequested = process.argv
   .concat(requestedE2ESpecs)
@@ -559,12 +559,12 @@ const manualReviewSpecRequested = process.argv
   .concat(requestedE2ESpecs)
   .some((arg) => arg.replaceAll("\\", "/").includes("/manual-review/"));
 const manualReviewE2E =
-  process.env.MARID_E2E_MANUAL_REVIEW?.trim() === "1" || manualReviewSpecRequested;
+  process.env.QODEX_E2E_MANUAL_REVIEW?.trim() === "1" || manualReviewSpecRequested;
 if (manualReviewE2E) {
-  process.env.MARID_E2E_MANUAL_REVIEW = "1";
+  process.env.QODEX_E2E_MANUAL_REVIEW = "1";
 }
-const manualReviewHoldMs = readPositiveIntegerEnv("MARID_E2E_MANUAL_REVIEW_HOLD_MS") ?? 0;
-const REQUESTED_UPSTREAM_HTTP_MODE_ENV = "MARID_E2E_REQUESTED_UPSTREAM_HTTP_MODE";
+const manualReviewHoldMs = readPositiveIntegerEnv("QODEX_E2E_MANUAL_REVIEW_HOLD_MS") ?? 0;
+const REQUESTED_UPSTREAM_HTTP_MODE_ENV = "QODEX_E2E_REQUESTED_UPSTREAM_HTTP_MODE";
 const requestedUpstreamE2EHttpMode =
   process.env[REQUESTED_UPSTREAM_HTTP_MODE_ENV] !== undefined
     ? process.env[REQUESTED_UPSTREAM_HTTP_MODE_ENV]?.trim() || undefined
@@ -574,7 +574,7 @@ const requestedAskUserQuestionClockScale =
 let upstreamE2EHttpMode = readUpstreamE2EHttpMode();
 const e2eProviderPresetName = readE2EProviderPresetName();
 const e2eProviderPreset = E2E_PROVIDER_PRESETS[e2eProviderPresetName];
-const containerE2E = process.env.MARID_E2E_CONTAINER === "1";
+const containerE2E = process.env.QODEX_E2E_CONTAINER === "1";
 const configuredE2ESpecs =
   requestedE2ESpecs.length > 0
     ? requestedE2ESpecs
@@ -599,9 +599,9 @@ const e2eRunnerFinalizationGuard = createE2ERunnerFinalizationGuard({
   onTimeout: forceFinalizeE2ERunnerFromGuard,
   timeoutMs: E2E_RUNNER_FINALIZATION_GUARD_TIMEOUT_MS,
 });
-const E2E_RUN_ID = process.env.MARID_E2E_RUN_ID?.trim();
+const E2E_RUN_ID = process.env.QODEX_E2E_RUN_ID?.trim();
 if (!E2E_RUN_ID) {
-  throw new Error("[e2e] MARID_E2E_RUN_ID missing after reporter initialization");
+  throw new Error("[e2e] QODEX_E2E_RUN_ID missing after reporter initialization");
 }
 const E2E_RUN_CACHE_DIR = resolve(DESKTOP_DIR, ".e2e-cache", E2E_RUN_ID);
 const E2E_APP_OUTPUT_DIR = resolve(E2E_RUN_CACHE_DIR, "app");
@@ -641,24 +641,24 @@ const containerChromeArgs = [
 
 process.env.HOME = E2E_HOME_DIR;
 process.env.USERPROFILE = E2E_HOME_DIR;
-process.env.MARID_E2E_HOME_DIR = E2E_HOME_DIR;
-process.env.MARID_E2E_RUN_ID = E2E_RUN_ID;
-process.env.MARID_DATA_BASE_DIR = E2E_HOME_DIR;
-process.env.MARID_DESKTOP_APPLICATION_NAME = "Marid E2E";
-process.env.MARID_DESKTOP_HOME_DIR = E2E_HOME_DIR;
-process.env.MARID_DESKTOP_USE_ELECTRON_DEFAULT_USER_DATA = "1";
-// 修复原因：从 Marid 客户端拉起的 shell 里带有应用自身环境（MARID_ENV=production、
-// MARID_BASE_URL=https://marid.z.ai）。它们会被 onPrepare 的 agent 构建读走并固化进产物，
+process.env.QODEX_E2E_HOME_DIR = E2E_HOME_DIR;
+process.env.QODEX_E2E_RUN_ID = E2E_RUN_ID;
+process.env.QODEX_DATA_BASE_DIR = E2E_HOME_DIR;
+process.env.QODEX_DESKTOP_APPLICATION_NAME = "Qodex E2E";
+process.env.QODEX_DESKTOP_HOME_DIR = E2E_HOME_DIR;
+process.env.QODEX_DESKTOP_USE_ELECTRON_DEFAULT_USER_DATA = "1";
+// 修复原因：从 Qodex 客户端拉起的 shell 里带有应用自身环境（QODEX_ENV=production、
+// QODEX_BASE_URL=https://qodex.z.ai）。它们会被 onPrepare 的 agent 构建读走并固化进产物，
 // 让 E2E 打到生产域、忽略 settings 里的 endpoint，fixture mock server 收不到请求。
 // 桌面包的归一在 ensure-e2e-desktop-build 内完成，这里保证 WDIO 侧构建链路一致。
-process.env.MARID_ENV = "test";
-delete process.env.MARID_BASE_URL;
-delete process.env.MARID_RUNTIME_ENV;
-// Bugfix: renderer E2E store bridge 只能由 WDIO 进程显式打开，避免 MARID_ENV=test 的产品测试环境暴露全局可变 store。
-process.env.VITE_MARID_E2E_STORE_BRIDGE = "1";
+process.env.QODEX_ENV = "test";
+delete process.env.QODEX_BASE_URL;
+delete process.env.QODEX_RUNTIME_ENV;
+// Bugfix: renderer E2E store bridge 只能由 WDIO 进程显式打开，避免 QODEX_ENV=test 的产品测试环境暴露全局可变 store。
+process.env.VITE_QODEX_E2E_STORE_BRIDGE = "1";
 // Bugfix: e2e session 由 Chromedriver 管理调试端口；禁用主进程开发态固定的 9229，
-// 避免和本机已打开的 Marid Dev 冲突后出现空白窗口并卡在 session 创建阶段。
-process.env.MARID_DISABLE_FIXED_REMOTE_DEBUGGING_PORT = "1";
+// 避免和本机已打开的 Qodex Dev 冲突后出现空白窗口并卡在 session 创建阶段。
+process.env.QODEX_DISABLE_FIXED_REMOTE_DEBUGGING_PORT = "1";
 
 let upstreamCaptureProxy: E2ENetworkCaptureProxy | null = null;
 let upstreamReplayServer: UpstreamReplayServer | null = null;
@@ -745,7 +745,7 @@ function loadE2ELocalEnv() {
 
 function readRequestedE2ESpecs() {
   const specs = new Set<string>();
-  appendRequestedE2ESpecs(specs, process.env.MARID_E2E_SPEC);
+  appendRequestedE2ESpecs(specs, process.env.QODEX_E2E_SPEC);
 
   for (let index = 0; index < process.argv.length; index += 1) {
     const arg = process.argv[index];
@@ -767,7 +767,7 @@ function readRequestedE2ESpecs() {
 
 function readRequestedE2EExcludeSpecs() {
   const specs = new Set<string>();
-  appendRequestedE2ESpecs(specs, process.env.MARID_E2E_EXCLUDE_SPEC);
+  appendRequestedE2ESpecs(specs, process.env.QODEX_E2E_EXCLUDE_SPEC);
 
   for (let index = 0; index < process.argv.length; index += 1) {
     const arg = process.argv[index];
@@ -793,7 +793,7 @@ function appendRequestedE2ESpecs(specs: Set<string>, value?: string) {
   }
 
   // 修复原因：`pnpm test:e2e -- --spec <file>` 下 WDIO 仍会先加载配置；
-  // 如果配置只读 MARID_E2E_SPEC，实际会回落到全量 spec，多个 worker 轮流重置
+  // 如果配置只读 QODEX_E2E_SPEC，实际会回落到全量 spec，多个 worker 轮流重置
   // .e2e-home 后就会把 上游 flash 选择冲掉。
   for (const spec of value.split(",")) {
     const trimmed = spec.trim();
@@ -973,21 +973,21 @@ function prepareDesktopAppBuild() {
     console.log(`[e2e] using packaged app: ${E2E_PACKAGED_APP_BINARY_PATH}`);
     return;
   }
-  // Bug 根因：Windows 上 Agent CLI 只能经过 marid-runtime-host.exe 启动，而下面的
+  // Bug 根因：Windows 上 Agent CLI 只能经过 qodex-runtime-host.exe 启动，而下面的
   // build:no-runtime-assets 不产出它，Windows CI 全部 case 报 runtime host missing /
-  // slash 目录为空。复用构建（MARID_E2E_SKIP_BUILD）也必须检查，产物不受 out stamp 保护。
+  // slash 目录为空。复用构建（QODEX_E2E_SKIP_BUILD）也必须检查，产物不受 out stamp 保护。
   ensureWindowsRuntimeHost();
   // 修复原因：WDIO 配置会先被 esbuild 解析，CI 可执行字符串必须保持 ASCII 引号。
   // shard 的 mock 端口在父构建后才分配；有网页 mock 时必须按当前端口重建编译期 origin。
   if (shouldReuseDesktopE2EBuild(process.env)) {
-    console.log("[e2e] MARID_E2E_SKIP_BUILD=1, skipping onPrepare build");
-    assertDesktopE2EBuildReady("MARID_E2E_SKIP_BUILD=1");
+    console.log("[e2e] QODEX_E2E_SKIP_BUILD=1, skipping onPrepare build");
+    assertDesktopE2EBuildReady("QODEX_E2E_SKIP_BUILD=1");
     return;
   }
   // Bugfix: 直接执行 `wdio run` 会绕过 package.json 的 pretest:e2e；只检查
   // out 文件是否存在又会跑到旧 renderer，表现成”已修复但 e2e 仍白屏/没动作”。
   // 因此 WDIO 入口始终先构建，确保测试使用当前源码对应的桌面产物。
-  runPnpmWorkspaceCommand(["--filter", "@marid/desktop", "build:no-runtime-assets"]);
+  runPnpmWorkspaceCommand(["--filter", "@qodex/desktop", "build:no-runtime-assets"]);
   assertDesktopE2EBuildReady("onPrepare build");
 }
 
@@ -1028,7 +1028,7 @@ function assertDesktopE2EBuildReady(context: string) {
   }
 
   if (!isRendererE2EStoreBridgeCompiled(E2E_RENDERER_ASSETS_DIR)) {
-    throw new Error(`[e2e] ${context}: renderer build is missing VITE_MARID_E2E_STORE_BRIDGE=1`);
+    throw new Error(`[e2e] ${context}: renderer build is missing VITE_QODEX_E2E_STORE_BRIDGE=1`);
   }
 }
 
@@ -1042,9 +1042,9 @@ async function stageDesktopE2EAppOutput() {
   await stageE2EAppOutput(DESKTOP_BUILD_OUTPUT_DIR, E2E_APP_OUTPUT_DIR);
   if (
     hasRequiredSshE2EEnvironment(process.env) ||
-    process.env.MARID_E2E_SSH_HOST?.trim() ||
-    process.env.MARID_E2E_SSH_A_HOST?.trim() ||
-    process.env.MARID_E2E_SSH_B_HOST?.trim()
+    process.env.QODEX_E2E_SSH_HOST?.trim() ||
+    process.env.QODEX_E2E_SSH_A_HOST?.trim() ||
+    process.env.QODEX_E2E_SSH_B_HOST?.trim()
   ) {
     // Bug 根因：CI 只有 build:remote:assets job 产出 mock-cdn/releases/<version>，且跑在通用
     // macos runner 槽位；conversation e2e 在专用 runner 上，mock-cdn 工作区持久化目录互不
@@ -1052,12 +1052,12 @@ async function stageDesktopE2EAppOutput() {
     // CI-only 失败。改为缺目录时自动跑 prepare:remote-assets（幂等），产出后仍缺失才
     // fail-closed。
     // Bug 根因：packages/desktop 的 prepare:remote-assets 已随 legacy asset pipeline 一并删除，
-    // `pnpm --filter @marid/desktop prepare:remote-assets` 会以 ERR_PNPM_RECURSIVE_RUN_NO_SCRIPT
+    // `pnpm --filter @qodex/desktop prepare:remote-assets` 会以 ERR_PNPM_RECURSIVE_RUN_NO_SCRIPT
     // 失败并让所有 SSH E2E 在 onPrepare 阶段 fatal；必须调用根 package.json 的
-    // prepare:remote-assets（→ @marid/server-cli stage:remote-assets）。runPnpmWorkspaceCommand
+    // prepare:remote-assets（→ @qodex/server-cli stage:remote-assets）。runPnpmWorkspaceCommand
     // 的 cwd 固定为 REPO_ROOT，直接传脚本名即可命中根脚本。
     // 本机 Docker runner 声明「只需 Linux」时，helper 改读 descriptor 判断两个 Linux 目标，
-    // 并只调用 `MARID_ENV=test pnpm prepare:remote-assets:linux`；未声明时行为不变。
+    // 并只调用 `QODEX_ENV=test pnpm prepare:remote-assets:linux`；未声明时行为不变。
     await ensureSshRemoteReleaseAssets({
       releaseDir: E2E_REMOTE_RELEASE_SOURCE_DIR,
       scope: resolveSshRemoteReleaseScope(process.env),
@@ -1078,7 +1078,7 @@ async function stageDesktopE2EAppOutput() {
     throw new Error(`[e2e] staged desktop main entrypoint missing: ${E2E_APP_ENTRY_POINT}`);
   }
   if (!isRendererE2EStoreBridgeCompiled(E2E_APP_RENDERER_ASSETS_DIR)) {
-    throw new Error("[e2e] staged renderer is missing VITE_MARID_E2E_STORE_BRIDGE=1");
+    throw new Error("[e2e] staged renderer is missing VITE_QODEX_E2E_STORE_BRIDGE=1");
   }
 }
 
@@ -1093,7 +1093,7 @@ function isRendererE2EStoreBridgeCompiled(rendererAssetsDir: string) {
     }
 
     const source = readFileSync(resolve(rendererAssetsDir, entry.name), "utf-8");
-    return /["'\x60]?VITE_MARID_E2E_STORE_BRIDGE["'\x60]?\s*:\s*["'\x60]1["'\x60]/u.test(source);
+    return /["'\x60]?VITE_QODEX_E2E_STORE_BRIDGE["'\x60]?\s*:\s*["'\x60]1["'\x60]/u.test(source);
   });
 }
 
@@ -1109,37 +1109,37 @@ function createPnpmChildEnv() {
     // CI 清理 .e2e-home 后会找不到 corepack 管理的 pnpm.mjs。
     ...(HOST_HOME_DIR ? { HOME: HOST_HOME_DIR } : {}),
     ...(HOST_USERPROFILE_DIR ? { USERPROFILE: HOST_USERPROFILE_DIR } : {}),
-    // Bugfix: agent 构建脚本会进入 apps/marid-cli 子 workspace；pnpm 11 的
+    // Bugfix: agent 构建脚本会进入 apps/qodex-cli 子 workspace；pnpm 11 的
     // verify-deps-before-run 会触发子 workspace install，但该 workspace 运行时
-    // 依赖根仓库 @marid/shared，自动 install 无法解析，必须在 E2E 构建链路关闭。
+    // 依赖根仓库 @qodex/shared，自动 install 无法解析，必须在 E2E 构建链路关闭。
     PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false",
     // 修复原因：E2E 依赖 renderer 暴露 store bridge；只在 WDIO 构建链路显式注入，
     // 避免普通 production/test 产品构建意外暴露可变全局 store。
-    VITE_MARID_E2E_STORE_BRIDGE: "1",
-    MARID_DESKTOP_AGENT_BUILD_MODE: env.MARID_DESKTOP_AGENT_BUILD_MODE ?? "pnpm",
+    VITE_QODEX_E2E_STORE_BRIDGE: "1",
+    QODEX_DESKTOP_AGENT_BUILD_MODE: env.QODEX_DESKTOP_AGENT_BUILD_MODE ?? "pnpm",
   };
 }
 
-function prepareMaridAgentServer() {
+function prepareQodexAgentServer() {
   if (E2E_PACKAGED_APP_BINARY_PATH) {
     // 真正的 Preview 包必须使用随包 Agent，禁止测试 runner 注入源码入口掩盖漏打包。
-    configureMaridAgentServerEnv();
+    configureQodexAgentServerEnv();
     return;
   }
-  if (process.env.MARID_E2E_SKIP_AGENT_BUILD === "1") {
+  if (process.env.QODEX_E2E_SKIP_AGENT_BUILD === "1") {
     // 修复原因：Windows 全量 E2E 分片由父 runner 统一构建一次 agent；子 WDIO 若再次构建，
     // 会并发覆盖同一 dist 目录。跳过时仍校验入口，避免旧或缺失产物静默启动。
-    console.log("[e2e] MARID_E2E_SKIP_AGENT_BUILD=1, skipping agent build");
-    if (!existsSync(MARID_CLI_ENTRYPOINT)) {
-      throw new Error(`Marid CLI entrypoint not found: ${MARID_CLI_ENTRYPOINT}`);
+    console.log("[e2e] QODEX_E2E_SKIP_AGENT_BUILD=1, skipping agent build");
+    if (!existsSync(QODEX_CLI_ENTRYPOINT)) {
+      throw new Error(`Qodex CLI entrypoint not found: ${QODEX_CLI_ENTRYPOINT}`);
     }
-    configureMaridAgentServerEnv();
+    configureQodexAgentServerEnv();
     return;
   }
 
-  // Bugfix: e2e 还在找仓库外的旧原生 marid-agent binary，并调用已经删除的
-  // `build:agent-exe`。当前桌面端统一通过 marid-cli 的 app-server JS bundle
-  // 暴露 Marid Protocol，这里复用正式开发入口的构建脚本，之后由 bundled resolver
+  // Bugfix: e2e 还在找仓库外的旧原生 qodex-agent binary，并调用已经删除的
+  // `build:agent-exe`。当前桌面端统一通过 qodex-cli 的 app-server JS bundle
+  // 暴露 Qodex Protocol，这里复用正式开发入口的构建脚本，之后由 bundled resolver
   // 选择已校验的 bundle，保留存储准备能力和正式桌面启动契约。
   execFileSync(process.execPath, [BUILD_DESKTOP_AGENT_SCRIPT], {
     cwd: REPO_ROOT,
@@ -1147,19 +1147,19 @@ function prepareMaridAgentServer() {
     stdio: "inherit",
   });
 
-  if (!existsSync(MARID_CLI_ENTRYPOINT)) {
-    throw new Error(`Marid CLI entrypoint not found: ${MARID_CLI_ENTRYPOINT}`);
+  if (!existsSync(QODEX_CLI_ENTRYPOINT)) {
+    throw new Error(`Qodex CLI entrypoint not found: ${QODEX_CLI_ENTRYPOINT}`);
   }
 
-  configureMaridAgentServerEnv();
+  configureQodexAgentServerEnv();
 }
 
-function configureMaridAgentServerEnv() {
+function configureQodexAgentServerEnv() {
   // 数据库准备只信任 bundled resolver 确认的入口。E2E 即使把本轮 bundle 填进自定义
   // command，也会按 unsupported_runtime 拒绝；清除继承的覆盖，复用正式桌面解析链。
-  delete process.env.MARID_AGENT_SERVER_COMMAND;
-  delete process.env.MARID_AGENT_SERVER_ARGS_JSON;
-  delete process.env.MARID_AGENT_SERVER_CWD;
+  delete process.env.QODEX_AGENT_SERVER_COMMAND;
+  delete process.env.QODEX_AGENT_SERVER_ARGS_JSON;
+  delete process.env.QODEX_AGENT_SERVER_CWD;
 }
 
 function assertUpstreamCaptureConfig() {
@@ -1259,7 +1259,7 @@ async function startCodingPlanTeamMockIfNeeded(specs: string[] = []) {
     // launcher 在 onPrepare 分配的地址（见 onPrepare 注释）。走到这里说明 runnerEnv
     // 没有携带存活的 mock 地址，静默降级只会让 waitForMockRequest 超时更难排查。
     throw new Error(
-      "coding plan reset mock 未在 onPrepare 准备（runnerEnv 缺少存活的 MARID_E2E_CODING_PLAN_MOCK_URL）",
+      "coding plan reset mock 未在 onPrepare 准备（runnerEnv 缺少存活的 QODEX_E2E_CODING_PLAN_MOCK_URL）",
     );
   }
 
@@ -1281,7 +1281,7 @@ async function startCodingPlanTeamMockIfNeeded(specs: string[] = []) {
   const offPeakTeam = isOffPeakTeamPlanSpec(specs);
   if (offPeakTeam) {
     // 通用产品 mock 会替换成个人假凭证，无法验证 Team。只在测试进程替代 HTTP 服务端。
-    const { startOffPeakMockGateway, createServiceLogger } = await import("@marid/services/node");
+    const { startOffPeakMockGateway, createServiceLogger } = await import("@qodex/services/node");
     offPeakTeamGateway = await startOffPeakMockGateway(
       {
         logger: createServiceLogger("e2e-offpeak-team", { isDebugEnabled: false }),
@@ -1297,7 +1297,7 @@ async function startCodingPlanTeamMockIfNeeded(specs: string[] = []) {
         scenario: "foreground-subagents",
       },
     );
-    process.env.MARID_OFFPEAK_MOCK_PORT = String(offPeakTeamGateway.port);
+    process.env.QODEX_OFFPEAK_MOCK_PORT = String(offPeakTeamGateway.port);
   }
   let providerResponsive = startIndependent;
   let faultMode:
@@ -1498,7 +1498,7 @@ async function startCodingPlanTeamMockIfNeeded(specs: string[] = []) {
     requests.push({
       ...(requestBody === undefined ? {} : { body: requestBody }),
       headers: {
-        // reset 四接口的双 JWT 契约（Authorization=marid JWT / X-Bigmodel-Authorization=MaaS JWT）
+        // reset 四接口的双 JWT 契约（Authorization=qodex JWT / X-Bigmodel-Authorization=MaaS JWT）
         // 由用例断言，必须一并记录。
         authorization: request.headers.authorization,
         "bigmodel-organization": request.headers["bigmodel-organization"],
@@ -1513,7 +1513,7 @@ async function startCodingPlanTeamMockIfNeeded(specs: string[] = []) {
     if (
       request.method === "GET" &&
       url.pathname === "/api/v1/oauth/profile" &&
-      request.headers.authorization === `Bearer ${CN_UNLINKED_E2E_MARID_JWT}`
+      request.headers.authorization === `Bearer ${CN_UNLINKED_E2E_QODEX_JWT}`
     ) {
       // 国内新账号没有注册 BigModel：profile 成功返回主体，但没有 bigmodel 关联块。
       writeJson(response, buildCnUnlinkedProfileResponse());
@@ -1536,7 +1536,7 @@ async function startCodingPlanTeamMockIfNeeded(specs: string[] = []) {
       writeJson(response, {
         code: 0,
         data: {
-          authorize_url: `https://bigmodel.cn/login?appId=marid&redirect=${encodeURIComponent("https://marid.z.ai/api/v1/oauth/cli/callback/bigmodel")}&state=${SUBAGENT_CODING_PLAN_OAUTH_STATE}`,
+          authorize_url: `https://bigmodel.cn/login?appId=qodex&redirect=${encodeURIComponent("https://qodex.z.ai/api/v1/oauth/cli/callback/bigmodel")}&state=${SUBAGENT_CODING_PLAN_OAUTH_STATE}`,
           expires_at: Math.floor(Date.now() / 1000) + 300,
           flow_id: SUBAGENT_CODING_PLAN_OAUTH_FLOW_ID,
           poll_interval_sec: 30,
@@ -1626,7 +1626,7 @@ async function startCodingPlanTeamMockIfNeeded(specs: string[] = []) {
       writeJson(response, {
         code: 0,
         data: {
-          token: "e2e-subagent-login-marid-jwt",
+          token: "e2e-subagent-login-qodex-jwt",
           bigmodel: {
             access_token: "e2e-subagent-login-bigmodel-token",
             refresh_token: "e2e-subagent-login-bigmodel-refresh-token",
@@ -1666,7 +1666,7 @@ async function startCodingPlanTeamMockIfNeeded(specs: string[] = []) {
 
     if (
       faultMode === "startBalanceFailure" &&
-      url.pathname === "/api/v1/marid-plan/billing/balance"
+      url.pathname === "/api/v1/qodex-plan/billing/balance"
     ) {
       writeJson(response, { code: 429, msg: "Too many requests" }, 429);
       return;
@@ -1675,7 +1675,7 @@ async function startCodingPlanTeamMockIfNeeded(specs: string[] = []) {
     if (
       providerResponsive &&
       request.method === "GET" &&
-      url.pathname === "/api/v1/marid-plan/billing/balance"
+      url.pathname === "/api/v1/qodex-plan/billing/balance"
     ) {
       writeJson(
         response,
@@ -1689,7 +1689,7 @@ async function startCodingPlanTeamMockIfNeeded(specs: string[] = []) {
     if (
       caseMode === SUBAGENT_CODING_PLAN_LOGIN_CATALOG_STALE_MODE &&
       request.method === "GET" &&
-      url.pathname === "/api/v1/marid-plan/billing/balance"
+      url.pathname === "/api/v1/qodex-plan/billing/balance"
     ) {
       writeJson(response, {
         code: 0,
@@ -1703,7 +1703,7 @@ async function startCodingPlanTeamMockIfNeeded(specs: string[] = []) {
     if (
       caseMode === "model-provider-plan-surface" &&
       request.method === "GET" &&
-      url.pathname === "/api/v1/marid-plan/billing/balance"
+      url.pathname === "/api/v1/qodex-plan/billing/balance"
     ) {
       // 计划交叉用例需要一份确定的 Start Plan 权益；普通 Coding Plan 用例仍按
       // 自己的订阅接口判定，不把 Start 权益泄漏到其他 spec。
@@ -1961,7 +1961,7 @@ async function startCodingPlanTeamMockIfNeeded(specs: string[] = []) {
           {
             apiKey: personal ? "personal-ak" : "team-ak",
             keyType: personal ? 1 : 2,
-            name: personal ? "marid-api-key" : "marid-team-api-key",
+            name: personal ? "qodex-api-key" : "qodex-team-api-key",
           },
         ],
       });
@@ -1976,7 +1976,7 @@ async function startCodingPlanTeamMockIfNeeded(specs: string[] = []) {
     ) {
       // 项目鉴权已改为短期 Token；缺少签发响应会让模型目录在工具请求之前被判不可用。
       const body = await readRequestJson<{ clientType?: string }>(request);
-      if (body.clientType !== "marid" || !request.headers.authorization?.startsWith("Bearer ")) {
+      if (body.clientType !== "qodex" || !request.headers.authorization?.startsWith("Bearer ")) {
         writeJson(response, { code: 400, msg: "invalid_token_request" }, 400);
         return;
       }
@@ -2278,7 +2278,7 @@ async function configureCodingPlanTeamMockForSpecs(specs: string[]) {
     return;
   }
   const baseUrl =
-    codingPlanTeamMockBaseUrl || process.env.MARID_E2E_CODING_PLAN_MOCK_URL?.trim() || "";
+    codingPlanTeamMockBaseUrl || process.env.QODEX_E2E_CODING_PLAN_MOCK_URL?.trim() || "";
   if (!baseUrl) {
     throw new Error("coding plan mock case mode 配置失败：mock URL 未初始化");
   }
@@ -2312,7 +2312,7 @@ async function stopCodingPlanTeamMock() {
     codingPlanDataPlaneProxy = null;
   }
   // Bugfix：不能无条件删除共享 env。beforeSession 里 budget/catalog mock 先于本函数
-  // 注入的 MARID_BASE_URL 等会被误删，导致那些 spec 的 Electron 打真实域名。
+  // 注入的 QODEX_BASE_URL 等会被误删，导致那些 spec 的 Electron 打真实域名。
   // 只清除“当前值仍指向本 mock”的键：既撤掉 runnerEnv 播种到非 team worker 的污染，
   // 又不碰其他 mock 家族刚写入的值。
   const ownedBaseUrl =
@@ -2461,7 +2461,7 @@ async function startUpstreamCaptureProxy(specs: readonly string[]) {
   upstreamCaptureProxy = await startE2ENetworkCaptureProxy({
     artifactPath: UPSTREAM_CAPTURE_ARTIFACT_PATH,
     // Bugfix: beforeSession 会在启动 capture proxy 后重置 .e2e-home；
-    // CA 若放在 .e2e-home 下会被删掉，agent 随后读取 MARID_AGENT_CA_CERT 就会 ENOENT。
+    // CA 若放在 .e2e-home 下会被删掉，agent 随后读取 QODEX_AGENT_CA_CERT 就会 ENOENT。
     caDir: E2E_NETWORK_CAPTURE_CA_DIR,
     recordResponseChunkTimeline: true,
     responseChunkTimelineLimitBytes: UPSTREAM_CAPTURE_RESPONSE_CHUNK_TIMELINE_BYTES,
@@ -2576,34 +2576,34 @@ async function startCodingPlanUpgradeE2EMock(
   applyCodingPlanUpgradeMockEnv(process.env, codingPlanUpgradeMockServer.baseUrl);
 }
 
-// 闲时任务 E2E：off-peak spec 命中时开进程内 mock 网关（MARID_OFFPEAK_MOCK=1），
+// 闲时任务 E2E：off-peak spec 命中时开进程内 mock 网关（QODEX_OFFPEAK_MOCK=1），
 // host 继承 worker env 后自动起网关、灰度强制开启；管理类 GUI spec 保持票据短暂 queued，
 // 避免创建落库唤醒 scheduler 后在 UI 来得及操作前就派发模型请求。
 async function startOffPeakE2EMock(specs: string[] = []): Promise<void> {
   const isOffPeakSpec = specs.some((spec) => spec.includes("off-peak") || spec.includes("offpeak"));
   if (isOffPeakTeamPlanSpec(specs)) {
-    delete process.env.MARID_OFFPEAK_MOCK;
-    const port = Number(process.env.MARID_OFFPEAK_MOCK_PORT);
+    delete process.env.QODEX_OFFPEAK_MOCK;
+    const port = Number(process.env.QODEX_OFFPEAK_MOCK_PORT);
     if (!port) throw new Error("Team 闲时 E2E 网关未由 launcher 准备");
-    await materializeOffPeakMockMaridBuiltinProviderConfig(port, "GLM-5.3");
-    process.env.MARID_BUILTIN_PROVIDER_CONFIG_FILE = E2E_OFFPEAK_MARID_BUILTIN_PROVIDER_CONFIG_FILE;
+    await materializeOffPeakMockQodexBuiltinProviderConfig(port, "GLM-5.3");
+    process.env.QODEX_BUILTIN_PROVIDER_CONFIG_FILE = E2E_OFFPEAK_QODEX_BUILTIN_PROVIDER_CONFIG_FILE;
     return;
   }
   if (isOffPeakSpec) {
-    process.env.MARID_OFFPEAK_MOCK = "1";
-    process.env.MARID_OFFPEAK_MOCK_PORT = "45197";
+    process.env.QODEX_OFFPEAK_MOCK = "1";
+    process.env.QODEX_OFFPEAK_MOCK_PORT = "45197";
     const isSubagentInheritanceSpec = isOffPeakSubagentModelInheritanceSpec(specs);
     const isInvalidTicketSpec = isOffPeakInvalidTicketSpec(specs);
     // 管理类 case 延后 ready；OP10 必须真跑 scheduler→turn→child，因此取号即 ready。
-    process.env.MARID_OFFPEAK_MOCK_READY_DELAY_MS =
+    process.env.QODEX_OFFPEAK_MOCK_READY_DELAY_MS =
       isSubagentInheritanceSpec || isInvalidTicketSpec ? "0" : "60000";
-    process.env.MARID_OFFPEAK_MOCK_READY_TTL_MS = "600000";
-    process.env.MARID_OFFPEAK_MOCK_ACTIVE_MS = "600000";
-    process.env.MARID_OFFPEAK_MOCK_NEXT_POLL_S = "1";
+    process.env.QODEX_OFFPEAK_MOCK_READY_TTL_MS = "600000";
+    process.env.QODEX_OFFPEAK_MOCK_ACTIVE_MS = "600000";
+    process.env.QODEX_OFFPEAK_MOCK_NEXT_POLL_S = "1";
     if (isSubagentInheritanceSpec) {
-      process.env.MARID_OFFPEAK_MOCK_SCENARIO = "foreground-subagents";
+      process.env.QODEX_OFFPEAK_MOCK_SCENARIO = "foreground-subagents";
     } else if (isInvalidTicketSpec) {
-      process.env.MARID_OFFPEAK_MOCK_SCENARIO = "invalid-ticket";
+      process.env.QODEX_OFFPEAK_MOCK_SCENARIO = "invalid-ticket";
     } else if (
       specs.some((spec) =>
         spec.includes("conversation-session-offpeak-create-existing-session.test.ts"),
@@ -2611,41 +2611,41 @@ async function startOffPeakE2EMock(specs: string[] = []): Promise<void> {
     ) {
       // 绑定会话复用已有固定文本响应，保留 queued 编辑窗口；capture 模式会继续
       // 转发上游，不适合作为此例的离线应答。fixture 只匹配一个 child marker，不创建子任务。
-      process.env.MARID_OFFPEAK_MOCK_SCENARIO = "foreground-subagents";
+      process.env.QODEX_OFFPEAK_MOCK_SCENARIO = "foreground-subagents";
     } else {
-      delete process.env.MARID_OFFPEAK_MOCK_SCENARIO;
+      delete process.env.QODEX_OFFPEAK_MOCK_SCENARIO;
     }
     // D39 回归 spec：专用 availability 返回 false + next_take_at，验证 renderer
     // 使用服务端快照提前置灰；其余 off-peak spec 保持 availability=true。
     const isLimitPreGateSpec = specs.some((spec) => spec.includes("off-peak-limit-pre-gate"));
     if (isLimitPreGateSpec) {
-      process.env.MARID_OFFPEAK_MOCK_AVAILABILITY_BLOCK_MS = "3600000";
+      process.env.QODEX_OFFPEAK_MOCK_AVAILABILITY_BLOCK_MS = "3600000";
     } else {
-      delete process.env.MARID_OFFPEAK_MOCK_AVAILABILITY_BLOCK_MS;
+      delete process.env.QODEX_OFFPEAK_MOCK_AVAILABILITY_BLOCK_MS;
     }
-    await materializeOffPeakMockMaridBuiltinProviderConfig(
-      Number(process.env.MARID_OFFPEAK_MOCK_PORT),
+    await materializeOffPeakMockQodexBuiltinProviderConfig(
+      Number(process.env.QODEX_OFFPEAK_MOCK_PORT),
       isSubagentInheritanceSpec ? "GLM-5.3" : "GLM-5.2",
     );
-    process.env.MARID_BUILTIN_PROVIDER_CONFIG_FILE = E2E_OFFPEAK_MARID_BUILTIN_PROVIDER_CONFIG_FILE;
+    process.env.QODEX_BUILTIN_PROVIDER_CONFIG_FILE = E2E_OFFPEAK_QODEX_BUILTIN_PROVIDER_CONFIG_FILE;
   } else {
-    delete process.env.MARID_OFFPEAK_MOCK;
-    delete process.env.MARID_OFFPEAK_MOCK_AVAILABILITY_BLOCK_MS;
-    delete process.env.MARID_OFFPEAK_MOCK_PORT;
-    delete process.env.MARID_OFFPEAK_MOCK_SCENARIO;
-    if (INITIAL_MARID_BUILTIN_PROVIDER_CONFIG_FILE) {
-      process.env.MARID_BUILTIN_PROVIDER_CONFIG_FILE = INITIAL_MARID_BUILTIN_PROVIDER_CONFIG_FILE;
+    delete process.env.QODEX_OFFPEAK_MOCK;
+    delete process.env.QODEX_OFFPEAK_MOCK_AVAILABILITY_BLOCK_MS;
+    delete process.env.QODEX_OFFPEAK_MOCK_PORT;
+    delete process.env.QODEX_OFFPEAK_MOCK_SCENARIO;
+    if (INITIAL_QODEX_BUILTIN_PROVIDER_CONFIG_FILE) {
+      process.env.QODEX_BUILTIN_PROVIDER_CONFIG_FILE = INITIAL_QODEX_BUILTIN_PROVIDER_CONFIG_FILE;
     } else {
-      delete process.env.MARID_BUILTIN_PROVIDER_CONFIG_FILE;
+      delete process.env.QODEX_BUILTIN_PROVIDER_CONFIG_FILE;
     }
   }
 }
 
-async function materializeOffPeakMockMaridBuiltinProviderConfig(
+async function materializeOffPeakMockQodexBuiltinProviderConfig(
   port: number,
   modelId: string,
 ): Promise<void> {
-  const sourcePath = resolve(REPO_ROOT, "config/provider/marid-builtin.json");
+  const sourcePath = resolve(REPO_ROOT, "config/provider/qodex-builtin.json");
   const document = JSON.parse(await readFile(sourcePath, "utf8")) as {
     config?: {
       providerConfigRules?: {
@@ -2666,18 +2666,18 @@ async function materializeOffPeakMockMaridBuiltinProviderConfig(
       (rule) => rule.providerId === providerId,
     )?.config;
     if (!offPeakProvider?.api) {
-      throw new Error(`Marid Built-in Config 缺少 ${providerId}.api`);
+      throw new Error(`Qodex Built-in Config 缺少 ${providerId}.api`);
     }
     offPeakProvider.api.baseUrl = `http://127.0.0.1:${port}/api/v1/off-peak/anthropic`;
     // 原闲时 fixture 的单模型白名单应迁到当前 Built-in 输入，不能继续依赖已退役的
     // client-config models 字段；仅修改本次 E2E 隔离文件，生产名单不变。
     offPeakProvider.builtinModelIds = [modelId];
   }
-  await mkdir(resolve(E2E_OFFPEAK_MARID_BUILTIN_PROVIDER_CONFIG_FILE, ".."), {
+  await mkdir(resolve(E2E_OFFPEAK_QODEX_BUILTIN_PROVIDER_CONFIG_FILE, ".."), {
     recursive: true,
   });
   await writeFile(
-    E2E_OFFPEAK_MARID_BUILTIN_PROVIDER_CONFIG_FILE,
+    E2E_OFFPEAK_QODEX_BUILTIN_PROVIDER_CONFIG_FILE,
     `${JSON.stringify(document, null, 2)}\n`,
     "utf8",
   );
@@ -2737,9 +2737,9 @@ async function startModelContextBudgetConfigE2EMock(specs: string[] = []) {
     await stopModelContextBudgetConfigE2EMock();
     modelContextBudgetConfigMockServer = await startModelContextBudgetConfigMockServer(scenario);
   }
-  process.env.MARID_BASE_URL = modelContextBudgetConfigMockServer.baseUrl;
-  process.env.MARID_TEST_BASE_URL = modelContextBudgetConfigMockServer.baseUrl;
-  process.env.MARID_ENDPOINT_ORIGIN = modelContextBudgetConfigMockServer.baseUrl;
+  process.env.QODEX_BASE_URL = modelContextBudgetConfigMockServer.baseUrl;
+  process.env.QODEX_TEST_BASE_URL = modelContextBudgetConfigMockServer.baseUrl;
+  process.env.QODEX_ENDPOINT_ORIGIN = modelContextBudgetConfigMockServer.baseUrl;
 }
 
 async function stopModelContextBudgetConfigE2EMock() {
@@ -2748,9 +2748,9 @@ async function stopModelContextBudgetConfigE2EMock() {
   }
   await modelContextBudgetConfigMockServer.stop();
   modelContextBudgetConfigMockServer = null;
-  delete process.env.MARID_BASE_URL;
-  delete process.env.MARID_TEST_BASE_URL;
-  delete process.env.MARID_ENDPOINT_ORIGIN;
+  delete process.env.QODEX_BASE_URL;
+  delete process.env.QODEX_TEST_BASE_URL;
+  delete process.env.QODEX_ENDPOINT_ORIGIN;
 }
 
 async function startDynamicWorkflowConfigE2EMock(specs: string[] = []) {
@@ -2813,7 +2813,7 @@ async function armCurrentElectronAppQuit(stage: string) {
     const result = (await browser.electron.execute((electron) => {
       const currentAppPid = process.pid;
       const appName = electron.app.getName();
-      if (appName !== "Marid E2E") {
+      if (appName !== "Qodex E2E") {
         return {
           appName,
           appPid: currentAppPid,
@@ -3102,13 +3102,13 @@ async function inspectE2ERendererBridgePreflight(): Promise<E2ERendererBridgePre
         (requiredBridgeMethods, requiredStateMethods) => {
           const bridge = (
             window as typeof window & {
-              __maridSessionStoreE2E?: Record<string, unknown> & {
+              __qodexSessionStoreE2E?: Record<string, unknown> & {
                 getState?: () => Record<string, unknown>;
                 setState?: (...args: unknown[]) => unknown;
                 subscribe?: (...args: unknown[]) => unknown;
               };
             }
-          ).__maridSessionStoreE2E;
+          ).__qodexSessionStoreE2E;
           const bridgeMethods = Object.fromEntries(
             requiredBridgeMethods.map((method) => [method, typeof bridge?.[method] === "function"]),
           ) as Record<string, boolean>;
@@ -3278,7 +3278,7 @@ function forceFinalizeE2ERunnerFromGuard() {
       await stopPluginCdnZipFixture();
       await cleanupE2EElectronProcesses("finalization-guard");
       // 失败保留诊断现场（同 onComplete-home 条件）：guard 路径本身就是失败收尾。
-      if (process.env.MARID_E2E_KEEP_HOME_ON_FAIL === "1") {
+      if (process.env.QODEX_E2E_KEEP_HOME_ON_FAIL === "1") {
         console.warn(`[e2e] finalization guard keeping failure home: ${E2E_HOME_DIR}`);
       } else {
         await cleanupE2EDirectory("finalization-guard-home", E2E_HOME_DIR);
@@ -3307,7 +3307,7 @@ async function resetE2EHome(specs: string[] = []) {
   await seedRemoteOnboardingFixture({
     // 营销弹窗会抢占首次引导的焦点；该套件从已完成引导的账号开始，独立验证弹窗交付。
     enabled:
-      process.env.MARID_E2E_REMOTE_PROFILE === "1" ||
+      process.env.QODEX_E2E_REMOTE_PROFILE === "1" ||
       specs.some((spec) => spec.endsWith("ui-shell/marketing/marketing-touch-delivery.test.ts")),
     specs,
     appConfigDir: E2E_APP_CONFIG_DIR,
@@ -3318,41 +3318,41 @@ async function resetE2EHome(specs: string[] = []) {
   }
   if (specs.some((spec) => spec.endsWith("sidebar-rich-content-performance.test.ts"))) {
     await seedSidebarRichContentFixture({
-      cliEntryPoint: MARID_CLI_ENTRYPOINT,
+      cliEntryPoint: QODEX_CLI_ENTRYPOINT,
       e2eHomeDir: E2E_HOME_DIR,
-      workspacePath: resolve(E2E_HOME_DIR, "MaridProject"),
+      workspacePath: resolve(E2E_HOME_DIR, "QodexProject"),
     });
   }
   if (usesProviderReadinessColdStartFixture(specs) || usesGitReviewEntryFixture(specs)) {
     // SP13 必须在 Host 打开 tasks-index 前同时预置真实 task row 与可打开的
     // CLI session；测试内临时注入会绕过 Header 与 status panel 的真实 task/service 解析链路。
     await seedProviderReadinessHistoryFixture({
-      cliEntryPoint: MARID_CLI_ENTRYPOINT,
+      cliEntryPoint: QODEX_CLI_ENTRYPOINT,
       e2eHomeDir: E2E_HOME_DIR,
-      workspacePath: resolve(E2E_HOME_DIR, "MaridProject"),
+      workspacePath: resolve(E2E_HOME_DIR, "QodexProject"),
     });
   }
   if (usesTaskIndexRowAuthorityFixture(specs)) {
     // Bug 根因：TSL23 必须在 Host 打开 tasks-index 前制造“持久行多于 session 摘要”的冷启动状态；
     // spec 的 before hook 已经太晚，因此只对该 case 在 beforeSession 的隔离 HOME 中落盘。
     await seedTaskIndexRowAuthorityFixture({
-      cliEntryPoint: MARID_CLI_ENTRYPOINT,
+      cliEntryPoint: QODEX_CLI_ENTRYPOINT,
       e2eHomeDir: E2E_HOME_DIR,
-      workspacePath: resolve(E2E_HOME_DIR, "MaridProject"),
+      workspacePath: resolve(E2E_HOME_DIR, "QodexProject"),
     });
   }
   if (specs.some((spec) => spec.includes(TASK_TITLE_MARQUEE_SPEC))) {
     await seedTaskTitleMarqueeFixture({
-      cliEntryPoint: MARID_CLI_ENTRYPOINT,
+      cliEntryPoint: QODEX_CLI_ENTRYPOINT,
       e2eHomeDir: E2E_HOME_DIR,
-      workspacePath: resolve(E2E_HOME_DIR, "MaridProject"),
+      workspacePath: resolve(E2E_HOME_DIR, "QodexProject"),
     });
   }
   if (specs.some((spec) => spec.includes("usage-stats-app-usage.test.ts"))) {
     await seedAppUsageE2EFixture({
-      cliEntryPoint: MARID_CLI_ENTRYPOINT,
+      cliEntryPoint: QODEX_CLI_ENTRYPOINT,
       e2eHomeDir: E2E_HOME_DIR,
-      workspacePath: resolve(E2E_HOME_DIR, "MaridProject"),
+      workspacePath: resolve(E2E_HOME_DIR, "QodexProject"),
     });
   }
   seedE2EWorkerModelStreamConfig(specs);
@@ -3370,9 +3370,9 @@ async function resetE2EHome(specs: string[] = []) {
     specs.some((spec) => /conversation-session-history-first(?:-migration)?\.test\.ts$/.test(spec))
   ) {
     await seedSessionHistoryFirstFixture({
-      cliEntryPoint: MARID_CLI_ENTRYPOINT,
+      cliEntryPoint: QODEX_CLI_ENTRYPOINT,
       e2eHomeDir: E2E_HOME_DIR,
-      workspacePath: resolve(E2E_HOME_DIR, "MaridProject"),
+      workspacePath: resolve(E2E_HOME_DIR, "QodexProject"),
       providerId: e2eProviderPreset.providerId,
       modelId: e2eProviderPreset.model,
       thoughtLevel: readE2EThoughtLevel(),
@@ -3445,11 +3445,11 @@ function seedE2EPluginCdnZipMarketplace(specs: string[] = []) {
 }
 
 // 把插件 MCP skill lifecycle spec 需要的 installed_plugins.json 写到
-// `~/.marid/cli/plugins/installed_plugins.json`；仅在 spec 命中且 state != not-installed
-// 时执行。注意 storageRoot 在 agent 视角是 `<home>/.marid`，而 pluginStorageRoot
-// 是 `<home>/.marid/cli/plugins`，installed_plugins.json 必须落在后者下面才会被
+// `~/.qodex/cli/plugins/installed_plugins.json`；仅在 spec 命中且 state != not-installed
+// 时执行。注意 storageRoot 在 agent 视角是 `<home>/.qodex`，而 pluginStorageRoot
+// 是 `<home>/.qodex/cli/plugins`，installed_plugins.json 必须落在后者下面才会被
 // bootstrap 的 `listInstalledPluginRecords(pluginStorageRoot)` 读到（见
-// `apps/marid-cli/packages/adapters/src/plugins/marketplace.ts:347`）。
+// `apps/qodex-cli/packages/adapters/src/plugins/marketplace.ts:347`）。
 function seedE2EPluginMcpSkillInstalledPlugins(specs: string[] = []) {
   const state = resolvePluginMcpSkillState(specs);
   if (!state || state === "not-installed" || state === "workspace-root") return;
@@ -3465,7 +3465,7 @@ function seedE2EPluginMcpSkillInstalledPlugins(specs: string[] = []) {
     '"__INSTALL_PATH__"',
     JSON.stringify(pluginRoot),
   );
-  // pluginStorageRoot = <home>/.marid/cli/plugins
+  // pluginStorageRoot = <home>/.qodex/cli/plugins
   const targetDir = resolve(E2E_STORAGE_ROOT, "cli/plugins");
   mkdirSync(targetDir, { recursive: true });
   writeFileSync(resolve(targetDir, "installed_plugins.json"), template, "utf-8");
@@ -3480,13 +3480,13 @@ function seedE2EGitCommitDialogWorkspace(specs: string[] = []) {
     return;
   }
 
-  const workspacePath = resolve(E2E_HOME_DIR, "MaridProject");
+  const workspacePath = resolve(E2E_HOME_DIR, "QodexProject");
   mkdirSync(resolve(workspacePath, "src"), { recursive: true });
   writeFileSync(resolve(workspacePath, "README.md"), "Git commit dialog E2E workspace\n", "utf-8");
   runGitE2ECommand(workspacePath, ["init"]);
   runGitE2ECommand(workspacePath, ["checkout", "-B", "main"]);
-  runGitE2ECommand(workspacePath, ["config", "user.name", "Marid E2E"]);
-  runGitE2ECommand(workspacePath, ["config", "user.email", "marid-e2e@example.com"]);
+  runGitE2ECommand(workspacePath, ["config", "user.name", "Qodex E2E"]);
+  runGitE2ECommand(workspacePath, ["config", "user.email", "qodex-e2e@example.com"]);
   runGitE2ECommand(workspacePath, ["add", "README.md"]);
   runGitE2ECommand(workspacePath, ["commit", "-m", "chore: seed git commit dialog e2e"]);
   runGitE2ECommand(workspacePath, ["branch", "e2e-target"]);
@@ -3517,7 +3517,7 @@ function seedE2EStartupState(specs: string[] = []) {
   const useFreshConversationWorkspace = specs.some((spec) =>
     spec.includes("conversation-session-conversation-workspace.test.ts"),
   );
-  const legacyDefaultProjectPath = resolve(E2E_HOME_DIR, "MaridProject");
+  const legacyDefaultProjectPath = resolve(E2E_HOME_DIR, "QodexProject");
   const agentWarmupFixture = AGENT_WARMUP_FIXTURE_SPECS.some((marker) =>
     workerSpecsContain(specs, marker),
   );
@@ -3599,7 +3599,7 @@ function seedE2EStartupState(specs: string[] = []) {
           ? {
               // steer 相关复现需要从当前 worker 的初始 settings 进入 guide 模式；
               // 运行中再改 setting.json 会被 app 启动态写回覆盖，导致实际仍跑 queue。
-              maridInteractionBehavior: "guide",
+              qodexInteractionBehavior: "guide",
             }
           : {}),
         providerFamilyConnectionSelections: shouldUseBigmodelAuth
@@ -3627,7 +3627,7 @@ function seedE2EStartupState(specs: string[] = []) {
       providerReadinessColdStartFixture ||
         workerSpecsContain(specs, "oauth-login-failure-cancel.test.ts")
         ? {}
-        : // Bug 根因：I20 不验证账号登录，却播种假 Marid JWT；带账号身份的旁路请求
+        : // Bug 根因：I20 不验证账号登录，却播种假 Qodex JWT；带账号身份的旁路请求
           // 会把它发往真实控制面，401 随后弹出登录过期对话框并遮挡目标交互。
           // 该 case 只保留本地 Provider 回放，不注入无关账号身份。
           builtInSubagentModelOverridesSpec
@@ -3641,7 +3641,7 @@ function seedE2EStartupState(specs: string[] = []) {
                 : createE2EStartupCredentialSeed({
                     specs,
                     accountMock: codingPlanTeamSpec || codingPlanUpgradeE2E,
-                    remoteProfile: process.env.MARID_E2E_REMOTE_PROFILE === "1",
+                    remoteProfile: process.env.QODEX_E2E_REMOTE_PROFILE === "1",
                     legacyAuthToken: E2E_AUTH_TOKEN,
                     restoredOAuthCredentials: {
                       "oauth:active_provider": authProviderId,
@@ -3650,7 +3650,7 @@ function seedE2EStartupState(specs: string[] = []) {
                         ? "e2e-bigmodel-oauth-token"
                         : E2E_AUTH_TOKEN,
                       [`oauth:${authProviderId}:user_info`]: JSON.stringify(E2E_USER_PROFILE),
-                      maridjwttoken: E2E_AUTH_TOKEN,
+                      qodexjwttoken: E2E_AUTH_TOKEN,
                     },
                   }),
       null,
@@ -3701,8 +3701,8 @@ function usesGitReviewEntryFixture(specs: string[] = []) {
 async function seedE2EGitReviewEntryWorkspace(specs: string[] = []) {
   if (!usesGitReviewEntryFixture(specs)) return;
 
-  const workspacePath = resolve(E2E_HOME_DIR, "MaridProject");
-  const caseRoot = resolve(workspacePath, ".marid-e2e/conversation-session-git-review-entry");
+  const workspacePath = resolve(E2E_HOME_DIR, "QodexProject");
+  const caseRoot = resolve(workspacePath, ".qodex-e2e/conversation-session-git-review-entry");
   await mkdir(caseRoot, { recursive: true });
   await runGitReviewEntryCommand(workspacePath, ["init"]);
   await runGitReviewEntryCommand(workspacePath, ["checkout", "-B", "main"]);
@@ -3714,7 +3714,7 @@ async function seedE2EGitReviewEntryWorkspace(specs: string[] = []) {
 }
 
 async function runGitReviewEntryCommand(cwd: string, args: string[]) {
-  await execFileAsync(process.env.MARID_GIT_BINARY?.trim() || "git", args, {
+  await execFileAsync(process.env.QODEX_GIT_BINARY?.trim() || "git", args, {
     cwd,
     encoding: "utf8",
     windowsHide: true,
@@ -3723,7 +3723,7 @@ async function runGitReviewEntryCommand(cwd: string, args: string[]) {
 
 function createCorruptOAuthCredentialSeed(authProviderId: string): Record<string, string> {
   const corruptEncryptedValue = "enc:v1:bad.bad.bad";
-  const corruptTokenProvider = process.env.MARID_E2E_CORRUPT_OAUTH_TOKEN_PROVIDER;
+  const corruptTokenProvider = process.env.QODEX_E2E_CORRUPT_OAUTH_TOKEN_PROVIDER;
   if (corruptTokenProvider === BIGMODEL_PROVIDER_ID || corruptTokenProvider === ZAI_PROVIDER_ID) {
     // 业务 token 损坏曾绕过启动恢复的解密清理；共享 JWT 与资料正常才能隔离此路径。
     return {
@@ -3735,7 +3735,7 @@ function createCorruptOAuthCredentialSeed(authProviderId: string): Record<string
           ? { user_id: "e2e-user", name: "Fixture User" }
           : { id: "e2e-user", username: "Fixture User", displayName: "Fixture User" },
       ),
-      maridjwttoken: "e2e-valid-opaque-jwt",
+      qodexjwttoken: "e2e-valid-opaque-jwt",
       "bot:e2e:credential": "e2e-independent-bot-token",
     };
   }
@@ -3749,7 +3749,7 @@ function createCorruptOAuthCredentialSeed(authProviderId: string): Record<string
     [`oauth:${BIGMODEL_PROVIDER_ID}:access_token`]: "stale-bigmodel-access-token",
     [`oauth:${BIGMODEL_PROVIDER_ID}:refresh_token`]: "stale-bigmodel-refresh-token",
     [`oauth:${BIGMODEL_PROVIDER_ID}:user_info`]: JSON.stringify(E2E_USER_PROFILE),
-    maridjwttoken: "stale-marid-jwt-token",
+    qodexjwttoken: "stale-qodex-jwt-token",
     "bot:e2e:credential": "e2e-independent-bot-token",
   };
 }
@@ -3762,7 +3762,7 @@ function createExpiredJwtOAuthCredentialSeed(authProviderId: string): Record<str
     [`oauth:${authProviderId}:user_info`]: JSON.stringify(E2E_USER_PROFILE),
     // Bug 回归 fixture：exp=1 明确早于任意测试运行时间；客户端只解析 exp，
     // 不验证这枚本地测试 JWT 的签名。
-    maridjwttoken: "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjF9.e2e",
+    qodexjwttoken: "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjF9.e2e",
   };
 }
 
@@ -3781,7 +3781,7 @@ function shouldSeedGuideInteractionBehavior(specs: string[] = []) {
 // 插件 MCP skill 生命周期 spec 的 spec 名 → seed 状态映射。
 // 状态 A 不写任何 plugin 记录；状态 B 装入并启用；状态 C 装入但通过
 // `config.json#plugins.enabledPlugins[id] = false` 关闭。读取顺序：
-// MARID_E2E_PLUGIN_MCP_SKILL_STATE 环境变量 > spec 文件名约定。
+// QODEX_E2E_PLUGIN_MCP_SKILL_STATE 环境变量 > spec 文件名约定。
 const PLUGIN_MCP_SKILL_SPEC_PATTERN =
   /conversation-session-plugin-mcp-skill-(not-installed|installed-enabled|installed-disabled|workspace-enabled|workspace-disabled|workspace-inherited|workspace-isolation|workspace-root|workspace-freeze)\.test\.ts/u;
 const PLUGIN_MCP_SKILL_STATES = new Set([
@@ -3809,7 +3809,7 @@ function resolvePluginMcpSkillState(
   | "workspace-root"
   | "workspace-freeze"
   | null {
-  const envState = process.env.MARID_E2E_PLUGIN_MCP_SKILL_STATE?.trim();
+  const envState = process.env.QODEX_E2E_PLUGIN_MCP_SKILL_STATE?.trim();
   if (envState && PLUGIN_MCP_SKILL_STATES.has(envState)) {
     return envState as Exclude<ReturnType<typeof resolvePluginMcpSkillState>, null>;
   }
@@ -3836,7 +3836,7 @@ function resolvePluginMcpSkillState(
 
 // 状态 A 不需要写任何文件；B/C 才落 fixture。
 // 这一段必须在 `seedUpstreamE2EModelConfig` 之后调用，因为它要 patch
-// 我们刚写好的 `~/.marid/cli/config.json`，把 `plugins.enabledPlugins[id]`
+// 我们刚写好的 `~/.qodex/cli/config.json`，把 `plugins.enabledPlugins[id]`
 // 置为 false 以表达"已安装但关闭"。
 function seedE2EPluginMcpSkillState(specs: string[] = []) {
   const state = resolvePluginMcpSkillState(specs);
@@ -3859,7 +3859,7 @@ function seedE2EPluginMcpSkillState(specs: string[] = []) {
   const enabledPlugins = (plugins.enabledPlugins as Record<string, boolean> | undefined) ?? {};
   const pluginId = "e2e-plugin-mcp-ping@e2e-fixture";
   // Bugfix: 安装型 plugin 在 candidate 构造时 defaultEnabled=false（见
-  // apps/marid-cli/packages/adapters/src/plugins/index.ts:resolveCandidates）；
+  // apps/qodex-cli/packages/adapters/src/plugins/index.ts:resolveCandidates）；
   // resolveEnabled 用 `config.enabledPlugins[id] ?? defaultEnabled` 判定，
   // 所以 enabled 状态必须显式写 true，不能只 "delete 字段"。
   if (state === "installed-disabled") {
@@ -3886,12 +3886,12 @@ async function seedE2EWorkspacePluginState(specs: string[] = []) {
   const state = resolvePluginMcpSkillState(specs);
   if (!state?.startsWith("workspace-")) return;
 
-  const workspacePath = resolve(E2E_HOME_DIR, "MaridProject");
+  const workspacePath = resolve(E2E_HOME_DIR, "QodexProject");
   const userConfigPath = resolve(E2E_CLI_CONFIG_DIR, "config.json");
-  const workspaceConfigPath = resolve(workspacePath, ".marid", "config.json");
+  const workspaceConfigPath = resolve(workspacePath, ".qodex", "config.json");
   const pluginId = "e2e-plugin-mcp-ping@e2e-fixture";
   const pluginRoot = resolve(DESKTOP_DIR, "test/e2e/fixtures/plugin-mcp-skill/e2e-plugin-mcp-ping");
-  await mkdir(resolve(workspacePath, ".marid"), { recursive: true });
+  await mkdir(resolve(workspacePath, ".qodex"), { recursive: true });
   const userConfig = await readOptionalE2ECliConfig(userConfigPath);
   const userPlugins = (userConfig.plugins as Record<string, unknown> | undefined) ?? {};
   const userEnabledPlugins =
@@ -3955,8 +3955,8 @@ async function seedE2EBuiltinWorkspacePluginDisable(specs: string[] = []) {
     return;
   }
 
-  const pluginId = "skill-creator@marid-plugins-official";
-  const workspaceA = resolve(E2E_HOME_DIR, "MaridProject");
+  const pluginId = "skill-creator@qodex-plugins-official";
+  const workspaceA = resolve(E2E_HOME_DIR, "QodexProject");
   const workspaceB = resolve(E2E_HOME_DIR, "WorkspaceB");
   const userConfig = await readOptionalE2ECliConfig(E2E_CLI_CONFIG_FILE);
   const userPlugins = (userConfig.plugins as Record<string, unknown> | undefined) ?? {};
@@ -3971,10 +3971,10 @@ async function seedE2EBuiltinWorkspacePluginDisable(specs: string[] = []) {
   await mkdir(E2E_CLI_CONFIG_DIR, { recursive: true });
   await writeFile(E2E_CLI_CONFIG_FILE, `${JSON.stringify(userConfig, null, 2)}\n`, "utf-8");
 
-  await mkdir(resolve(workspaceA, ".marid"), { recursive: true });
+  await mkdir(resolve(workspaceA, ".qodex"), { recursive: true });
   await mkdir(workspaceB, { recursive: true });
   await writeFile(
-    resolve(workspaceA, ".marid", "config.json"),
+    resolve(workspaceA, ".qodex", "config.json"),
     `${JSON.stringify(
       {
         plugins: {
@@ -4419,7 +4419,7 @@ This child must fail before sending a provider request when the Team scope is un
 
   for (const agentsDir of [E2E_USER_AGENTS_DIR, E2E_CLI_AGENTS_DIR]) {
     // 修复原因：CLI runtime 从 storageRoot/agents 加载用户 subagent profile，
-    // 而设置页/历史路径曾使用 .marid/cli/agents。双写只作用于本复现 spec，
+    // 而设置页/历史路径曾使用 .qodex/cli/agents。双写只作用于本复现 spec，
     // 避免路径差异让 case 停在 agent type not found，而不是 provider registry 缺失。
     mkdirSync(agentsDir, { recursive: true });
     for (const profile of profileEntries) {
@@ -4673,51 +4673,51 @@ export const config: WebdriverIO.Config = {
       : {}),
     HOME: E2E_HOME_DIR,
     USERPROFILE: E2E_HOME_DIR,
-    MARID_CREDENTIAL_SECRET:
-      resolveE2ECredentialSecret(configuredE2ESpecs, process.env.MARID_CREDENTIAL_SECRET) ?? "",
-    // PLM-LC-010 使用非 MARID_ 前缀验证插件 MCP 的 Claude-compatible env 展开。
+    QODEX_CREDENTIAL_SECRET:
+      resolveE2ECredentialSecret(configuredE2ESpecs, process.env.QODEX_CREDENTIAL_SECRET) ?? "",
+    // PLM-LC-010 使用非 QODEX_ 前缀验证插件 MCP 的 Claude-compatible env 展开。
     // 值只供 fixture 做 hash 比对，工具结果和截图都不得回显原值。
     E2E_PLUGIN_RUNTIME_SECRET: "e2e-plugin-runtime-secret-fixture-20260718",
     ...(pluginNoGitGitHubArchiveE2E
       ? {
           // 真实公网 smoke 必须证明 Agent 没有偷偷回退开发机 Git；不存在的绝对路径会让
           // 任意 Git 调用稳定得到 ENOENT，同时不影响 WDIO runner 自身的进程清理命令。
-          MARID_GIT_BINARY: resolve(E2E_HOME_DIR, "missing-bin", "git"),
+          QODEX_GIT_BINARY: resolve(E2E_HOME_DIR, "missing-bin", "git"),
         }
       : {}),
-    VITE_MARID_E2E_STORE_BRIDGE: "1",
-    MARID_AGENT_SERVER_ARGS_JSON: "",
-    MARID_AGENT_SERVER_COMMAND: "",
-    MARID_DATA_BASE_DIR: E2E_HOME_DIR,
-    MARID_BUILTIN_PROVIDER_CONFIG_FILE:
-      INITIAL_MARID_BUILTIN_PROVIDER_CONFIG_FILE ?? E2E_DEFAULT_MARID_BUILTIN_PROVIDER_CONFIG_FILE,
-    MARID_DESKTOP_APPLICATION_NAME: "Marid E2E",
-    MARID_DESKTOP_HOME_DIR: E2E_HOME_DIR,
-    MARID_DESKTOP_USE_ELECTRON_DEFAULT_USER_DATA: "1",
-    MARID_DISABLE_FIXED_REMOTE_DEBUGGING_PORT: "1",
-    MARID_E2E_HOME_DIR: E2E_HOME_DIR,
-    MARID_E2E_ARTIFACT_DIR: e2eReporter.artifactDir,
-    MARID_E2E_DEFER_APP_DATA_CLEANUP: "1",
-    MARID_E2E_RUN_ID: E2E_RUN_ID,
-    MARID_ENV: "test",
-    // 修复原因：普通 E2E 的 MARID_ENV=test 会把配置接口路由到测试域；
+    VITE_QODEX_E2E_STORE_BRIDGE: "1",
+    QODEX_AGENT_SERVER_ARGS_JSON: "",
+    QODEX_AGENT_SERVER_COMMAND: "",
+    QODEX_DATA_BASE_DIR: E2E_HOME_DIR,
+    QODEX_BUILTIN_PROVIDER_CONFIG_FILE:
+      INITIAL_QODEX_BUILTIN_PROVIDER_CONFIG_FILE ?? E2E_DEFAULT_QODEX_BUILTIN_PROVIDER_CONFIG_FILE,
+    QODEX_DESKTOP_APPLICATION_NAME: "Qodex E2E",
+    QODEX_DESKTOP_HOME_DIR: E2E_HOME_DIR,
+    QODEX_DESKTOP_USE_ELECTRON_DEFAULT_USER_DATA: "1",
+    QODEX_DISABLE_FIXED_REMOTE_DEBUGGING_PORT: "1",
+    QODEX_E2E_HOME_DIR: E2E_HOME_DIR,
+    QODEX_E2E_ARTIFACT_DIR: e2eReporter.artifactDir,
+    QODEX_E2E_DEFER_APP_DATA_CLEANUP: "1",
+    QODEX_E2E_RUN_ID: E2E_RUN_ID,
+    QODEX_ENV: "test",
+    // 修复原因：普通 E2E 的 QODEX_ENV=test 会把配置接口路由到测试域；
     // 请求安全 capture 与独立 live-team 显式覆盖生产控制面，其他用例保持原行为。
     ...getE2EProviderEndpointEnv(configuredE2ESpecs, e2eProviderPresetName, upstreamE2EHttpMode),
-    ...(process.env.MARID_TELEMETRY_PARITY_CAPTURE_PATH?.trim()
+    ...(process.env.QODEX_TELEMETRY_PARITY_CAPTURE_PATH?.trim()
       ? {
-          MARID_TELEMETRY_PARITY_CAPTURE_PATH: process.env.MARID_TELEMETRY_PARITY_CAPTURE_PATH,
+          QODEX_TELEMETRY_PARITY_CAPTURE_PATH: process.env.QODEX_TELEMETRY_PARITY_CAPTURE_PATH,
         }
       : {}),
-    ...(process.env.MARID_TELEMETRY_PARITY_VARIANT?.trim()
+    ...(process.env.QODEX_TELEMETRY_PARITY_VARIANT?.trim()
       ? {
-          MARID_TELEMETRY_PARITY_VARIANT: process.env.MARID_TELEMETRY_PARITY_VARIANT,
+          QODEX_TELEMETRY_PARITY_VARIANT: process.env.QODEX_TELEMETRY_PARITY_VARIANT,
         }
       : {}),
   },
   framework: "mocha",
   reporters: ["spec"],
-  maxInstances: Number(process.env.MARID_E2E_MAX_INSTANCES ?? "1"),
-  maxInstancesPerCapability: Number(process.env.MARID_E2E_MAX_INSTANCES ?? "1"),
+  maxInstances: Number(process.env.QODEX_E2E_MAX_INSTANCES ?? "1"),
+  maxInstancesPerCapability: Number(process.env.QODEX_E2E_MAX_INSTANCES ?? "1"),
   ...(containerE2E
     ? {
         autoXvfb: true,
@@ -4811,8 +4811,8 @@ export const config: WebdriverIO.Config = {
     // MP-UI-05-remote）：整份跑会把同 spec 的本机用例一起拉进远程结果，失败原因
     // 与远程无关却计在远程账上（实测 MP-UI-06 拖累 MP-UI-05-remote 的通过结论）。
     // 未设置时保持全量，不影响本机回归。
-    ...(process.env.MARID_E2E_MOCHA_GREP?.trim()
-      ? { grep: process.env.MARID_E2E_MOCHA_GREP.trim() }
+    ...(process.env.QODEX_E2E_MOCHA_GREP?.trim()
+      ? { grep: process.env.QODEX_E2E_MOCHA_GREP.trim() }
       : {}),
     // 修复原因：真实模型配置 + 首次会话预热可能超过 30s，保留更宽的单 case 上限，避免还没收到上游响应就被 Mocha 截断。
     // 真实 GitHub Archive smoke 会下载 Claude 官方市场和目标插件；E2E 抓包代理还会
@@ -4901,7 +4901,7 @@ export const config: WebdriverIO.Config = {
         await cleanupE2EDirectory("onPrepare", E2E_CHROMIUM_USER_DATA_ROOT_DIR, true);
         // Bug 根因：beforeSession 发生在 WDIO worker 内，而 Electron/ChromeDriver
         // 启动链继承的是 launcher 派生 worker 时的环境。reset mock 若到 worker 才启动，
-        // Main -> Host 会继续请求真实 Marid 域名；因此与 upgrade mock 一样在派发 worker
+        // Main -> Host 会继续请求真实 Qodex 域名；因此与 upgrade mock 一样在派发 worker
         // 前启动，并通过环境把同一个动态端口传给 Electron 和测试控制端。
         await startCodingPlanTeamMockIfNeeded(configuredE2ESpecs);
         if (codingPlanTeamMockBaseUrl) {
@@ -4918,7 +4918,7 @@ export const config: WebdriverIO.Config = {
           Object.assign(config.runnerEnv, {
             [CODING_PLAN_TEAM_MOCK_BASE_URL_ENV]: codingPlanTeamMockBaseUrl,
             ...(offPeakTeamGateway
-              ? { MARID_OFFPEAK_MOCK_PORT: String(offPeakTeamGateway.port) }
+              ? { QODEX_OFFPEAK_MOCK_PORT: String(offPeakTeamGateway.port) }
               : {}),
           });
         }
@@ -4949,7 +4949,7 @@ export const config: WebdriverIO.Config = {
             if (!E2E_PACKAGED_APP_BINARY_PATH) await stageDesktopE2EAppOutput();
           });
         // 旧覆盖报告只有路径，不能证明源码版本；复用构建不得追认当前工作树。
-        if (process.env.MARID_E2E_SOURCE_EVIDENCE === "1") {
+        if (process.env.QODEX_E2E_SOURCE_EVIDENCE === "1") {
           await withE2ESourceEvidence({
             freshBuild: !E2E_PACKAGED_APP_BINARY_PATH && !shouldReuseDesktopE2EBuild(process.env),
             captureSources: () => captureWorkspaceSources(REPO_ROOT),
@@ -4958,11 +4958,11 @@ export const config: WebdriverIO.Config = {
             artifactDir: e2eReporter.artifactDir,
           });
         } else await buildAndStage();
-        prepareMaridAgentServer();
+        prepareQodexAgentServer();
         // 正式包使用随包 CLI，模板 seed 源不同，不预热；缺模板时各 HOME 照常冷 seed。
         if (!E2E_PACKAGED_APP_BINARY_PATH) {
           await prepareOfficialPluginCacheTemplate({
-            cliEntryPoint: MARID_CLI_ENTRYPOINT,
+            cliEntryPoint: QODEX_CLI_ENTRYPOINT,
             templateHome: E2E_OFFICIAL_PLUGIN_CACHE_TEMPLATE_HOME,
           });
         }
@@ -4982,7 +4982,7 @@ export const config: WebdriverIO.Config = {
     });
   },
   async beforeSession(_config, capabilities, specs, cid) {
-    // Bugfix: 现有 e2e 会读写 ~/.marid/v2；如果多个 spec 复用真实 HOME，
+    // Bugfix: 现有 e2e 会读写 ~/.qodex/v2；如果多个 spec 复用真实 HOME，
     // 上一个 spec 的凭据、最近项目和 localStorage 会串到下一个 spec，
     // 既污染开发者本机数据，也让“首次启动”类断言变得随机。
     // 这里为 e2e 单独准备隔离 HOME，并在每个 session 启动前重置，保证每个 spec 都从干净环境开始。
@@ -5011,7 +5011,7 @@ export const config: WebdriverIO.Config = {
       currentE2EChromiumUserDataDir,
     );
     const storageDiagnostics =
-      process.env.MARID_E2E_STORAGE_WORKER_DIAGNOSTICS === "1" &&
+      process.env.QODEX_E2E_STORAGE_WORKER_DIAGNOSTICS === "1" &&
       specs.some((spec) =>
         spec.endsWith("conversation-session-r3-desktop-settings-authority.test.ts"),
       );
@@ -5044,9 +5044,9 @@ export const config: WebdriverIO.Config = {
       // exit 1，用例卡在等待工作区。预加载统一传 file:// URL，macOS/Linux 行为不变。
       const preload = `--import=${JSON.stringify(pathToFileURL(proxy).href)}`;
       const diagnostics = credentialOwnerProbe
-        ? `process.env.MARID_E2E_CREDENTIAL_OWNER_LOG = ${JSON.stringify(resolve(E2E_HOME_DIR, "credential-owner.ndjson"))};\nawait import(${JSON.stringify(pathToFileURL(proxy).href)});\n`
+        ? `process.env.QODEX_E2E_CREDENTIAL_OWNER_LOG = ${JSON.stringify(resolve(E2E_HOME_DIR, "credential-owner.ndjson"))};\nawait import(${JSON.stringify(pathToFileURL(proxy).href)});\n`
         : storageDiagnostics
-          ? `process.env.MARID_E2E_STORAGE_WORKER_DIAGNOSTICS_DIR = ${JSON.stringify(resolve(e2eReporter.artifactDir, "storage-workers"))};\n`
+          ? `process.env.QODEX_E2E_STORAGE_WORKER_DIAGNOSTICS_DIR = ${JSON.stringify(resolve(e2eReporter.artifactDir, "storage-workers"))};\n`
           : "";
       await writeFile(
         entry,
@@ -5073,18 +5073,18 @@ export const config: WebdriverIO.Config = {
         await startDynamicWorkflowConfigE2EMock(specs);
         // 此 SSH 用例验证会话归属；在 Electron 启动前设置开启前置，避免把本机 mock 的 loopback 交给远端。
         if (specs.some((spec) => spec.endsWith("conversation-session-r3-subagent.test.ts"))) {
-          process.env.MARID_DYNAMIC_WORKFLOW_MODE = "alwaysOn";
+          process.env.QODEX_DYNAMIC_WORKFLOW_MODE = "alwaysOn";
         }
         const fixtureCredentialSecret = resolveE2ECredentialSecret(
           specs,
-          process.env.MARID_CREDENTIAL_SECRET,
+          process.env.QODEX_CREDENTIAL_SECRET,
         );
-        if (fixtureCredentialSecret) process.env.MARID_CREDENTIAL_SECRET = fixtureCredentialSecret;
-        else delete process.env.MARID_CREDENTIAL_SECRET;
+        if (fixtureCredentialSecret) process.env.QODEX_CREDENTIAL_SECRET = fixtureCredentialSecret;
+        else delete process.env.QODEX_CREDENTIAL_SECRET;
         await runE2EBeforeSessionSetup({
           cid,
           specs,
-          configureAgentServerEnv: configureMaridAgentServerEnv,
+          configureAgentServerEnv: configureQodexAgentServerEnv,
           configureCodingPlanTeamMockForSpecs,
           recordBeforeSession: e2eReporter.beforeSession,
           resetHome: resetE2EHome,
@@ -5121,19 +5121,19 @@ export const config: WebdriverIO.Config = {
           specs,
           credentialsFile: E2E_APP_CREDENTIALS_FILE,
           settingsFile: E2E_APP_SETTINGS_FILE,
-          workspacePath: resolve(E2E_HOME_DIR, "MaridProject"),
+          workspacePath: resolve(E2E_HOME_DIR, "QodexProject"),
         });
         stopOfficialMcpAuthRoutingFixture = await prepareOfficialMcpAuthRoutingFixture({
           specs,
           credentialsFile: E2E_APP_CREDENTIALS_FILE,
           settingsFile: E2E_APP_SETTINGS_FILE,
-          workspacePath: resolve(E2E_HOME_DIR, "MaridProject"),
+          workspacePath: resolve(E2E_HOME_DIR, "QodexProject"),
         });
         stopMcpFailureGuidanceFixture = await prepareMcpFailureGuidanceFixture({
           specs,
           credentialsFile: E2E_APP_CREDENTIALS_FILE,
           settingsFile: E2E_APP_SETTINGS_FILE,
-          workspacePath: resolve(E2E_HOME_DIR, "MaridProject"),
+          workspacePath: resolve(E2E_HOME_DIR, "QodexProject"),
         });
         // resetHome 之后、Electron 启动之前安装，Main -> Host -> Agent 才会同时继承
         // case-owned PATH；其他 spec 由 helper 保持 no-op。
@@ -5348,10 +5348,10 @@ export const config: WebdriverIO.Config = {
           await cleanupE2EElectronProcesses("onComplete");
           // 修复原因：逐 worker 删除同一 app data 会重复支付 SQLite 锁重试；下一
           // beforeSession 已负责重置，最后一个 worker 的 HOME 在全部进程退出后统一删除。
-          // 失败保留诊断现场：批次 runner（run.mjs）注入 MARID_E2E_KEEP_HOME_ON_FAIL=1 时，
+          // 失败保留诊断现场：批次 runner（run.mjs）注入 QODEX_E2E_KEEP_HOME_ON_FAIL=1 时，
           // 失败 run 保留 HOME（setting.json/credentials/db 是失败定性的关键证据，
           // r3-rerun §49 曾因 home 被删只能从 run.log 反推 settings）。PASS 行为不变。
-          if (exitCode !== 0 && process.env.MARID_E2E_KEEP_HOME_ON_FAIL === "1") {
+          if (exitCode !== 0 && process.env.QODEX_E2E_KEEP_HOME_ON_FAIL === "1") {
             console.warn(`[e2e] keeping failure home for diagnosis: ${E2E_HOME_DIR}`);
           } else {
             await cleanupE2EDirectory("onComplete-home", E2E_HOME_DIR, true);

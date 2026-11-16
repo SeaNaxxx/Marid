@@ -3,7 +3,7 @@ import type {
   ProviderProvisioningLaneStatus,
   ProviderProvisioningSourceTrigger,
   ProviderProvisioningTrigger,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 type ExecuteSync = (trigger: ProviderProvisioningTrigger) => Promise<void>;
 

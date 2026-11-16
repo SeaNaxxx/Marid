@@ -1,4 +1,4 @@
-import { Emitter, type Event } from "@marid/rpc";
+import { Emitter, type Event } from "@qodex/rpc";
 import {
   toWorkbenchSessions,
   workspaceScopeKey,
@@ -6,7 +6,7 @@ import {
   type WorkbenchReportSession,
   type WorkbenchSession,
   type WorkspaceRef,
-} from "@marid/shared/extension-host";
+} from "@qodex/shared/extension-host";
 
 // 屏幕上的会话（docs/plugins/extension-host.md §3.4、§3.5 ③）：唯一 owner 是 Renderer。
 // Window Host 只持最近一份报告，按报告整份替换，不维护第二份会话状态。

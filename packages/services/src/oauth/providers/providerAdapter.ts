@@ -5,7 +5,7 @@ import type {
   OAuthProviderMeta,
   OAuthTokenSet,
   OAuthUserProfile,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 /** Provider 执行上下文 */
 export interface OAuthProviderContext {

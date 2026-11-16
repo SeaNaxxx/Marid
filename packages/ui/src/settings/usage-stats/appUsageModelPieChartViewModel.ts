@@ -1,4 +1,4 @@
-import type { AppUsageSnapshot } from "@marid/shared";
+import type { AppUsageSnapshot } from "@qodex/shared";
 import type { ChartConfig } from "@/components/ui/chart.js";
 import { getAppUsageModelChartColor } from "@/settings/usage-stats/appUsageChartPalette.js";
 

@@ -14,7 +14,7 @@ import {
   getE2EAppDataPaths,
   setInputValueByTestIdDom,
 } from "#e2e/helpers/desktop-app";
-import { TID_CHAT_ATTACHMENT_BUTTON, TID_V4_COMPOSER_INPUT } from "@marid/shared/test-ids";
+import { TID_CHAT_ATTACHMENT_BUTTON, TID_V4_COMPOSER_INPUT } from "@qodex/shared/test-ids";
 import {
   clickV4SlashOption,
   getV4ComposerText,
@@ -31,7 +31,7 @@ import {
 const SESSION_SKILL_NAME = "e2e-session-skill-catalog";
 const SESSION_SKILL_DIRECTORY = join(
   getE2EAppDataPaths().workspace,
-  ".marid",
+  ".qodex",
   "skills",
   SESSION_SKILL_NAME,
 );

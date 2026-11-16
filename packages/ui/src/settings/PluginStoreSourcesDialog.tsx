@@ -1,9 +1,9 @@
 import { AlertTriangle, LoaderCircle, RefreshCw, Trash2 } from "lucide-react";
-import type { MaridPluginMarketplaceSummary } from "@marid/shared";
-import { CLAUDE_OFFICIAL_PLUGIN_MARKETPLACE_ID } from "@marid/shared";
+import type { QodexPluginMarketplaceSummary } from "@qodex/shared";
+import { CLAUDE_OFFICIAL_PLUGIN_MARKETPLACE_ID } from "@qodex/shared";
 import { Button } from "@/components/ui/button.js";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { resolveMarketplaceDisplayName } from "@/settings/pluginSourceLabel.js";
 import {
   isPublicStoreMarketplaceId,
@@ -12,7 +12,7 @@ import {
 import { DEFAULT_MARKETPLACE_ID } from "@/settings/recommendedPlugins.js";
 
 // 官方市场不可移除：移除后启动时会被重新补种，只会造成「删了又回来」的困惑。
-function isRemovableMarketplace(marketplace: MaridPluginMarketplaceSummary): boolean {
+function isRemovableMarketplace(marketplace: QodexPluginMarketplaceSummary): boolean {
   if (isPublicStoreMarketplaceId(marketplace.id)) return false;
   if (marketplace.id === DEFAULT_MARKETPLACE_ID) return false;
   return true;
@@ -21,9 +21,9 @@ function isRemovableMarketplace(marketplace: MaridPluginMarketplaceSummary): boo
 export function PluginStoreSourceRefreshFailure({
   failure,
 }: {
-  failure: NonNullable<MaridPluginMarketplaceSummary["refreshFailure"]>;
+  failure: NonNullable<QodexPluginMarketplaceSummary["refreshFailure"]>;
 }) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   return (
     <div
       className="mt-1 flex min-w-0 items-start gap-1 text-ui-base text-destructive"
@@ -52,12 +52,12 @@ export function PluginStoreSourcesDialog({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  marketplaces: MaridPluginMarketplaceSummary[];
+  marketplaces: QodexPluginMarketplaceSummary[];
   onUpdateMarketplace: (marketplace: string) => void;
   onRemoveMarketplace: (marketplace: string) => void;
   activeOperations: ReadonlyArray<{ id: string }>;
 }) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const claudeCodePlugins = intl.formatMessage({
     id: "settings.plugins.marketplace.claudeCodePlugins",
   });

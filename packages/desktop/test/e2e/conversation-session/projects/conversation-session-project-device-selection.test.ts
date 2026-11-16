@@ -1,4 +1,4 @@
-import { BufferReader, BufferWriter, deserialize, serialize, VSBuffer } from "@marid/rpc";
+import { BufferReader, BufferWriter, deserialize, serialize, VSBuffer } from "@qodex/rpc";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
@@ -6,7 +6,7 @@ import {
   PlatformChannels,
   InternalChannels,
   buildRemoteHostWorkspaceIdentity,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   TID_VIRTUAL_PROJECT_CREATE_TASK,
   TID_TASK_ITEM,
@@ -16,7 +16,7 @@ import {
   TID_REMOTE_KIND_SSH,
   TID_CONFIRM_DIALOG_CONFIRM,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { clickTestIdByDom, clearAppData, DEFAULT_WORKSPACE } from "#e2e/helpers/desktop-app";
 import { selectRemoteDeviceMenuItem } from "#e2e/helpers/remote-project-actions";
 import {
@@ -36,7 +36,7 @@ import {
   waitForSSHDirectoryStep,
   waitForRemoteTab,
 } from "#e2e/helpers/ssh-remote-p0";
-import type { RemoteProjectDirectory, VirtualProject } from "@marid/services";
+import type { RemoteProjectDirectory, VirtualProject } from "@qodex/services";
 const marker = "E2E_PROJECT_DEVICE_SELECTION";
 const projectName = `${marker}_${Date.now()}`;
 interface DirectoryDelay {
@@ -59,9 +59,9 @@ async function activeTabId() {
     () =>
       (
         window as Window & {
-          __maridTabStoreE2E?: { getState(): { activeTabId: string | null } };
+          __qodexTabStoreE2E?: { getState(): { activeTabId: string | null } };
         }
-      ).__maridTabStoreE2E!.getState().activeTabId,
+      ).__qodexTabStoreE2E!.getState().activeTabId,
   );
 }
 async function holdProjectConnection() {
@@ -163,7 +163,7 @@ async function readDirectory() {
 }
 describe(marker, () => {
   afterEach(async () => {
-    await browser.saveScreenshot(join(process.env.MARID_E2E_ARTIFACT_DIR!, "last-state.png"));
+    await browser.saveScreenshot(join(process.env.QODEX_E2E_ARTIFACT_DIR!, "last-state.png"));
   });
   after(async () => {
     await browser.electron.execute(() => globalThis.__projectConnectionRestore?.());
@@ -308,7 +308,7 @@ describe(marker, () => {
       `${projectName}_OFFLINE`,
     );
 
-    const artifacts = process.env.MARID_E2E_ARTIFACT_DIR!;
+    const artifacts = process.env.QODEX_E2E_ARTIFACT_DIR!;
     for (const locale of ["zh-CN", "en-US"])
       for (const theme of ["light", "dark"]) {
         await browser.execute(
@@ -530,7 +530,7 @@ describe(marker, () => {
       sessionRowDetailsOpened: true,
     });
     await browser.saveScreenshot(
-      join(process.env.MARID_E2E_ARTIFACT_DIR!, "task-hover-no-identity.png"),
+      join(process.env.QODEX_E2E_ARTIFACT_DIR!, "task-hover-no-identity.png"),
     );
     await openForm();
     await expectSelectedDevice(remote.hostId);
@@ -585,7 +585,7 @@ async function createHistoryTask(
   // 空 createSession 是草稿，正式任务前置走公开历史导入，不发送模型请求。
   const call = remote ? callRemoteFixture : callHandoffHost;
   const snapshot = await call<{ session: { sessionId: string } }>(
-    ServiceChannels.MaridAgent,
+    ServiceChannels.QodexAgent,
     "createSession",
     [
       {
@@ -603,7 +603,7 @@ async function createHistoryTask(
     ],
   );
   const taskId = snapshot.session.sessionId;
-  await call(ServiceChannels.MaridTask, "resumeTask", [
+  await call(ServiceChannels.QodexTask, "resumeTask", [
     {
       taskId,
       workspacePath: target.workspacePath,

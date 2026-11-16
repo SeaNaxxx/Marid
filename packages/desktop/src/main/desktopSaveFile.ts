@@ -5,8 +5,8 @@ import { BlockList } from "node:net";
 import type { LookupFunction } from "node:net";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
-import type { SaveFileRequest, SaveFileResult } from "@marid/shared";
-import { PlatformChannels } from "@marid/shared";
+import type { SaveFileRequest, SaveFileResult } from "@qodex/shared";
+import { PlatformChannels } from "@qodex/shared";
 import { BrowserWindow, dialog, ipcMain } from "electron";
 import { Agent, fetch as undiciFetch } from "undici";
 
@@ -134,7 +134,7 @@ async function fetchPublicRemoteUrl(
 
 async function downloadRemoteFile(sourceUrl: URL, destinationPath: string): Promise<void> {
   const controller = new AbortController();
-  const temporaryDirectory = await mkdtemp(join(tmpdir(), "marid-save-file-"));
+  const temporaryDirectory = await mkdtemp(join(tmpdir(), "qodex-save-file-"));
   const temporaryPath = join(temporaryDirectory, "download");
   let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
   let file: Awaited<ReturnType<typeof open>> | null = null;

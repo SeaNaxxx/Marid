@@ -5,8 +5,8 @@ import type {
   MigrateLegacyCommonMcpResult,
   NativeMcpServerRecord,
   SaveCliMcpToUserDirectoryRequest,
-} from "@marid/shared";
-import type { IMcpSyncService } from "@marid/services";
+} from "@qodex/shared";
+import type { IMcpSyncService } from "@qodex/services";
 import { logger } from "@/logger.js";
 
 export type McpPlatformService = Pick<

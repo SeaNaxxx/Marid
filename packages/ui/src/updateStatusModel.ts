@@ -2,7 +2,7 @@ import type {
   ElectronReleaseChannel,
   PostUpdateReleaseNotesPayload,
   UpdateStatePayload,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export type UpdateStatusDialogPhase =
   | "before-download"

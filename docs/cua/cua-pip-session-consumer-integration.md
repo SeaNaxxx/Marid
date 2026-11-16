@@ -2,7 +2,7 @@
 
 ## Ownership
 
-Marid publishes product facts only. `@marid/marid-cua` owns PiP panels, grouping,
+Qodex publishes product facts only. `@qodex/qodex-cua` owns PiP panels, grouping,
 dismissal, terminal badges, capture admission, native stacking and retry policy.
 
 ```text
@@ -19,10 +19,10 @@ computer-use/operation-event --------> TurnStarted / TurnEnded / SessionClosed
 ```
 
 Desktop Main keeps only ephemeral `{windowId -> activeSessionId}`, the focused
-Marid window and a process-lifetime `focusRevision`. A background renderer may
-update its map, but only the frontmost Marid window publishes global focus. When
-focus moves between Marid windows, Main sends `sessionId=null` to the old host
-before sending the new host's session. When no Marid window is focused, the last
+Qodex window and a process-lifetime `focusRevision`. A background renderer may
+update its map, but only the frontmost Qodex window publishes global focus. When
+focus moves between Qodex windows, Main sends `sessionId=null` to the old host
+before sending the new host's session. When no Qodex window is focused, the last
 host receives `sessionId=null`.
 
 The existing `computer-use/operation-event` sideband remains outside conversation
@@ -32,8 +32,8 @@ create another Helper or presentation client.
 
 ## Strict compatibility
 
-The Local Host imports `@marid/marid-cua/pip-session` for pure event types and
-`@marid/marid-cua/pip-session/node` for the control client. It does not parse
+The Local Host imports `@qodex/qodex-cua/pip-session` for pure event types and
+`@qodex/qodex-cua/pip-session/node` for the control client. It does not parse
 NDJSON or name broker methods. The client must complete the exact runtime/version
 handshake before sending events. A mismatch disables Auto-PiP for that Helper
 transport and produces one diagnostic; there is no `pip_stop`, clear, freeze or
@@ -49,7 +49,7 @@ legacy group fallback.
 | `session-closed` | `SessionClosed` |
 
 Tool scheduled/started events continue to drive the Windows operation indicator,
-but do not define PiP lifecycle. Marid never manufactures a green badge from
+but do not define PiP lifecycle. Qodex never manufactures a green badge from
 connection loss or controller state.
 
 ## Verification catalog

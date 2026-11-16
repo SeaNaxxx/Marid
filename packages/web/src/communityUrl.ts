@@ -1,14 +1,14 @@
 import {
-  DEFAULT_MARID_ENDPOINT_ORIGIN,
-  MARID_VERSION,
+  DEFAULT_QODEX_ENDPOINT_ORIGIN,
+  QODEX_VERSION,
   buildHelpAppConfigUrl,
   createHelpAppConfigReader,
-  resolveOptionalMaridAuthorization,
+  resolveOptionalQodexAuthorization,
   resolveHelpAppConfig,
   toZhOrEnLocale,
   type Locale,
-  type MaridJwtTokenResolver,
-} from "@marid/shared";
+  type QodexJwtTokenResolver,
+} from "@qodex/shared";
 import { BrowserOAuthCredentialRepo } from "#src/auth/browserOAuthCredentialRepo.js";
 import localDefaultAppConfig from "../../../config/default.json" with { type: "json" };
 
@@ -16,7 +16,7 @@ interface ResolveWebCommunityUrlOptions {
   fetchImpl?: typeof fetch;
   localConfig?: unknown;
   endpointOrigin?: string;
-  resolveMaridJwtToken?: MaridJwtTokenResolver;
+  resolveQodexJwtToken?: QodexJwtTokenResolver;
 }
 
 const readHelpConfig = createHelpAppConfigReader({
@@ -27,14 +27,14 @@ export async function resolveWebHelpConfig(options: ResolveWebCommunityUrlOption
   const env = import.meta.env;
   const endpoint =
     options.endpointOrigin ??
-    (env?.VITE_MARID_BASE_URL?.trim() ||
-      env?.VITE_MARID_ENDPOINT_ORIGIN?.trim() ||
-      DEFAULT_MARID_ENDPOINT_ORIGIN);
+    (env?.VITE_QODEX_BASE_URL?.trim() ||
+      env?.VITE_QODEX_ENDPOINT_ORIGIN?.trim() ||
+      DEFAULT_QODEX_ENDPOINT_ORIGIN);
   // 服务端拒绝 platform=web；浏览器省略可选平台参数，避免伪装桌面系统。
-  const url = buildHelpAppConfigUrl(endpoint, MARID_VERSION);
-  const authorization = await resolveOptionalMaridAuthorization(
+  const url = buildHelpAppConfigUrl(endpoint, QODEX_VERSION);
+  const authorization = await resolveOptionalQodexAuthorization(
     // 可选配置读取不能顺带清理过期或残缺的登录态；恢复/登出仍由原认证入口处理。
-    options.resolveMaridJwtToken ?? (() => new BrowserOAuthCredentialRepo().loadMaridJwtToken()),
+    options.resolveQodexJwtToken ?? (() => new BrowserOAuthCredentialRepo().loadQodexJwtToken()),
   );
   let remote: unknown;
   try {

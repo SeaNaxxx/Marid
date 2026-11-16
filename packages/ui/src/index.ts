@@ -34,8 +34,8 @@ export { useTheme } from "./useTheme.js";
 export type { Theme } from "./useTheme.js";
 export { useTestActions } from "./test-actions.js";
 export type { TestActions } from "./test-actions.js";
-export { StoreProvider, useMaridStore } from "./store/StoreProvider.js";
-export type { MaridState } from "./store/index.js";
+export { StoreProvider, useQodexStore } from "./store/StoreProvider.js";
+export type { QodexState } from "./store/index.js";
 export {
   bindRemoteWorkspacePath,
   getRemoteWorkspaceSession,
@@ -77,7 +77,7 @@ export {
   useGitActions,
 } from "./hooks/index.js";
 
-export { MaridIntlProvider, useMaridIntl, LocaleSwitcher } from "./i18n/index.js";
+export { QodexIntlProvider, useQodexIntl, LocaleSwitcher } from "./i18n/index.js";
 export { ResourceManagerApp } from "./resource-manager/ResourceManagerApp.js";
 export type {
   ResourceManagerAppProps,

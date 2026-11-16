@@ -55,8 +55,8 @@
       );
     </script>
     <script>
-      // 页面只经 window.marid 读写；window.marid 是不可配置的全局属性，顶层不再声明同名变量。
-      const host = window.marid;
+      // 页面只经 window.qodex 读写；window.qodex 是不可配置的全局属性，顶层不再声明同名变量。
+      const host = window.qodex;
       const applyHostStyles = () => {
         const variables = host.hostContext?.styles?.variables ?? {};
         for (const [name, value] of Object.entries(variables)) {

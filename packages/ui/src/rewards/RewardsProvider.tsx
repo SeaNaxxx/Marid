@@ -7,10 +7,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { buildRewardsUrl, resolveRewardsOrigin, MARID_ENV } from "@marid/shared";
+import { buildRewardsUrl, resolveRewardsOrigin, QODEX_ENV } from "@qodex/shared";
 import { usePlatform } from "@/hooks/usePlatform.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
-import { useMaridStore } from "@/store/StoreProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
+import { useQodexStore } from "@/store/StoreProvider.js";
 import { resolveTheme } from "@/useTheme.js";
 import { RewardsWebview } from "@/rewards/RewardsWebview.js";
 import { logger } from "@/logger.js";
@@ -26,11 +26,11 @@ export function RewardsProvider({
 }) {
   const [opened, setOpened] = useState(false);
   const platform = usePlatform();
-  const { locale } = useMaridIntl();
-  const theme = useMaridStore((s) => s.theme);
-  const user = useMaridStore((s) => s.user);
-  const loginAttempt = useMaridStore((s) => s.loginEntryAttempt);
-  const requestLogin = useMaridStore((s) => s.requestLoginEntry);
+  const { locale } = useQodexIntl();
+  const theme = useQodexStore((s) => s.theme);
+  const user = useQodexStore((s) => s.user);
+  const loginAttempt = useQodexStore((s) => s.loginEntryAttempt);
+  const requestLogin = useQodexStore((s) => s.requestLoginEntry);
   // 登录后营销实例会重建；续接意图由窗口级 Provider 持有，不能挂在旧 controller 上。
   const pendingLogin = useRef<number | null>(null);
   const openPage = useCallback(async () => {
@@ -38,7 +38,7 @@ export function RewardsProvider({
     else
       await platform.openExternal(
         buildRewardsUrl(
-          resolveRewardsOrigin({ env: MARID_ENV }),
+          resolveRewardsOrigin({ env: QODEX_ENV }),
           locale,
           resolveTheme(theme) === "dark" ? "zai-dark" : "zai-light",
         ),

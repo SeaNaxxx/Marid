@@ -1,4 +1,4 @@
-import type { BrowserPageState } from "@marid/shared";
+import type { BrowserPageState } from "@qodex/shared";
 import type { ControlledViewWebContents } from "./browserCommandTypes.js";
 
 /**

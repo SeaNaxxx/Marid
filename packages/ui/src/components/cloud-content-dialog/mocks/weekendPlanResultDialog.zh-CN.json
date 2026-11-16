@@ -7,7 +7,7 @@
   "dialog": {
     "hero": {
       "type": "interactive_bundle",
-      "runtime": "marid-hero-sandbox-v1",
+      "runtime": "qodex-hero-sandbox-v1",
       "viewport": {
         "aspectRatio": "4:3"
       },

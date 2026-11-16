@@ -1,11 +1,11 @@
 import { parentPort, workerData } from "node:worker_threads";
 import { tasksStorageWorkerDataSchema } from "./contract.js";
-import { prepareTasksIndexStorage, createSettingService } from "@marid/services/storage-startup";
+import { prepareTasksIndexStorage, createSettingService } from "@qodex/services/storage-startup";
 import {
   classifyDatabaseStartupError,
   databaseStartupErrorDetails,
   databaseMigrationFactsSchema,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 const data = tasksStorageWorkerDataSchema.parse(workerData);
 try {

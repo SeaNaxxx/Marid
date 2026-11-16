@@ -1,10 +1,10 @@
-import type { ModelSelectionView, ProviderSettingsView } from "@marid/services";
+import type { ModelSelectionView, ProviderSettingsView } from "@qodex/services";
 import {
   resolveModelProviderFamilySpecByProviderId,
   type ProviderFamilyDomain,
   type ProviderFamilyConnectionSelection,
-  type MaridProvider,
-} from "@marid/shared";
+  type QodexProvider,
+} from "@qodex/shared";
 import type { ModelSelectGroup, ModelSelectGroupItem } from "@/ModelConfigSelect.js";
 import {
   buildRegistryModelSelectGroups,
@@ -56,7 +56,7 @@ export function buildComposerPlanGroups(
   groups: readonly ModelSelectGroup[],
   products: readonly TeamProduct[],
   settingsView?: ProviderSettingsView | null,
-  agentProvider: MaridProvider = "glm",
+  agentProvider: QodexProvider = "glm",
   labels: ModelProviderGroupLabelOptions = {},
   selections?: Partial<Record<ProviderFamilyDomain, ProviderFamilyConnectionSelection>>,
 ): ComposerPlanGroup[] {

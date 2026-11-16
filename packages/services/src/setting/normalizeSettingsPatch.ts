@@ -1,4 +1,4 @@
-import type { AppSettings } from "@marid/shared";
+import type { AppSettings } from "@qodex/shared";
 
 export function normalizeSettingsPatch(patch: Partial<AppSettings>): Partial<AppSettings> {
   const normalizedPatch = { ...patch };
@@ -69,13 +69,13 @@ export function normalizeSettingsPatch(patch: Partial<AppSettings>): Partial<App
   }
 
   if (
-    "maridEndpointOrigin" in normalizedPatch &&
-    typeof normalizedPatch.maridEndpointOrigin === "string"
+    "qodexEndpointOrigin" in normalizedPatch &&
+    typeof normalizedPatch.qodexEndpointOrigin === "string"
   ) {
     // 非生产 endpoint override 需要支持 Reset 清空；RPC/JSON 对 undefined 不稳定时，用空串也能回到默认生产域。
-    const trimmedMaridEndpointOrigin = normalizedPatch.maridEndpointOrigin.trim();
-    normalizedPatch.maridEndpointOrigin =
-      trimmedMaridEndpointOrigin.length > 0 ? trimmedMaridEndpointOrigin : undefined;
+    const trimmedQodexEndpointOrigin = normalizedPatch.qodexEndpointOrigin.trim();
+    normalizedPatch.qodexEndpointOrigin =
+      trimmedQodexEndpointOrigin.length > 0 ? trimmedQodexEndpointOrigin : undefined;
   }
 
   if (

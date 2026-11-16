@@ -55,7 +55,7 @@ describe("资源管理器网络", () => {
       const externalResult = await browser.electron.execute(async (electron, origin) => {
         return (
           await electron.session
-            .fromPartition("persist:marid-embedded-browser")
+            .fromPartition("persist:qodex-embedded-browser")
             .fetch(`${origin}/excluded-external-page`)
         ).text();
       }, url);
@@ -92,8 +92,8 @@ describe("资源管理器网络", () => {
       ]) {
         await browser.execute(
           (themeValue, localeValue) => {
-            localStorage.setItem("marid-theme", themeValue!);
-            localStorage.setItem("marid-locale-preference", localeValue!);
+            localStorage.setItem("qodex-theme", themeValue!);
+            localStorage.setItem("qodex-locale-preference", localeValue!);
           },
           theme,
           locale,
@@ -106,7 +106,7 @@ describe("资源管理器网络", () => {
             "renderer-network-test",
           ),
         );
-        await browser.saveScreenshot(join(tmpdir(), `marid-network-${theme}.png`));
+        await browser.saveScreenshot(join(tmpdir(), `qodex-network-${theme}.png`));
       }
       await $('//button[normalize-space(.)="Clear" or normalize-space(.)="清空"]').click();
       await browser.waitUntil(

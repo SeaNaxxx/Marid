@@ -3,8 +3,8 @@ import type {
   BotConfig,
   BotServiceStatus,
   BotWorkspaceRef,
-} from "@marid/shared";
-import { ALL_BOT_WORKSPACES, BOT_BIND_CODE_TTL_MS } from "@marid/shared";
+} from "@qodex/shared";
+import { ALL_BOT_WORKSPACES, BOT_BIND_CODE_TTL_MS } from "@qodex/shared";
 import {
   DingDingChannelIcon,
   DiscordChannelIcon,

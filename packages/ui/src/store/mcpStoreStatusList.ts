@@ -1,14 +1,14 @@
-import type { McpServerStatus, MaridMcpServer, MaridMcpServerStatusSnapshot } from "@marid/shared";
+import type { McpServerStatus, QodexMcpServer, QodexMcpServerStatusSnapshot } from "@qodex/shared";
 
 type MappedMcpServerStatus = {
-  authorization?: MaridMcpServerStatusSnapshot["authorization"];
+  authorization?: QodexMcpServerStatusSnapshot["authorization"];
   error?: string;
-  failureKind?: MaridMcpServerStatusSnapshot["failureKind"];
+  failureKind?: QodexMcpServerStatusSnapshot["failureKind"];
   serverRequestId?: string;
   status: McpServerStatus;
 };
 
-function mapRuntimeStatusToUi(snapshot: MaridMcpServerStatusSnapshot): MappedMcpServerStatus {
+function mapRuntimeStatusToUi(snapshot: QodexMcpServerStatusSnapshot): MappedMcpServerStatus {
   switch (snapshot.status) {
     case "connected":
     case "connecting":
@@ -40,13 +40,13 @@ function mapRuntimeStatusToUi(snapshot: MaridMcpServerStatusSnapshot): MappedMcp
 }
 
 export function mergeMcpServerStatusSnapshots(
-  servers: MaridMcpServer[],
-  statuses: Record<string, MaridMcpServerStatusSnapshot>,
+  servers: QodexMcpServer[],
+  statuses: Record<string, QodexMcpServerStatusSnapshot>,
   options: { markMissingConnectingAsError?: boolean } = {},
-): MaridMcpServer[] {
+): QodexMcpServer[] {
   const markMissingConnectingAsError = options.markMissingConnectingAsError ?? true;
   return servers.map((server) => {
-    if (server.source !== "maridagentmcp") {
+    if (server.source !== "qodexagentmcp") {
       return server;
     }
     const snapshot = statuses[server.name];

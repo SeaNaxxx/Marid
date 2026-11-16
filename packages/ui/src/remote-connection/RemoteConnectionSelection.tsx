@@ -6,7 +6,7 @@ import type {
   SourceServerManagementSnapshot,
   SSHConfigAliasOption,
   WSLDistro,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   BoxIcon,
   CloudIcon,
@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input.js";
 import { Button } from "@/components/ui/button.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { findPreferredSourceConnectionProfile } from "@/lib/remoteConnectionWizard.js";
 import {
   getRemoteDevicePresentationInput,
@@ -99,7 +99,7 @@ export function RemoteConnectionSelection({
   onNewConnection: (kind: RemoteTarget["kind"]) => void;
   remoteConversationWorkspaceBySourceServerId: AppSettingsConversationWorkspaceMap;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const [query, setQuery] = useState("");
   const matches = (...values: Array<string | undefined>) =>
     values.join(" ").toLocaleLowerCase().includes(query.trim().toLocaleLowerCase());

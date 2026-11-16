@@ -2,7 +2,7 @@ import { FileTextIcon, GlobeIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import type { MessageFileLinkTarget } from "@/components/ai-elements/message.js";
 import { useWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import {
   type AssistantPreviewCard,
   type AssistantPreviewCardFileStatService,
@@ -194,7 +194,7 @@ export function AssistantPreviewCards({
   onAutoOpenPptx,
   compactForRemoteControl,
 }: AssistantPreviewCardsProps) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const { visibleCards, settled } = useAssistantPreviewCardValidation(cards, {
     workspacePath,
     workspaceIdentity,
@@ -272,7 +272,7 @@ function AssistantPreviewCardRow({
   onOpenCodeViewer?: (source: CodeViewerSource) => void;
   compactForRemoteControl?: boolean;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const filePath = getAssistantPreviewCardFilePath(card);
   const renderAsFile = shouldRenderAssistantPreviewCardAsFile(card, {
     workspaceIdentity,
@@ -297,10 +297,10 @@ function AssistantPreviewCardRow({
         <div
           className="group/preview-card relative isolate flex w-full items-center gap-3 rounded-xl border border-card-border bg-card p-3 pr-4 text-foreground"
           data-preview-card-title={card.title}
-          data-marid-stream-animate="true"
+          data-qodex-stream-animate="true"
           style={
             {
-              "--marid-stream-animation-delay": `${animationDelayMs}ms`,
+              "--qodex-stream-animation-delay": `${animationDelayMs}ms`,
             } as CSSProperties
           }
         >

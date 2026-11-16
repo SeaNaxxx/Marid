@@ -1,4 +1,4 @@
-import { MARID_AGENT_PROVIDER } from "@marid/shared";
+import { QODEX_AGENT_PROVIDER } from "@qodex/shared";
 import { useSubagents } from "@/hooks/useSubagents.js";
 import { SUBAGENT_WORKFLOW_COLOR } from "@/lib/subagentColors.js";
 import { WorkflowAgentFace } from "@/components/workflow-timeline/WorkflowAgentFace.js";
@@ -605,7 +605,7 @@ function SubagentTabAvatar({
 }: {
   tab: Extract<WorkspaceSidePaneTab, { type: "subagent-session" }>;
 }) {
-  const { agents } = useSubagents(tab.workspacePath, MARID_AGENT_PROVIDER, tab.workspaceIdentity);
+  const { agents } = useSubagents(tab.workspacePath, QODEX_AGENT_PROVIDER, tab.workspaceIdentity);
   const key = tab.subagentType.trim().toLowerCase();
   const color = agents.find(
     (agent) => agent.name.trim().toLowerCase() === key || agent.id.trim().toLowerCase() === key,

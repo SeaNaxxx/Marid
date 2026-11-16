@@ -1,12 +1,12 @@
 import { USAGE_ENTITLEMENT_ACCESS_REFRESH_MS } from "@/lib/usageEntitlementRefreshPolicy.js";
-import { validateModelSelectionOptions, type ModelSelectionView } from "@marid/provider";
+import { validateModelSelectionOptions, type ModelSelectionView } from "@qodex/provider";
 import {
   isBuiltinModelProviderId,
   isStartPlanModelProviderId,
   resolveModelProviderFamilySpecByProviderId,
   type ModelSelection,
   type UsageEntitlementSnapshot,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   bucketMatchesModel,
   bucketRemainingRatio,

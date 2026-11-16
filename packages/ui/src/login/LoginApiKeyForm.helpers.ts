@@ -3,9 +3,9 @@ import {
   type AppSettings,
   type Locale,
   type ProviderFamilyDomain,
-} from "@marid/shared";
-import type { ModelSelectionView } from "@marid/services";
-import { encodeCustomModelValue } from "@/lib/maridCustomModelValue.js";
+} from "@qodex/shared";
+import type { ModelSelectionView } from "@qodex/services";
+import { encodeCustomModelValue } from "@/lib/qodexCustomModelValue.js";
 
 export type ApiKeyProviderChoice = "zai" | "bigmodel";
 

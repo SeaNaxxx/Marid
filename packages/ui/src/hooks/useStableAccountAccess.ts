@@ -1,7 +1,7 @@
 import { useRef } from "react";
-import type { MaridAccountAccess, MaridProviderAccountAccess } from "@marid/shared";
+import type { QodexAccountAccess, QodexProviderAccountAccess } from "@qodex/shared";
 
-type StableAccountAccess = MaridProviderAccountAccess | MaridAccountAccess;
+type StableAccountAccess = QodexProviderAccountAccess | QodexAccountAccess;
 
 /** Schema 解析会为同一份 Account Access 生成新对象；hook 依赖必须按配置值稳定。 */
 export function useStableAccountAccess(

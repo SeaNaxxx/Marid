@@ -1,7 +1,7 @@
 import { runConfirmedProcess } from "#e2e/helpers/confirmed-process";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { buildServerRemoteWorkspaceIdentity } from "@marid/shared";
+import { buildServerRemoteWorkspaceIdentity } from "@qodex/shared";
 import {
   TID_SETTINGS_PAGE,
   TID_SETTINGS_BACK_BUTTON,
@@ -10,7 +10,7 @@ import {
   TID_SETTINGS_SECTION_NAV,
   TID_TASK_SETTINGS_BUTTON,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   clearAppData,
   clickTestIdByDom,
@@ -50,19 +50,19 @@ const variant = process.env.R3_UNINSTALL_CASE ?? "preserve-data";
 if (variant !== "preserve-data" && variant !== "replace-environment") {
   throw new Error(`Unsupported R3_UNINSTALL_CASE: ${variant}`);
 }
-const artifactDir = resolve(process.env.MARID_E2E_ARTIFACT_DIR ?? ".e2e-artifacts/r3-uninstall");
+const artifactDir = resolve(process.env.QODEX_E2E_ARTIFACT_DIR ?? ".e2e-artifacts/r3-uninstall");
 
 async function readInstallFacts(config: SSHConnectionConfig) {
   const result = await runSSHCommand(
     config,
-    'echo "installationId=$(grep -o \'"installationId": *"[^"]*"\' "$HOME/.marid/server/install.json" 2>/dev/null | grep -oE "[0-9a-f-]{36}")"; ' +
-      'echo "current=$(test -f "$HOME/.marid/server/current.json" && echo present || echo none)"; ' +
-      'echo "releases=$(ls "$HOME/.marid/server/releases" 2>/dev/null | tr "\\n" ",")"; ' +
-      'echo "configSentinel=$(cat "$HOME/.marid/server/config/e2e-sentinel.txt" 2>/dev/null || echo none)"; ' +
-      'echo "legacyAsset=$(test -e "$HOME/.marid/server/e2e-legacy-asset.bin" && echo present || echo none)"; ' +
-      'echo "userData=$(cat "$HOME/.marid/e2e-user-data.txt" 2>/dev/null || echo none)"; ' +
-      'echo "serverEntries=$(ls -A "$HOME/.marid/server" 2>/dev/null | tr "\\n" ",")"; ' +
-      'echo "uninstalledMarker=$(cat "$HOME/.marid/server/uninstalled.json" 2>/dev/null | tr -d "\\n ")"',
+    'echo "installationId=$(grep -o \'"installationId": *"[^"]*"\' "$HOME/.qodex/server/install.json" 2>/dev/null | grep -oE "[0-9a-f-]{36}")"; ' +
+      'echo "current=$(test -f "$HOME/.qodex/server/current.json" && echo present || echo none)"; ' +
+      'echo "releases=$(ls "$HOME/.qodex/server/releases" 2>/dev/null | tr "\\n" ",")"; ' +
+      'echo "configSentinel=$(cat "$HOME/.qodex/server/config/e2e-sentinel.txt" 2>/dev/null || echo none)"; ' +
+      'echo "legacyAsset=$(test -e "$HOME/.qodex/server/e2e-legacy-asset.bin" && echo present || echo none)"; ' +
+      'echo "userData=$(cat "$HOME/.qodex/e2e-user-data.txt" 2>/dev/null || echo none)"; ' +
+      'echo "serverEntries=$(ls -A "$HOME/.qodex/server" 2>/dev/null | tr "\\n" ",")"; ' +
+      'echo "uninstalledMarker=$(cat "$HOME/.qodex/server/uninstalled.json" 2>/dev/null | tr -d "\\n ")"',
   );
   return Object.fromEntries(
     result.stdout
@@ -144,8 +144,8 @@ describe(`${CASE_MARKER}: ${variant}，卸载重装与独立环境替换`, () =>
     // 前置：已安装目标；放置 config 哨兵、旧散资产、用户数据哨兵。
     const seed = await runSSHCommand(
       config,
-      'mkdir -p "$HOME/.marid/server/config" && echo R3_CONFIG_SENTINEL > "$HOME/.marid/server/config/e2e-sentinel.txt" && ' +
-        'head -c 1024 /dev/zero > "$HOME/.marid/server/e2e-legacy-asset.bin" && echo R3_USER_DATA > "$HOME/.marid/e2e-user-data.txt" && echo ok',
+      'mkdir -p "$HOME/.qodex/server/config" && echo R3_CONFIG_SENTINEL > "$HOME/.qodex/server/config/e2e-sentinel.txt" && ' +
+        'head -c 1024 /dev/zero > "$HOME/.qodex/server/e2e-legacy-asset.bin" && echo R3_USER_DATA > "$HOME/.qodex/e2e-user-data.txt" && echo ok',
     );
     expect(seed.stdout.trim()).toBe("ok");
     const before = await readInstallFacts(config);
@@ -156,8 +156,8 @@ describe(`${CASE_MARKER}: ${variant}，卸载重装与独立环境替换`, () =>
     if (before.current === "present") {
       // 正式 CLI 卸载：收到每次确认提示后分别输入 DELETE，避免旧管道固定等待 33 秒。
       // 保留两次人工确认协议与 docker exec -i；不使用 --force 或直接删除目录代替卸载。
-      const container = process.env.MARID_E2E_SSH_CONTAINER?.trim();
-      if (!container) throw new Error(`${CASE_MARKER}: 缺少 MARID_E2E_SSH_CONTAINER`);
+      const container = process.env.QODEX_E2E_SSH_CONTAINER?.trim();
+      if (!container) throw new Error(`${CASE_MARKER}: 缺少 QODEX_E2E_SSH_CONTAINER`);
       const uninstallStarted = performance.now();
       const uninstall = await runConfirmedProcess(
         "docker",
@@ -169,10 +169,10 @@ describe(`${CASE_MARKER}: ${variant}，卸载重装与独立环境替换`, () =>
           container,
           "bash",
           "-lc",
-          '"$HOME/.marid/server/bin/marid" uninstall --server-root "$HOME/.marid/server" --json',
+          '"$HOME/.qodex/server/bin/qodex" uninstall --server-root "$HOME/.qodex/server" --json',
         ],
         {
-          prompts: ["Type DELETE to uninstall Marid Server: ", "Type DELETE again to confirm: "],
+          prompts: ["Type DELETE to uninstall Qodex Server: ", "Type DELETE again to confirm: "],
           answer: "DELETE",
           timeoutMs: 120_000,
         },
@@ -294,12 +294,12 @@ describe(`${CASE_MARKER}: ${variant}，卸载重装与独立环境替换`, () =>
     // 身份变化只由真正独立的数据环境触发。完整封存旧数据，不能只删 UUID 却共享历史库。
     const replaced = await runSSHCommand(
       config,
-      'test ! -e "$HOME/r3-uninstall-preserved-data" && mv "$HOME/.marid" "$HOME/r3-uninstall-preserved-data"',
+      'test ! -e "$HOME/r3-uninstall-preserved-data" && mv "$HOME/.qodex" "$HOME/r3-uninstall-preserved-data"',
     );
     expect(replaced.code).toBe(0);
     facts.originalDataArchived = true;
     // 同一线路安装到空环境，检测到不同身份后必须等待确认；取消不改绑原连接。
-    await openWorkspaceDraftFromSidebar(resolve(getE2EAppDataPaths().homeDir, "MaridProject"));
+    await openWorkspaceDraftFromSidebar(resolve(getE2EAppDataPaths().homeDir, "QodexProject"));
     await openSSHRemoteDialog(CASE_MARKER);
     await fillSSHPasswordSettings(config);
     await clickLastEnabledSSHDialogButton(CASE_MARKER);
@@ -469,7 +469,7 @@ describe(`${CASE_MARKER}: ${variant}，卸载重装与独立环境替换`, () =>
     expect(reinstalled.userData).toBe("none");
     // 真实旧任务保留在封存的数据环境；新环境不能因目录相同而得到旧历史。
     const runtime = JSON.parse(
-      (await runSSHCommand(config, 'cat "$HOME/.marid/server/current.json"')).stdout,
+      (await runSSHCommand(config, 'cat "$HOME/.qodex/server/current.json"')).stdout,
     );
     const history = await runSSHCommand(
       config,

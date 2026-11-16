@@ -15,7 +15,7 @@
  */
 
 import { ipcMain } from "electron";
-import { PlatformChannels, rendererHeapSampleSchema } from "@marid/shared";
+import { PlatformChannels, rendererHeapSampleSchema } from "@qodex/shared";
 import type { ProcessResourceSampleSource } from "./processResourceSampleSources.js";
 import { isMainApplicationWindowWebContents } from "./resourceManagerWindow.js";
 

@@ -6,25 +6,25 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import WebSocket from "ws";
-import { Emitter, VSBuffer, SocketProtocol, type ISocket, type IServerChannel } from "@marid/rpc";
-import { MARID_RPC_HOST_CAPABILITY_HEADER } from "@marid/shared";
+import { Emitter, VSBuffer, SocketProtocol, type ISocket, type IServerChannel } from "@qodex/rpc";
+import { QODEX_RPC_HOST_CAPABILITY_HEADER } from "@qodex/shared";
 
 const childMode = process.argv.includes("--stdio-child");
 const home = childMode
-  ? process.env.MARID_DATA_BASE_DIR!
+  ? process.env.QODEX_DATA_BASE_DIR!
   : await mkdtemp(join(tmpdir(), "credential-rpc-"));
-process.env.MARID_DATA_BASE_DIR = home;
-process.env.MARID_DESKTOP_HOME_DIR = home;
-const { createHttpServer } = await import("@marid/server");
-const { createStdioServer } = await import("@marid/server/stdio");
+process.env.QODEX_DATA_BASE_DIR = home;
+process.env.QODEX_DESKTOP_HOME_DIR = home;
+const { createHttpServer } = await import("@qodex/server");
+const { createStdioServer } = await import("@qodex/server/stdio");
 const { createCoreHttpServer } =
-  await import("../../../../../marid-server-cli/src/server-core/http.js");
+  await import("../../../../../qodex-server-cli/src/server-core/http.js");
 const { exposeWindowHostAttachmentServices } =
   await import("../../../../src/host/windowHostAttachmentRpcPolicy.js");
-const { ServiceCollection, ICredentialService } = await import("@marid/services");
-const { createCredentialService } = await import("@marid/services/node");
-const { connectViaProtocol } = await import("@marid/client");
-const file = join(home, ".marid", "v2", "credentials.json");
+const { ServiceCollection, ICredentialService } = await import("@qodex/services");
+const { createCredentialService } = await import("@qodex/services/node");
+const { connectViaProtocol } = await import("@qodex/client");
+const file = join(home, ".qodex", "v2", "credentials.json");
 const raw = Buffer.from('{"unfinished":');
 const token = "synthetic-ingress-token";
 
@@ -38,16 +38,16 @@ if (childMode) {
   await server.stop();
   process.exit(0);
 }
-await mkdir(join(home, ".marid", "v2"), { recursive: true });
+await mkdir(join(home, ".qodex", "v2"), { recursive: true });
 
 async function snapshot() {
   return {
     bytes: (await readFile(file)).toString("base64"),
-    files: await readdir(join(home, ".marid", "v2")),
+    files: await readdir(join(home, ".qodex", "v2")),
     generation: await readFile(`${file}.recovery-generation`, "utf8").catch(() => null),
   };
 }
-async function check(credential: import("@marid/services").ICredentialService) {
+async function check(credential: import("@qodex/services").ICredentialService) {
   await writeFile(file, raw);
   const before = await snapshot();
   const denied: Record<string, string> = {};
@@ -121,18 +121,18 @@ try {
     const sockets: WebSocket[] = [];
     try {
       const ordinary = await connect(`${base.replace("http:", "ws:")}/ws${auth}`, {
-        "x-marid-client-mode": "desktop-continuous",
+        "x-qodex-client-mode": "desktop-continuous",
       });
       sockets.push(ordinary.ws);
       const direct = await check(ordinary.credential);
       const response = await fetch(`${base}/api/rpc-host-capability${auth}`, { method: "POST" });
       assert.equal(response.status, 200);
       const capability = (await response.json()) as { capability: string };
-      const hostHeaders = { [MARID_RPC_HOST_CAPABILITY_HEADER]: capability.capability };
+      const hostHeaders = { [QODEX_RPC_HOST_CAPABILITY_HEADER]: capability.capability };
       await assert.rejects(connect(`${base.replace("http:", "ws:")}/ws/host${auth}`), /401/);
       await assert.rejects(
         connect(`${base.replace("http:", "ws:")}/ws/host${auth}`, {
-          [MARID_RPC_HOST_CAPABILITY_HEADER]: "synthetic-forged-ticket",
+          [QODEX_RPC_HOST_CAPABILITY_HEADER]: "synthetic-forged-ticket",
         }),
         /401/,
       );
@@ -211,7 +211,7 @@ try {
       ...(kind ? { attachmentScope: { kind } } : {}),
     });
     const channel = channels.get(ICredentialService.channelName)!;
-    const credential: import("@marid/services").ICredentialService = {
+    const credential: import("@qodex/services").ICredentialService = {
       inspectStore: () => channel.call(undefined, "inspectStore", []),
       recoverStore: (fingerprint) => channel.call(undefined, "recoverStore", [fingerprint]),
       load: (key) => channel.call(undefined, "load", [key]),

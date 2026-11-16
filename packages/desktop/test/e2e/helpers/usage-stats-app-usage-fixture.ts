@@ -103,7 +103,7 @@ async function seedHistory(
 }
 
 function appUsageDatabasePath(e2eHomeDir: string): string {
-  return join(e2eHomeDir, ".marid", "cli", "db", "db.sqlite");
+  return join(e2eHomeDir, ".qodex", "cli", "db", "db.sqlite");
 }
 
 function insertUsage(

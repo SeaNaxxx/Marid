@@ -10,7 +10,7 @@ import {
   type FeedbackTicketModule,
   type FeedbackTicketSeverity,
   type FeedbackTicketType,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { toast } from "@/components/ui/toast.js";
 import { FeedbackErrorTip } from "@/feedback/feedbackBadges.js";
 import { readFeedbackContactPreference } from "@/feedback/feedbackContactPreference.js";
@@ -47,11 +47,11 @@ import {
   DEFAULT_FEEDBACK_TYPE,
   startSimplifiedFeedbackSubmission,
 } from "@/feedback/feedbackSubmitSubmission.js";
-import type { IFeedbackService } from "@marid/services";
-import type { IPlatformService } from "@marid/shared";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import type { IFeedbackService } from "@qodex/services";
+import type { IPlatformService } from "@qodex/shared";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { useTabStore } from "@/store/TabStoreProvider.js";
-import { selectWorkspaceMaridState, useMaridSessionStore } from "@/store/maridSessionStore.js";
+import { selectWorkspaceQodexState, useQodexSessionStore } from "@/store/qodexSessionStore.js";
 
 export { SubmitProgressView } from "@/feedback/FeedbackSubmitProgressView.js";
 export { readCurrentAgentModelContext } from "@/feedback/feedbackSubmitModelContext.js";
@@ -89,7 +89,7 @@ export function FeedbackSubmitForm({
   onViewTickets: () => void;
   onCancel: () => void;
 }) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const formatMessage = useCallback(
     (id: string, values?: Record<string, string>) => intl.formatMessage({ id }, values),
     [intl],
@@ -397,13 +397,13 @@ function useActiveFeedbackModelContext(): FeedbackAgentModelContext {
   const activeWorkspaceIdentity = useTabStore(
     (state) => state.activeWorkspaceIdentity ?? undefined,
   );
-  const workspaceMaridState = useMaridSessionStore((state) =>
+  const workspaceQodexState = useQodexSessionStore((state) =>
     activeWorkspacePath
-      ? selectWorkspaceMaridState(state, activeWorkspacePath, activeWorkspaceIdentity)
+      ? selectWorkspaceQodexState(state, activeWorkspacePath, activeWorkspaceIdentity)
       : null,
   );
   return useMemo(
-    () => readCurrentAgentModelContext(workspaceMaridState?.configOptions),
-    [workspaceMaridState?.configOptions],
+    () => readCurrentAgentModelContext(workspaceQodexState?.configOptions),
+    [workspaceQodexState?.configOptions],
   );
 }

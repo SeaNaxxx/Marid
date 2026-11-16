@@ -1,1 +1,1 @@
-export { scopeConversationShareServiceForAttachment } from "@marid/services/node";
+export { scopeConversationShareServiceForAttachment } from "@qodex/services/node";

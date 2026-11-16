@@ -3,19 +3,19 @@ import { randomUUID } from "node:crypto";
 import armsRum from "@arms/rum-electron";
 import { BrowserWindow, type WebContents } from "electron";
 import {
-  mapMaridEnvToArmsRumEnv,
+  mapQodexEnvToArmsRumEnv,
   type HostAgentProcessErrorResponse,
   type HostAgentProcessExceptionResponse,
   type HostAgentProcessExitedResponse,
   type HostAgentProcessReadyResponse,
   type HostAgentProcessSpawnedResponse,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   createAgentCrashFingerprint,
   parseAgentProcessExitDiagnostic,
   parseAgentProcessSpawnDiagnostic,
   sanitizeAgentCrashDetail,
-} from "@marid/shared/agent-crash-diagnostic";
+} from "@qodex/shared/agent-crash-diagnostic";
 import type { CrashCapturePaths } from "./desktopCrashCapture.js";
 import { registerCrashEventMonitor as registerBaseCrashEventMonitor } from "./desktopCrashCapture.js";
 import { getResourceManagerWindowId } from "./resourceManagerWindow.js";
@@ -82,7 +82,7 @@ interface StabilityGlobalContext {
   deviceMid: string;
   platform: NodeJS.Platform;
   appVersion: string;
-  armsEnv: ReturnType<typeof mapMaridEnvToArmsRumEnv>;
+  armsEnv: ReturnType<typeof mapQodexEnvToArmsRumEnv>;
 }
 
 interface UnresponsiveWatchState {
@@ -483,10 +483,10 @@ function mapChildProcessGoneToProcessRoleWithName(
   type: string,
   processName?: string,
 ): StabilityProcessRole {
-  if (processName?.startsWith("marid-host")) {
+  if (processName?.startsWith("qodex-host")) {
     return "host";
   }
-  if (processName?.startsWith("marid-agent")) {
+  if (processName?.startsWith("qodex-agent")) {
     return "agent";
   }
   switch (type) {
@@ -510,7 +510,7 @@ export function shouldReportChildProcessGoneAsCrash(input: ChildProcessGoneInput
   }
 
   // Bugfix: RUM 里 Video Capture / Network Service / Audio Service 等 Chromium Utility
-  // 子进程会被系统自动重建，不会让 Marid 主窗口或会话不可用；它们只能作为可恢复退出记录，
+  // 子进程会被系统自动重建，不会让 Qodex 主窗口或会话不可用；它们只能作为可恢复退出记录，
   // 不能进入 perf_crash，否则会把 crash-free 指标按“非真实崩溃”拉低。
   if (role === "utility") {
     return false;

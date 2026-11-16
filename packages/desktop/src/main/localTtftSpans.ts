@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { SpanKind, SpanStatusCode, TraceFlags, type HrTime } from "@opentelemetry/api";
 import type { ReadableSpan } from "@opentelemetry/sdk-trace-base";
-import { LOCAL_TTFT_STAGES, type LocalTtftRecord } from "@marid/shared";
+import { LOCAL_TTFT_STAGES, type LocalTtftRecord } from "@qodex/shared";
 
 export function createLocalTtftSpans(
   record: LocalTtftRecord,
@@ -76,7 +76,7 @@ export function createLocalTtftSpans(
       events: [],
       ended: true,
       resource,
-      instrumentationScope: { name: "@marid/local-ttft", version: "1" },
+      instrumentationScope: { name: "@qodex/local-ttft", version: "1" },
       droppedAttributesCount: 0,
       droppedEventsCount: 0,
       droppedLinksCount: 0,

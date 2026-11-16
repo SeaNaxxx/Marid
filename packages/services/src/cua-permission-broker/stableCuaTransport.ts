@@ -1,4 +1,4 @@
-import { mintBrokerSocketPath } from "@marid/marid-cua/broker";
+import { mintBrokerSocketPath } from "@qodex/qodex-cua/broker";
 import { createServiceLogger } from "#src/logger/serviceLogger.js";
 import { resolveWindowsCuaRuntime } from "#src/cua-permission-broker/windowsCuaDevRuntime.js";
 

@@ -75,7 +75,7 @@ for (const theme of ["light", "dark"]) {
       await page.addInitScript(() => {
         window.__entrances = [];
         document.addEventListener("animationstart", (event) => {
-          if (event.animationName !== "marid-turn-navigator-enter") return;
+          if (event.animationName !== "qodex-turn-navigator-enter") return;
           const node = event.target;
           const animation = node
             .getAnimations()
@@ -139,7 +139,7 @@ for (const theme of ["light", "dark"]) {
         await page.evaluate(() => {
           window.__entrances.forEach(({ animation }) => animation.finish());
           window.__entrances = [];
-          window.__retainedBars = new Set(document.querySelectorAll(".marid-turn-navigator-enter"));
+          window.__retainedBars = new Set(document.querySelectorAll(".qodex-turn-navigator-enter"));
           window.__navigatorPerf.hydrate();
         });
         await page.waitForFunction(

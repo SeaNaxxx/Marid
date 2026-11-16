@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button.js";
 import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/components/ui/dialog.js";
 import { toast } from "@/components/ui/toast.js";
 import { useOptionalPlatform } from "@/hooks/usePlatform.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 import { ImagePreviewSurface } from "@/image-preview-editor/index.js";
 
@@ -40,7 +40,7 @@ export function ImagePreviewDialog({
   onOpenChange: (open: boolean) => void;
   open: boolean;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const platform = useOptionalPlatform();
   const [activeIndex, setActiveIndex] = useState(initialIndex);
   const [isDownloading, setIsDownloading] = useState(false);

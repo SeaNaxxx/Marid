@@ -2,12 +2,12 @@
  * MCP 用户目录模块 - 类型和常量定义
  */
 
-import type { CliMcpSource, McpFileFormat } from "@marid/shared";
+import type { CliMcpSource, McpFileFormat } from "@qodex/shared";
 
 /**
  * MCP 配置键名类型
  * - mcpServers: 通用 JSON 目录格式（.agents/mcp.json）
- * - mcp.servers: marid CLI config.json 格式
+ * - mcp.servers: qodex CLI config.json 格式
  */
 export type McpConfigKeyName = "mcpServers" | "mcp" | "mcp_servers" | "mcp.servers";
 
@@ -36,8 +36,8 @@ export interface McpSourceDescriptor {
 
 export const MCP_SOURCE_DESCRIPTORS: McpSourceDescriptor[] = [
   {
-    source: "maridagentmcp",
-    configDirSegments: [".marid", "cli"],
+    source: "qodexagentmcp",
+    configDirSegments: [".qodex", "cli"],
     fileName: "config.json",
     format: "json",
     configKeyName: "mcp.servers",

@@ -6,8 +6,8 @@ import type {
   CommandSetEnabledParams,
   CommandAgentSource,
   UserCommand,
-} from "@marid/shared";
-import { ServiceChannels } from "@marid/shared";
+} from "@qodex/shared";
+import { ServiceChannels } from "@qodex/shared";
 import { createServiceDescriptor } from "../descriptors.js";
 
 export interface ICommandsService {

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { RemoteConnectionRuntimeLog } from "@marid/shared";
+import type { RemoteConnectionRuntimeLog } from "@qodex/shared";
 import { usePlatform } from "@/hooks/usePlatform.js";
 
 export interface RemoteConnectionLogEntry {

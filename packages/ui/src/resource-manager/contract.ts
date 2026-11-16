@@ -2,7 +2,7 @@ import type {
   NetworkCaptureBridge,
   ResourceUsageSnapshot,
   StorageManagementBridge,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export type ResourceManagerTab = "cpu" | "memory" | "storage" | "network";
 

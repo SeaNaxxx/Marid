@@ -6,7 +6,7 @@ import {
   type MemoryDiagnosticsRegistry,
   type MemorySample,
   type RendererHeapSample,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { logMemoryDiagnostics } from "@/logger.js";
 
 /**

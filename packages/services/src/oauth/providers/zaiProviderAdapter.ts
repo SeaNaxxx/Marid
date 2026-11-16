@@ -9,7 +9,7 @@ import {
   type OAuthProviderMeta,
   type OAuthTokenSet,
   type OAuthUserProfile,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { createServiceLogger } from "#src/logger/serviceLogger.js";
 import { readApiJson } from "../../providers/api/apiJson.js";
 import { ZaiBusinessTokenResolver } from "../../providers/zaiBusinessTokenResolver.js";
@@ -189,7 +189,7 @@ function sanitizeTokenPayloadForLog(tokenPayload: ZaiBackendTokenPayload): unkno
   return {
     code: typeof tokenPayload.code === "number" ? tokenPayload.code : undefined,
     hasData: Boolean(data),
-    hasMaridToken: typeof data?.token === "string" && data.token.length > 0,
+    hasQodexToken: typeof data?.token === "string" && data.token.length > 0,
     hasZaiToken: typeof data?.zai?.access_token === "string" && data.zai.access_token.length > 0,
     hasUser: Boolean(data?.user),
   };
@@ -311,7 +311,7 @@ export class ZaiProviderAdapter implements OAuthProviderAdapter {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          // marid OAuth token 后端现在同时服务 Z.ai 和 BigModel。
+          // qodex OAuth token 后端现在同时服务 Z.ai 和 BigModel。
           // 显式传 provider 枚举值，避免只依赖 redirect_uri 推断登录域导致兑换错路由。
           body: JSON.stringify({
             provider: this.providerId,
@@ -332,8 +332,8 @@ export class ZaiProviderAdapter implements OAuthProviderAdapter {
       throw new Error(tokenPayload.msg?.trim() || "ZAI 后端 token 交换失败");
     }
 
-    const maridJwtToken = tokenPayload.data?.token;
-    if (!maridJwtToken) {
+    const qodexJwtToken = tokenPayload.data?.token;
+    if (!qodexJwtToken) {
       throw new Error("Token 交换失败：响应缺少 data.token");
     }
 
@@ -365,7 +365,7 @@ export class ZaiProviderAdapter implements OAuthProviderAdapter {
 
     return {
       accessToken: businessAccessToken,
-      maridJwtToken,
+      qodexJwtToken,
       linkedBigModel: readLinkedBigModel(tokenPayload.data?.bigmodel),
       ...(expiresAt ? { expiresAt } : {}),
     };
@@ -382,12 +382,12 @@ export class ZaiProviderAdapter implements OAuthProviderAdapter {
     }
 
     if (this.providerId === ZAI_CN_PROVIDER_ID) {
-      if (!tokenSet.maridJwtToken) throw new Error("中国区 profile 缺少 Marid JWT");
+      if (!tokenSet.qodexJwtToken) throw new Error("中国区 profile 缺少 Qodex JWT");
       const payload = await readApiJson<ZaiBackendTokenPayload>(
         this.apiClient,
         this.config.userinfoUrl,
         {
-          headers: { Authorization: `Bearer ${tokenSet.maridJwtToken}` },
+          headers: { Authorization: `Bearer ${tokenSet.qodexJwtToken}` },
           authFailurePolicy: "caller-handled",
           timeoutMs: OAUTH_USERINFO_TIMEOUT_MS,
         },

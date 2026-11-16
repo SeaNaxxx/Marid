@@ -1,6 +1,6 @@
 import { createStore, type StoreApi } from "zustand/vanilla";
-import type { ExtensionGrantsSnapshot } from "@marid/shared/extension-host";
-import type { IExtensionGrantsService } from "@marid/services";
+import type { ExtensionGrantsSnapshot } from "@qodex/shared/extension-host";
+import type { IExtensionGrantsService } from "@qodex/services";
 import { logger } from "@/logger.js";
 
 // Renderer 侧只持授权状态的最近一份（docs/plugins/extension-host.md §17.7）。owner 是 Window Host 的

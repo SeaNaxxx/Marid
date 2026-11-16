@@ -1,18 +1,18 @@
 import {
-  buildMaridEndpointUrls,
-  buildMaridSourceHeadersFromContext,
-  resolveOptionalMaridAuthorization,
-  type MaridJwtTokenResolver,
-  MARID_ENV,
-  MARID_DESKTOP_CONTEXT_PROMPT_ENABLED_ENV,
-} from "@marid/shared";
+  buildQodexEndpointUrls,
+  buildQodexSourceHeadersFromContext,
+  resolveOptionalQodexAuthorization,
+  type QodexJwtTokenResolver,
+  QODEX_ENV,
+  QODEX_DESKTOP_CONTEXT_PROMPT_ENABLED_ENV,
+} from "@qodex/shared";
 import {
   createSingleFeatureRollout,
   type SingleFeatureRollout,
   type SingleFeatureRolloutLogger,
 } from "./singleFeatureRollout.js";
 
-export { MARID_DESKTOP_CONTEXT_PROMPT_ENABLED_ENV };
+export { QODEX_DESKTOP_CONTEXT_PROMPT_ENABLED_ENV };
 
 export type DesktopContextPromptRolloutLogger = SingleFeatureRolloutLogger;
 export const DESKTOP_CONTEXT_PROMPT_REQUEST_TIMEOUT_MS = 3_000;
@@ -88,14 +88,14 @@ export function createElectronDesktopContextPromptConfigFetcher(options: {
   resolveEndpointOrigin: () => Promise<string>;
   /** 当前界面语言；以前不传，X-Client-Language 固定为 unknown。 */
   getClientLanguage: () => string;
-  resolveMaridJwtToken?: MaridJwtTokenResolver;
+  resolveQodexJwtToken?: QodexJwtTokenResolver;
 }): (signal: AbortSignal) => Promise<unknown> {
   return async (signal) => {
     const { net } = await import("electron");
     const endpointOrigin = await options.resolveEndpointOrigin();
-    const authorization = await resolveOptionalMaridAuthorization(options.resolveMaridJwtToken);
+    const authorization = await resolveOptionalQodexAuthorization(options.resolveQodexJwtToken);
     signal.throwIfAborted();
-    const url = new URL(`${buildMaridEndpointUrls(endpointOrigin).origin}/api/v1/client/configs`);
+    const url = new URL(`${buildQodexEndpointUrls(endpointOrigin).origin}/api/v1/client/configs`);
     url.searchParams.set("app_version", options.appVersion);
     url.searchParams.set("platform", `${process.platform}-${process.arch}`);
 
@@ -123,14 +123,14 @@ export function createElectronDesktopContextPromptConfigFetcher(options: {
       };
       signal.addEventListener("abort", onAbort, { once: true });
 
-      const sourceHeaders = buildMaridSourceHeadersFromContext({
+      const sourceHeaders = buildQodexSourceHeadersFromContext({
         appVersion: options.appVersion,
         arch: process.arch,
         clientLanguage: options.getClientLanguage(),
         deviceMid: options.deviceMid,
         endpointOrigin,
         platform: process.platform,
-        releaseChannel: MARID_ENV,
+        releaseChannel: QODEX_ENV,
         sourceTitle: "electron",
       });
       for (const [name, value] of Object.entries(sourceHeaders)) {

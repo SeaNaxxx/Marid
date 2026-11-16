@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Check, ChevronRight, Clock, CopyIcon, ListChecks } from "lucide-react";
-import type { FeedbackTicketDetail } from "@marid/shared";
+import type { FeedbackTicketDetail } from "@qodex/shared";
 import { Button } from "@/components/ui/button.js";
 import { StatusIndicator } from "@/feedback/feedbackBadges.js";
 import { FeedbackProgress } from "@/feedback/feedbackProgress.js";
@@ -13,8 +13,8 @@ import {
   getUserFacingDescription,
 } from "@/feedback/feedbackUserView.js";
 import { cn } from "@/components/lib/utils.js";
-import type { IFeedbackService } from "@marid/services";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import type { IFeedbackService } from "@qodex/services";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 
 export function TicketDetailView({
@@ -28,7 +28,7 @@ export function TicketDetailView({
   onRefresh: () => Promise<void>;
   onOpenProcess: () => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const formatMessage = intl.formatMessage;
   const copiedResetTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | null>(null);
   const [copiedIssueId, setCopiedIssueId] = useState<string | null>(null);

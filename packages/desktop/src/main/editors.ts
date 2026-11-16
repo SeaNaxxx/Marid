@@ -19,8 +19,8 @@ import { createRequire } from "node:module";
 import { promisify } from "node:util";
 import { join, win32 as pathWin32 } from "node:path";
 import { app, nativeImage } from "electron";
-import type { EditorInfo } from "@marid/shared";
-import { getMaridDataRootDir } from "@marid/services/node";
+import type { EditorInfo } from "@qodex/shared";
+import { getQodexDataRootDir } from "@qodex/services/node";
 import { logger } from "./logger.js";
 import {
   getFileApplicationDefs,
@@ -533,7 +533,7 @@ function loadNativeImageFromIcnsViaSips(
   appPath: string,
   icnsPath: string,
 ): Electron.NativeImage | null {
-  const tempRootDir = join(getMaridDataRootDir(), "editor-icon");
+  const tempRootDir = join(getQodexDataRootDir(), "editor-icon");
   mkdirSync(tempRootDir, { recursive: true });
   const tempDirPath = mkdtempSync(join(tempRootDir, "icon-"));
   const tempPngPath = join(tempDirPath, "icon.png");

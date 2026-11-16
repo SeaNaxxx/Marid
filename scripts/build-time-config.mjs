@@ -39,18 +39,18 @@ export async function resolveBuildTimeConfig(
 ) {
   const defaults = await readPrivateDefaults(defaultsPath);
   return {
-    armsRumEndpoint: pickValue(env, defaults, "MARID_ARMS_RUM_ENDPOINT"),
-    telemetryReportEndpoint: pickValue(env, defaults, "MARID_TELEMETRY_REPORT_ENDPOINT"),
+    armsRumEndpoint: pickValue(env, defaults, "QODEX_ARMS_RUM_ENDPOINT"),
+    telemetryReportEndpoint: pickValue(env, defaults, "QODEX_TELEMETRY_REPORT_ENDPOINT"),
     autoUpdateEnabled: ENABLED_VALUES.has(
-      pickValue(env, defaults, "MARID_AUTO_UPDATE").toLowerCase(),
+      pickValue(env, defaults, "QODEX_AUTO_UPDATE").toLowerCase(),
     ),
   };
 }
 
 export function createBuildTimeConfigDefines(config) {
   return {
-    __MARID_ARMS_RUM_ENDPOINT__: JSON.stringify(config.armsRumEndpoint),
-    __MARID_TELEMETRY_REPORT_ENDPOINT__: JSON.stringify(config.telemetryReportEndpoint),
-    __MARID_AUTO_UPDATE_ENABLED__: JSON.stringify(config.autoUpdateEnabled),
+    __QODEX_ARMS_RUM_ENDPOINT__: JSON.stringify(config.armsRumEndpoint),
+    __QODEX_TELEMETRY_REPORT_ENDPOINT__: JSON.stringify(config.telemetryReportEndpoint),
+    __QODEX_AUTO_UPDATE_ENABLED__: JSON.stringify(config.autoUpdateEnabled),
   };
 }

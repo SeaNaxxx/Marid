@@ -3,4 +3,4 @@ export type {
   IManagedWorktreeService,
   ManagedWorktreeGroup,
   StartManagedWorktreeCreationResult,
-} from "@marid/services";
+} from "@qodex/services";

@@ -1,7 +1,7 @@
 import { Box, Server, TerminalSquare } from "lucide-react";
-import type { SourceServerTransportKind } from "@marid/shared";
+import type { SourceServerTransportKind } from "@qodex/shared";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import {
   resolveRemoteConnectionPresentation,
   type RemoteConnectionPresentation,
@@ -62,7 +62,7 @@ export function RemoteConnectionKindTag({
   kind: SourceServerTransportKind;
   className?: string;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const presentation = REMOTE_KIND_PRESENTATION[kind];
   const Icon = presentation.Icon;
   return (
@@ -91,7 +91,7 @@ export function RemoteConnectionStatusTag({
   /** 进行中操作的已知百分比，追加在状态文字后。 */
   progressPercent?: number;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const presentation = supplied ?? resolveRemoteConnectionPresentation({ state: status });
   const primaryMessageId =
     compact && !presentation.recovery ? presentation.shortMessageId : presentation.messageId;

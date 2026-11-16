@@ -1,9 +1,9 @@
 import {
-  mapMaridEnvToArmsRumEnv,
-  type MaridRuntimeEnv,
-  MARID_ARMS_RUM_ENDPOINT,
-  MARID_VERSION,
-} from "@marid/shared";
+  mapQodexEnvToArmsRumEnv,
+  type QodexRuntimeEnv,
+  QODEX_ARMS_RUM_ENDPOINT,
+  QODEX_VERSION,
+} from "@qodex/shared";
 
 /** 主进程 init 的 browserCollectors，经 autoInject 注入到 renderer 的 RumSDK.init(collectors) */
 export const ARMS_BROWSER_COLLECTORS = {
@@ -34,12 +34,12 @@ export function parseArmsViewName(url: string): string {
 }
 
 /** Renderer Browser SDK init 配置（与主进程 endpoint/env/version 对齐） */
-export function buildArmsBrowserInitConfig(runtimeEnv: MaridRuntimeEnv) {
+export function buildArmsBrowserInitConfig(runtimeEnv: QodexRuntimeEnv) {
   return {
-    enable: MARID_ARMS_RUM_ENDPOINT !== "",
-    version: MARID_VERSION,
-    endpoint: MARID_ARMS_RUM_ENDPOINT,
-    env: mapMaridEnvToArmsRumEnv(runtimeEnv),
+    enable: QODEX_ARMS_RUM_ENDPOINT !== "",
+    version: QODEX_VERSION,
+    endpoint: QODEX_ARMS_RUM_ENDPOINT,
+    env: mapQodexEnvToArmsRumEnv(runtimeEnv),
     sessionConfig: {
       sampleRate: 1,
     },

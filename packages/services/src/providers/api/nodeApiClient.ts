@@ -1,13 +1,13 @@
 import {
   ApiError,
-  DEFAULT_MARID_ENDPOINT_ORIGIN,
-  normalizeMaridEndpointOrigin,
-  rewriteMaridEndpointUrl,
+  DEFAULT_QODEX_ENDPOINT_ORIGIN,
+  normalizeQodexEndpointOrigin,
+  rewriteQodexEndpointUrl,
   type ApiClient,
   type ApiRequestInit,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { createServiceLogger } from "#src/logger/serviceLogger.js";
-import { buildMaridSourceHeaders } from "../sourceHeaders.js";
+import { buildQodexSourceHeaders } from "../sourceHeaders.js";
 import { withRequestIdHeader } from "./requestIdHeaders.js";
 
 const log = createServiceLogger("node-api-client");
@@ -19,8 +19,8 @@ interface NodeApiClientOptions {
     input: string | URL,
     headers: Headers,
   ) => Promise<(() => Promise<void>) | null>;
-  onMaridJwtInvalid?: (input: string | URL, headers: Headers) => void;
-  isMaridJwtRequest?: (input: string | URL, headers: Headers) => boolean | Promise<boolean>;
+  onQodexJwtInvalid?: (input: string | URL, headers: Headers) => void;
+  isQodexJwtRequest?: (input: string | URL, headers: Headers) => boolean | Promise<boolean>;
   isBusinessUnauthorizedRequest?: (
     input: string | URL,
     headers: Headers,
@@ -30,7 +30,7 @@ interface NodeApiClientOptions {
     input: string | URL,
     headers: Headers,
   ) => Promise<{ url: string; authorization: string; emptyBodyMeansInvalid: boolean } | null>;
-  resolveMaridEndpointOrigin?: () => Promise<string> | string;
+  resolveQodexEndpointOrigin?: () => Promise<string> | string;
   /** 宿主内存里的实时界面语言；同步读取，未注入或无值时 X-Client-Language 回退进程 Intl locale。 */
   resolveClientLanguage?: () => string | undefined;
 }
@@ -140,25 +140,25 @@ function readHeaderKeys(headers: RequestInit["headers"] | undefined): string[] {
 
 function isRequestForEndpoint(input: string | URL, endpointOrigin: string): boolean {
   try {
-    return new URL(resolveUrl(input)).origin === normalizeMaridEndpointOrigin(endpointOrigin);
+    return new URL(resolveUrl(input)).origin === normalizeQodexEndpointOrigin(endpointOrigin);
   } catch {
     return false;
   }
 }
 
-function withMaridEndpointHeaders(
+function withQodexEndpointHeaders(
   headers: RequestInit["headers"] | undefined,
   endpointOrigin: string,
   clientLanguage: string | undefined,
 ): RequestInit["headers"] {
-  const next = new Headers(buildMaridSourceHeaders({ clientLanguage }));
+  const next = new Headers(buildQodexSourceHeaders({ clientLanguage }));
   if (headers) {
     new Headers(headers).forEach((value, key) => {
       next.set(key, value);
     });
   }
 
-  if (next.get("HTTP-Referer") === DEFAULT_MARID_ENDPOINT_ORIGIN) {
+  if (next.get("HTTP-Referer") === DEFAULT_QODEX_ENDPOINT_ORIGIN) {
     next.set("HTTP-Referer", endpointOrigin);
   }
   return next;
@@ -174,18 +174,18 @@ function resolveRequestHeaders(
     return headers;
   }
 
-  // Marid 后端请求以前只有部分业务路径手动补来源头。
+  // Qodex 后端请求以前只有部分业务路径手动补来源头。
   // 统一在 ApiClient 出口按 endpoint origin 注入，避免 OAuth/config/billing/snapshot 等链路遗漏。
-  return withMaridEndpointHeaders(headers, endpointOrigin, clientLanguage);
+  return withQodexEndpointHeaders(headers, endpointOrigin, clientLanguage);
 }
 
 export class NodeApiClient implements ApiClient {
   private readonly fetchImpl?: typeof fetch;
   private readonly resolveAssociatedCredentialRefresh?: NodeApiClientOptions["resolveAssociatedCredentialRefresh"];
-  private readonly resolveMaridEndpointOrigin?: () => Promise<string> | string;
+  private readonly resolveQodexEndpointOrigin?: () => Promise<string> | string;
   private readonly resolveClientLanguage?: NodeApiClientOptions["resolveClientLanguage"];
-  private readonly onMaridJwtInvalid?: (input: string | URL, headers: Headers) => void;
-  private readonly isMaridJwtRequest?: NodeApiClientOptions["isMaridJwtRequest"];
+  private readonly onQodexJwtInvalid?: (input: string | URL, headers: Headers) => void;
+  private readonly isQodexJwtRequest?: NodeApiClientOptions["isQodexJwtRequest"];
   private readonly isBusinessUnauthorizedRequest?: NodeApiClientOptions["isBusinessUnauthorizedRequest"];
   private readonly businessUnauthorizedObservationTimeoutMs: number;
   private readonly resolveBusinessCredentialValidationRequest?: NodeApiClientOptions["resolveBusinessCredentialValidationRequest"];
@@ -201,15 +201,15 @@ export class NodeApiClient implements ApiClient {
   constructor(options: NodeApiClientOptions = {}) {
     this.fetchImpl = options.fetchImpl;
     this.resolveAssociatedCredentialRefresh = options.resolveAssociatedCredentialRefresh;
-    this.onMaridJwtInvalid = options.onMaridJwtInvalid;
-    this.isMaridJwtRequest = options.isMaridJwtRequest;
+    this.onQodexJwtInvalid = options.onQodexJwtInvalid;
+    this.isQodexJwtRequest = options.isQodexJwtRequest;
     this.isBusinessUnauthorizedRequest = options.isBusinessUnauthorizedRequest;
     this.resolveBusinessCredentialValidationRequest =
       options.resolveBusinessCredentialValidationRequest;
     this.businessUnauthorizedObservationTimeoutMs =
       options.businessUnauthorizedObservationTimeoutMs ??
       DEFAULT_BUSINESS_UNAUTHORIZED_OBSERVATION_TIMEOUT_MS;
-    this.resolveMaridEndpointOrigin = options.resolveMaridEndpointOrigin;
+    this.resolveQodexEndpointOrigin = options.resolveQodexEndpointOrigin;
     this.resolveClientLanguage = options.resolveClientLanguage;
   }
 
@@ -289,11 +289,11 @@ export class NodeApiClient implements ApiClient {
   }
 
   async request(input: string | URL, init?: ApiRequestInit): Promise<Response> {
-    const endpointOrigin = this.resolveMaridEndpointOrigin
-      ? await this.resolveMaridEndpointOrigin()
+    const endpointOrigin = this.resolveQodexEndpointOrigin
+      ? await this.resolveQodexEndpointOrigin()
       : undefined;
-    const activeEndpointOrigin = endpointOrigin ?? DEFAULT_MARID_ENDPOINT_ORIGIN;
-    const requestInput = rewriteMaridEndpointUrl(input, activeEndpointOrigin);
+    const activeEndpointOrigin = endpointOrigin ?? DEFAULT_QODEX_ENDPOINT_ORIGIN;
+    const requestInput = rewriteQodexEndpointUrl(input, activeEndpointOrigin);
     const url = resolveUrl(requestInput);
     const method = resolveMethod(init);
     const timeoutMs = init?.timeoutMs;
@@ -329,7 +329,7 @@ export class NodeApiClient implements ApiClient {
       );
       if (isRequestForEndpoint(requestInput, activeEndpointOrigin)) {
         // 调试说明：这里只记录 header key，避免 Authorization / token 等敏感值落盘。
-        log.debug(undefined, "marid endpoint request headers prepared", {
+        log.debug(undefined, "qodex endpoint request headers prepared", {
           headerKeys: readHeaderKeys(requestHeaders),
           method,
           url,
@@ -378,17 +378,17 @@ export class NodeApiClient implements ApiClient {
       if (
         authFailurePolicy !== "caller-handled" &&
         [200, 401, 403].includes(response.status) &&
-        this.onMaridJwtInvalid
+        this.onQodexJwtInvalid
       ) {
         try {
           await waitWithAbort(
             (async () => {
               const requestHeadersForObservation = new Headers(requestHeaders);
-              const isCurrentMaridJwtRequest = await this.isMaridJwtRequest?.(
+              const isCurrentQodexJwtRequest = await this.isQodexJwtRequest?.(
                 requestInput,
                 requestHeadersForObservation,
               );
-              if (isCurrentMaridJwtRequest) {
+              if (isCurrentQodexJwtRequest) {
                 let invalid = response.status === 401;
                 if (
                   !invalid &&
@@ -416,14 +416,14 @@ export class NodeApiClient implements ApiClient {
                     );
                 }
                 if (invalid && !signal?.aborted)
-                  this.onMaridJwtInvalid?.(requestInput, requestHeadersForObservation);
+                  this.onQodexJwtInvalid?.(requestInput, requestHeadersForObservation);
               }
             })(),
             signal,
           );
         } catch (error) {
           if (signal?.aborted) throw new DOMException("The operation was aborted.", "AbortError");
-          log.warn("marid jwt invalid response observation failed", { error });
+          log.warn("qodex jwt invalid response observation failed", { error });
         }
       }
       if (signal?.aborted) throw new DOMException("The operation was aborted.", "AbortError");

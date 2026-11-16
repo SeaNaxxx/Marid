@@ -18,8 +18,8 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
-import type { ConversationRow } from "@marid/shared/marid-protocol-v4";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import type { ConversationRow } from "@qodex/shared/qodex-protocol-v4";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import {
   createConversationSelectionReference,
   setHoveredConversationAnnotation,
@@ -118,7 +118,7 @@ export function ConversationSelectionTooltip({
   ) => ConversationSelectionAppendResult | undefined;
   onAskInSideChat: (reference: ConversationSelectionReference) => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const rowsRef = useRef(rows);
   rowsRef.current = rows;
   const inspectSelection = useCallback((): TooltipState | null => {

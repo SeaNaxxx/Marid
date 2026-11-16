@@ -10,8 +10,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog.js";
 import { Input } from "@/components/ui/input.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
-import type { ModelConfigObject } from "@marid/provider";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
+import type { ModelConfigObject } from "@qodex/provider";
 import type {
   ProviderModelDraftValues,
   ProviderModelDraftCommitResult,
@@ -80,7 +80,7 @@ export function ProviderModelMetadataDialog({
   modelDefaultsLoaded?: boolean;
   onModelIdBlur?: () => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const [validationAttempt, setValidationAttempt] = useState(0);
   const commit = async () => {
     const result = await onCommit();

@@ -6,7 +6,7 @@ import { dirname } from "node:path";
 
 const requireFromBrowserUse = createRequire(
   new URL(
-    "../../../../../../apps/marid-cli/packages/browser-use-plugin/package.json",
+    "../../../../../../apps/qodex-cli/packages/browser-use-plugin/package.json",
     import.meta.url,
   ),
 );

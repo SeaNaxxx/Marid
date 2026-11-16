@@ -2,31 +2,31 @@ import {
   normalizeRemoteArch,
   normalizeRemotePlatform,
   resolveRemotePlatform,
-} from "@marid/server/remote/detectEnv.js";
-import type { IRemoteBackend } from "@marid/server/remote/backend.js";
+} from "@qodex/server/remote/detectEnv.js";
+import type { IRemoteBackend } from "@qodex/server/remote/backend.js";
 import {
   assertSupportedRemoteEnvironment,
   createUnsupportedRemotePlatformError,
   WINDOWS_NATIVE_REMOTE_UNSUPPORTED_MESSAGE,
-} from "@marid/server/remote/remotePlatformSupport.js";
+} from "@qodex/server/remote/remotePlatformSupport.js";
 import {
   collectCommand,
   readLastJsonLine,
   readUniqueVersion,
   throwIfAborted,
-} from "@marid/server/source-server/sourceServerTransportRuntime.js";
+} from "@qodex/server/source-server/sourceServerTransportRuntime.js";
 import type {
   SourceServerProbeOptions,
   SourceServerProbeResult,
   TransportContext,
-} from "@marid/server/source-server/transportAdapter.js";
+} from "@qodex/server/source-server/transportAdapter.js";
 
-const SERVER_ROOT_SHELL = '"$HOME/.marid/server"';
-const SERVER_BIN_SHELL = '"$HOME/.marid/server/bin/marid"';
+const SERVER_ROOT_SHELL = '"$HOME/.qodex/server"';
+const SERVER_BIN_SHELL = '"$HOME/.qodex/server/bin/qodex"';
 const SERVER_CURRENT_SHELL = `${SERVER_ROOT_SHELL}/current.json`;
 const SERVER_STATUS_SHELL = `${SERVER_ROOT_SHELL}/run/status.json`;
 const SERVER_DOWNGRADE_SHELL = `${SERVER_ROOT_SHELL}/downgrade.json`;
-const SOURCE_SERVER_PROBE_MARKER_PREFIX = "__MARID_PROBE_";
+const SOURCE_SERVER_PROBE_MARKER_PREFIX = "__QODEX_PROBE_";
 
 function buildSourceServerProbeCommand(includeReleaseIdentity: boolean): string {
   return [
@@ -68,7 +68,7 @@ function buildSourceServerProbeCommand(includeReleaseIdentity: boolean): string 
 }
 
 function readSourceServerProbeSections(output: string): Map<string, string> {
-  const parts = output.split(/__MARID_PROBE_([A-Z]+)__\r?\n/gu);
+  const parts = output.split(/__QODEX_PROBE_([A-Z]+)__\r?\n/gu);
   const sections = new Map<string, string>();
   for (let index = 1; index + 1 < parts.length; index += 2) {
     sections.set(parts[index]!, parts[index + 1]!.trim());
@@ -115,7 +115,7 @@ function warnUnsupportedLibc(platform: string, libcText: string, context: Transp
     phase: "probe",
     level: "warn",
     message:
-      `${detected} glibc ${required} required by the bundled Marid Source Server runtime. Marid Source Server may fail to start. ` +
+      `${detected} glibc ${required} required by the bundled Qodex Source Server runtime. Qodex Source Server may fail to start. ` +
       "Continuing installation or connection.",
   });
 }

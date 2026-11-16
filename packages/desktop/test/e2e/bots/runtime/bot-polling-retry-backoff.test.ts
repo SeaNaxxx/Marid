@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import type { BotRuntimeInfo, BotsConfigFile } from "@marid/shared";
+import type { BotRuntimeInfo, BotsConfigFile } from "@qodex/shared";
 import {
   createFeishuConfig,
   readBotSyntheticFixture,

@@ -1,10 +1,10 @@
 import { LoaderCircle } from "lucide-react";
-import { type StorageCategoryId } from "@marid/shared";
+import { type StorageCategoryId } from "@qodex/shared";
 import {
   TID_RESOURCE_MANAGER_STORAGE_CONFIRM_ACCEPT,
   TID_RESOURCE_MANAGER_STORAGE_CONFIRM_CANCEL,
   TID_RESOURCE_MANAGER_STORAGE_CONFIRM_DIALOG,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,7 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { formatBytes } from "@/resource-manager/resourceUsageView.js";
 import { storageCategoryTitleId } from "./storageCategoryPresentation.js";
 
@@ -35,7 +35,7 @@ export function StorageCleanConfirmDialog({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   return (
     <AlertDialog
       open={target !== null}

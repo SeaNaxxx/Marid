@@ -18,14 +18,14 @@ export function RootStartupLoading({ label, children, busy = true }: RootStartup
       aria-label={label}
       data-testid="root-startup-loading"
     >
-      <MaridStartupLogoBadge />
+      <QodexStartupLogoBadge />
       {children}
     </div>
   );
 }
 
 /** 初始化与引导共用品牌图标，保持底色、描边、圆角和标志比例一致。 */
-export function MaridStartupLogoBadge({
+export function QodexStartupLogoBadge({
   animated = true,
   size = "default",
 }: {
@@ -43,7 +43,7 @@ export function MaridStartupLogoBadge({
       )}
     >
       {/* Button 会给 SVG 默认尺寸；紧凑 Logo 显式恢复自动高度，保持标志原始比例。 */}
-      <MaridStartupLogo
+      <QodexStartupLogo
         className={size === "titlebar" ? "size-auto w-3.25" : "h-auto w-14"}
         animated={animated}
       />
@@ -51,7 +51,7 @@ export function MaridStartupLogoBadge({
   );
 }
 
-export function MaridStartupLogo({
+export function QodexStartupLogo({
   className,
   animated = true,
 }: {

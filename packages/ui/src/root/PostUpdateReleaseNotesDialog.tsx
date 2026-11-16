@@ -1,4 +1,4 @@
-import type { PostUpdateReleaseNotesPayload } from "@marid/shared";
+import type { PostUpdateReleaseNotesPayload } from "@qodex/shared";
 import { MessageResponse } from "@/components/ai-elements/message.js";
 import { Button } from "@/components/ui/button.js";
 import { cn } from "@/components/lib/utils.js";
@@ -8,8 +8,8 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
-import { useMaridStoreWithDefault } from "@/store/StoreProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
+import { useQodexStoreWithDefault } from "@/store/StoreProvider.js";
 import { DEFAULT_CODE_PREVIEW_SETTINGS } from "@/lib/codePreviewSettings.js";
 
 interface PostUpdateReleaseNotesDialogProps {
@@ -23,10 +23,10 @@ export function PostUpdateReleaseNotesDialog({
   onAcknowledge,
   onOpenExternalUrl,
 }: PostUpdateReleaseNotesDialogProps) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   // M5②.5 store 耦合剥离：MessageResponse 不再自取 store，主题/代码预览设置由调用方传入。
-  const theme = useMaridStoreWithDefault((state) => state.theme, "system");
-  const codePreviewSettings = useMaridStoreWithDefault(
+  const theme = useQodexStoreWithDefault((state) => state.theme, "system");
+  const codePreviewSettings = useQodexStoreWithDefault(
     (state) => state.codePreviewSettings,
     DEFAULT_CODE_PREVIEW_SETTINGS,
   );
@@ -49,7 +49,7 @@ export function PostUpdateReleaseNotesDialog({
       >
         <div className="flex flex-col px-8 py-6">
           <div className="flex min-w-0 shrink-0 items-center gap-2.5">
-            <GlmMonochromeIcon className="size-5 shrink-0" alt="Marid" />
+            <GlmMonochromeIcon className="size-5 shrink-0" alt="Qodex" />
             <div className="min-w-0 flex-1">
               <DialogTitle className="text-lg leading-snug tracking-tight text-foreground">
                 {dialogHeading}

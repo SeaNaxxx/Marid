@@ -4,7 +4,7 @@ import type {
   McpAppsHostTitleBar,
   McpAppsToolResultPayload,
   PluginSandboxHandle,
-} from "@marid/shared/mcp-apps";
+} from "@qodex/shared/mcp-apps";
 import type {
   PluginUiHostControllerDeps,
   PluginUiHostPhase,
@@ -71,9 +71,9 @@ export interface Page {
   callPanelTool(
     toolName: string,
     args?: Record<string, unknown>,
-  ): Promise<import("@marid/services").PluginUiCallToolResult>;
+  ): Promise<import("@qodex/services").PluginUiCallToolResult>;
   /** 把工具结果经面板通知通道回投页面；未 attached 时由 controller 丢弃。 */
-  notifyPanelToolResult(result: import("@marid/shared/mcp-apps").McpAppsToolResultPayload): void;
+  notifyPanelToolResult(result: import("@qodex/shared/mcp-apps").McpAppsToolResultPayload): void;
   suspend(force?: boolean): Promise<boolean>;
   destroy(): void;
 }

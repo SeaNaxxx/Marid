@@ -1,4 +1,4 @@
-import { MARID_AGENT_PROVIDER } from "@marid/shared";
+import { QODEX_AGENT_PROVIDER } from "@qodex/shared";
 import {
   legacyTelemetryModelValue,
   legacyTelemetryProviderId,
@@ -9,7 +9,7 @@ export function resolveLegacyRuntimeModelValue(params: {
 }): string | null | undefined {
   const configProvider = params.configProvider?.trim();
   const modelName = params.modelName?.trim();
-  if (!configProvider || !modelName || configProvider === MARID_AGENT_PROVIDER) {
+  if (!configProvider || !modelName || configProvider === QODEX_AGENT_PROVIDER) {
     return params.modelName;
   }
   if (modelName.startsWith(`${configProvider}/`)) return legacyTelemetryModelValue(modelName);

@@ -69,6 +69,6 @@ ACK 返回前切换 task/workspace 时，不得把旧 payload 写进新 composer
 
 ## 当前入口
 
-- Schema：`packages/shared/src/marid-protocol-v4/command.ts`、`snapshot.ts`
-- CLI handlers：`apps/marid-cli/packages/bootstrap/src/marid-protocol-v4/commands/handlers/queue.ts`
+- Schema：`packages/shared/src/qodex-protocol-v4/command.ts`、`snapshot.ts`
+- CLI handlers：`apps/qodex-cli/packages/bootstrap/src/qodex-protocol-v4/commands/handlers/queue.ts`
 - UI：`packages/ui/src/v4/SessionPane.tsx`

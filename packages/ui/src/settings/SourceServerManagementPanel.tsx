@@ -11,7 +11,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog.js";
 import { useOptionalPlatform } from "@/hooks/usePlatform.js";
-import { DesktopCommandIds, MARID_VERSION } from "@marid/shared";
+import { DesktopCommandIds, QODEX_VERSION } from "@qodex/shared";
 /* eslint-disable max-lines -- Source/Profile/迁移三类管理操作共享同一 Host 快照和错误状态。 */
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -35,7 +35,7 @@ import {
   Unplug,
   Wrench,
 } from "lucide-react";
-import { resolveWorkspaceKey } from "@marid/shared";
+import { resolveWorkspaceKey } from "@qodex/shared";
 import type {
   ConnectionProfile,
   AppSettings,
@@ -43,8 +43,8 @@ import type {
   SourceServerMigrationReport,
   SourceServerRecord,
   SourceServerWorkspaceHistoryEntry,
-} from "@marid/shared";
-import type { ISourceServerManagementService } from "@marid/services";
+} from "@qodex/shared";
+import type { ISourceServerManagementService } from "@qodex/services";
 import { getPathLeaf } from "@/lib/path.js";
 import { toast } from "@/components/ui/toast.js";
 import { getSourceServerManagementErrorMessage } from "@/lib/sourceServerManagementError.js";
@@ -54,7 +54,7 @@ import { cn } from "@/components/lib/utils.js";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog.js";
 import { useSourceServerManagementSnapshot } from "@/hooks/useSourceServerManagementSnapshot.js";
 import { useSourceServerOperationLogs } from "@/hooks/useSourceServerOperationLogs.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { SourceServerMigrationReportPanel } from "@/settings/SourceServerMigrationReportPanel.js";
 import {
   resolveSourceServerUpdatePercent,
@@ -271,7 +271,7 @@ export function SourceServerManagementPanel({
   onHideProjectDeviceNamesChange?: (hidden: boolean) => void;
 }) {
   const background = useRemoteConnectionProgress();
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const confirmDialog = useConfirmDialog();
   const platform = useOptionalPlatform();
   const deferredUpdates = useDeferredSourceServerUpdates();
@@ -627,7 +627,7 @@ export function SourceServerManagementPanel({
       const confirmed = await confirmDialog(
         getSourceServerReinstallConfirmation({
           source: server.displayName,
-          version: MARID_VERSION,
+          version: QODEX_VERSION,
           formatMessage: intl.formatMessage,
         }),
       );
@@ -1129,7 +1129,7 @@ export function SourceServerManagementPanel({
                     deviceBusy,
                     installState: server.installState,
                     lastSeenVersion: server.lastSeenVersion,
-                    localVersion: MARID_VERSION,
+                    localVersion: QODEX_VERSION,
                   })
                 : ({ visible: false } as const);
               const actionBusy =

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile, rm } from "node:fs/promises";
-import type { IMaridTaskService } from "@marid/services";
+import type { IQodexTaskService } from "@qodex/services";
 import {
   createBotsServiceHarness,
   createFeishuConfig,
@@ -9,8 +9,8 @@ import {
   type RecordedRequest,
 } from "#e2e/bots/helpers/bots-service-harness";
 
-type Prompt = Parameters<IMaridTaskService["sendPrompt"]>[0];
-type GroupInput = Parameters<NonNullable<IMaridTaskService["submitBotGroupInput"]>>[0];
+type Prompt = Parameters<IQodexTaskService["sendPrompt"]>[0];
+type GroupInput = Parameters<NonNullable<IQodexTaskService["submitBotGroupInput"]>>[0];
 
 describe("BOT-E2E-AT-01 large Bot attachments", () => {
   for (const provider of ["feishu", "lark"] as const) {
@@ -47,10 +47,10 @@ describe("BOT-E2E-AT-01 large Bot attachments", () => {
           const h = createBotsServiceHarness({ config: createFeishuConfig(provider, botId) });
           const prompts: Prompt[] = [];
           const groupInputs: GroupInput[] = [];
-          h.maridTaskService.sendPrompt = async (params: Prompt) => {
+          h.qodexTaskService.sendPrompt = async (params: Prompt) => {
             prompts.push(params);
           };
-          h.maridTaskService.submitBotGroupInput = async (params: GroupInput) => {
+          h.qodexTaskService.submitBotGroupInput = async (params: GroupInput) => {
             groupInputs.push(params);
             return {
               commandId: params.commandId,

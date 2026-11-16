@@ -66,7 +66,7 @@
  */
 
 /*
- * 修复原因：styles.css 是从 @marid/ui 包里被 web/desktop 间接引入的，Tailwind v4 在这种工作区场景下
+ * 修复原因：styles.css 是从 @qodex/ui 包里被 web/desktop 间接引入的，Tailwind v4 在这种工作区场景下
  * 仅靠 source(".") 不能稳定把 UI 包里的 TSX 组件都加入扫描，像 Select 这类新组件用到的
  * bg-popover、shadow-md、overflow-x-hidden 等 utility 会直接缺席，页面就只剩下一部分“碰巧命中”的通用类。
  * 这里显式补一条 @source，让 Tailwind 始终扫描 UI 包源码，避免下拉框、菜单这类组件渲染成半残状态。
@@ -153,7 +153,7 @@ body {
 
 /*
  * 中日韩汉字共用码位，字形由字体决定：--font-mono 为中文在 monospace 前写死了 SC 字体，
- * 日文/韩文界面会因此显示中文字形（如「直」「骨」）。<html lang> 由 MaridIntlProvider 跟随界面语言写入，
+ * 日文/韩文界面会因此显示中文字形（如「直」「骨」）。<html lang> 由 QodexIntlProvider 跟随界面语言写入，
  * 这里按 lang 把对应语言的字体排到 SC 前面；无衬线正文走 system-ui，浏览器会按 lang 自动选日/韩字形。
  */
 :root:lang(ja) {
@@ -934,11 +934,11 @@ body {
  * 会命中上面的全局滚动条样式，在幻灯片内部露出滚动条。幻灯片内容不存在用户滚动交互，
  * 这里整体隐藏渲染表面内部的原生滚动条。
  */
-[data-marid-pptx-render-surface] * {
+[data-qodex-pptx-render-surface] * {
   scrollbar-width: none;
 }
 
-[data-marid-pptx-render-surface] *::-webkit-scrollbar {
+[data-qodex-pptx-render-surface] *::-webkit-scrollbar {
   display: none;
   width: 0;
   height: 0;
@@ -1027,16 +1027,16 @@ body {
   }
 }
 
-/* ChatLoading 的 Marid 标记：双柱按镜像相位呼吸，读作眨眼而非同步闪烁。 */
-.marid-loader-bar {
-  animation: marid-loader-breathe 1.6s ease-in-out infinite;
+/* ChatLoading 的 Qodex 标记：双柱按镜像相位呼吸，读作眨眼而非同步闪烁。 */
+.qodex-loader-bar {
+  animation: qodex-loader-breathe 1.6s ease-in-out infinite;
 }
 
-.marid-loader-bar-offset {
+.qodex-loader-bar-offset {
   animation-delay: -0.8s;
 }
 
-@keyframes marid-loader-breathe {
+@keyframes qodex-loader-breathe {
   0%,
   100% {
     opacity: 1;
@@ -1048,12 +1048,12 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .marid-loader-bar {
+  .qodex-loader-bar {
     animation: none;
   }
 }
 
-@keyframes marid-turn-navigator-enter {
+@keyframes qodex-turn-navigator-enter {
   from {
     opacity: 0;
     transform: translateX(-6px);
@@ -1066,12 +1066,12 @@ body {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .marid-turn-navigator-enter {
-    animation: marid-turn-navigator-enter 180ms ease-out;
+  .qodex-turn-navigator-enter {
+    animation: qodex-turn-navigator-enter 180ms ease-out;
   }
 }
 
-@keyframes marid-stream-text-in {
+@keyframes qodex-stream-text-in {
   0% {
     opacity: 0;
   }
@@ -1081,7 +1081,7 @@ body {
   }
 }
 
-@keyframes marid-draft-prompt-waterfall {
+@keyframes qodex-draft-prompt-waterfall {
   from {
     opacity: 0;
     clip-path: inset(0 0 100% 0);
@@ -1095,13 +1095,13 @@ body {
   }
 }
 
-.marid-draft-prompt-waterfall {
-  animation: marid-draft-prompt-waterfall 260ms cubic-bezier(0.22, 1, 0.36, 1)
-    var(--marid-draft-prompt-waterfall-delay, 0ms) both;
+.qodex-draft-prompt-waterfall {
+  animation: qodex-draft-prompt-waterfall 260ms cubic-bezier(0.22, 1, 0.36, 1)
+    var(--qodex-draft-prompt-waterfall-delay, 0ms) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .marid-draft-prompt-waterfall {
+  .qodex-draft-prompt-waterfall {
     animation: none;
   }
 }
@@ -1141,27 +1141,27 @@ body {
    逐词浮现要靠尾部好几帧的词处在不同透明度，形成渐隐的尾巴才看得出来，所以逐词单独用
    300ms + ease-out（低于 90% 不透明的约 7 帧）；整块入场是一次性的，保留原来的急起曲线。 */
 :root {
-  --marid-reveal-duration: 300ms;
-  --marid-reveal-ease: ease-out;
-  --marid-enter-duration: 260ms;
-  --marid-enter-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --qodex-reveal-duration: 300ms;
+  --qodex-reveal-ease: ease-out;
+  --qodex-enter-duration: 260ms;
+  --qodex-enter-ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* 逐字 / 逐词浮现。只动 opacity：文本从第一帧起就占满最终位置，高度恒定，
    不触发 ResizeObserver，也就不会撞进虚拟滚动测高和底部跟随。
    刻意不加 will-change：每个单元一个 span，提升合成层反而拖垮长消息。
-   排期写在 --marid-reveal-delay 上（跨帧的浮现时钟，见 message.tsx 的 planRevealSchedule）。
+   排期写在 --qodex-reveal-delay 上（跨帧的浮现时钟，见 message.tsx 的 planRevealSchedule）。
    Bugfix：最初用 @keyframes 绑在新词上，但词在下一帧（30ms）就从 new 变成 settled，
    选择器不再命中，动画被立即移除，淡入只播了一帧。transition 只要 transition-property
    仍含 opacity 就会跑完，所以 settled 也保留同一条 transition；@starting-style 只作用于
    元素首次挂载，new 只决定挂载时是否从透明开始。 */
-[data-marid-reveal] {
-  transition: opacity var(--marid-reveal-duration) var(--marid-reveal-ease)
-    var(--marid-reveal-delay, 0ms);
+[data-qodex-reveal] {
+  transition: opacity var(--qodex-reveal-duration) var(--qodex-reveal-ease)
+    var(--qodex-reveal-delay, 0ms);
 }
 
 @starting-style {
-  [data-marid-reveal="new"] {
+  [data-qodex-reveal="new"] {
     opacity: 0;
   }
 }
@@ -1171,41 +1171,41 @@ body {
    这里沿用正文同一套 transition + @starting-style：属性从 new 变成 settled 时过渡不被取消
    （Electron 44.7 / Chrome 152 探针实测）。unlayered 的 @starting-style 能盖过 Tailwind 分层的
    marker:text-foreground-subtlest，颜色从透明插值到它，中间不会先变黑。
-   延迟用单独的变量名：li 上的值不能被里面 settled 的字继承。时长与正文共用 --marid-reveal-duration。 */
-[data-marid-reveal-marker]::marker {
-  transition: color var(--marid-reveal-duration) var(--marid-reveal-ease)
-    var(--marid-reveal-marker-delay, 0ms);
+   延迟用单独的变量名：li 上的值不能被里面 settled 的字继承。时长与正文共用 --qodex-reveal-duration。 */
+[data-qodex-reveal-marker]::marker {
+  transition: color var(--qodex-reveal-duration) var(--qodex-reveal-ease)
+    var(--qodex-reveal-marker-delay, 0ms);
 }
 
 @starting-style {
-  [data-marid-reveal-marker="new"]::marker {
+  [data-qodex-reveal-marker="new"]::marker {
     color: transparent;
   }
 }
 
-[data-marid-stream-animate="true"] {
-  animation: marid-stream-text-in var(--marid-enter-duration) var(--marid-enter-ease)
-    var(--marid-stream-animation-delay, 0ms) both;
+[data-qodex-stream-animate="true"] {
+  animation: qodex-stream-text-in var(--qodex-enter-duration) var(--qodex-enter-ease)
+    var(--qodex-stream-animation-delay, 0ms) both;
   will-change: opacity;
 }
 
-[data-marid-chat-loading-animate="true"] {
-  animation: marid-stream-text-in var(--marid-enter-duration) var(--marid-enter-ease) both;
+[data-qodex-chat-loading-animate="true"] {
+  animation: qodex-stream-text-in var(--qodex-enter-duration) var(--qodex-enter-ease) both;
   will-change: opacity;
 }
 
 /* Bugfix: Radix Collapsible 在测量 closed 高度时会写入 inline animation-name:none。
    assistant 历史区自动结束收起需要在延迟卸载期间继续播放高度动画，
    所以这里用 !important 覆盖 Radix 的 inline style，只作用于显式标记的收起窗口。 */
-[data-marid-collapsible-animate-close="true"][data-state="closed"] {
-  animation: marid-collapsible-up 300ms ease-in-out forwards !important;
+[data-qodex-collapsible-animate-close="true"][data-state="closed"] {
+  animation: qodex-collapsible-up 300ms ease-in-out forwards !important;
 }
 
-[data-marid-collapsible-animate-close="true"][data-state="closed"] > * {
-  animation: marid-collapsible-fade-out 300ms ease-in-out forwards !important;
+[data-qodex-collapsible-animate-close="true"][data-state="closed"] > * {
+  animation: qodex-collapsible-fade-out 300ms ease-in-out forwards !important;
 }
 
-@keyframes marid-collapsible-up {
+@keyframes qodex-collapsible-up {
   from {
     height: var(--radix-collapsible-content-height);
   }
@@ -1215,7 +1215,7 @@ body {
   }
 }
 
-@keyframes marid-collapsible-fade-out {
+@keyframes qodex-collapsible-fade-out {
   from {
     opacity: 1;
   }
@@ -1226,31 +1226,31 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-marid-reveal],
-  [data-marid-reveal-marker]::marker {
+  [data-qodex-reveal],
+  [data-qodex-reveal-marker]::marker {
     transition: none;
   }
 
-  [data-marid-stream-animate="true"],
-  [data-marid-chat-loading-animate="true"],
-  [data-marid-collapsible-animate-close="true"][data-state="closed"],
-  [data-marid-collapsible-animate-close="true"][data-state="closed"] > * {
+  [data-qodex-stream-animate="true"],
+  [data-qodex-chat-loading-animate="true"],
+  [data-qodex-collapsible-animate-close="true"][data-state="closed"],
+  [data-qodex-collapsible-animate-close="true"][data-state="closed"] > * {
     animation: none;
   }
 }
 
 /* 点赞/点踩选中时的反馈动画：参考微信/X 的做法，只做图标回弹 + 细小粒子飞散两段，
    粒子用 box-shadow 画在 ::after 上且跟随 currentColor，零额外 DOM、不引入新颜色。 */
-.marid-reaction-burst {
+.qodex-reaction-burst {
   position: relative;
   display: inline-flex;
 }
 
-.marid-reaction-burst > svg {
-  animation: marid-reaction-pop 450ms cubic-bezier(0.34, 1.56, 0.64, 1);
+.qodex-reaction-burst > svg {
+  animation: qodex-reaction-pop 450ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.marid-reaction-burst::after {
+.qodex-reaction-burst::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -1262,14 +1262,14 @@ body {
   background: transparent;
   opacity: 0;
   pointer-events: none;
-  animation: marid-reaction-particles 560ms cubic-bezier(0.16, 1, 0.3, 1) 60ms forwards;
+  animation: qodex-reaction-particles 560ms cubic-bezier(0.16, 1, 0.3, 1) 60ms forwards;
 }
 
-.animate-marid-alarm-ring {
-  animation: marid-alarm-ring 600ms ease-in-out infinite;
+.animate-qodex-alarm-ring {
+  animation: qodex-alarm-ring 600ms ease-in-out infinite;
 }
 
-@keyframes marid-alarm-ring {
+@keyframes qodex-alarm-ring {
   0%,
   100% {
     transform: rotate(-10deg);
@@ -1280,7 +1280,7 @@ body {
   }
 }
 
-@keyframes marid-reaction-pop {
+@keyframes qodex-reaction-pop {
   0% {
     transform: scale(0);
   }
@@ -1298,7 +1298,7 @@ body {
   }
 }
 
-@keyframes marid-reaction-particles {
+@keyframes qodex-reaction-particles {
   0% {
     opacity: 0;
     box-shadow:
@@ -1327,8 +1327,8 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .marid-reaction-burst > svg,
-  .marid-reaction-burst::after {
+  .qodex-reaction-burst > svg,
+  .qodex-reaction-burst::after {
     animation: none;
   }
 }
@@ -1346,24 +1346,24 @@ body {
   }
 }
 
-@keyframes marid-task-interaction-countdown {
+@keyframes qodex-task-interaction-countdown {
   from {
-    transform: scaleX(var(--marid-interaction-progress, 1));
+    transform: scaleX(var(--qodex-interaction-progress, 1));
   }
   to {
     transform: scaleX(0);
   }
 }
 
-.marid-task-interaction-countdown-fill {
-  animation: marid-task-interaction-countdown var(--marid-interaction-remaining-ms, 240000ms) linear
+.qodex-task-interaction-countdown-fill {
+  animation: qodex-task-interaction-countdown var(--qodex-interaction-remaining-ms, 240000ms) linear
     forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .marid-task-interaction-countdown-fill {
+  .qodex-task-interaction-countdown-fill {
     animation: none;
-    transform: scaleX(var(--marid-interaction-progress, 1));
+    transform: scaleX(var(--qodex-interaction-progress, 1));
   }
 }
 
@@ -1371,12 +1371,12 @@ body {
   animation: workspace-remote-connecting-breathe 1.8s ease-in-out infinite;
 }
 
-.marid-update-charge-progress [data-slot="progress-indicator"] {
+.qodex-update-charge-progress [data-slot="progress-indicator"] {
   position: relative;
   overflow: hidden;
 }
 
-.marid-update-charge-progress [data-slot="progress-indicator"]::after {
+.qodex-update-charge-progress [data-slot="progress-indicator"]::after {
   content: "";
   position: absolute;
   bottom: 0;
@@ -1389,11 +1389,11 @@ body {
     color-mix(in oklab, var(--color-primary-foreground) 62%, transparent),
     transparent
   );
-  animation: marid-update-charge-sweep 1.15s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  animation: qodex-update-charge-sweep 1.15s cubic-bezier(0.65, 0, 0.35, 1) infinite;
   transform: translateX(-120%);
 }
 
-@keyframes marid-update-charge-sweep {
+@keyframes qodex-update-charge-sweep {
   0% {
     opacity: 0.35;
     transform: translateX(-120%);
@@ -1410,7 +1410,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .marid-update-charge-progress [data-slot="progress-indicator"]::after {
+  .qodex-update-charge-progress [data-slot="progress-indicator"]::after {
     animation: none;
     opacity: 0.2;
     transform: none;
@@ -2395,7 +2395,7 @@ body {
 }
 
 /* thumb 伪元素需继承容器颜色；每个真实子元素重置透明，隔离嵌套滚动区。 */
-@property --marid-scrollbar-thumb {
+@property --qodex-scrollbar-thumb {
   syntax: "<color>";
   inherits: true;
   initial-value: transparent;
@@ -2403,7 +2403,7 @@ body {
 :is([data-project-sidebar-panel], [data-workspace-conversation-frame], [data-workspace-side-frame]),
 :is([data-project-sidebar-panel], [data-workspace-conversation-frame], [data-workspace-side-frame])
   * {
-  --marid-scrollbar-thumb: transparent;
+  --qodex-scrollbar-thumb: transparent;
   scrollbar-color: auto;
 }
 :is(
@@ -2413,10 +2413,10 @@ body {
 )::-webkit-scrollbar-thumb,
 :is([data-project-sidebar-panel], [data-workspace-conversation-frame], [data-workspace-side-frame])
   *::-webkit-scrollbar-thumb {
-  background-color: var(--marid-scrollbar-thumb);
+  background-color: var(--qodex-scrollbar-thumb);
 }
 [data-scrollbar-active] {
-  --marid-scrollbar-thumb: var(--color-border);
+  --qodex-scrollbar-thumb: var(--color-border);
 }
 
 /* 只在滑块本身悬停/拖动时增强反馈，不改变轨道与内容尺寸。 */
@@ -2447,10 +2447,10 @@ body {
 }
 
 [data-scrollbar-active][data-scrollbar-hover] {
-  --marid-scrollbar-thumb: color-mix(in oklab, var(--color-foreground) 30%, transparent);
+  --qodex-scrollbar-thumb: color-mix(in oklab, var(--color-foreground) 30%, transparent);
 }
 [data-scrollbar-active][data-scrollbar-dragging] {
-  --marid-scrollbar-thumb: color-mix(in oklab, var(--color-foreground) 45%, transparent);
+  --qodex-scrollbar-thumb: color-mix(in oklab, var(--color-foreground) 45%, transparent);
 }
 /* 文字填充与图标分别控制，避免箭头和身份头像随摘要文字变色；扫光保留自身透明填充。 */
 @media (hover: hover) {

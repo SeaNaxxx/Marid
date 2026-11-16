@@ -3,10 +3,10 @@ import {
   findStaticView,
   type ExtensionViewInput,
   type ResolvedScope,
-} from "@marid/shared/extension-host";
-import { TID_EXTENSION_VIEW } from "@marid/shared/test-ids";
+} from "@qodex/shared/extension-host";
+import { TID_EXTENSION_VIEW } from "@qodex/shared/test-ids";
 import { usePlatform } from "@/hooks/usePlatform.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import {
   useExtensionSlotsState,
   useExtensionViewsService,
@@ -39,7 +39,7 @@ export function ExtensionViewPane({
   target,
   onOpenExternal,
 }: ExtensionViewPaneProps) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const platform = usePlatform();
   const sandbox = platform.pluginSandbox ?? null;
   const service = useExtensionsService();

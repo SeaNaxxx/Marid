@@ -1,4 +1,4 @@
-import type { ComposerMentionPrefill } from "@/store/maridSessionStoreTypes.js";
+import type { ComposerMentionPrefill } from "@/store/qodexSessionStoreTypes.js";
 
 /** Workspace catalog preview; selection emits a canonical mention without installing plugins. */
 export interface WorkspacePluginPreviewProps {

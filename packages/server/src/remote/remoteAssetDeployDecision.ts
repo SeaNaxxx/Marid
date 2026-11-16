@@ -1,25 +1,25 @@
-import { MARID_VERSION } from "@marid/shared";
-import type { IRemoteBackend, RemoteEnvironment } from "@marid/server/remote/backend.js";
+import { QODEX_VERSION } from "@qodex/shared";
+import type { IRemoteBackend, RemoteEnvironment } from "@qodex/server/remote/backend.js";
 import {
   REMOTE_BASE,
   type DeployLoggers,
   type RemoteAssetDeployOptions,
-} from "@marid/server/remote/deployShared.js";
+} from "@qodex/server/remote/deployShared.js";
 import {
   readRemoteAssetComponentMeta,
   writeRemoteAssetComponentMeta,
-} from "@marid/server/remote/remoteAssetLiveIdentity.js";
+} from "@qodex/server/remote/remoteAssetLiveIdentity.js";
 import {
   fetchRemoteAssetManifestFromCdn,
   resolveRemoteAssetComponentCacheVersion,
   selectRemoteAssetManifestComponents,
   type RemoteAssetManifest,
-} from "@marid/server/remote/remoteAssetCache.js";
+} from "@qodex/server/remote/remoteAssetCache.js";
 import {
   LocalUploadAssetInstaller,
   type RemoteAssetInstaller,
-} from "@marid/server/remote/remoteAssetInstaller.js";
-import type { RemoteAssetNetworkPort } from "@marid/server/remote/remoteAssetNetwork.js";
+} from "@qodex/server/remote/remoteAssetInstaller.js";
+import type { RemoteAssetNetworkPort } from "@qodex/server/remote/remoteAssetNetwork.js";
 
 const REMOTE_NODE_PTY_PATH = `${REMOTE_BASE}/build/Release/pty.node`;
 const REMOTE_NODE_PTY_SPAWN_HELPER_PATH = `${REMOTE_BASE}/build/Release/spawn-helper`;
@@ -300,7 +300,7 @@ async function resolveComponentManifest(
         remoteCdnBaseUrl: options.remoteCdnBaseUrl,
         remoteCdnBaseUrls: options.remoteCdnBaseUrls,
         remoteCacheDir: options.remoteCacheDir,
-        version: MARID_VERSION,
+        version: QODEX_VERSION,
         platformArch: `${env.platform}-${env.arch}`,
         manifestRequestTimeoutMs: options.manifestRequestTimeoutMs,
         remoteAssetNetwork: options.remoteAssetNetwork,

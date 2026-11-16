@@ -1,4 +1,4 @@
-import type { UsageEntitlementSnapshot } from "@marid/shared";
+import type { UsageEntitlementSnapshot } from "@qodex/shared";
 import { hasActiveCodingPlanSnapshot } from "@/CodingPlanUsageRemainingPanel.js";
 
 export type SidebarFooterProfilePlanBadge =

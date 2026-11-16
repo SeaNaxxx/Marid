@@ -1,13 +1,13 @@
 import { create } from "zustand";
 import {
-  normalizeAgentProviderToMaridAgent,
-  MARID_AGENT_PROVIDER,
-  type MaridProvider,
+  normalizeAgentProviderToQodexAgent,
+  QODEX_AGENT_PROVIDER,
+  type QodexProvider,
   type AgentSummary,
   type AgentsCapability,
   type SubAgentConfig,
-} from "@marid/shared";
-import type { ISubagentsService } from "@marid/services";
+} from "@qodex/shared";
+import type { ISubagentsService } from "@qodex/services";
 import { shouldExposeE2EStoreBridge } from "@/lib/e2eStoreBridge.js";
 import { logger } from "@/logger.js";
 import { getRemoteWorkspaceServicesForIdentity } from "@/store/remoteWorkspaceSessionStore.js";
@@ -24,8 +24,8 @@ interface SubagentsStoreState {
   workspaceIdentity: string | null;
   loadedWorkspacePath: string | null;
   loadedWorkspaceIdentity: string | null;
-  provider: MaridProvider;
-  loadedProvider: MaridProvider | null;
+  provider: QodexProvider;
+  loadedProvider: QodexProvider | null;
   agents: AgentSummary[];
   capability: AgentsCapability | null;
   loading: boolean;
@@ -34,7 +34,7 @@ interface SubagentsStoreState {
   operatingAgentId: string | null;
   initialize: (
     workspacePath: string,
-    providerOrSubagentsService: MaridProvider | ISubagentsService,
+    providerOrSubagentsService: QodexProvider | ISubagentsService,
     maybeSubagentsService?: ISubagentsService,
     workspaceIdentity?: string,
   ) => Promise<void>;
@@ -47,7 +47,7 @@ interface SubagentsStoreState {
   ) => Promise<void>;
   createAgent: (
     config: SubAgentConfig,
-    provider: MaridProvider,
+    provider: QodexProvider,
     subagentsService: ISubagentsService,
     workspaceIdentity?: string,
   ) => Promise<AgentSummary | null>;
@@ -55,7 +55,7 @@ interface SubagentsStoreState {
     agentId: string,
     config: SubAgentConfig,
     oldFilePath: string | undefined,
-    provider: MaridProvider,
+    provider: QodexProvider,
     subagentsService: ISubagentsService,
     workspaceIdentity?: string,
   ) => Promise<AgentSummary | null>;
@@ -74,7 +74,7 @@ export const useSubagentsStore = create<SubagentsStoreState>((set, get) => ({
   workspaceIdentity: null,
   loadedWorkspacePath: null,
   loadedWorkspaceIdentity: null,
-  provider: MARID_AGENT_PROVIDER,
+  provider: QODEX_AGENT_PROVIDER,
   loadedProvider: null,
   agents: [],
   capability: null,
@@ -83,14 +83,14 @@ export const useSubagentsStore = create<SubagentsStoreState>((set, get) => ({
   operatingAgentId: null,
   async initialize(
     workspacePath: string,
-    providerOrSubagentsService: MaridProvider | ISubagentsService,
+    providerOrSubagentsService: QodexProvider | ISubagentsService,
     maybeSubagentsService?: ISubagentsService,
     workspaceIdentity?: string,
   ) {
     const currentState = get();
     const hasProvider = typeof providerOrSubagentsService === "string";
-    const provider = normalizeAgentProviderToMaridAgent(
-      hasProvider ? providerOrSubagentsService : MARID_AGENT_PROVIDER,
+    const provider = normalizeAgentProviderToQodexAgent(
+      hasProvider ? providerOrSubagentsService : QODEX_AGENT_PROVIDER,
     );
     const subagentsService = hasProvider ? maybeSubagentsService : providerOrSubagentsService;
     const normalizedWorkspaceIdentity = workspaceIdentity?.trim() || null;
@@ -168,7 +168,7 @@ export const useSubagentsStore = create<SubagentsStoreState>((set, get) => ({
     }
     const workspaceIdentityFromState =
       workspaceIdentity?.trim() || get().workspaceIdentity || undefined;
-    const provider = normalizeAgentProviderToMaridAgent(get().provider);
+    const provider = normalizeAgentProviderToQodexAgent(get().provider);
     const serviceAuthorityId = getServiceAuthorityId(subagentsService);
     const hasCachedAgents =
       get().agents.length > 0 && loadedSubagentsServiceAuthorityId === serviceAuthorityId;
@@ -246,7 +246,7 @@ export const useSubagentsStore = create<SubagentsStoreState>((set, get) => ({
   },
   async createAgent(
     config: SubAgentConfig,
-    provider: MaridProvider,
+    provider: QodexProvider,
     subagentsService: ISubagentsService,
     workspaceIdentity?: string,
   ) {
@@ -260,7 +260,7 @@ export const useSubagentsStore = create<SubagentsStoreState>((set, get) => ({
     try {
       const result = await subagentsService.createAgent({
         config,
-        provider: normalizeAgentProviderToMaridAgent(provider),
+        provider: normalizeAgentProviderToQodexAgent(provider),
       });
       await get().refresh(subagentsService, workspaceIdentityFromState);
       return result.agent;
@@ -277,7 +277,7 @@ export const useSubagentsStore = create<SubagentsStoreState>((set, get) => ({
     agentId: string,
     config: SubAgentConfig,
     oldFilePath: string | undefined,
-    provider: MaridProvider,
+    provider: QodexProvider,
     subagentsService: ISubagentsService,
     workspaceIdentity?: string,
   ) {
@@ -293,7 +293,7 @@ export const useSubagentsStore = create<SubagentsStoreState>((set, get) => ({
         agentId,
         config,
         oldFilePath,
-        provider: normalizeAgentProviderToMaridAgent(provider),
+        provider: normalizeAgentProviderToQodexAgent(provider),
       });
       await get().refresh(subagentsService, workspaceIdentityFromState);
       return result.agent;
@@ -346,7 +346,7 @@ declare global {
 }
 
 if (shouldExposeE2EStoreBridge()) {
-  // E2E 诊断入口必须由 WDIO 显式打开，不能复用 MARID_ENV=test，避免产品测试环境暴露可变全局 store。
+  // E2E 诊断入口必须由 WDIO 显式打开，不能复用 QODEX_ENV=test，避免产品测试环境暴露可变全局 store。
   window.__subagentsStoreE2E = useSubagentsStore;
 }
 

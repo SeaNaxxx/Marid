@@ -1,4 +1,4 @@
-import type { McpServerConfig, NativeMcpServerRecord } from "@marid/shared";
+import type { McpServerConfig, NativeMcpServerRecord } from "@qodex/shared";
 import { logger } from "@/logger.js";
 import {
   fetchNativeMcpServers,
@@ -16,15 +16,15 @@ interface CommonMcpMigrationResult extends MigrateLegacyResult {
   changed: boolean;
 }
 
-function isMaridAgentUserServer(server: NativeMcpServerRecord): boolean {
+function isQodexAgentUserServer(server: NativeMcpServerRecord): boolean {
   return (
-    server.source === "maridagentmcp" &&
+    server.source === "qodexagentmcp" &&
     server.scope === "user" &&
-    (!server.location || server.location.source === "marid")
+    (!server.location || server.location.source === "qodex")
   );
 }
 
-export async function importLegacyCommonServersToMaridAgent(
+export async function importLegacyCommonServersToQodexAgent(
   platform: McpPlatformService | null,
   legacyServers: Record<string, McpServerConfig>,
   nativeServers: NativeMcpServerRecord[],
@@ -44,7 +44,7 @@ export async function importLegacyCommonServersToMaridAgent(
   }
 
   const existingNames = new Set(
-    nativeServers.filter(isMaridAgentUserServer).map((server) => server.name),
+    nativeServers.filter(isQodexAgentUserServer).map((server) => server.name),
   );
   let importedCount = 0;
   let skippedCount = 0;
@@ -58,7 +58,7 @@ export async function importLegacyCommonServersToMaridAgent(
     try {
       const persisted = await persistCliMcpToUserDirectory(platform, {
         action: "upsert",
-        source: "maridagentmcp",
+        source: "qodexagentmcp",
         name,
         config,
       });
@@ -98,7 +98,7 @@ export async function importLegacyCommonServersToMaridAgent(
   };
 }
 
-export async function migrateStoredCommonMcpToMaridAgent(
+export async function migrateStoredCommonMcpToQodexAgent(
   platform: McpPlatformService | null,
   nativeServers: NativeMcpServerRecord[],
   workspacePath?: string,
@@ -109,14 +109,14 @@ export async function migrateStoredCommonMcpToMaridAgent(
   }
 
   // 旧通用 MCP 保存在 localStorage，不迁移就直接去掉 common 读取会让用户配置从设置页和运行时消失。
-  const migration = await importLegacyCommonServersToMaridAgent(
+  const migration = await importLegacyCommonServersToQodexAgent(
     platform,
     legacyServers,
     nativeServers,
-    "localStorage:marid-mcp-config",
+    "localStorage:qodex-mcp-config",
   );
   if (migration.completed) {
-    // 只有确认写入 marid agent 目录后才清理旧数据，避免 Web 端没有 desktop bridge 时丢配置。
+    // 只有确认写入 qodex agent 目录后才清理旧数据，避免 Web 端没有 desktop bridge 时丢配置。
     clearLegacyCommonMcpServers();
   }
   if (!migration.changed) {
@@ -124,7 +124,7 @@ export async function migrateStoredCommonMcpToMaridAgent(
   }
 
   logger.info(
-    `[mcpStore] migrated ${migration.importedCount} legacy common MCP servers to marid agent config`,
+    `[mcpStore] migrated ${migration.importedCount} legacy common MCP servers to qodex agent config`,
   );
   return fetchNativeMcpServers(platform, { workspacePath });
 }

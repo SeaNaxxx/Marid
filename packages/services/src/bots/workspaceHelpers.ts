@@ -1,4 +1,4 @@
-import { ALL_BOT_WORKSPACES, type BotConfig, type BotWorkspaceRef } from "@marid/shared";
+import { ALL_BOT_WORKSPACES, type BotConfig, type BotWorkspaceRef } from "@qodex/shared";
 
 export function getWorkspaceKey(workspacePath: string, workspaceIdentity?: string): string {
   return workspaceIdentity?.trim() || workspacePath;

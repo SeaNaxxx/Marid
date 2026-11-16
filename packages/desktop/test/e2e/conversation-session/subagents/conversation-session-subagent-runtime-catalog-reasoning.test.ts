@@ -5,7 +5,7 @@ import {
   decodeCustomModelValue,
   encodeCustomModelValue,
   formatSubagentMarkdownModel,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   TID_CHAT_MODEL_SELECT_GROUP,
   TID_CHAT_MODEL_SELECT_ITEM,
@@ -20,7 +20,7 @@ import {
   TID_TASK_SETTINGS_BUTTON,
   TID_V4_MODEL_CONFIG,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { selectCombinedComposerThoughtLevel } from "#e2e/helpers/composer-model-picker";
 import {
   DEFAULT_WORKSPACE,

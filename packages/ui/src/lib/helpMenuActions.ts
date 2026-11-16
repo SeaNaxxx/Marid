@@ -1,8 +1,8 @@
-import type { IPlatformService } from "@marid/shared";
+import type { IPlatformService } from "@qodex/shared";
 import type { IntlInstance } from "@/i18n/IntlProvider.js";
 import type { FeedbackSubmitDraft } from "@/feedback/feedbackStore.js";
 import { runExportLogsAction } from "@/lib/exportLogsAction.js";
-import { MARID_PRODUCT_DOCS_URL } from "@/lib/productDocs.js";
+import { QODEX_PRODUCT_DOCS_URL } from "@/lib/productDocs.js";
 
 export interface HelpMenuActionHandlers {
   openIssueReport: () => Promise<void>;
@@ -30,7 +30,7 @@ export function createHelpMenuActionHandlers({
       });
     },
     openProductDocs: () => {
-      platform.openExternal(MARID_PRODUCT_DOCS_URL);
+      platform.openExternal(QODEX_PRODUCT_DOCS_URL);
     },
     exportLogs: () => {
       void runExportLogsAction(platform, intl);

@@ -1,4 +1,4 @@
-// 上游请求体里的 token 预算提醒（apps/marid-cli/docs/design/v2/loop/meta-user-context.md「Total-tokens reminder」）。
+// 上游请求体里的 token 预算提醒（apps/qodex-cli/docs/design/v2/loop/meta-user-context.md「Total-tokens reminder」）。
 type Block = Record<string, unknown> & { type?: string };
 type Message = { role: string; content: unknown };
 type RequestShape = { messages: Message[]; system?: unknown };

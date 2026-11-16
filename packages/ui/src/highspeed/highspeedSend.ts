@@ -3,8 +3,8 @@ import type {
   HighspeedMessageMeta,
   HighspeedPrepareTurnResult,
   ModelSelection,
-} from "@marid/shared";
-import type { CommandPayloadMap } from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared";
+import type { CommandPayloadMap } from "@qodex/shared/qodex-protocol-v4";
 
 /** 与协议 payload 同源，避免 Renderer 再维护一份执行材料形状。 */
 type HighspeedModelExecution = NonNullable<CommandPayloadMap["sendText"]["modelExecution"]>;

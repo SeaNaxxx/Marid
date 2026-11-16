@@ -1,4 +1,4 @@
-export const MARID_KNOWN_TOOL_NAMES = [
+export const QODEX_KNOWN_TOOL_NAMES = [
   "Read",
   "Write",
   "Edit",
@@ -39,9 +39,9 @@ export const MARID_KNOWN_TOOL_NAMES = [
   "submit_result",
 ] as const;
 
-export type MaridKnownToolName = (typeof MARID_KNOWN_TOOL_NAMES)[number];
+export type QodexKnownToolName = (typeof QODEX_KNOWN_TOOL_NAMES)[number];
 
-export type MaridToolFamily =
+export type QodexToolFamily =
   | "file-read"
   | "file-write"
   | "shell"
@@ -58,7 +58,7 @@ export type MaridToolFamily =
   | "node-repl"
   | "workflow";
 
-const TOOL_FAMILY_BY_NAME: Record<MaridKnownToolName, MaridToolFamily> = {
+const TOOL_FAMILY_BY_NAME: Record<QodexKnownToolName, QodexToolFamily> = {
   Read: "file-read",
   Write: "file-write",
   Edit: "file-write",
@@ -96,13 +96,13 @@ const TOOL_FAMILY_BY_NAME: Record<MaridKnownToolName, MaridToolFamily> = {
   submit_result: "workflow",
 };
 
-const TOOL_NAME_BY_LOWER = new Map<string, MaridKnownToolName>(
-  MARID_KNOWN_TOOL_NAMES.map((toolName) => [toolName.toLowerCase(), toolName]),
+const TOOL_NAME_BY_LOWER = new Map<string, QodexKnownToolName>(
+  QODEX_KNOWN_TOOL_NAMES.map((toolName) => [toolName.toLowerCase(), toolName]),
 );
 
-export function normalizeMaridToolName(
+export function normalizeQodexToolName(
   value: string | null | undefined,
-): MaridKnownToolName | null {
+): QodexKnownToolName | null {
   const normalized = value?.trim();
   if (!normalized) {
     return null;
@@ -111,20 +111,20 @@ export function normalizeMaridToolName(
   return TOOL_NAME_BY_LOWER.get(normalized.toLowerCase()) ?? null;
 }
 
-export function getMaridToolFamilyForName(
+export function getQodexToolFamilyForName(
   value: string | null | undefined,
-): MaridToolFamily | null {
-  const toolName = normalizeMaridToolName(value);
+): QodexToolFamily | null {
+  const toolName = normalizeQodexToolName(value);
   return toolName ? TOOL_FAMILY_BY_NAME[toolName] : null;
 }
 
-export function isMaridToolFamily(
+export function isQodexToolFamily(
   value: string | null | undefined,
-  family: MaridToolFamily,
+  family: QodexToolFamily,
 ): boolean {
-  return getMaridToolFamilyForName(value) === family;
+  return getQodexToolFamilyForName(value) === family;
 }
 
-export function isMaridFileContentWriteToolName(value: string | null | undefined): boolean {
-  return normalizeMaridToolName(value) === "Write";
+export function isQodexFileContentWriteToolName(value: string | null | undefined): boolean {
+  return normalizeQodexToolName(value) === "Write";
 }

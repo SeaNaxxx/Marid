@@ -1,7 +1,7 @@
 import { SidebarNativeTooltip, ControlHintTooltip } from "@/ControlHintTooltip.js";
 import type {
-  MaridGroupedTaskViewNode,
-  MaridTaskGroupColor,
+  QodexGroupedTaskViewNode,
+  QodexTaskGroupColor,
 } from "@/project-sidebar/grouped/types.js";
 
 import { ChevronDownIcon, ChevronRightIcon, MessageCirclePlus } from "lucide-react";
@@ -25,8 +25,8 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.js";
-import { CRON_DEFAULT_GROUP_ID, OFF_PEAK_DEFAULT_GROUP_ID } from "@marid/shared";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { CRON_DEFAULT_GROUP_ID, OFF_PEAK_DEFAULT_GROUP_ID } from "@qodex/shared";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { getTaskGroupDisplayTitle } from "@/project-sidebar/grouped/group-title.js";
 import {
   TASK_GROUP_COLORS,
@@ -34,7 +34,7 @@ import {
   TaskGroupColorMark,
 } from "@/project-sidebar/grouped/shared.js";
 
-type StickyGroupNode = Extract<MaridGroupedTaskViewNode, { type: "group" }>;
+type StickyGroupNode = Extract<QodexGroupedTaskViewNode, { type: "group" }>;
 
 export function StickyGroupHeader({
   node,
@@ -50,10 +50,10 @@ export function StickyGroupHeader({
   tooltipsDisabled?: boolean;
   onCreateTask: () => void;
   onToggleCollapsed: (groupId: string) => void;
-  onUpdateGroupColor: (groupId: string, color: MaridTaskGroupColor) => void;
+  onUpdateGroupColor: (groupId: string, color: QodexTaskGroupColor) => void;
   onUngroupGroup: (groupId: string) => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const taskCount = node.tasks.length;
   // 系统分组（cron / 闲时）标题按语言环境本地化展示，与 GroupItem 保持一致。
   const displayTitle = getTaskGroupDisplayTitle(node.group, {
@@ -66,7 +66,7 @@ export function StickyGroupHeader({
     node.group.id === CRON_DEFAULT_GROUP_ID || node.group.id === OFF_PEAK_DEFAULT_GROUP_ID;
   const handleToggle = () => onToggleCollapsed(node.group.id);
   const handleGroupColorChange = (color: string) => {
-    onUpdateGroupColor(node.group.id, color as MaridTaskGroupColor);
+    onUpdateGroupColor(node.group.id, color as QodexTaskGroupColor);
   };
   const newTaskButton = (
     <Button

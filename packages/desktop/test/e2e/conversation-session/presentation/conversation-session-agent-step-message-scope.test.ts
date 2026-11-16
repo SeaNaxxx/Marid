@@ -139,19 +139,19 @@ async function prepareArmsCapture(): Promise<FinalArmsCaptureMode> {
   const hasFinalBridge = await browser.execute(
     async (targetArmsEvents) => {
       type DebugWindow = Window & {
-        __maridArmsCustomEventsE2E?: Array<ArmsCustomEventPayload & { recordedAt?: number }>;
-        __maridFinalArmsCustomEventsE2E?: {
+        __qodexArmsCustomEventsE2E?: Array<ArmsCustomEventPayload & { recordedAt?: number }>;
+        __qodexFinalArmsCustomEventsE2E?: {
           clear(): Promise<void>;
           configure(request: { suppressedEventNames: string[] }): Promise<void>;
         };
-        marid?: {
+        qodex?: {
           reportArmsCustomEvent?: (payload: ArmsCustomEventPayload) => Promise<unknown>;
         };
       };
       const host = window as DebugWindow;
-      host.__maridArmsCustomEventsE2E = [];
+      host.__qodexArmsCustomEventsE2E = [];
 
-      const finalBridge = host.__maridFinalArmsCustomEventsE2E;
+      const finalBridge = host.__qodexFinalArmsCustomEventsE2E;
       if (finalBridge) {
         await finalBridge.clear();
         await finalBridge.configure({ suppressedEventNames: [...targetArmsEvents] });
@@ -163,7 +163,7 @@ async function prepareArmsCapture(): Promise<FinalArmsCaptureMode> {
   );
   if (hasFinalBridge) return "bridge";
 
-  if (!process.env.MARID_TELEMETRY_PARITY_LEGACY_ARMS_PATH?.trim()) {
+  if (!process.env.QODEX_TELEMETRY_PARITY_LEGACY_ARMS_PATH?.trim()) {
     throw new Error("旧版缺少 main sendCustom 临时捕获路径，已在发送前停止");
   }
   return "legacy-file";
@@ -216,9 +216,9 @@ async function readTargetRendererArms(): Promise<ArmsCustomEventPayload[]> {
       const buffer =
         (
           window as Window & {
-            __maridArmsCustomEventsE2E?: Array<ArmsCustomEventPayload & { recordedAt?: number }>;
+            __qodexArmsCustomEventsE2E?: Array<ArmsCustomEventPayload & { recordedAt?: number }>;
           }
-        ).__maridArmsCustomEventsE2E ?? [];
+        ).__qodexArmsCustomEventsE2E ?? [];
       return buffer
         .filter(
           (entry) =>
@@ -263,7 +263,7 @@ async function waitForTargetFinalArms(
 
 async function readTargetFinalArms(mode: FinalArmsCaptureMode): Promise<JsonRecord[]> {
   if (mode === "legacy-file") {
-    const capturePath = process.env.MARID_TELEMETRY_PARITY_LEGACY_ARMS_PATH?.trim();
+    const capturePath = process.env.QODEX_TELEMETRY_PARITY_LEGACY_ARMS_PATH?.trim();
     if (!capturePath) return [];
     try {
       const contents = await readFile(capturePath, "utf8");
@@ -288,11 +288,11 @@ async function readTargetFinalArms(mode: FinalArmsCaptureMode): Promise<JsonReco
     async (targetArmsEvents) => {
       const bridge = (
         window as Window & {
-          __maridFinalArmsCustomEventsE2E?: {
+          __qodexFinalArmsCustomEventsE2E?: {
             read(): Promise<Array<{ payload: JsonRecord }>>;
           };
         }
-      ).__maridFinalArmsCustomEventsE2E;
+      ).__qodexFinalArmsCustomEventsE2E;
       if (!bridge) return [];
       const entries = await bridge.read();
       return entries
@@ -313,7 +313,7 @@ async function writeParityArtifact(params: {
   armsRenderer?: ArmsCustomEventPayload[];
   armsFinal?: JsonRecord[];
 }): Promise<void> {
-  const artifactPath = process.env.MARID_TELEMETRY_PARITY_CAPTURE_PATH?.trim();
+  const artifactPath = process.env.QODEX_TELEMETRY_PARITY_CAPTURE_PATH?.trim();
   if (!artifactPath) return;
   const artifact: TelemetryParityArtifact = {
     version: 1,

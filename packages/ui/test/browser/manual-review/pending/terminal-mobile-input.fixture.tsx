@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import type { IServiceAccessor, ITerminalService } from "@marid/services";
+import type { IServiceAccessor, ITerminalService } from "@qodex/services";
 import { TerminalSession } from "@/terminal/TerminalSession.js";
-import { MaridIntlProvider } from "@/i18n/IntlProvider.js";
+import { QodexIntlProvider } from "@/i18n/IntlProvider.js";
 import "@/styles.css";
 
 const writes: string[] = [];
@@ -40,7 +40,7 @@ const onOpenBrowserUrl = () => {};
 function Fixture() {
   const [mounted, setMounted] = useState(true);
   return (
-    <MaridIntlProvider initialLocale="zh-CN">
+    <QodexIntlProvider initialLocale="zh-CN">
       <button onClick={() => setMounted((value) => !value)}>Toggle</button>
       <button
         onClick={() => {
@@ -65,7 +65,7 @@ function Fixture() {
           />
         )}
       </div>
-    </MaridIntlProvider>
+    </QodexIntlProvider>
   );
 }
 

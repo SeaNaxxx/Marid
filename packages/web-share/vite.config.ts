@@ -6,10 +6,10 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import {
   resolveBigModelApiOrigin,
-  resolveRuntimeMaridEndpointOrigin,
+  resolveRuntimeQodexEndpointOrigin,
   resolveZaiOAuthClientId,
   resolveZaiOAuthOrigin,
-} from "../shared/src/maridEndpoint.js";
+} from "../shared/src/qodexEndpoint.js";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
 const REPO_ROOT = resolve(HERE, "../..");
@@ -17,12 +17,12 @@ const { version } = JSON.parse(readFileSync(resolve(REPO_ROOT, "package.json"), 
 
 export default defineConfig(({ mode }) => {
   const env = { ...loadEnv(mode, REPO_ROOT, ""), ...process.env };
-  const maridEnv = env.MARID_ENV?.trim().toLowerCase() === "production" ? "production" : "test";
-  const endpointEnv = { ...env, MARID_ENV: maridEnv };
-  const endpointOrigin = resolveRuntimeMaridEndpointOrigin(endpointEnv);
+  const qodexEnv = env.QODEX_ENV?.trim().toLowerCase() === "production" ? "production" : "test";
+  const endpointEnv = { ...env, QODEX_ENV: qodexEnv };
+  const endpointOrigin = resolveRuntimeQodexEndpointOrigin(endpointEnv);
   const oauthOrigin = resolveZaiOAuthOrigin(endpointEnv);
   const oauthClientId = resolveZaiOAuthClientId(endpointEnv);
-  // BigModel 授权入口必须跟随 MARID_ENV，否则测试环境会把测试账号带到生产授权页。
+  // BigModel 授权入口必须跟随 QODEX_ENV，否则测试环境会把测试账号带到生产授权页。
   const bigmodelOAuthOrigin = resolveBigModelApiOrigin(endpointEnv);
 
   return {
@@ -38,68 +38,68 @@ export default defineConfig(({ mode }) => {
         // Docker 只给 web-share 安装依赖，复用的 Web/UI 源文件找不到同级依赖链接。
         // 根入口必须精确匹配，避免把 shared/mcp-apps 等子路径改写成 index.ts/mcp-apps。
         {
-          find: /^@marid\/shared$/,
+          find: /^@qodex\/shared$/,
           replacement: resolve(REPO_ROOT, "packages/shared/src/index.ts"),
         },
         // Bugfix：message.tsx 的文件链接菜单静态引用 useWorkspaceServices / file-menu，二者值导入
-        // @marid/rpc，分享只读时间线因此带上 rpc；镜像未安装它，Docker 构建解析失败。rpc 无三方依赖，
+        // @qodex/rpc，分享只读时间线因此带上 rpc；镜像未安装它，Docker 构建解析失败。rpc 无三方依赖，
         // 分享页没有 services 时也不会走到该分支，所以直接指向源码（Dockerfile 同步复制 rpc/src）。
         {
-          find: /^@marid\/rpc$/,
+          find: /^@qodex\/rpc$/,
           replacement: resolve(REPO_ROOT, "packages/rpc/src/index.ts"),
         },
         // Bugfix：shared/app-control 值导入 session-control 契约；镜像只复制该包源码（唯一三方依赖 zod 已由 shared
         // 安装），未登记别名时 Docker 构建解析失败。
         {
-          find: /^@marid\/session-control\/contracts$/,
+          find: /^@qodex\/session-control\/contracts$/,
           replacement: resolve(REPO_ROOT, "packages/session-control/src/contract.ts"),
         },
-        // Share 镜像不安装 @marid/ui（它会带入 services 闭包），子路径导入必须显式指向源码。
+        // Share 镜像不安装 @qodex/ui（它会带入 services 闭包），子路径导入必须显式指向源码。
         {
-          find: "@marid/ui/useTheme",
+          find: "@qodex/ui/useTheme",
           replacement: resolve(REPO_ROOT, "packages/ui/src/useTheme.ts"),
         },
         // 只读时间线的协议子路径同时是 shareBuildBoundary 守卫的准入声明。
         {
-          find: "@marid/shared/marid-protocol-v4",
-          replacement: resolve(REPO_ROOT, "packages/shared/src/marid-protocol-v4/index.ts"),
+          find: "@qodex/shared/qodex-protocol-v4",
+          replacement: resolve(REPO_ROOT, "packages/shared/src/qodex-protocol-v4/index.ts"),
         },
         // Bugfix：test-ids 改为只从子路径导入后，reasoning.tsx、ToolSummaryRow.tsx 等 share 闭包
         // 文件引用了它；镜像没有 packages/ui 的依赖链接，未登记别名时 Docker 构建解析失败。
         {
-          find: "@marid/shared/test-ids",
+          find: "@qodex/shared/test-ids",
           replacement: resolve(REPO_ROOT, "packages/shared/src/test-ids.ts"),
         },
         // 分享管理页复用的基础控件；只依赖 radix-ui / cva / lucide，均在 share-ui 依赖闭包内。
         {
-          find: "@marid/ui/button",
+          find: "@qodex/ui/button",
           replacement: resolve(REPO_ROOT, "packages/ui/src/components/ui/button.tsx"),
         },
         {
-          find: "@marid/ui/dropdown-menu",
+          find: "@qodex/ui/dropdown-menu",
           replacement: resolve(REPO_ROOT, "packages/ui/src/components/ui/dropdown-menu.tsx"),
         },
         {
-          find: "@marid/ui/alert-dialog",
+          find: "@qodex/ui/alert-dialog",
           replacement: resolve(REPO_ROOT, "packages/ui/src/components/ui/alert-dialog.tsx"),
         },
         {
-          find: "@marid/ui/conversation-share-readonly",
+          find: "@qodex/ui/conversation-share-readonly",
           replacement: resolve(REPO_ROOT, "packages/share-ui/src/index.ts"),
         },
         // 登录卡片要用 provider 图标；只依赖 shared/lucide/cn，不引入 services/rpc。
         {
-          find: "@marid/ui/oauth-provider-icon",
+          find: "@qodex/ui/oauth-provider-icon",
           replacement: resolve(REPO_ROOT, "packages/ui/src/lib/oauthProviderIcon.tsx"),
         },
       ],
     },
     define: {
-      __MARID_VERSION__: JSON.stringify(version),
-      __MARID_COMMIT__: JSON.stringify(env.MARID_COMMIT || "unknown"),
-      __MARID_ENV__: JSON.stringify(maridEnv),
-      "import.meta.env.VITE_MARID_BASE_URL": JSON.stringify(endpointOrigin),
-      "import.meta.env.VITE_MARID_ENDPOINT_ORIGIN": JSON.stringify(endpointOrigin),
+      __QODEX_VERSION__: JSON.stringify(version),
+      __QODEX_COMMIT__: JSON.stringify(env.QODEX_COMMIT || "unknown"),
+      __QODEX_ENV__: JSON.stringify(qodexEnv),
+      "import.meta.env.VITE_QODEX_BASE_URL": JSON.stringify(endpointOrigin),
+      "import.meta.env.VITE_QODEX_ENDPOINT_ORIGIN": JSON.stringify(endpointOrigin),
       "import.meta.env.VITE_ZAI_OAUTH_CLIENT_ID": JSON.stringify(oauthClientId),
       "import.meta.env.VITE_ZAI_OAUTH_ORIGIN": JSON.stringify(oauthOrigin),
       "import.meta.env.VITE_BIGMODEL_OAUTH_ORIGIN": JSON.stringify(bigmodelOAuthOrigin),

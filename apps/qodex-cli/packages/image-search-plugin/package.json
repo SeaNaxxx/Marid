@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "@qodex/image-search-plugin",
+  "version": "0.1.0-qodex",
+  "private": true,
+  "license": "Apache-2.0",
+  "description": "Official Qodex image search MCP server for finding illustrations and reference images."
+}

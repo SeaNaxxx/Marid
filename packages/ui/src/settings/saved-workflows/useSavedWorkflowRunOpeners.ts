@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import type { MaridSavedWorkflowRun } from "@marid/shared";
+import type { QodexSavedWorkflowRun } from "@qodex/shared";
 import type {
   SavedWorkflowsOpenArtifactParams,
   SavedWorkflowsOpenRunParams,
@@ -31,17 +31,17 @@ export interface SavedWorkflowRunOpenTarget {
  */
 export function useSavedWorkflowRunOpeners(options: {
   /** 该行归属的项目；返回 null 即两个入口都关闭（全局档里 cwd 对应的项目没打开）。 */
-  resolveTarget: (run: MaridSavedWorkflowRun) => SavedWorkflowRunOpenTarget | null;
+  resolveTarget: (run: QodexSavedWorkflowRun) => SavedWorkflowRunOpenTarget | null;
   onOpenWorkflowRun?: (params: SavedWorkflowsOpenRunParams) => void;
   onOpenWorkflowArtifact?: (params: SavedWorkflowsOpenArtifactParams) => void;
 }): {
-  handleOpenRun: (run: MaridSavedWorkflowRun, workflowName: string) => void;
-  handleOpenArtifact: (run: MaridSavedWorkflowRun, artifactId: string) => void;
+  handleOpenRun: (run: QodexSavedWorkflowRun, workflowName: string) => void;
+  handleOpenArtifact: (run: QodexSavedWorkflowRun, artifactId: string) => void;
 } {
   const { onOpenWorkflowArtifact, onOpenWorkflowRun, resolveTarget } = options;
 
   const handleOpenRun = useCallback(
-    (run: MaridSavedWorkflowRun, workflowName: string) => {
+    (run: QodexSavedWorkflowRun, workflowName: string) => {
       if (!run.parentSessionId || !run.toolCallId) return;
       const target = resolveTarget(run);
       if (!target) return;
@@ -58,11 +58,11 @@ export function useSavedWorkflowRunOpeners(options: {
   );
 
   const handleOpenArtifact = useCallback(
-    (run: MaridSavedWorkflowRun, artifactId: string) => {
+    (run: QodexSavedWorkflowRun, artifactId: string) => {
       if (!run.parentSessionId) return;
       const target = resolveTarget(run);
       if (!target) return;
-      // 行上的 chip 载荷（`MaridSavedWorkflowRun.artifacts`）带最新版的 `contentType`：
+      // 行上的 chip 载荷（`QodexSavedWorkflowRun.artifacts`）带最新版的 `contentType`：
       // 终点据它把 html 产物直接开成浏览器 tab。老行整个 `artifacts` 缺席，少一个键是退化不是错误。
       const artifact = run.artifacts?.find((candidate) => candidate.id === artifactId);
       onOpenWorkflowArtifact?.({

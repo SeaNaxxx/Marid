@@ -1,16 +1,16 @@
-import { MARID_VERSION, type MaridEnv } from "@marid/shared";
+import { QODEX_VERSION, type QodexEnv } from "@qodex/shared";
 
-declare const __MARID_REMOTE_CDN_RELEASE_ROOTS__: readonly string[] | undefined;
+declare const __QODEX_REMOTE_CDN_RELEASE_ROOTS__: readonly string[] | undefined;
 
 const REMOTE_CDN_RELEASE_ROOTS = {
-  domestic: "https://cdn.codegeex.cn/marid/electron/releases",
+  domestic: "https://cdn.codegeex.cn/qodex/electron/releases",
   // 开发构建未注入 CDN_DOMAIN 时也须使用当前发布域名，避免仍请求旧域名。
-  overseas: "https://cdn-marid.z.ai/marid/electron/releases",
+  overseas: "https://cdn-qodex.z.ai/qodex/electron/releases",
 } as const;
 const TEST_REMOTE_CDN_RELEASE_ROOT = "http://intranet.example.invalid:12345/ssh-remote-assets";
 
 export interface ResolveRemoteCdnOptions {
-  env?: MaridEnv;
+  env?: QodexEnv;
   locale?: string;
   timeZone?: string;
   overrideBaseUrl?: string;
@@ -52,16 +52,16 @@ export function resolveRemoteCdnBaseUrls(options: ResolveRemoteCdnOptions = {}):
   const orderedReleaseRoots = shouldPreferDomesticRemoteCdn(options)
     ? [REMOTE_CDN_RELEASE_ROOTS.domestic, REMOTE_CDN_RELEASE_ROOTS.overseas]
     : [REMOTE_CDN_RELEASE_ROOTS.overseas, REMOTE_CDN_RELEASE_ROOTS.domestic];
-  const version = options.version ?? MARID_VERSION;
+  const version = options.version ?? QODEX_VERSION;
 
   if (options.env === "test") {
     return [`${TEST_REMOTE_CDN_RELEASE_ROOT}/${version}`];
   }
 
   const configuredReleaseRoots =
-    typeof __MARID_REMOTE_CDN_RELEASE_ROOTS__ === "undefined"
+    typeof __QODEX_REMOTE_CDN_RELEASE_ROOTS__ === "undefined"
       ? []
-      : __MARID_REMOTE_CDN_RELEASE_ROOTS__;
+      : __QODEX_REMOTE_CDN_RELEASE_ROOTS__;
   if (configuredReleaseRoots.length > 0) {
     // Bugfix：remote runtime 的 manifest/components 下载根不能继续写死旧 CDN。
     // 构建期按 CI 的 CDN_DOMAIN/OSS_PATH_PREFIX 注入有序列表，切换时只改 CI 变量。

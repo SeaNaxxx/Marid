@@ -10,10 +10,10 @@ import {
   RemoteServiceAccess,
   connectViaProtocol,
   createAcknowledgedWebRemoteControlRelayProtocol,
-} from "@marid/client";
-import { ServiceChannels } from "@marid/shared";
-import { V4_WIRE_PROTOCOL_VERSION } from "@marid/shared/marid-protocol-v4";
-import { TID_V4_COMPOSER_INPUT, TID_V4_COMPOSER_SEND } from "@marid/shared/test-ids";
+} from "@qodex/client";
+import { ServiceChannels } from "@qodex/shared";
+import { V4_WIRE_PROTOCOL_VERSION } from "@qodex/shared/qodex-protocol-v4";
+import { TID_V4_COMPOSER_INPUT, TID_V4_COMPOSER_SEND } from "@qodex/shared/test-ids";
 import { createDeviceSwitchDesktopBridge } from "../../../projects/manual-review/pending/remote-device-switch.helpers.mjs";
 import { taskSnapshotFrame } from "../../../projects/manual-review/pending/remote-task-open.fixture.mjs";
 import {
@@ -259,7 +259,7 @@ async function scenario({ width, theme, locale, remote }) {
       currentBridge = bridge;
       const frames = new Emitter();
       send(socket, {
-        marid_type: "workspace-bridge-ready",
+        qodex_type: "workspace-bridge-ready",
         requestId: request.requestId,
         bridgeSessionId: bridge.bridgeSessionId,
         bridgeGeneration: bridge.bridgeGeneration,
@@ -270,7 +270,7 @@ async function scenario({ width, theme, locale, remote }) {
         createDeviceSwitchDesktopBridge(socket, bridge, {
           locale,
           theme,
-          events: { [`${ServiceChannels.MaridAgent}:onDynamicConversationFrame`]: frames.event },
+          events: { [`${ServiceChannels.QodexAgent}:onDynamicConversationFrame`]: frames.event },
           responses: {
             [`${ServiceChannels.OnboardingRecord}:shouldOnboard`]: false,
             [`${ServiceChannels.SettingsSync}:getFirstRunPromptState`]: { handled: true },
@@ -288,8 +288,8 @@ async function scenario({ width, theme, locale, remote }) {
               projectId: project.id,
               workspacePath,
             },
-            [`${ServiceChannels.MaridTask}:getTaskMeta`]: task,
-            [`${ServiceChannels.MaridAgent}:helloConversationV4`]: {
+            [`${ServiceChannels.QodexTask}:getTaskMeta`]: task,
+            [`${ServiceChannels.QodexAgent}:helloConversationV4`]: {
               kind: "hello",
               protocolVersion: V4_WIRE_PROTOCOL_VERSION,
               connectionId: bridge.bridgeSessionId,
@@ -304,8 +304,8 @@ async function scenario({ width, theme, locale, remote }) {
                 compression: "none",
               },
             },
-            [`${ServiceChannels.MaridAgent}:initializeConversationV4`]: null,
-            [`${ServiceChannels.MaridAgent}:subscribeConversationV4`]: () => {
+            [`${ServiceChannels.QodexAgent}:initializeConversationV4`]: null,
+            [`${ServiceChannels.QodexAgent}:subscribeConversationV4`]: () => {
               const subscriptionId = `sub-${bridge.bridgeSessionId}`;
               snapshots.set(bridge.bridgeSessionId, () => {
                 const frame = taskSnapshotFrame(taskId, subscriptionId);
@@ -321,11 +321,11 @@ async function scenario({ width, theme, locale, remote }) {
               });
               return { ack: { subscriptionId, mode: "snapshot", logEpoch: "e2e" } };
             },
-            [`${ServiceChannels.MaridAgent}:unsubscribeConversationV4`]: null,
-            [`${ServiceChannels.MaridAgent}:conversationWorkflowRunsV4`]: { runs: [] },
-            [`${ServiceChannels.MaridAgent}:conversationPlansV4`]: { plans: [] },
-            [`${ServiceChannels.MaridAgent}:queryConversationCommandsV4`]: { results: [] },
-            [`${ServiceChannels.MaridAgent}:sendConversationCommandV4`]: ({ envelope }) => {
+            [`${ServiceChannels.QodexAgent}:unsubscribeConversationV4`]: null,
+            [`${ServiceChannels.QodexAgent}:conversationWorkflowRunsV4`]: { runs: [] },
+            [`${ServiceChannels.QodexAgent}:conversationPlansV4`]: { plans: [] },
+            [`${ServiceChannels.QodexAgent}:queryConversationCommandsV4`]: { results: [] },
+            [`${ServiceChannels.QodexAgent}:sendConversationCommandV4`]: ({ envelope }) => {
               traffic.commands.push(envelope);
               return {
                 commandId: envelope.commandId,
@@ -392,7 +392,7 @@ async function scenario({ width, theme, locale, remote }) {
         socket.send(JSON.stringify({ type: "pair_status_ack", pair_status: "matched" }));
       const p = m.payload;
       if (!p) return;
-      if (p.marid_type === "rpc-frame" || p.marid_type === "rpc-frame-ack") {
+      if (p.qodex_type === "rpc-frame" || p.qodex_type === "rpc-frame-ack") {
         bridges.get(p.bridgeSessionId)?.acceptPayload(p);
         return;
       }
@@ -402,16 +402,16 @@ async function scenario({ width, theme, locale, remote }) {
         workspaces: [workspace],
         initialViewState: { activeWorkspaceKey: workspaceKey, activeTaskId: taskId, updatedAt: 1 },
       };
-      if (p.marid_type === "bootstrap-request" || p.marid_type === "workspace-list-request")
+      if (p.qodex_type === "bootstrap-request" || p.qodex_type === "workspace-list-request")
         send(socket, {
-          marid_type: p.marid_type.replace("request", "response"),
+          qodex_type: p.qodex_type.replace("request", "response"),
           requestId: p.requestId,
           success: true,
           result,
         });
-      if (p.marid_type === "mobile-view-state-update")
-        send(socket, { marid_type: "mobile-view-state-updated", requestId: p.requestId });
-      if (p.marid_type === "workspace-bridge-open") {
+      if (p.qodex_type === "mobile-view-state-update")
+        send(socket, { qodex_type: "mobile-view-state-updated", requestId: p.requestId });
+      if (p.qodex_type === "workspace-bridge-open") {
         traffic.opens.push(p);
         ready(p);
       }
@@ -464,7 +464,7 @@ async function scenario({ width, theme, locale, remote }) {
     await assertEventually(() => Boolean(heldRead));
     const oldBridge = currentBridge;
     send(socketRef, {
-      marid_type: "bridge-degraded",
+      qodex_type: "bridge-degraded",
       bridgeSessionId: oldBridge.bridgeSessionId,
       reason: "rpc-transport-fault",
     });

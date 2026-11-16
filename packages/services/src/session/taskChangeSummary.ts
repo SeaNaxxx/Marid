@@ -1,10 +1,10 @@
 import type {
-  MaridPersistedFileChange,
-  MaridTaskChangeSummary,
-  MaridTaskChangedFileSummary,
-  MaridTaskMeta,
-} from "@marid/shared";
-import { computeLineChangeStat } from "@marid/shared";
+  QodexPersistedFileChange,
+  QodexTaskChangeSummary,
+  QodexTaskChangedFileSummary,
+  QodexTaskMeta,
+} from "@qodex/shared";
+import { computeLineChangeStat } from "@qodex/shared";
 
 interface AggregatedFileChange {
   path: string;
@@ -19,9 +19,9 @@ interface AggregatedFileChange {
  * 每个轮次独立计算 diff，用于在每条 assistant 消息下方显示该轮的文件改动。
  */
 export function buildPerTurnChangeSummaries(
-  fileChanges: readonly MaridPersistedFileChange[] | undefined,
-): Map<number, MaridTaskChangeSummary> {
-  const result = new Map<number, MaridTaskChangeSummary>();
+  fileChanges: readonly QodexPersistedFileChange[] | undefined,
+): Map<number, QodexTaskChangeSummary> {
+  const result = new Map<number, QodexTaskChangeSummary>();
   if (!fileChanges || fileChanges.length === 0) {
     return result;
   }
@@ -53,7 +53,7 @@ export function buildPerTurnChangeSummaries(
 
     let added = 0;
     let removed = 0;
-    const files: MaridTaskChangedFileSummary[] = Array.from(turnFileMap.entries())
+    const files: QodexTaskChangedFileSummary[] = Array.from(turnFileMap.entries())
       .map(([path, file]) => {
         const fileStat = computeLineChangeStat(file.beforeContent, file.afterContent);
         added += fileStat.added;
@@ -80,8 +80,8 @@ export function buildPerTurnChangeSummaries(
 }
 
 export function buildTaskChangeSummary(
-  fileChanges: readonly MaridPersistedFileChange[] | undefined,
-): MaridTaskChangeSummary | undefined {
+  fileChanges: readonly QodexPersistedFileChange[] | undefined,
+): QodexTaskChangeSummary | undefined {
   if (!fileChanges || fileChanges.length === 0) {
     return undefined;
   }
@@ -114,7 +114,7 @@ export function buildTaskChangeSummary(
 
   let added = 0;
   let removed = 0;
-  const files: MaridTaskChangedFileSummary[] = Array.from(changedFileMap.values())
+  const files: QodexTaskChangedFileSummary[] = Array.from(changedFileMap.values())
     .map((file) => {
       const fileStat = computeLineChangeStat(file.originalContent, file.finalContent);
       added += fileStat.added;

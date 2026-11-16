@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { join } from "node:path";
 
 const source = new URL(
-  "../../../apps/marid-cli/packages/visualize-plugin/skills/visualize/assets/",
+  "../../../apps/qodex-cli/packages/visualize-plugin/skills/visualize/assets/",
   import.meta.url,
 );
 

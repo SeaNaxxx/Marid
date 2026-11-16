@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { normalize } from "node:path";
-import type { MaridAgentMcpServer } from "@marid/shared";
+import type { QodexAgentMcpServer } from "@qodex/shared";
 
 function normalizePathForCompare(value: string): string {
   const normalized = normalize(value.trim()).replace(/[\\/]+$/, "");
@@ -8,8 +8,8 @@ function normalizePathForCompare(value: string): string {
 }
 
 function isFilesystemServer(
-  server: MaridAgentMcpServer,
-): server is Extract<MaridAgentMcpServer, { command: string }> {
+  server: QodexAgentMcpServer,
+): server is Extract<QodexAgentMcpServer, { command: string }> {
   return (
     "command" in server &&
     server.name === "filesystem" &&
@@ -18,9 +18,9 @@ function isFilesystemServer(
 }
 
 export function appendWorkspaceToFilesystemMcpServers(
-  mcpServers: MaridAgentMcpServer[] | undefined,
+  mcpServers: QodexAgentMcpServer[] | undefined,
   workspacePath: string,
-): MaridAgentMcpServer[] | undefined {
+): QodexAgentMcpServer[] | undefined {
   if (!mcpServers || mcpServers.length === 0) {
     return mcpServers;
   }

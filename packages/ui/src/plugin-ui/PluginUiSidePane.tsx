@@ -1,5 +1,5 @@
 import { memo, useMemo } from "react";
-import type { PluginUiScopeRef } from "@marid/shared/mcp-apps";
+import type { PluginUiScopeRef } from "@qodex/shared/mcp-apps";
 import { readPluginUiScopeRef, type PluginUiSidePaneTab } from "@/plugin-ui/contract.js";
 import {
   PluginUiConversationScope,

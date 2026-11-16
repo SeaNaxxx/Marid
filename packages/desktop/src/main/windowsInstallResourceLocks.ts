@@ -185,7 +185,7 @@ export function probeWindowsPackagedResourceWritable(
     }
     const sentinelPath = join(
       path,
-      `.marid_resource_probe_${process.pid}_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+      `.qodex_resource_probe_${process.pid}_${Date.now()}_${Math.random().toString(16).slice(2)}`,
     );
     const renamedSentinelPath = `${sentinelPath}.renamed`;
     try {

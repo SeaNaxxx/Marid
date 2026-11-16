@@ -1,4 +1,4 @@
-import type { SourceServerConnectionStateSnapshot } from "@marid/shared";
+import type { SourceServerConnectionStateSnapshot } from "@qodex/shared";
 import type { WindowRemoteConnectionCloseEvent } from "./windowRemoteConnectionRegistry.js";
 
 export function isSourceServerAutomaticRecoveryTerminalState(

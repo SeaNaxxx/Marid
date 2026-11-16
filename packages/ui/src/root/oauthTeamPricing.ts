@@ -1,5 +1,5 @@
-import type { IServiceAccessor } from "@marid/services";
-import type { EnterpriseCodingPlanPricingProduct, ProviderFamilyDomain } from "@marid/shared";
+import type { IServiceAccessor } from "@qodex/services";
+import type { EnterpriseCodingPlanPricingProduct, ProviderFamilyDomain } from "@qodex/shared";
 import { logger } from "@/logger.js";
 
 type EnterprisePricingProductsResult =

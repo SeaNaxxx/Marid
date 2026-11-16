@@ -1,5 +1,5 @@
-import type { IFileService } from "@marid/services";
-import { WORKSPACE_FILE_ENTRIES_CHUNK_SIZE } from "@marid/shared/workspaceFileEntriesCodec";
+import type { IFileService } from "@qodex/services";
+import { WORKSPACE_FILE_ENTRIES_CHUNK_SIZE } from "@qodex/shared/workspaceFileEntriesCodec";
 
 /**
  * 分块拉取 workspace 文件索引的列式 packed 字符串。

@@ -1,4 +1,4 @@
-import type { BotActor, MaridStreamEvent } from "@marid/shared";
+import type { BotActor, QodexStreamEvent } from "@qodex/shared";
 import {
   createBotsServiceHarness,
   createFeishuConfig,
@@ -68,7 +68,7 @@ describe("BOT-E2E-TP-03 topic interaction routing", () => {
         };
         const botId = `${provider}-topic-card-e2e`;
         const h = createBotsServiceHarness({ config: createFeishuConfig(provider, botId) });
-        h.maridTaskService.submitBotGroupInput = async (params: { commandId: string }) => ({
+        h.qodexTaskService.submitBotGroupInput = async (params: { commandId: string }) => ({
           commandId: params.commandId,
           status: "accepted",
           revisionAtDecision: 1,
@@ -111,7 +111,7 @@ describe("BOT-E2E-TP-03 topic interaction routing", () => {
             inputId,
             startedAt: Date.now(),
             inputOrigin: "desktop",
-          } as MaridStreamEvent);
+          } as QodexStreamEvent);
           await listener({
             type: "permission_request",
             taskId: "task-e2e-bot",
@@ -128,7 +128,7 @@ describe("BOT-E2E-TP-03 topic interaction routing", () => {
                 response: { decision: "allow" },
               },
             ],
-          } as MaridStreamEvent);
+          } as QodexStreamEvent);
           await listener({
             type: "elicitation_request",
             taskId: "task-e2e-bot",
@@ -136,7 +136,7 @@ describe("BOT-E2E-TP-03 topic interaction routing", () => {
             requestId: "question-cards",
             message: "Which option?",
             options: [{ value: "first", label: "First" }],
-          } as MaridStreamEvent);
+          } as QodexStreamEvent);
           const posts = requests.filter(
             (r) =>
               r.method === "POST" && (r.url.endsWith("/reply") || r.url.includes("/messages?")),

@@ -1,10 +1,10 @@
-import { ServiceChannels } from "@marid/shared";
-import type { Event } from "@marid/rpc";
+import { ServiceChannels } from "@qodex/shared";
+import type { Event } from "@qodex/rpc";
 import { createServiceDescriptor } from "../descriptors.js";
 
 /**
  * 语音输入失败原因（docs/chat/composer-voice-input.md「服务端失败」）。
- * UI 只按这里的分类给提示，不感知 marid-server 的原始错误码。
+ * UI 只按这里的分类给提示，不感知 qodex-server 的原始错误码。
  */
 export type VoiceInputErrorCode =
   | "network"

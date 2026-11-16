@@ -1,4 +1,4 @@
-import type { GitRepositorySummary, SystemInfo } from "@marid/shared";
+import type { GitRepositorySummary, SystemInfo } from "@qodex/shared";
 
 export interface GitAutoRefreshWatchPath {
   path: string;

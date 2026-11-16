@@ -1,10 +1,10 @@
 import type { PluginUiHostScope } from "@/plugin-ui/app/pluginUiHostController.js";
 import type { PluginUiInteractionCallbacks } from "@/plugin-ui/app/pluginUiInteractionPorts.js";
 import type { PluginUiPresentation } from "@/plugin-ui/contract.js";
-import type { IPluginUiBridgeService, PluginUiReadResourceResult } from "@marid/services";
-import type { IPlatformService, SaveFileRequest, SaveFileResult } from "@marid/shared";
-import type { McpAppsDownloadFileItem } from "@marid/shared/mcp-apps";
-import { MCP_APPS_DOWNLOAD_FILE_MAX_BYTES } from "@marid/shared/mcp-apps";
+import type { IPluginUiBridgeService, PluginUiReadResourceResult } from "@qodex/services";
+import type { IPlatformService, SaveFileRequest, SaveFileResult } from "@qodex/shared";
+import type { McpAppsDownloadFileItem } from "@qodex/shared/mcp-apps";
+import { MCP_APPS_DOWNLOAD_FILE_MAX_BYTES } from "@qodex/shared/mcp-apps";
 import {
   decodedBase64Length,
   planPluginUiDownload,
@@ -44,7 +44,7 @@ export function createPluginUiDownloadInteraction(input: {
   platform: Pick<IPlatformService, "saveFile"> | null;
   bridge: Pick<IPluginUiBridgeService, "readResource">;
   scope: PluginUiHostScope;
-  getInstance(): import("@marid/shared/mcp-apps").McpAppInstance;
+  getInstance(): import("@qodex/shared/mcp-apps").McpAppInstance;
   presentation: Pick<PluginUiPresentation, "pluginId" | "serverName">;
 }): Required<Pick<PluginUiInteractionCallbacks, "onDownloadFile">> | undefined {
   const saveFile = input.platform?.saveFile;

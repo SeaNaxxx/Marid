@@ -1,5 +1,5 @@
 import type { ProviderSettingsFormModel } from "@/lib/providerSettingsFormTypes.js";
-import { clearManualModelConfig } from "@marid/provider";
+import { clearManualModelConfig } from "@qodex/provider";
 import {
   createProviderModelDraftValues,
   type ProviderModelDraftValues,

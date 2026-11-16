@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { isRemoteWorkspaceIdentity } from "@marid/shared";
+import { isRemoteWorkspaceIdentity } from "@qodex/shared";
 import {
   MENTION_ITEMS_ERROR_CODES,
   slotScopeKey,
   type MentionItemsResult,
-} from "@marid/shared/extension-host";
+} from "@qodex/shared/extension-host";
 import { logger } from "@/logger.js";
 import {
   composerCommandScope,

@@ -10,7 +10,7 @@ import {
   type BotsConfigFile,
   type BotConfig,
   type BotGroupDelivery,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 interface ChannelReplyDependencies {
   readState(): Promise<BotsStateFile>;

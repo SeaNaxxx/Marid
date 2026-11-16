@@ -1,5 +1,5 @@
 import armsRum from "@arms/rum-electron";
-import type { MaridMcpTelemetryEvent } from "@marid/shared";
+import type { QodexMcpTelemetryEvent } from "@qodex/shared";
 
 interface DesktopMcpTelemetryContext {
   appVersion: string;
@@ -14,7 +14,7 @@ export function configureDesktopMcpTelemetry(next: DesktopMcpTelemetryContext): 
 }
 
 export function reportMcpTelemetryToArms(
-  event: MaridMcpTelemetryEvent,
+  event: QodexMcpTelemetryEvent,
   runtimeSurface: "local" | "remote",
 ): void {
   // 旧 CLI 的内存通知仍允许协议解析，但不能再生成已废弃的 ARMS 事件。
@@ -44,7 +44,7 @@ export function reportMcpTelemetryToArms(
   }
 }
 
-function mapMcpTelemetryEvent(event: Exclude<MaridMcpTelemetryEvent, { kind: "memory" }>): {
+function mapMcpTelemetryEvent(event: Exclude<QodexMcpTelemetryEvent, { kind: "memory" }>): {
   group: "resource" | "stability";
   name: string;
   properties: Record<string, string | number | boolean | undefined | null>;
@@ -88,7 +88,7 @@ function mapMcpTelemetryEvent(event: Exclude<MaridMcpTelemetryEvent, { kind: "me
 }
 
 function processProperties(
-  event: Extract<MaridMcpTelemetryEvent, { kind: "process_start" | "process_crash" }>,
+  event: Extract<QodexMcpTelemetryEvent, { kind: "process_start" | "process_crash" }>,
 ): Record<string, string> {
   return {
     mcp_id: event.mcpId,

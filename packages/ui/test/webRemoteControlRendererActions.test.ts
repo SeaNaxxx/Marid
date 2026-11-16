@@ -7,13 +7,13 @@ import {
 function createPorts(projects: unknown[] = []) {
   const mutateTask = vi.fn(async () => null);
   const createScratchWorkspace = vi.fn(async ({ name }: { name: string }) => ({
-    path: `/Users/u/MaridProject/${name}`,
+    path: `/Users/u/QodexProject/${name}`,
   }));
   const saveProject = vi.fn(async () => ({ id: "project-new", hostId: "local" }));
   const removeTaskState = vi.fn();
   const ports = {
     services: {
-      maridTaskService: {},
+      qodexTaskService: {},
       windowControllerService: { mutateTask },
       fileService: { createScratchWorkspace },
       projectService: { readProjects: vi.fn(async () => projects), saveProject },
@@ -94,7 +94,7 @@ describe("executeWebRemoteControlRendererAction", () => {
     expect(removeTaskState).not.toHaveBeenCalled();
   });
 
-  it("新建项目：目录在 ~/MaridProject 下，并登记为项目", async () => {
+  it("新建项目：目录在 ~/QodexProject 下，并登记为项目", async () => {
     const { ports, createScratchWorkspace, saveProject } = createPorts();
     await expect(
       executeWebRemoteControlRendererAction(
@@ -104,7 +104,7 @@ describe("executeWebRemoteControlRendererAction", () => {
     ).resolves.toEqual({
       requestId: "r4",
       success: true,
-      workspacePath: "/Users/u/MaridProject/demo",
+      workspacePath: "/Users/u/QodexProject/demo",
       projectId: "project-new",
       hostId: "local",
     });
@@ -112,8 +112,8 @@ describe("executeWebRemoteControlRendererAction", () => {
     expect(saveProject).toHaveBeenCalledWith({
       name: "demo",
       defaultName: "demo",
-      roots: ["/Users/u/MaridProject/demo"],
-      primaryRoot: "/Users/u/MaridProject/demo",
+      roots: ["/Users/u/QodexProject/demo"],
+      primaryRoot: "/Users/u/QodexProject/demo",
     });
   });
 
@@ -123,9 +123,9 @@ describe("executeWebRemoteControlRendererAction", () => {
         id: "deleted",
         hostId: "local",
         deleted: true,
-        roots: [{ rootPath: "/Users/u/MaridProject/demo" }],
+        roots: [{ rootPath: "/Users/u/QodexProject/demo" }],
       },
-      { id: "existing", hostId: "local", roots: [{ rootPath: "/Users/u/MaridProject/demo" }] },
+      { id: "existing", hostId: "local", roots: [{ rootPath: "/Users/u/QodexProject/demo" }] },
     ]);
     const result = await executeWebRemoteControlRendererAction(
       { requestId: "r5", kind: "workspace-create", name: "demo" },

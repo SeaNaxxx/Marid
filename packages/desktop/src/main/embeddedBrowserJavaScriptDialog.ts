@@ -1,6 +1,6 @@
 import { BrowserWindow, dialog, nativeImage, webContents } from "electron";
 import type { WebContents } from "electron";
-import type { Locale } from "@marid/shared";
+import type { Locale } from "@qodex/shared";
 
 const DEFAULT_AUTOMATION_GRACE_MS = 3_000;
 const USER_BROWSER_TAB_PREFIX = "browser:";

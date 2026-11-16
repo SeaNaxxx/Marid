@@ -1,6 +1,6 @@
-import { buildRuntimeMaridApiUrl, resolveZaiBusinessBaseUrl } from "@marid/shared";
+import { buildRuntimeQodexApiUrl, resolveZaiBusinessBaseUrl } from "@qodex/shared";
 
-export const MARID_CLIENT_SCENES_URL = buildRuntimeMaridApiUrl(
+export const QODEX_CLIENT_SCENES_URL = buildRuntimeQodexApiUrl(
   process.env,
   "/api/v1/client/scenes",
 );

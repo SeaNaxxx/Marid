@@ -1,5 +1,5 @@
 import { useMemo, type ReactNode } from "react";
-import type { WorkflowRunState } from "@marid/shared/marid-protocol-v4";
+import type { WorkflowRunState } from "@qodex/shared/qodex-protocol-v4";
 import type { WorkflowCausalityGraphData } from "@/components/workflow-graph/types.js";
 import { draftTimeline, scanWorkflowDraft } from "@/components/workflow-timeline/draft-scan.js";
 import { narrowTimelineToFill } from "@/components/workflow-timeline/timeline-holes.js";

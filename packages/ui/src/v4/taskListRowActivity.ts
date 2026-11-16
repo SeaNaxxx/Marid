@@ -1,13 +1,13 @@
-import type { MaridTaskMeta } from "@marid/shared";
+import type { QodexTaskMeta } from "@qodex/shared";
 import type {
   PendingInteractionSummary,
   SessionSummary,
   SessionWorkflowActivity,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 
 // UI-only sidecar：不进入 shared task meta/schema，也不写回 tasks-index。
 // 字段名使用明确的内部前缀，避免调用方把它误当成持久化 task 属性。
-export const TASK_LIST_ROW_ACTIVITY_FIELD = "__maridSessionActivity" as const;
+export const TASK_LIST_ROW_ACTIVITY_FIELD = "__qodexSessionActivity" as const;
 
 export interface TaskListRowActivity {
   phase: SessionSummary["phase"];
@@ -18,11 +18,11 @@ export interface TaskListRowActivity {
   workflowActivity?: SessionWorkflowActivity;
 }
 
-export type TaskListMetaWithActivity = MaridTaskMeta & {
+export type TaskListMetaWithActivity = QodexTaskMeta & {
   [TASK_LIST_ROW_ACTIVITY_FIELD]: TaskListRowActivity;
 };
 
-export function attachTaskListRowActivity<T extends MaridTaskMeta>(
+export function attachTaskListRowActivity<T extends QodexTaskMeta>(
   task: T,
   activity: TaskListRowActivity,
 ): T & TaskListMetaWithActivity {
@@ -32,13 +32,13 @@ export function attachTaskListRowActivity<T extends MaridTaskMeta>(
   };
 }
 
-export function getTaskListRowActivity(task: MaridTaskMeta): TaskListRowActivity | null {
+export function getTaskListRowActivity(task: QodexTaskMeta): TaskListRowActivity | null {
   const activity = (task as Partial<TaskListMetaWithActivity>)[TASK_LIST_ROW_ACTIVITY_FIELD];
   return activity ?? null;
 }
 
 /** 只采信 sessions-index 的实时 phase；tasks-index 残留 status=running 不能置顶历史任务。 */
-export function isTaskListRowRunning(task: MaridTaskMeta): boolean {
+export function isTaskListRowRunning(task: QodexTaskMeta): boolean {
   const phase = getTaskListRowActivity(task)?.phase;
   return phase === "prewarming" || phase === "running";
 }
@@ -51,12 +51,12 @@ export function isTaskListRowRunning(task: MaridTaskMeta): boolean {
  * 都落在按 updatedAt 排序的非运行层，随进度事件互相换位。后台 bash / 分离子代理同理。
  * 转圈图标仍只认 phase（isTaskListRowRunning），这里只决定排序层。
  */
-export function isTaskListRowActive(task: MaridTaskMeta): boolean {
+export function isTaskListRowActive(task: QodexTaskMeta): boolean {
   return isTaskListRowRunning(task) || getTaskListRowActivity(task)?.hasBackgroundWork === true;
 }
 
 export function getTaskListAttention(
-  task: MaridTaskMeta,
+  task: QodexTaskMeta,
 ): { kind: "permission" | "userInput"; count: number } | null {
   const summary = getTaskListRowActivity(task)?.pendingInteractions;
   if (!summary) {
@@ -73,9 +73,9 @@ export function getTaskListAttention(
 }
 
 export function mergeTaskListMembershipFields(
-  activityTask: MaridTaskMeta,
-  membershipTask: MaridTaskMeta,
-): MaridTaskMeta {
+  activityTask: QodexTaskMeta,
+  membershipTask: QodexTaskMeta,
+): QodexTaskMeta {
   const activity = getTaskListRowActivity(activityTask);
   if (!activity) {
     return membershipTask;

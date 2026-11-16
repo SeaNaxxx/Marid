@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { McpSource, MaridMcpServer } from "@marid/shared";
+import type { McpSource, QodexMcpServer } from "@qodex/shared";
 import { Button } from "@/components/ui/button.js";
 import { Input } from "@/components/ui/input.js";
 import {
@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { PluginScopeMenu } from "@/settings/PluginScopeMenu.js";
 import type { ConfigWorkspaceTarget } from "@/workspace-config-catalog/index.js";
 import { SettingsFormTextarea } from "@/settings/SettingsFormTextarea.js";
@@ -41,7 +41,7 @@ function McpScopeMenu({
   workspaceTabs: ConfigWorkspaceTarget[];
   onChange: (scopeKey: string) => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const scopeLabel = intl.formatMessage({ id: "settings.scope.label" });
 
   return (
@@ -70,7 +70,7 @@ export function McpServerForm({
   workspaceTabs,
   onScopeKeyChange,
 }: {
-  initial?: MaridMcpServer;
+  initial?: QodexMcpServer;
   editingId?: string;
   editorMode: McpEditorMode;
   source?: McpSource;
@@ -78,11 +78,11 @@ export function McpServerForm({
   workspaceTabs: ConfigWorkspaceTarget[];
   onScopeKeyChange: (scopeKey: string) => void;
   onEditorModeChange: (mode: McpEditorMode) => void;
-  onSave: (form: FormState, prevServer?: MaridMcpServer) => void;
+  onSave: (form: FormState, prevServer?: QodexMcpServer) => void;
   onCancel: () => void;
-  onDelete?: (server: MaridMcpServer) => void;
+  onDelete?: (server: QodexMcpServer) => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const initialForm: FormState = initial
     ? serverToForm(initial)
     : {

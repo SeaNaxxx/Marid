@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { NodePersonalProviderConfigRepository } from "@marid/provider-node";
+import { NodePersonalProviderConfigRepository } from "@qodex/provider-node";
 import {
   TID_LOGIN_USE_API_KEY_BUTTON,
   TID_TASK_SETTINGS_BUTTON,
   TID_CHAT_MODEL_SELECT_TRIGGER,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   clearAppData,
   DEFAULT_WORKSPACE,
@@ -27,7 +27,7 @@ import { skipOccupationOnboardingIfPresent } from "#e2e/helpers/occupation-onboa
 
 const CASE_NAME = "conversation-session-composer-provider-identity";
 const evidence = join(
-  process.env.MARID_E2E_ARTIFACT_DIR ?? join(process.cwd(), ".e2e-artifacts"),
+  process.env.QODEX_E2E_ARTIFACT_DIR ?? join(process.cwd(), ".e2e-artifacts"),
   CASE_NAME,
 );
 async function settledSnapshot() {

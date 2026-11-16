@@ -1,4 +1,4 @@
-import type { MaridPersistedFileChange } from "@marid/shared";
+import type { QodexPersistedFileChange } from "@qodex/shared";
 import type { CodeViewerSource } from "@/lib/codeViewer.js";
 import type { CodeViewerWorkspaceScope } from "@/lib/codeViewerWorkspaceScope.js";
 
@@ -13,7 +13,7 @@ export function buildChangeSummaryDiffViewerSource({
 }: {
   patch?: string;
   path?: string;
-  snapshot: MaridPersistedFileChange["snapshots"][number] | undefined;
+  snapshot: QodexPersistedFileChange["snapshots"][number] | undefined;
   relativePath: string;
 } & CodeViewerWorkspaceScope): CodeViewerSource | undefined {
   const workspaceScope = {

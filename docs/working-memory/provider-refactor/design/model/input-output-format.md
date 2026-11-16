@@ -36,11 +36,11 @@ interface ModelProperties {
 
 ## Config Rule 与 Overlay
 
-Marid Built-in Model Config Rules 和 Personal Model Config Rules 使用同一结构。Rule 可以只声明
+Qodex Built-in Model Config Rules 和 Personal Model Config Rules 使用同一结构。Rule 可以只声明
 需要覆盖的叶子字段；嵌套字段逐叶 overlay，Personal 规则拼接在 Built-in 规则之后：
 
 ```text
-Marid Built-in Model Config Rules ─┐
+Qodex Built-in Model Config Rules ─┐
                                     ├─ resolve against Effective Provider Config
 Personal Model Config Rules ────────┘
                                               |

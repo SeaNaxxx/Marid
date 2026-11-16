@@ -23,7 +23,7 @@
 
 **Files:**
 
-- Modify: `apps/marid-cli/docs/design/v2/tool/07-subagent.md`
+- Modify: `apps/qodex-cli/docs/design/v2/tool/07-subagent.md`
 - Modify: `docs/conversation-session-case-catalog.md`
 - Modify: `docs/testing/conversation-session-background-e2e-coverage-matrix.md`
 - Modify: `docs/testing/conversation-session-e2e-coverage-matrix.md`
@@ -59,10 +59,10 @@
 
 **Files:**
 
-- Modify: `apps/marid-cli/packages/core/tests/subagent-background.test.ts`
+- Modify: `apps/qodex-cli/packages/core/tests/subagent-background.test.ts`
 - Modify: `packages/shared/test/backgroundTaskNotifications.test.ts`
-- Modify: `packages/ui/test/maridSessionProjection.test.ts`
-- Modify: `packages/services/test/maridLegacyTaskCompatTaskIndex.test.ts`
+- Modify: `packages/ui/test/qodexSessionProjection.test.ts`
+- Modify: `packages/services/test/qodexLegacyTaskCompatTaskIndex.test.ts`
 
 **Interfaces:**
 
@@ -78,11 +78,11 @@
 
 **Files:**
 
-- Modify: `apps/marid-cli/packages/core/src/subagent/runner.ts`
-- Modify: `apps/marid-cli/packages/core/src/subagent/completion-notification.ts`
+- Modify: `apps/qodex-cli/packages/core/src/subagent/runner.ts`
+- Modify: `apps/qodex-cli/packages/core/src/subagent/completion-notification.ts`
 - Modify: `packages/shared/src/background-task-notifications.ts`
-- Modify: `packages/ui/src/lib/maridSessionProjection.ts`
-- Modify: `packages/services/src/marid-agent/maridTaskServiceAdapter.ts`
+- Modify: `packages/ui/src/lib/qodexSessionProjection.ts`
+- Modify: `packages/services/src/qodex-agent/qodexTaskServiceAdapter.ts`
 
 **Interfaces:**
 
@@ -107,7 +107,7 @@
 - Produces: replay artifacts and verification output.
 
 - [x] Re-run explicit-fixture WDIO and default replay for `conversation-session-background-subagent-rate-limit.test.ts`.
-- [x] Run `pnpm --filter @marid/desktop typecheck:e2e`.
+- [x] Run `pnpm --filter @qodex/desktop typecheck:e2e`.
 - [x] Run the conversation coverage audit.
 - [x] Run `pnpm typecheck`, `pnpm lint`, and `git diff --check`.
 

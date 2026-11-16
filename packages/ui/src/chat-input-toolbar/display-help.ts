@@ -1,6 +1,6 @@
-import type { MaridProvider } from "@marid/shared";
+import type { QodexProvider } from "@qodex/shared";
 
-export const MARID_MODE_OPTION_LABEL_IDS: Record<MaridProvider, Record<string, string>> = {
+export const QODEX_MODE_OPTION_LABEL_IDS: Record<QodexProvider, Record<string, string>> = {
   glm: {
     default: "mode.label.glm.default",
     build: "mode.label.glm.build",
@@ -11,7 +11,7 @@ export const MARID_MODE_OPTION_LABEL_IDS: Record<MaridProvider, Record<string, s
   },
 };
 
-export const MARID_MODE_OPTION_DESCRIPTION_IDS: Record<MaridProvider, Record<string, string>> = {
+export const QODEX_MODE_OPTION_DESCRIPTION_IDS: Record<QodexProvider, Record<string, string>> = {
   glm: {
     default: "mode.description.glm.default",
     build: "mode.description.glm.build",

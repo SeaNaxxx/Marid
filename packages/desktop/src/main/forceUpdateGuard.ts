@@ -1,18 +1,18 @@
 import {
-  DEFAULT_MARID_ENDPOINT_ORIGIN,
-  MARID_VERSION,
-  buildMaridEndpointUrls,
+  DEFAULT_QODEX_ENDPOINT_ORIGIN,
+  QODEX_VERSION,
+  buildQodexEndpointUrls,
   getForceUpdateMinimalVersionFromConfig,
   resolveForceUpdateRequirement,
-  resolveOptionalMaridAuthorization,
+  resolveOptionalQodexAuthorization,
   type ForceUpdateRequirement,
   type Locale,
-  type MaridJwtTokenResolver,
-} from "@marid/shared";
+  type QodexJwtTokenResolver,
+} from "@qodex/shared";
 import { requestForceAutoUpdate, type ForceAutoUpdateState } from "./autoUpdater.js";
 import { showForceUpdatePrompt } from "./forceUpdatePrompt.js";
 
-const MARID_CLIENT_CONFIG_API_PATH = "/api/v1/client/configs";
+const QODEX_CLIENT_CONFIG_API_PATH = "/api/v1/client/configs";
 const FORCE_UPDATE_CONFIG_REQUEST_TIMEOUT_MS = 10_000;
 const FORCE_UPDATE_CONFIG_MAX_RESPONSE_BYTES = 1024 * 1024;
 
@@ -40,7 +40,7 @@ export interface ForceUpdateGuardOptions {
   logger: ForceUpdateGuardLogger;
   endpointOrigin?: string;
   fetchRemoteConfig?: () => Promise<unknown>;
-  resolveMaridJwtToken?: MaridJwtTokenResolver;
+  resolveQodexJwtToken?: QodexJwtTokenResolver;
   requestAutoUpdate?: (
     onStateChange?: (state: ForceAutoUpdateState) => void,
   ) => (() => void) | void;
@@ -48,12 +48,12 @@ export interface ForceUpdateGuardOptions {
 }
 
 export function resolveForceUpdateClientConfigUrl(
-  endpointOrigin = DEFAULT_MARID_ENDPOINT_ORIGIN,
+  endpointOrigin = DEFAULT_QODEX_ENDPOINT_ORIGIN,
 ): string {
   const url = new URL(
-    `${buildMaridEndpointUrls(endpointOrigin).origin}${MARID_CLIENT_CONFIG_API_PATH}`,
+    `${buildQodexEndpointUrls(endpointOrigin).origin}${QODEX_CLIENT_CONFIG_API_PATH}`,
   );
-  url.searchParams.set("app_version", MARID_VERSION);
+  url.searchParams.set("app_version", QODEX_VERSION);
   url.searchParams.set("platform", `${process.platform}-${process.arch}`);
   return url.toString();
 }
@@ -71,7 +71,7 @@ function getForceUpdateMinimalVersionFromClientConfig(config: unknown): string |
   };
   if (typeof envelope.code === "number" && envelope.code !== 0) {
     // /client/configs 与服务层一样只有 code=0 才可信，避免错误 envelope 携带旧 data 时误触发启动强更。
-    throw new Error(`Marid client config failed: ${envelope.code}`);
+    throw new Error(`Qodex client config failed: ${envelope.code}`);
   }
   return getForceUpdateMinimalVersionFromConfig(envelope.data?.configs);
 }
@@ -79,14 +79,14 @@ function getForceUpdateMinimalVersionFromClientConfig(config: unknown): string |
 async function fetchRemoteForceUpdateConfig(
   endpointOrigin?: string,
   fetchRemoteConfig?: () => Promise<unknown>,
-  resolveMaridJwtToken?: MaridJwtTokenResolver,
+  resolveQodexJwtToken?: QodexJwtTokenResolver,
 ): Promise<unknown> {
   if (fetchRemoteConfig) {
     return fetchRemoteConfig();
   }
 
   const { net } = await import("electron");
-  const authorization = await resolveOptionalMaridAuthorization(resolveMaridJwtToken);
+  const authorization = await resolveOptionalQodexAuthorization(resolveQodexJwtToken);
   return new Promise<unknown>((resolve, reject) => {
     let request: ReturnType<typeof net.request>;
     let timer: ReturnType<typeof setTimeout>;
@@ -162,11 +162,11 @@ export async function resolveDesktopForceUpdateRequirement(options: {
   logger: ForceUpdateGuardLogger;
   endpointOrigin?: string;
   fetchRemoteConfig?: () => Promise<unknown>;
-  resolveMaridJwtToken?: MaridJwtTokenResolver;
+  resolveQodexJwtToken?: QodexJwtTokenResolver;
 }): Promise<ForceUpdateRequirement | null> {
   const resolveFromConfig = (config: unknown) =>
     resolveForceUpdateRequirement({
-      currentVersion: MARID_VERSION,
+      currentVersion: QODEX_VERSION,
       forceUpdate: {
         minimalVersion:
           getForceUpdateMinimalVersionFromClientConfig(config) ??
@@ -179,7 +179,7 @@ export async function resolveDesktopForceUpdateRequirement(options: {
     const remoteConfig = await fetchRemoteForceUpdateConfig(
       options.endpointOrigin,
       options.fetchRemoteConfig,
-      options.resolveMaridJwtToken,
+      options.resolveQodexJwtToken,
     );
     const remoteRequirement = resolveFromConfig(remoteConfig);
     if (remoteRequirement) {
@@ -196,9 +196,9 @@ export async function resolveDesktopForceUpdateRequirement(options: {
 
 export function resolveForceUpdateDownloadUrl(
   locale: Locale,
-  endpointOrigin = DEFAULT_MARID_ENDPOINT_ORIGIN,
+  endpointOrigin = DEFAULT_QODEX_ENDPOINT_ORIGIN,
 ): string {
-  const origin = buildMaridEndpointUrls(endpointOrigin).origin;
+  const origin = buildQodexEndpointUrls(endpointOrigin).origin;
   return locale === "zh-CN" ? `${origin}/cn` : `${origin}/en`;
 }
 
@@ -208,7 +208,7 @@ export function formatForceUpdateDialogText(
 ): ForceUpdateDialogText {
   if (locale === "zh-CN") {
     return {
-      title: "需要升级 Marid",
+      title: "需要升级 Qodex",
       message: "当前版本无法继续使用",
       detail: `当前版本：v${requirement.currentVersion}\n最低可用版本：v${requirement.minimalVersion}`,
       autoUpdateButton: "自动升级",
@@ -218,7 +218,7 @@ export function formatForceUpdateDialogText(
   }
 
   return {
-    title: "Update Marid",
+    title: "Update Qodex",
     message: "The current version can no longer be used",
     detail: `Current version: v${requirement.currentVersion}\nMinimum supported version: v${requirement.minimalVersion}`,
     autoUpdateButton: "Auto update",

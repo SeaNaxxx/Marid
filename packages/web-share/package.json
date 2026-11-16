@@ -1,5 +1,5 @@
 {
-  "name": "@marid/web-share",
+  "name": "@qodex/web-share",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,8 +8,8 @@
     "lint": "oxlint"
   },
   "dependencies": {
-    "@marid/share-ui": "workspace:*",
-    "@marid/shared": "workspace:*",
+    "@qodex/share-ui": "workspace:*",
+    "@qodex/shared": "workspace:*",
     "lucide-react": "^1.17.0",
     "react": "19.2.7",
     "react-dom": "19.2.7"

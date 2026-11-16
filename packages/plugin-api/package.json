@@ -1,12 +1,12 @@
 {
-  "name": "@marid-dev/plugin-api",
-  "version": "0.1.0-marid",
-  "description": "Type definitions for Marid plugin extensions.",
+  "name": "@qodex-dev/plugin-api",
+  "version": "0.1.0-qodex",
+  "description": "Type definitions for Qodex plugin extensions.",
   "keywords": [
     "extension",
     "plugin",
     "types",
-    "marid"
+    "qodex"
   ],
   "license": "Apache-2.0",
   "files": [

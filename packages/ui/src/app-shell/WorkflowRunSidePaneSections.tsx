@@ -15,10 +15,10 @@ import {
   SlidersHorizontalIcon,
   SquareIcon,
 } from "lucide-react";
-import type { WorkflowRunState, WorkflowRunUsage } from "@marid/shared/marid-protocol-v4";
+import type { WorkflowRunState, WorkflowRunUsage } from "@qodex/shared/qodex-protocol-v4";
 import { Button } from "@/components/ui/button.js";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import type { workflowRunResultView } from "@/app-shell/workflowRunPanel.js";
 import { workflowRunConcurrencyChip } from "@/app-shell/workflowRunThrottle.js";
 import { WorkflowRunStatus } from "@/components/workflow-timeline/WorkflowCardChrome.js";
@@ -122,7 +122,7 @@ export const WorkflowRunStatusHeader = memo(function WorkflowRunStatusHeader({
   title: string;
   usage: WorkflowRunUsage | undefined;
 }) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const saveChip = saveSlots?.leading ?? null;
   const saveVerb = saveSlots?.trailing ?? null;
   const cancelLabel = intl.formatMessage({ id: "chat.toolCall.workflow.run.cancel" });
@@ -377,7 +377,7 @@ export const WorkflowRunResultSections = memo(function WorkflowRunResultSections
 }: {
   result: ReturnType<typeof workflowRunResultView>;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
 
   return (
     <>

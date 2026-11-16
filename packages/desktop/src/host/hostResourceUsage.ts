@@ -1,18 +1,18 @@
-import type { IMaridAgentService } from "@marid/services";
+import type { IQodexAgentService } from "@qodex/services";
 import {
   attributeHostProcessTree,
   createProcessResourceSampler,
   createProcessResourceTableReader,
   type ProcessResourceSampler,
-} from "@marid/services/node";
+} from "@qodex/services/node";
 import {
   HostResponseTypes,
   type HostResourceUsageSnapshotRequestMessage,
   type HostResourceUsageSnapshotResultResponse,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export interface CreateHostResourceUsageResponderOptions {
-  getAgentService: () => Pick<IMaridAgentService, "collectLocalRuntimeChildProcesses"> | undefined;
+  getAgentService: () => Pick<IQodexAgentService, "collectLocalRuntimeChildProcesses"> | undefined;
   postMessage: (message: HostResourceUsageSnapshotResultResponse) => void;
   hostPid?: number;
   sampler?: ProcessResourceSampler;

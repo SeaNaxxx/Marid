@@ -1,10 +1,10 @@
-import type { IDisposable } from "@marid/rpc";
-import type { IMaridAgentService } from "@marid/services";
-import type { ProcessResourceRuntimeSurface } from "@marid/shared";
-import { HostResponseTypes } from "@marid/shared";
+import type { IDisposable } from "@qodex/rpc";
+import type { IQodexAgentService } from "@qodex/services";
+import type { ProcessResourceRuntimeSurface } from "@qodex/shared";
+import { HostResponseTypes } from "@qodex/shared";
 
 interface RegisterHostMcpTelemetryOptions {
-  agentService: Pick<IMaridAgentService, "onDynamicMcpTelemetry">;
+  agentService: Pick<IQodexAgentService, "onDynamicMcpTelemetry">;
   postMessage(message: unknown): void;
   runtimeSurface: ProcessResourceRuntimeSurface;
 }

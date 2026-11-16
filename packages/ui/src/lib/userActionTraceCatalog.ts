@@ -1,4 +1,4 @@
-import type { RendererActionTraceGroup } from "@marid/shared";
+import type { RendererActionTraceGroup } from "@qodex/shared";
 
 export const CORE_USER_ACTION_FEATURES = {
   "workspace.local.lifecycle": ["open", "switch", "close"],

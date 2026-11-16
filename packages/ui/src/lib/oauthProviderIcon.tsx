@@ -1,5 +1,5 @@
-import type { OAuthProviderId } from "@marid/shared";
-import { BIGMODEL_PROVIDER_ID, ZAI_PROVIDER_ID } from "@marid/shared";
+import type { OAuthProviderId } from "@qodex/shared";
+import { BIGMODEL_PROVIDER_ID, ZAI_PROVIDER_ID } from "@qodex/shared";
 import { LogInIcon } from "lucide-react";
 import { cn } from "@/components/lib/utils.js";
 import bigModelIcon from "@/assets/provider-icons/logo-bigmodel.svg";

@@ -1,4 +1,4 @@
-import type { MaridAutomationScheduleRule } from "@marid/shared";
+import type { QodexAutomationScheduleRule } from "@qodex/shared";
 import { Cron } from "croner";
 
 /** 校验 cron 表达式是否合法（5 段，本地时区）。 */
@@ -37,7 +37,7 @@ function hasOnlyIntegersInRange(values: number[] | undefined, min: number, max: 
   );
 }
 
-export function assertValidAutomationScheduleRule(rule: MaridAutomationScheduleRule): void {
+export function assertValidAutomationScheduleRule(rule: QodexAutomationScheduleRule): void {
   if (!AUTOMATION_SCHEDULE_RULE_UNITS.has(rule.unit)) {
     throw new InvalidAutomationScheduleRuleError("unit 不受支持");
   }

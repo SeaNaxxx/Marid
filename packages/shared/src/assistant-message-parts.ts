@@ -1,4 +1,4 @@
-export type MaridAssistantMessagePart =
+export type QodexAssistantMessagePart =
   | {
       type: "content";
       content: string;
@@ -13,8 +13,8 @@ export type MaridAssistantMessagePart =
     };
 
 export function appendAssistantMessagePart(
-  parts: readonly MaridAssistantMessagePart[] | undefined,
-  nextPart: MaridAssistantMessagePart,
+  parts: readonly QodexAssistantMessagePart[] | undefined,
+  nextPart: QodexAssistantMessagePart,
 ) {
   const currentParts = parts ?? [];
   const lastPart = currentParts[currentParts.length - 1];
@@ -39,7 +39,7 @@ export function appendAssistantMessagePart(
   return [...currentParts, nextPart];
 }
 
-export function getLatestAssistantContentPart(parts: readonly MaridAssistantMessagePart[]) {
+export function getLatestAssistantContentPart(parts: readonly QodexAssistantMessagePart[]) {
   for (let index = parts.length - 1; index >= 0; index -= 1) {
     const part = parts[index];
     if (part?.type === "content") {
@@ -49,6 +49,6 @@ export function getLatestAssistantContentPart(parts: readonly MaridAssistantMess
   return null;
 }
 
-export function getLatestAssistantContentText(parts: readonly MaridAssistantMessagePart[]) {
+export function getLatestAssistantContentText(parts: readonly QodexAssistantMessagePart[]) {
   return getLatestAssistantContentPart(parts)?.content ?? "";
 }

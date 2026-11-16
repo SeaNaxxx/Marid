@@ -1,7 +1,7 @@
 import type {
   SettingsSyncAgent,
   SettingsSyncCategory,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export interface SettingsSyncSourceItem {
   id: string;

@@ -11,17 +11,17 @@ import {
   TID_EXTENSION_COMPOSER_STATUS,
   TID_EXTENSION_VIEW,
   TID_SIDE_PANE_EXTENSION_VIEW_ITEM,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { getE2EAppDataPaths } from "#e2e/helpers/desktop-app";
 import { resolveE2EStorageRoot } from "#e2e/helpers/e2e-runtime-paths";
 import { ensureSidePaneEntryVisible } from "#e2e/helpers/browser-side-pane";
 
-/** 把插件目录写进隔离 HOME 的 `~/.marid/cli/config.json`（`plugins.dirs`），并启用为 `<name>@inline`。 */
+/** 把插件目录写进隔离 HOME 的 `~/.qodex/cli/config.json`（`plugins.dirs`），并启用为 `<name>@inline`。 */
 export async function writePluginDirsConfig(
   dirs: readonly string[],
   pluginIds: readonly string[],
 ): Promise<void> {
-  const configPath = join(getE2EAppDataPaths().homeDir, ".marid", "cli", "config.json");
+  const configPath = join(getE2EAppDataPaths().homeDir, ".qodex", "cli", "config.json");
   const config = JSON.parse(await readFile(configPath, "utf8").catch(() => "{}")) as Record<
     string,
     unknown
@@ -49,11 +49,11 @@ export async function writePluginDirsConfig(
   );
 }
 
-// —— 日志：Main 以 [extension-host] / [extensions] 等前缀写进 ~/.marid/v2/logs ——
+// —— 日志：Main 以 [extension-host] / [extensions] 等前缀写进 ~/.qodex/v2/logs ——
 
 async function readExtensionLogLines(): Promise<string[]> {
   const logDir =
-    process.env.MARID_E2E_RUNTIME_LOG_DIR?.trim() || join(resolveE2EStorageRoot(), "v2", "logs");
+    process.env.QODEX_E2E_RUNTIME_LOG_DIR?.trim() || join(resolveE2EStorageRoot(), "v2", "logs");
   const names = (await readdir(logDir).catch(() => [] as string[]))
     .filter((name) => name.endsWith(".log"))
     .sort();
@@ -184,13 +184,13 @@ async function dumpSandboxFrames(sandboxId: string): Promise<unknown> {
           .executeJavaScript(
             `(async () => ({
               ready: document.readyState,
-              marid: typeof window.marid,
+              qodex: typeof window.qodex,
               text: (document.body?.innerText ?? "").slice(0, 300),
               errors: window.__e2eErrors ?? null,
               scripts: Array.from(document.scripts).map((script) => script.src || "inline"),
-              handshake: window.marid
+              handshake: window.qodex
                 ? await Promise.race([
-                    window.marid.ready().then(() => "ready", (error) => "error: " + (error?.message ?? error)),
+                    window.qodex.ready().then(() => "ready", (error) => "error: " + (error?.message ?? error)),
                     new Promise((resolve) => setTimeout(() => resolve("pending"), 3000)),
                   ])
                 : null,
@@ -230,7 +230,7 @@ export async function evaluateInViewPage<T>(
       const guest = electron.webContents.fromId(id);
       if (!guest || guest.isDestroyed()) return null;
       const frame = guest.mainFrame.framesInSubtree.find((candidate) =>
-        candidate.url.startsWith("marid-sandbox://plugin-"),
+        candidate.url.startsWith("qodex-sandbox://plugin-"),
       );
       if (!frame) return null;
       return frame.executeJavaScript(source);

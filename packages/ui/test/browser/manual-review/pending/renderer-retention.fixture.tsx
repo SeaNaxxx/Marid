@@ -1,16 +1,16 @@
 import { useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import type { IPlatformService, WebRemoteControlStatus } from "@marid/shared";
-import type { IServiceAccessor, IBroadcastService } from "@marid/services";
-import type { ConversationSnapshot } from "@marid/shared/marid-protocol-v4";
+import type { IPlatformService, WebRemoteControlStatus } from "@qodex/shared";
+import type { IServiceAccessor, IBroadcastService } from "@qodex/services";
+import type { ConversationSnapshot } from "@qodex/shared/qodex-protocol-v4";
 import { ConversationComposer } from "@/v4/ConversationComposer.js";
 import { PlatformProvider } from "@/hooks/usePlatform.js";
 import { useWebRemoteControlStatus } from "@/hooks/useWebRemoteControlStatus.js";
 import { ServiceProvider } from "@/hooks/useServices.js";
 import { StoreContext } from "@/store/StoreProvider.js";
 import { TabStoreProvider } from "@/store/TabStoreProvider.js";
-import { createMaridStore } from "@/store/index.js";
-import { MaridIntlProvider } from "@/i18n/IntlProvider.js";
+import { createQodexStore } from "@/store/index.js";
+import { QodexIntlProvider } from "@/i18n/IntlProvider.js";
 import { TooltipProvider } from "@/components/ui/tooltip.js";
 import "@/styles.css";
 
@@ -19,11 +19,11 @@ document.documentElement.className = params.get("theme") ?? "light";
 const noop = () => {};
 const dispose = () => ({ dispose: noop });
 const broadcast = { send: async () => {}, onMessage: dispose } as unknown as IBroadcastService;
-const store = createMaridStore(broadcast);
+const store = createQodexStore(broadcast);
 const services = {
   broadcastService: broadcast,
   settingService: { get: async () => ({}), update: async () => {} },
-  maridAgentService: { onAgentRuntimeRestarted: dispose },
+  qodexAgentService: { onAgentRuntimeRestarted: dispose },
   subagentsService: { list: async () => ({ agents: [], capability: null }) },
   skillsService: { list: async () => ({ skills: [] }) },
   clientConfigService: { getSnapshot: async () => ({}) },
@@ -203,13 +203,13 @@ function Fixture() {
 createRoot(document.getElementById("root")!).render(
   <ServiceProvider services={services}>
     <StoreContext.Provider value={store}>
-      <MaridIntlProvider initialLocale={params.get("locale") === "zh-CN" ? "zh-CN" : "en-US"}>
+      <QodexIntlProvider initialLocale={params.get("locale") === "zh-CN" ? "zh-CN" : "en-US"}>
         <TabStoreProvider>
           <TooltipProvider>
             <Fixture />
           </TooltipProvider>
         </TabStoreProvider>
-      </MaridIntlProvider>
+      </QodexIntlProvider>
     </StoreContext.Provider>
   </ServiceProvider>,
 );

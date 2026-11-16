@@ -1,4 +1,4 @@
-import type { UsageEntitlementSnapshot, UsageQuotaLimit } from "@marid/shared";
+import type { UsageEntitlementSnapshot, UsageQuotaLimit } from "@qodex/shared";
 
 export type CodingPlanQuotaResetFormat = "date" | "dateTime" | "adaptive";
 

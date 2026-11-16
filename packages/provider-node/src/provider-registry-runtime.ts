@@ -4,7 +4,7 @@ import {
   createFailClosedAccountProviderConfigSnapshot,
   type AccountProviderConfigSnapshot,
   type ProviderSource,
-} from "@marid/provider";
+} from "@qodex/provider";
 import {
   NodeProviderConfigRuntime,
   type NodeProviderConfigRuntimeOptions,
@@ -43,7 +43,7 @@ export class NodeProviderRegistryRuntime {
     await this.#configRuntime.start();
     if (this.#accountSource instanceof MutableAccountProviderConfigSource) {
       const account = await this.#accountSource.read();
-      if (account.basedOnMaridBuiltinRevision === "uninitialized") {
+      if (account.basedOnQodexBuiltinRevision === "uninitialized") {
         this.#accountSource.replace(
           createFailClosedAccountProviderConfigSnapshot(await this.configService.read()),
           "initial-fail-closed",
@@ -57,8 +57,8 @@ export class NodeProviderRegistryRuntime {
     return this.#configRuntime.personalRepository;
   }
 
-  onDidCheckMaridBuiltin(listener: () => Promise<void>): () => void {
-    return this.#configRuntime.onDidCheckMaridBuiltin(listener);
+  onDidCheckQodexBuiltin(listener: () => Promise<void>): () => void {
+    return this.#configRuntime.onDidCheckQodexBuiltin(listener);
   }
 
   dispose(): void {

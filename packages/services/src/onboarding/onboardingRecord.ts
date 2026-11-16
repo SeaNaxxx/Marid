@@ -3,8 +3,8 @@ import type {
   OnboardingRecordEntryInput,
   OnboardingRecordFile,
   OnboardingDecision,
-} from "@marid/shared";
-import { ServiceChannels, type AppSettings } from "@marid/shared";
+} from "@qodex/shared";
+import { ServiceChannels, type AppSettings } from "@qodex/shared";
 import { createServiceDescriptor } from "../descriptors.js";
 
 /** 登录态变化时按 record 回填 settings 的字段范围（settings 仍是运行时唯一事实源）。 */

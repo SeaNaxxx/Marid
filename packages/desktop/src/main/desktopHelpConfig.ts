@@ -1,12 +1,12 @@
 import { net } from "electron";
 import {
   buildHelpAppConfigUrl,
-  buildMaridSourceHeadersFromContext,
+  buildQodexSourceHeadersFromContext,
   createHelpAppConfigReader,
-  resolveOptionalMaridAuthorization,
-  type MaridJwtTokenResolver,
-  MARID_ENV,
-} from "@marid/shared";
+  resolveOptionalQodexAuthorization,
+  type QodexJwtTokenResolver,
+  QODEX_ENV,
+} from "@qodex/shared";
 
 export function createDesktopHelpConfigReader(options: {
   resolveEndpointOrigin: () => Promise<string>;
@@ -14,14 +14,14 @@ export function createDesktopHelpConfigReader(options: {
   deviceMid: string;
   /** 当前界面语言；以前不传，X-Client-Language 固定为 unknown。 */
   getClientLanguage: () => string;
-  resolveMaridJwtToken?: MaridJwtTokenResolver;
+  resolveQodexJwtToken?: QodexJwtTokenResolver;
 }) {
   const read = createHelpAppConfigReader({
     fetchImpl: (input, init) => net.fetch(input instanceof URL ? input.href : input, init),
   });
   return async () => {
     const endpointOrigin = await options.resolveEndpointOrigin();
-    const authorization = await resolveOptionalMaridAuthorization(options.resolveMaridJwtToken);
+    const authorization = await resolveOptionalQodexAuthorization(options.resolveQodexJwtToken);
     return read(
       buildHelpAppConfigUrl(
         endpointOrigin,
@@ -30,14 +30,14 @@ export function createDesktopHelpConfigReader(options: {
       ),
       {
         ...(authorization ? { Authorization: authorization } : {}),
-        ...buildMaridSourceHeadersFromContext({
+        ...buildQodexSourceHeadersFromContext({
           endpointOrigin,
           appVersion: options.appVersion,
           clientLanguage: options.getClientLanguage(),
           deviceMid: options.deviceMid,
           platform: process.platform,
           arch: process.arch,
-          releaseChannel: MARID_ENV,
+          releaseChannel: QODEX_ENV,
           sourceTitle: "electron",
         }),
       },

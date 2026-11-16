@@ -6,7 +6,7 @@ import {
   TID_V4_FORK,
   TID_V4_FORK_HERE,
   TID_V4_FORK_TO_WORKTREE,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { Button } from "@/components/ui/button.js";
 import {
   DropdownMenu,
@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.js";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 export function ForkDestinationMenu({
   rowId,
@@ -35,7 +35,7 @@ export function ForkDestinationMenu({
   onForkHere: () => void;
   onForkToWorktree: () => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const trigger = (
     <DropdownMenuTrigger asChild>
       <Button

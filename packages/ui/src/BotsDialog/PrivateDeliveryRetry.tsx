@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { useBotPrivateDeliveryRetry } from "@/hooks/useBotPrivateDeliveryRetry.js";
 
 export function PrivateDeliveryRetry({ botId, deliveryId }: { botId: string; deliveryId: string }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const { state, retry } = useBotPrivateDeliveryRetry(botId, deliveryId);
   if (state === "done") return null;
   return (

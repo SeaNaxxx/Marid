@@ -1,6 +1,6 @@
 import { createStore, type StoreApi } from "zustand/vanilla";
-import type { ExtensionLogEntry, ExtensionLogsSnapshot } from "@marid/shared/extension-host";
-import type { IExtensionsService } from "@marid/services";
+import type { ExtensionLogEntry, ExtensionLogsSnapshot } from "@qodex/shared/extension-host";
+import type { IExtensionsService } from "@qodex/services";
 import { logger } from "@/logger.js";
 import { appendExtensionLogs } from "@/extension-slots/domain/logSelectors.js";
 

@@ -1,4 +1,4 @@
-# Marid 打包平台 API 与契约 v1
+# Qodex 打包平台 API 与契约 v1
 
 - 状态：Proposed
 - 版本：`release-platform.v1`
@@ -286,7 +286,7 @@ POST /v1/release-candidates/{candidateId}/retry
 ```json
 {
   "specversion": "1.0",
-  "type": "marid.release.candidate.state_changed.v1",
+  "type": "qodex.release.candidate.state_changed.v1",
   "id": "evt_01J...",
   "source": "packaging-platform",
   "subject": "cand_01J...",
@@ -302,10 +302,10 @@ POST /v1/release-candidates/{candidateId}/retry
 
 最低事件类型：
 
-- `marid.release.candidate.created.v1`
-- `marid.release.build.state_changed.v1`
-- `marid.release.notes.approval_changed.v1`
-- `marid.release.publication.state_changed.v1`
+- `qodex.release.candidate.created.v1`
+- `qodex.release.build.state_changed.v1`
+- `qodex.release.notes.approval_changed.v1`
+- `qodex.release.publication.state_changed.v1`
 
 事件消费者必须按 `id` 去重，并以查询 API 为最终事实来源。
 

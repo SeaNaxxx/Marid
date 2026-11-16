@@ -3,7 +3,7 @@ import type {
   SettingsSyncCategory,
   SettingsSyncDiscoveryResult,
   SettingsSyncImportResult,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export type SettingsSyncUiStep = "selection" | "importing" | "complete";
 

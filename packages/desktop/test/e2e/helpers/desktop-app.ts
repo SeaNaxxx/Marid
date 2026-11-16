@@ -1,4 +1,4 @@
-import { createSystemCredentialCipher } from "@marid/shared/credential-security";
+import { createSystemCredentialCipher } from "@qodex/shared/credential-security";
 /* eslint-disable max-lines -- 测试相关的代码，忽略 */
 import { execFileSync } from "node:child_process";
 import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
@@ -8,18 +8,18 @@ import {
   type ModelConfig,
   type ProviderConfig,
   type ProviderConfigLayerSnapshot,
-} from "@marid/provider";
+} from "@qodex/provider";
 import {
   NodePersonalProviderConfigRepository,
   PERSONAL_PROVIDER_CONFIG_FILE_NAME,
-} from "@marid/provider-node";
-import { ZAI_PROVIDER_ID } from "@marid/shared";
+} from "@qodex/provider-node";
+import { ZAI_PROVIDER_ID } from "@qodex/shared";
 import {
   TID_COMPOSER_WORKSPACE_TRIGGER,
   TID_V4_SESSION_PANE,
   TID_WORKSPACE_PATH,
-} from "@marid/shared/test-ids";
-import type { AppSettings } from "@marid/shared";
+} from "@qodex/shared/test-ids";
+import type { AppSettings } from "@qodex/shared";
 import { collectWindowsE2EProcessTreePids } from "./e2e-process-cleanup.js";
 import {
   collectE2EWebDriverPageHandleCandidates,
@@ -31,17 +31,17 @@ import { projectSectionSelector } from "./project-sidebar.js";
 
 const DEFAULT_E2E_HOME_DIR = resolve(process.cwd(), ".e2e-home");
 const E2E_HOME_DIR =
-  process.env.MARID_E2E_HOME_DIR?.trim() ||
-  process.env.MARID_DATA_BASE_DIR?.trim() ||
-  process.env.MARID_DESKTOP_HOME_DIR?.trim() ||
+  process.env.QODEX_E2E_HOME_DIR?.trim() ||
+  process.env.QODEX_DATA_BASE_DIR?.trim() ||
+  process.env.QODEX_DESKTOP_HOME_DIR?.trim() ||
   // 修复原因：WDIO worker 环境不稳定时，helper 曾回落到真实 HOME，
   // 导致 provider 诊断和清理读写开发者本机配置，而不是当前 e2e sandbox。
   DEFAULT_E2E_HOME_DIR;
 // Bug 根因：storage profile 回滚删除了该共享根字段，但多个 E2E 仍需定位 CLI 数据。
-// 隔离由测试 HOME 保证，目录名保持生产历史语义 .marid。
-const E2E_STORAGE_ROOT = join(E2E_HOME_DIR, ".marid");
+// 隔离由测试 HOME 保证，目录名保持生产历史语义 .qodex。
+const E2E_STORAGE_ROOT = join(E2E_HOME_DIR, ".qodex");
 const E2E_APP_DATA_DIR = join(E2E_STORAGE_ROOT, "v2");
-export const DEFAULT_WORKSPACE = join(E2E_HOME_DIR, "MaridProject");
+export const DEFAULT_WORKSPACE = join(E2E_HOME_DIR, "QodexProject");
 export const DEFAULT_CONVERSATION_WORKSPACE = join(E2E_STORAGE_ROOT, "workspace", "default");
 const SETTINGS_FILE = join(E2E_APP_DATA_DIR, "setting.json");
 const CREDENTIALS_FILE = join(E2E_APP_DATA_DIR, "credentials.json");
@@ -51,9 +51,9 @@ const AGENTS_STATE_FILE = join(E2E_APP_DATA_DIR, "agents-state.json");
 const REMOVE_APP_DATA_RETRY_DELAYS_MS = [200, 500, 1000, 2000, 3000];
 const REMOVE_APP_DATA_MAX_ATTEMPTS = REMOVE_APP_DATA_RETRY_DELAYS_MS.length;
 const E2E_USER_PROFILE = {
-  displayName: "Marid E2E",
-  id: "marid-e2e-user",
-  username: "marid-e2e-user",
+  displayName: "Qodex E2E",
+  id: "qodex-e2e-user",
+  username: "qodex-e2e-user",
 };
 
 interface WindowInfo {
@@ -310,7 +310,7 @@ export async function setInputValueByTestIdDom(
   // 修复原因：同一类容器坐标异常会让输入框无法通过 WebDriver 聚焦。
   // 这里使用原生 value setter 并派发 input/change/blur，继续走页面保存逻辑。
   // M5：v4 composer 恢复为 Lexical contenteditable——写入改走编辑器挂载的
-  // __maridLexicalInputE2E bridge（驱动真实 editor state，避免 DOM 直改绕过 Lexical）。
+  // __qodexLexicalInputE2E bridge（驱动真实 editor state，避免 DOM 直改绕过 Lexical）。
   // bridge 由 E2ELexicalInputBridgePlugin 短轮询补挂，可能晚于节点出现，故带重试。
   await waitForTestIdByDom(testId, { timeout, timeoutMsg });
   type SetInputResult = {
@@ -339,13 +339,13 @@ export async function setInputValueByTestIdDom(
           }
           const bridge = (
             element as HTMLElement & {
-              __maridLexicalInputE2E?: {
+              __qodexLexicalInputE2E?: {
                 focus: () => void;
                 getText: () => string;
                 setText: (text: string) => void;
               };
             }
-          ).__maridLexicalInputE2E;
+          ).__qodexLexicalInputE2E;
           if (!bridge) {
             return {
               ok: false,
@@ -453,14 +453,14 @@ export async function setInputValueByTestIdDom(
                     document.querySelectorAll<HTMLElement>("[data-testid]"),
                   ).find((item) => item.dataset.testid === currentTestId) as
                     | (HTMLElement & {
-                        __maridLexicalInputE2E?: {
+                        __qodexLexicalInputE2E?: {
                           focus: () => void;
                           getText: () => string;
                           setText: (text: string) => void;
                         };
                       })
                     | undefined;
-                  const bridge = element?.__maridLexicalInputE2E;
+                  const bridge = element?.__qodexLexicalInputE2E;
                   if (!element?.isContentEditable || !bridge) {
                     done({ ok: false, reason: "lexical-not-editable" });
                     return;
@@ -545,7 +545,7 @@ export async function readE2ECredentialValue(key: string): Promise<string | unde
 }
 
 export async function clearAppData() {
-  if (process.env.MARID_E2E_DEFER_APP_DATA_CLEANUP === "1") {
+  if (process.env.QODEX_E2E_DEFER_APP_DATA_CLEANUP === "1") {
     // 修复原因：普通 spec 的 after hook 先 app.quit 会抢在 ChromeDriver
     // deleteSession 前销毁 browsing context，导致每个 worker 都支付断连超时。
     // WDIO afterSession 会在进程退出后删除 app data，此处只交还关闭所有权。
@@ -558,7 +558,7 @@ export async function clearAppData() {
 export async function quitElectronAppGracefully() {
   try {
     const result = (await browser.electron.execute((electron) => {
-      if (electron.app.getName() !== "Marid E2E") {
+      if (electron.app.getName() !== "Qodex E2E") {
         return { quit: false, pid: process.pid };
       }
       // 修复原因：clearAppData 常在 spec after 中运行；如果把 app.quit 延迟
@@ -605,7 +605,7 @@ async function removeAppDataWithRetry() {
       if (!isRetryableRemoveError(error) || attempt === REMOVE_APP_DATA_MAX_ATTEMPTS) {
         if (
           !isRetryableRemoveError(error) ||
-          process.env.MARID_E2E_STRICT_APP_DATA_CLEANUP === "1"
+          process.env.QODEX_E2E_STRICT_APP_DATA_CLEANUP === "1"
         ) {
           throw error;
         } else {
@@ -675,7 +675,7 @@ function listWindowsLeftoverE2EProcessPids() {
     return collectWindowsE2EProcessTreePids(output, {
       currentPid: process.pid,
       homeDir: E2E_HOME_DIR,
-      runId: process.env.MARID_E2E_RUN_ID,
+      runId: process.env.QODEX_E2E_RUN_ID,
     });
   } catch {
     return [];
@@ -904,7 +904,7 @@ export async function snapshotCliConfig(): Promise<CliConfigSnapshot> {
 }
 
 export async function restoreCliConfig(snapshot: CliConfigSnapshot): Promise<void> {
-  // 修复原因：seedCliConfig 写的是隔离 HOME 下的 CLI 全局配置；只清 ~/.marid/v2
+  // 修复原因：seedCliConfig 写的是隔离 HOME 下的 CLI 全局配置；只清 ~/.qodex/v2
   // 会让 WebFetch 临时代理留到同一 E2E session 后续步骤，必须恢复文件级快照。
   if (snapshot.content === null) {
     await rm(CLI_CONFIG_FILE, { force: true });
@@ -937,7 +937,7 @@ export async function seedCredentials(authToken = "mock-token") {
         "oauth:active_provider": ZAI_PROVIDER_ID,
         [`oauth:${ZAI_PROVIDER_ID}:access_token`]: authToken,
         [`oauth:${ZAI_PROVIDER_ID}:user_info`]: JSON.stringify(E2E_USER_PROFILE),
-        maridjwttoken: authToken,
+        qodexjwttoken: authToken,
       },
       null,
       2,
@@ -980,11 +980,11 @@ export function probeWorkspaceAppState(
   const workspaceItem =
     (
       window as Window & {
-        __maridTabStoreE2E?: { getState(): { activeWorkspacePath?: string | null } };
+        __qodexTabStoreE2E?: { getState(): { activeWorkspacePath?: string | null } };
       }
-    ).__maridTabStoreE2E?.getState().activeWorkspacePath === params.expectedPath;
+    ).__qodexTabStoreE2E?.getState().activeWorkspacePath === params.expectedPath;
   const conversationWorkspaceReady =
-    params.expectedPath.replace(/\\/g, "/").endsWith("/.marid/workspace/default") &&
+    params.expectedPath.replace(/\\/g, "/").endsWith("/.qodex/workspace/default") &&
     Boolean(document.querySelector(`[data-testid="${params.composerWorkspaceTriggerTestId}"]`));
   // v4 硬切后聊天区是 v4 session pane（testid 带 paneId 后缀，用前缀匹配）。
   return (workspaceItem || conversationWorkspaceReady) &&
@@ -1040,9 +1040,9 @@ async function isWorkspaceAppVisible(workspacePath: string) {
         if (
           (
             window as Window & {
-              __maridTabStoreE2E?: { getState(): { activeWorkspacePath: string | null } };
+              __qodexTabStoreE2E?: { getState(): { activeWorkspacePath: string | null } };
             }
-          ).__maridTabStoreE2E?.getState().activeWorkspacePath === expectedPath &&
+          ).__qodexTabStoreE2E?.getState().activeWorkspacePath === expectedPath &&
           document.querySelector(`[data-testid^="${sessionPanePrefix}-"]`)
         )
           return true;
@@ -1497,10 +1497,10 @@ export async function clickAboutMenuItem() {
     const menu = electron.Menu.getApplicationMenu();
     const topMenuLabel = process.platform === "darwin" ? electron.app.name : "Help";
     const topMenu = menu?.items.find((item) => item.label === topMenuLabel);
-    const menuItem = topMenu?.submenu?.items.find((item) => item.label === "About Marid");
+    const menuItem = topMenu?.submenu?.items.find((item) => item.label === "About Qodex");
 
     if (!menuItem) {
-      throw new Error(`未找到 About Marid 菜单项: ${topMenuLabel}`);
+      throw new Error(`未找到 About Qodex 菜单项: ${topMenuLabel}`);
     }
 
     menuItem.click(undefined as never, undefined, undefined as never);

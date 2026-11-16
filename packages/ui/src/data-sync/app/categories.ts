@@ -8,13 +8,13 @@ import {
   WandSparkles,
   type LucideIcon,
 } from "lucide-react";
-import type { IDataSyncCategoryService, IServiceAccessor } from "@marid/services";
+import type { IDataSyncCategoryService, IServiceAccessor } from "@qodex/services";
 import {
   PLUGIN_DATA_SYNC_MAX_ITEM_BYTES,
   SKILL_DATA_SYNC_MAX_ITEM_BYTES,
   type SourceServerWorkspaceHistoryEntry,
   type UserConfigSyncCategory,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { getWorkspaceSourceServerId } from "@/conversation-workspace-target/sourceIdentity.js";
 import {
   refreshSlashCommandsAfterRemoteSync,
@@ -25,7 +25,7 @@ import { refreshSharedSkillStoreForWorkspace } from "@/lib/skillStoreRefresh.js"
 import {
   invalidateDeferredDraftSessionForRuntimeChange,
   invalidateDeferredDraftSessionForSkillChange,
-} from "@/lib/maridDraftSkillInvalidation.js";
+} from "@/lib/qodexDraftSkillInvalidation.js";
 import { refreshSubagentsStoreForRemoteWorkspaces } from "@/store/subagentsStore.js";
 import type { WorkspaceTabState } from "@/store/tabStore.js";
 import type { DataSyncCategoryId } from "@/data-sync/contract.js";
@@ -101,7 +101,7 @@ async function refreshPluginsAfterPush(context: DataSyncAfterPushContext): Promi
       skillsService: targetServices.skillsService,
       workspaceIdentity: tab.workspaceIdentity,
       workspacePath: tab.workspacePath,
-      maridAgentService: targetServices.maridAgentService,
+      qodexAgentService: targetServices.qodexAgentService,
     });
   }
 }

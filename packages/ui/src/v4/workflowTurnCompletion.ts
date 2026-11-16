@@ -1,4 +1,4 @@
-import type { TurnHeaderRow, WorkflowNotificationMeta } from "@marid/shared/marid-protocol-v4";
+import type { TurnHeaderRow, WorkflowNotificationMeta } from "@qodex/shared/qodex-protocol-v4";
 import type { WorkflowRunCardSummary } from "@/ToolCallBlocks/fileSummaryTypes.js";
 
 /**

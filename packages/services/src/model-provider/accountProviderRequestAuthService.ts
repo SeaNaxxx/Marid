@@ -1,14 +1,14 @@
-import type { RequestVerificationReason } from "@marid/shared";
+import type { RequestVerificationReason } from "@qodex/shared";
 import { createHash } from "node:crypto";
 import {
   BIGMODEL_PROVIDER_ID,
   type OAuthProviderId,
   type ProviderFamilyDomain,
   type ProjectAccessTokenMaterial,
-  type MaridAccountAccess,
-  type MaridProviderAccountAccess,
+  type QodexAccountAccess,
+  type QodexProviderAccountAccess,
   ZAI_PROVIDER_ID,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export interface AccountRequestAuthMaterial {
   /** 私有传输字段兼容旧命名；套餐 OAuth 实际传入短期 Project Token。 */
@@ -21,7 +21,7 @@ export interface AccountRequestAuthMaterial {
 export interface AccountRequestAuthInput {
   providerId: string;
   modelId?: string;
-  accountAccess: MaridProviderAccountAccess | MaridAccountAccess;
+  accountAccess: QodexProviderAccountAccess | QodexAccountAccess;
   expectedAccountScope?: string;
   rejectedProjectTokenFingerprint?: string;
   reason: RequestVerificationReason | "off-peak" | "usage";
@@ -29,7 +29,7 @@ export interface AccountRequestAuthInput {
 
 export interface AccountAccessIdentityInput {
   providerId: string;
-  accountAccess: MaridProviderAccountAccess | MaridAccountAccess;
+  accountAccess: QodexProviderAccountAccess | QodexAccountAccess;
 }
 
 export class AccountRequestCredentialUnavailableError extends Error {
@@ -40,31 +40,31 @@ export class AccountRequestCredentialUnavailableError extends Error {
 }
 
 export interface AccountRequestAuthResolver {
-  resolveAccessCurrent(access: MaridProviderAccountAccess): Promise<MaridAccountAccess | null>;
+  resolveAccessCurrent(access: QodexProviderAccountAccess): Promise<QodexAccountAccess | null>;
   resolveCurrent(input: AccountRequestAuthInput): Promise<AccountRequestAuthMaterial>;
   assertCurrent(input: AccountAccessIdentityInput): Promise<void>;
 }
 
 interface AccountProviderRequestAuthServiceOptions {
   resolveCurrentAccountAccess(
-    access: MaridProviderAccountAccess,
-  ): Promise<MaridAccountAccess | null>;
+    access: QodexProviderAccountAccess,
+  ): Promise<QodexAccountAccess | null>;
   loadOAuthTokenSet(providerId: OAuthProviderId): Promise<{
     accessToken?: string | null;
-    maridJwtToken?: string | null;
+    qodexJwtToken?: string | null;
     sessionRevision?: string | null;
     accountIdentity?: string;
-    maridUserId?: string;
+    qodexUserId?: string;
   } | null>;
-  /** Start 只用共享 Marid JWT；不经过付费套餐的家族 token set。 */
-  loadStartPlanMaridJwt(family: ProviderFamilyDomain): Promise<string | null>;
+  /** Start 只用共享 Qodex JWT；不经过付费套餐的家族 token set。 */
+  loadStartPlanQodexJwt(family: ProviderFamilyDomain): Promise<string | null>;
   loadIndividualPlanMaterial(
     providerId: string,
     family: ProviderFamilyDomain,
     rejectedProjectTokenFingerprint?: string,
   ): Promise<ProjectAccessTokenMaterial | null>;
   resolveTeamPlanMaterial(
-    access: Extract<MaridAccountAccess, { planKind: "team-coding-plan" }>,
+    access: Extract<QodexAccountAccess, { planKind: "team-coding-plan" }>,
     rejectedProjectTokenFingerprint?: string,
   ): Promise<ProjectAccessTokenMaterial | null>;
 }
@@ -76,7 +76,7 @@ class AccountProviderRequestAuthService implements AccountRequestAuthResolver {
     this.#options = options;
   }
 
-  resolveAccessCurrent(access: MaridProviderAccountAccess): Promise<MaridAccountAccess | null> {
+  resolveAccessCurrent(access: QodexProviderAccountAccess): Promise<QodexAccountAccess | null> {
     return this.#options.resolveCurrentAccountAccess(access);
   }
 
@@ -88,7 +88,7 @@ class AccountProviderRequestAuthService implements AccountRequestAuthResolver {
     if (access.planKind === "start-plan") {
       // Bug 原因：曾从家族 token set 取 JWT，国内无关联账号没有家族材料，Start 调用拿不到凭据。
       return {
-        apiKey: requireApiKey(await this.#options.loadStartPlanMaridJwt(access.family), providerId),
+        apiKey: requireApiKey(await this.#options.loadStartPlanQodexJwt(access.family), providerId),
       };
     }
 
@@ -122,7 +122,7 @@ class AccountProviderRequestAuthService implements AccountRequestAuthResolver {
     };
   }
 
-  async #scope(access: MaridAccountAccess): Promise<string> {
+  async #scope(access: QodexAccountAccess): Promise<string> {
     const login = await this.#options.loadOAuthTokenSet(resolveOAuthProviderId(access.family));
     if (!login?.accessToken?.trim())
       throw new AccountRequestCredentialUnavailableError(access.family);
@@ -135,10 +135,10 @@ class AccountProviderRequestAuthService implements AccountRequestAuthResolver {
             ? [access.organizationId, access.projectId, access.productId]
             : null,
           login.accessToken.trim(),
-          login.maridJwtToken?.trim() ?? null,
+          login.qodexJwtToken?.trim() ?? null,
           login.sessionRevision ?? null,
           login.accountIdentity ?? null,
-          login.maridUserId ?? null,
+          login.qodexUserId ?? null,
         ]),
       )
       .digest("hex");
@@ -151,8 +151,8 @@ class AccountProviderRequestAuthService implements AccountRequestAuthResolver {
   }
 
   #resolveAccess(
-    access: MaridProviderAccountAccess | MaridAccountAccess,
-  ): Promise<MaridAccountAccess | null> {
+    access: QodexProviderAccountAccess | QodexAccountAccess,
+  ): Promise<QodexAccountAccess | null> {
     return "mode" in access
       ? this.#options.resolveCurrentAccountAccess(access)
       : Promise.resolve(access);

@@ -1,4 +1,4 @@
-import type { McpServerConfig, McpTestResult } from "@marid/shared";
+import type { McpServerConfig, McpTestResult } from "@qodex/shared";
 
 const MCP_PROBE_TIMEOUT_MS = 5000;
 

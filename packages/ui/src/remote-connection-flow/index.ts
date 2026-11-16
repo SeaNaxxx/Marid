@@ -19,11 +19,11 @@ import {
   REMOTE_WORKSPACE_DIRECTORY_UNRESPONSIVE_ERROR_CODE,
   resolveWorkspaceKey,
   SOURCE_SERVER_UPDATE_IN_PROGRESS_ERROR_CODE,
-  MARID_VERSION,
+  QODEX_VERSION,
   type ConnectionProfile,
   type SourceServerRunningTask,
   type RemoteTarget,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { useCancelPendingRemoteConnection } from "@/hooks/useCancelPendingRemoteConnection.js";
 import { useConfirmDialogStore } from "@/store/confirmDialogStore.js";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog.js";
@@ -31,7 +31,7 @@ import { useRemoteConnectionForm } from "@/hooks/useRemoteConnectionForm.js";
 import { useRemoteConnectionLogs } from "@/hooks/useRemoteConnectionLogs.js";
 import { useSourceServerManagementSnapshot } from "@/hooks/useSourceServerManagementSnapshot.js";
 import { useSourceServerOperationLogs } from "@/hooks/useSourceServerOperationLogs.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { getErrorMessage } from "@/lib/errorMessage.js";
 import { formatTaskRelativeTime } from "@/lib/taskListItemPresentation.js";
 import {
@@ -126,7 +126,7 @@ export function useRemoteConnectionFlow(options: RemoteConnectionFlowOptions) {
     !preferredSourceServerId &&
     !preferredProfileId &&
     !preferredTarget;
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const confirmDialog = useConfirmDialog();
   const acknowledgeBoundary = useRemoteBoundaryAcknowledgement();
   const cancelPendingRemoteConnection = useCancelPendingRemoteConnection();
@@ -1378,7 +1378,7 @@ export function useRemoteConnectionFlow(options: RemoteConnectionFlowOptions) {
     deviceBusy: reinstallDeviceBusy,
     installState: reinstallServer?.installState,
     lastSeenVersion: reinstallServer?.lastSeenVersion,
-    localVersion: MARID_VERSION,
+    localVersion: QODEX_VERSION,
   });
   const reinstallAvailable =
     Boolean(reinstallProfile) && reinstallAvailability.visible && reinstallAvailability.enabled;
@@ -1392,7 +1392,7 @@ export function useRemoteConnectionFlow(options: RemoteConnectionFlowOptions) {
           recognizedDeviceName ??
           activeProfileName ??
           formatRemoteLinkRailTarget(pendingRemoteTarget),
-        version: MARID_VERSION,
+        version: QODEX_VERSION,
         formatMessage: intl.formatMessage,
       }),
     );
@@ -2314,7 +2314,7 @@ export function useRemoteConnectionFlow(options: RemoteConnectionFlowOptions) {
       recognizedDeviceName: recognizedDeviceName,
       profileName: activeProfileName,
       recognizedDeviceMeta: recognizedServer ? formatDeviceCardMeta(recognizedServer) : undefined,
-      localVersion: MARID_VERSION,
+      localVersion: QODEX_VERSION,
       onUseRemoteDownload:
         pendingRemoteTarget?.kind === "ssh"
           ? () => {

@@ -6,7 +6,7 @@ import {
   readAskUserQuestionAnswers,
   readAskUserQuestionInput,
 } from "@/lib/askUserQuestion.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { ToolLayout } from "@/ToolCallBlocks/ToolLayout.js";
 import type { ToolCallBlockRenderContext } from "@/ToolCallBlocks/shared.js";
 
@@ -15,7 +15,7 @@ const ASK_QUESTION_TOOL_ICON = (
 );
 
 export function AskQuestionToolCallBlock(context: ToolCallBlockRenderContext) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const { toolCallNode, isRunning, statusLabel, errorText } = context;
   const { toolCall } = toolCallNode;
   const input = readAskUserQuestionInput(toolCall);

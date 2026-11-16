@@ -1,13 +1,13 @@
 import { sanitizeRemoteConnectionLog } from "./connectionLog.js";
-import { isPublicMaridErrorCode, type PublicMaridErrorCode } from "./errorCodes.js";
+import { isPublicQodexErrorCode, type PublicQodexErrorCode } from "./errorCodes.js";
 
 export interface RemoteConnectionFailure {
-  code: PublicMaridErrorCode;
+  code: PublicQodexErrorCode;
   message: string;
   retryable?: boolean;
 }
 
-const systemCodes: Record<string, PublicMaridErrorCode> = {
+const systemCodes: Record<string, PublicQodexErrorCode> = {
   ECONNREFUSED: "remote-host-unreachable",
   EHOSTUNREACH: "remote-host-unreachable",
   ENETUNREACH: "remote-host-unreachable",
@@ -23,7 +23,7 @@ const systemCodes: Record<string, PublicMaridErrorCode> = {
   ABORT_ERR: "remote-connection-canceled",
   ERR_SSH_HOST_KEY_MISMATCH: "remote-host-key-changed",
 };
-const phaseCodes: Record<string, PublicMaridErrorCode> = {
+const phaseCodes: Record<string, PublicQodexErrorCode> = {
   download: "remote-download-failed",
   upload: "remote-upload-failed",
   preflight: "remote-preflight-failed",
@@ -52,7 +52,7 @@ export function normalizeRemoteConnectionError(
           ? value.trim()
           : "";
     const rawCode = typeof record.code === "string" ? record.code : "";
-    const explicitCode = isPublicMaridErrorCode(rawCode) ? rawCode : undefined;
+    const explicitCode = isPublicQodexErrorCode(rawCode) ? rawCode : undefined;
     // 适配器已确认的领域原因优先于 cause 的文本猜测；阶段包装仍继续寻找更具体的内层原因。
     if (
       explicitCode &&

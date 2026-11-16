@@ -9,17 +9,17 @@ import {
   createAccountProviderConfigSnapshot,
   createFailClosedAccountProviderConfigSnapshot,
   type ModelSelectionViewInput,
-} from "@marid/provider";
-import { NodeProviderRegistryRuntime, createNodeModelSelectionFacade } from "@marid/provider-node";
+} from "@qodex/provider";
+import { NodeProviderRegistryRuntime, createNodeModelSelectionFacade } from "@qodex/provider-node";
 import {
-  createMaridAgentService,
-  createMaridTaskServiceAdapter,
+  createQodexAgentService,
+  createQodexTaskServiceAdapter,
   getDataBaseDir,
   setDataBaseDir,
-} from "@marid/services/node";
-import { BUILTIN_MODEL_PROVIDER_IDS } from "@marid/shared";
+} from "@qodex/services/node";
+import { BUILTIN_MODEL_PROVIDER_IDS } from "@qodex/shared";
 import { TaskIndexRepo } from "../../../../services/src/session/taskIndexRepo.js";
-import { createMaridTaskIndexSyncer } from "../../../../services/src/marid-agent/maridTaskIndexSyncer.js";
+import { createQodexTaskIndexSyncer } from "../../../../services/src/qodex-agent/qodexTaskIndexSyncer.js";
 import { getE2EAppDataPaths } from "./desktop-app.js";
 
 /** 独立测试 Host + 真实 stdio Worker；仅账号上游和模型 HTTP 使用隔离 fixture。 */
@@ -37,19 +37,19 @@ export async function createWorkerSelectionIntegration(
   const deliverySource = new MutableAccountProviderConfigSource();
   let deliveryPaused = false;
   const runtimePaths = {
-    maridBuiltinFilePath: resolve("../../config/provider/marid-builtin.json"),
-    personalFilePath: join(home, ".marid/v2/provider_config.json"),
+    qodexBuiltinFilePath: resolve("../../config/provider/qodex-builtin.json"),
+    personalFilePath: join(home, ".qodex/v2/provider_config.json"),
   };
   // 独立 Host 不继承 Electron 设置。保持内建 HTTPS endpoint，
   // 将显式网络出口接到本轮数据面代理，避免假凭据直连或 HTTP 被官方请求安全校验拒绝。
-  const httpProxy = process.env.MARID_HTTP_PROXY?.trim();
-  const caCertFile = process.env.MARID_AGENT_CA_CERT?.trim();
+  const httpProxy = process.env.QODEX_HTTP_PROXY?.trim();
+  const caCertFile = process.env.QODEX_AGENT_CA_CERT?.trim();
   if (!httpProxy || !caCertFile) throw new Error("Worker 选择回归缺少隔离 HTTPS 数据面代理");
-  await mkdir(join(home, ".marid/cli"), { recursive: true });
+  await mkdir(join(home, ".qodex/cli"), { recursive: true });
   await writeFile(
-    join(home, ".marid/cli/config.json"),
+    join(home, ".qodex/cli/config.json"),
     JSON.stringify({
-      network: { httpProxy, caCertFile, noProxy: process.env.MARID_NO_PROXY },
+      network: { httpProxy, caCertFile, noProxy: process.env.QODEX_NO_PROXY },
     }),
   );
   const runtime = new NodeProviderRegistryRuntime({
@@ -77,7 +77,7 @@ export async function createWorkerSelectionIntegration(
     }
     source.replace(
       createAccountProviderConfigSnapshot(
-        config.maridBuiltinRevision,
+        config.qodexBuiltinRevision,
         new ProviderConfigMap([...providers]),
         Object.fromEntries(
           [individual, team].map((id) => [
@@ -104,7 +104,7 @@ export async function createWorkerSelectionIntegration(
   };
   const repo = new TaskIndexRepo();
   const projects: ProjectRepositoryContract = await repo.getProjectRepository();
-  const agent = createMaridAgentService({
+  const agent = createQodexAgentService({
     // 真实 Host 创建端口必须预留任务归属；旧夹具漏装配，Worker 启动前即报 creation-unavailable。
     prepareSessionCreation: async (target) => {
       const prepared = projects.reserveCreatedTask({
@@ -119,17 +119,17 @@ export async function createWorkerSelectionIntegration(
       command: process.execPath,
       args: [
         ...(options.cliNodeArgs ?? []),
-        resolve("../../apps/marid-cli/packages/cli/dist/marid.cjs"),
+        resolve("../../apps/qodex-cli/packages/cli/dist/qodex.cjs"),
         "app-server",
         "--stdio",
       ],
       env: {
         HOME: home,
         USERPROFILE: home,
-        MARID_DATA_BASE_DIR: home,
-        MARID_RUNTIME_ENV: "development",
-        MARID_BUILTIN_PROVIDER_CONFIG_FILE: runtimePaths.maridBuiltinFilePath,
-        MARID_PERSONAL_PROVIDER_CONFIG_FILE: runtimePaths.personalFilePath,
+        QODEX_DATA_BASE_DIR: home,
+        QODEX_RUNTIME_ENV: "development",
+        QODEX_BUILTIN_PROVIDER_CONFIG_FILE: runtimePaths.qodexBuiltinFilePath,
+        QODEX_PERSONAL_PROVIDER_CONFIG_FILE: runtimePaths.personalFilePath,
       },
     }),
     modelSelectionReadinessSource: modelSelectionService,
@@ -151,9 +151,9 @@ export async function createWorkerSelectionIntegration(
     // 夹具只用 Team Plan，不会读取验证配置；返回 null 保持 Start Plan 失败关闭的正式语义。
     readRequestVerificationConfig: async () => null,
   });
-  const syncer = createMaridTaskIndexSyncer({ agentService: agent, taskIndexRepo: repo });
-  const task = createMaridTaskServiceAdapter({
-    maridAgentService: agent,
+  const syncer = createQodexTaskIndexSyncer({ agentService: agent, taskIndexRepo: repo });
+  const task = createQodexTaskServiceAdapter({
+    qodexAgentService: agent,
     taskIndexRepo: repo,
     taskIndexSyncer: syncer,
   });

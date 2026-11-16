@@ -4,7 +4,7 @@ import {
   WEB_REMOTE_CONTROL_WORKSPACE_RECONNECT_TIMEOUT_MS,
   webRemoteControlReconnectWorkspaceResultSchema,
   type WebRemoteControlReconnectWorkspaceRequest,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export function reconnectWebRemoteControlWorkspaceInRenderer(
   windowId: number,

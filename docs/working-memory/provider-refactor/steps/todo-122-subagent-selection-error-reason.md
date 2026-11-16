@@ -50,9 +50,9 @@
 
 ## 代码入口
 
-- `apps/marid-cli/packages/core/src/runtime/helpers/subagent-selection.ts`
-- `apps/marid-cli/packages/core/src/errors/error-payload.ts`
-- `apps/marid-cli/packages/core/src/tool/executor/errors.ts`
-- `apps/marid-cli/packages/core/src/subagent/runner.ts`
-- `apps/marid-cli/packages/adapters/src/logging/serialize.ts`
+- `apps/qodex-cli/packages/core/src/runtime/helpers/subagent-selection.ts`
+- `apps/qodex-cli/packages/core/src/errors/error-payload.ts`
+- `apps/qodex-cli/packages/core/src/tool/executor/errors.ts`
+- `apps/qodex-cli/packages/core/src/subagent/runner.ts`
+- `apps/qodex-cli/packages/adapters/src/logging/serialize.ts`
 - `packages/ui/src/ToolCallBlocks/ToolLayout.tsx`

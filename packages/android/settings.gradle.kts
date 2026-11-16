@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "marid-android"
+rootProject.name = "qodex-android"
 include(":app")

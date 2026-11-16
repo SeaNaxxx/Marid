@@ -1,5 +1,5 @@
-import type { ProviderSettingsView } from "@marid/services";
-import { resolveModelProviderFamilySpecByProviderId } from "@marid/shared";
+import type { ProviderSettingsView } from "@qodex/services";
+import { resolveModelProviderFamilySpecByProviderId } from "@qodex/shared";
 import type { UseUsageEntitlementOptions } from "@/hooks/useUsageEntitlement.js";
 import { resolveAccountProviderInspectionAccess } from "@/lib/accountProviderAccess.js";
 import { buildUsageEntitlementCacheKey } from "@/lib/usageEntitlementCache.js";

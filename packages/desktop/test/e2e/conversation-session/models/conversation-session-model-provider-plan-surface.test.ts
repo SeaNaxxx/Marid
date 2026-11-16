@@ -2,7 +2,7 @@ import { reloadElectronSessionPreservingBrowserProfile } from "#e2e/helpers/e2e-
 import { skipOccupationOnboardingIfPresent } from "#e2e/helpers/occupation-onboarding";
 import { DatabaseSync } from "node:sqlite";
 import { join } from "node:path";
-import { encodeCustomModelValue } from "@marid/shared";
+import { encodeCustomModelValue } from "@qodex/shared";
 import {
   TID_AUTOMATION_CREATE_MANUALLY,
   TID_AUTOMATION_CREATE_MENU,
@@ -19,7 +19,7 @@ import {
   TID_AUTOMATION_FREQUENCY_OPTION,
   TID_START_PLAN_RECOMMENDATION_DIALOG,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   DEFAULT_WORKSPACE,
   clearAppData,
@@ -207,7 +207,7 @@ async function prepareBigModelCatalogWorkspace(model: string): Promise<void> {
       browser.execute(
         (expectedText, providerId, modelId) => {
           return Object.entries(localStorage).some(([key, raw]) => {
-            if (!key.startsWith("marid-v4-composer-project-drafts:v1:")) return false;
+            if (!key.startsWith("qodex-v4-composer-project-drafts:v1:")) return false;
             const value = JSON.parse(raw) as {
               scopes?: Record<
                 string,
@@ -248,7 +248,7 @@ async function restartCatalogWorkspace(): Promise<void> {
 }
 
 async function setCatalogMode(mode: "full" | "partial" | "unavailable"): Promise<void> {
-  const baseUrl = process.env.MARID_CODING_PLAN_TEAM_MOCK_BASE_URL?.trim();
+  const baseUrl = process.env.QODEX_CODING_PLAN_TEAM_MOCK_BASE_URL?.trim();
   if (!baseUrl) throw new Error("Coding Plan mock URL 未配置，无法切换模型目录状态");
   const response = await fetch(`${baseUrl}/__e2e/coding-plan/catalog-mode`, {
     method: "POST",

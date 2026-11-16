@@ -16,7 +16,7 @@ import {
   MessageCirclePlus,
 } from "lucide-react";
 import { ProjectFolderIcon } from "@/project-sidebar/ProjectFolderIcon.js";
-import { sourceServerConnectionStateSchema } from "@marid/shared";
+import { sourceServerConnectionStateSchema } from "@qodex/shared";
 import type {
   ProjectTask,
   VirtualProject,
@@ -44,7 +44,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu.js";
 import { ProjectTaskRows } from "@/project-sidebar/ProjectTaskRows.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { resolveRemoteConnectionPresentation } from "@/lib/remoteConnectionPresentation.js";
 import { RemoteConnectionStateIcon } from "@/remote-connection/RemoteConnectionStateIcon.js";
 import { ManagedWorktreeCreatingRows } from "@/managed-worktrees/index.js";
@@ -115,7 +115,7 @@ export const ProjectNodeContent = memo(function ProjectNodeContent({
     canOpen: boolean;
     isOpen: boolean;
   }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const msg = (id: string) => intl.formatMessage({ id: `project.${id}` });
   // 修复原因：新项目行曾无条件显示本地文件夹；远程图标只读 Host 现有投影，复用统一五态。
   const remotePresentation = remoteHost

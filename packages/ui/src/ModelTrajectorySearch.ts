@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { MaridModelTrajectoryMessage, MaridModelTrajectoryRecord } from "@marid/services";
+import type { QodexModelTrajectoryMessage, QodexModelTrajectoryRecord } from "@qodex/services";
 import {
   trajectoryToolCallInputs,
   trajectoryToolMetadata,
@@ -27,8 +27,8 @@ export interface TrajectorySearchIndex {
 
 export interface TrajectorySearchTimelineItem {
   key: string;
-  record: MaridModelTrajectoryRecord;
-  inputMessages: MaridModelTrajectoryMessage[];
+  record: QodexModelTrajectoryRecord;
+  inputMessages: QodexModelTrajectoryMessage[];
 }
 
 interface SearchTarget {
@@ -98,7 +98,7 @@ function messageTargets(
   callKey: string,
   callIndex: number,
   expansionKey: string,
-  message: MaridModelTrajectoryMessage,
+  message: QodexModelTrajectoryMessage,
 ): SearchTarget[] {
   const metadata = trajectoryToolMetadata(message);
   const content = message.parts.some((part) => part.kind === "tool-result")

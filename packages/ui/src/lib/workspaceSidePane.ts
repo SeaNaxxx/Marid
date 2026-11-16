@@ -3,7 +3,7 @@ import {
   createUuid,
   type BrowserTabResidencyState,
   type BrowserViewRestoredTabShell,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type { PluginUiSidePaneTab } from "@/plugin-ui/contract.js";
 import type {
   ExtensionLogsSidePaneTab,

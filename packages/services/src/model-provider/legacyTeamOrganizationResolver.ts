@@ -3,7 +3,7 @@ import {
   resolveZaiBusinessBaseUrl,
   type ApiClient,
   type ProviderFamilyDomain,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type { LegacyTeamConnection } from "#src/setting/legacyAccountConnectionSettings.js";
 import type {
   RemoteCustomerInfo,
@@ -17,16 +17,16 @@ export function createLegacyTeamOrganizationResolver(dependencies: {
     family: ProviderFamilyDomain,
   ) => Promise<{
     accessToken: string;
-    maridJwtToken?: string | null;
+    qodexJwtToken?: string | null;
     sessionRevision?: string | null;
     accountIdentity?: string;
-    maridUserId?: string;
+    qodexUserId?: string;
   } | null>;
 }): (connection: LegacyTeamConnection) => Promise<string | null> {
   return async ({ family, projectId }) => {
     const tokens = await dependencies.loadOAuthTokenSet(family);
     const token = tokens?.accessToken.trim();
-    if (!token || (family === "bigmodel" && token === tokens?.maridJwtToken)) return null;
+    if (!token || (family === "bigmodel" && token === tokens?.qodexJwtToken)) return null;
     const origin =
       family === "zai"
         ? resolveZaiBusinessBaseUrl(process.env)
@@ -47,10 +47,10 @@ export function createLegacyTeamOrganizationResolver(dependencies: {
     const latest = await dependencies.loadOAuthTokenSet(family);
     if (
       latest?.accessToken.trim() !== token ||
-      latest?.maridJwtToken !== tokens?.maridJwtToken ||
+      latest?.qodexJwtToken !== tokens?.qodexJwtToken ||
       latest?.sessionRevision !== tokens?.sessionRevision ||
       latest?.accountIdentity !== tokens?.accountIdentity ||
-      latest?.maridUserId !== tokens?.maridUserId
+      latest?.qodexUserId !== tokens?.qodexUserId
     )
       return null;
     const organizations = new Set(

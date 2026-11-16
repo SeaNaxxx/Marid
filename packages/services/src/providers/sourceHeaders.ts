@@ -2,17 +2,17 @@ import { readFileSync } from "node:fs";
 import { version as readOsVersion } from "node:os";
 import { join } from "node:path";
 import {
-  buildMaridSourceHeadersFromContext,
-  normalizeMaridSourceHeaderValue,
-  MARID_ENV,
-  MARID_SOURCE_HEADERS,
-  MARID_VERSION,
-} from "@marid/shared";
+  buildQodexSourceHeadersFromContext,
+  normalizeQodexSourceHeaderValue,
+  QODEX_ENV,
+  QODEX_SOURCE_HEADERS,
+  QODEX_VERSION,
+} from "@qodex/shared";
 import { getAppConfigDir } from "../paths.js";
 
-export { MARID_SOURCE_HEADERS };
+export { QODEX_SOURCE_HEADERS };
 
-interface MaridSourceHeaderOptions {
+interface QodexSourceHeaderOptions {
   appVersion?: string;
   arch?: string;
   clientLanguage?: string;
@@ -25,7 +25,7 @@ interface MaridSourceHeaderOptions {
 let cachedDeviceMid: { stateFile: string; value: string } | null = null;
 
 function normalizePrintableHeaderValue(value: string | undefined): string | undefined {
-  return normalizeMaridSourceHeaderValue(value);
+  return normalizeQodexSourceHeaderValue(value);
 }
 
 function resolveClientLanguage(): string {
@@ -62,13 +62,13 @@ function readExistingDeviceMid(): string | undefined {
   }
 }
 
-export function buildMaridSourceHeaders(
-  options: MaridSourceHeaderOptions = {},
+export function buildQodexSourceHeaders(
+  options: QodexSourceHeaderOptions = {},
 ): Record<string, string> {
   const platform = options.platform ?? process.platform;
   const arch = options.arch ?? process.arch;
-  const appVersion = normalizePrintableHeaderValue(options.appVersion ?? MARID_VERSION);
-  const releaseChannel = normalizePrintableHeaderValue(options.releaseChannel ?? MARID_ENV);
+  const appVersion = normalizePrintableHeaderValue(options.appVersion ?? QODEX_VERSION);
+  const releaseChannel = normalizePrintableHeaderValue(options.releaseChannel ?? QODEX_ENV);
   const clientLanguage =
     normalizePrintableHeaderValue(options.clientLanguage) ?? resolveClientLanguage();
   const clientTimezone =
@@ -76,7 +76,7 @@ export function buildMaridSourceHeaders(
   const osVersion = normalizePrintableHeaderValue(options.osVersion ?? readOsVersion());
   const deviceMid = readExistingDeviceMid();
 
-  return buildMaridSourceHeadersFromContext({
+  return buildQodexSourceHeadersFromContext({
     appVersion,
     arch,
     clientLanguage,

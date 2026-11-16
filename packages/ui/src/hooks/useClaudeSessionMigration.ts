@@ -1,10 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
 import type {
-  MaridImportSessionsResult,
-  MaridImportableSessionCandidate,
-} from "@marid/shared";
+  QodexImportSessionsResult,
+  QodexImportableSessionCandidate,
+} from "@qodex/shared";
 import { logger } from "@/logger.js";
-import { useMaridTaskService } from "@/hooks/useMaridTaskService.js";
+import { useQodexTaskService } from "@/hooks/useQodexTaskService.js";
 import { useTabStoreApi } from "@/store/TabStoreProvider.js";
 import { invalidateTaskQueryCacheByScopes } from "@/store/taskQueryCacheStore.js";
 
@@ -63,7 +63,7 @@ export function useClaudeSessionMigration(params: {
   workspaceIdentity?: string;
   isDesktop?: boolean;
 }) {
-  const maridTaskService = useMaridTaskService(
+  const qodexTaskService = useQodexTaskService(
     params.workspacePath ?? undefined,
     undefined,
     params.workspaceIdentity,
@@ -73,12 +73,12 @@ export function useClaudeSessionMigration(params: {
     useState<ClaudeMigrationWorkspaceFilterMode>("all");
   const [range, setRange] = useState<ClaudeMigrationRange>("30d");
   const [limitInput, setLimitInput] = useState(String(DEFAULT_LIMIT));
-  const [candidates, setCandidates] = useState<MaridImportableSessionCandidate[]>([]);
+  const [candidates, setCandidates] = useState<QodexImportableSessionCandidate[]>([]);
   const [selectedSessionIds, setSelectedSessionIds] = useState<string[]>([]);
   const [scanError, setScanError] = useState<string | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [lastImportResult, setLastImportResult] =
-    useState<MaridImportSessionsResult | null>(null);
+    useState<QodexImportSessionsResult | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
 
@@ -156,7 +156,7 @@ export function useClaudeSessionMigration(params: {
       logger.info(
         `[Migration] 开始扫描 Claude 原生历史 workspaceFilter=${effectiveWorkspacePath ?? "all"} range=${range} limit=${scanLimit ?? "unlimited"}`,
       );
-      const nextCandidates = await maridTaskService.scanImportableClaudeSessions({
+      const nextCandidates = await qodexTaskService.scanImportableClaudeSessions({
         workspacePath: effectiveWorkspacePath,
         ...(effectiveWorkspaceIdentity
           ? { workspaceIdentity: effectiveWorkspaceIdentity }
@@ -183,7 +183,7 @@ export function useClaudeSessionMigration(params: {
       setIsScanning(false);
     }
   }, [
-    maridTaskService,
+    qodexTaskService,
     effectiveWorkspaceIdentity,
     effectiveWorkspacePath,
     range,
@@ -203,7 +203,7 @@ export function useClaudeSessionMigration(params: {
       logger.info(
         `[Migration] 开始导入 Claude 原生历史 workspaceFilter=${effectiveWorkspacePath ?? "all"} selected=${sessionIds.length}`,
       );
-      const result = await maridTaskService.importClaudeSessions({
+      const result = await qodexTaskService.importClaudeSessions({
         workspacePath: effectiveWorkspacePath,
         ...(effectiveWorkspaceIdentity
           ? { workspaceIdentity: effectiveWorkspaceIdentity }
@@ -247,7 +247,7 @@ export function useClaudeSessionMigration(params: {
       setIsImporting(false);
     }
   }, [
-    maridTaskService,
+    qodexTaskService,
     effectiveWorkspaceIdentity,
     effectiveWorkspacePath,
     supportState.supported,

@@ -1,4 +1,4 @@
-import type { ProviderFamilyDomain, ProjectAccessTokenMaterial } from "@marid/shared";
+import type { ProviderFamilyDomain, ProjectAccessTokenMaterial } from "@qodex/shared";
 import {
   isSameOAuthAccountMaterial,
   type OAuthAccountMaterial,

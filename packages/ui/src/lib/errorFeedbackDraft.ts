@@ -1,4 +1,4 @@
-import { redactFeedbackText } from "@marid/shared";
+import { redactFeedbackText } from "@qodex/shared";
 export function buildErrorFeedbackDescription({
   message,
   detail,

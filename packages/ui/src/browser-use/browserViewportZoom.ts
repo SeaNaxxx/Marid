@@ -3,7 +3,7 @@ import {
   DEFAULT_BROWSER_VIEWPORT_ZOOM,
   type BrowserViewportSize,
   type BrowserViewportZoom,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export { BROWSER_VIEWPORT_ZOOM_OPTIONS, DEFAULT_BROWSER_VIEWPORT_ZOOM };
 export type { BrowserViewportZoom };

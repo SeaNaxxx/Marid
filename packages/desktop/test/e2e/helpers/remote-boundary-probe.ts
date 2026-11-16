@@ -1,5 +1,5 @@
-import { BufferReader, BufferWriter, deserialize, serialize, VSBuffer } from "@marid/rpc";
-import { PlatformChannels, ServiceChannels } from "@marid/shared";
+import { BufferReader, BufferWriter, deserialize, serialize, VSBuffer } from "@qodex/rpc";
+import { PlatformChannels, ServiceChannels } from "@qodex/shared";
 
 type Handler = (...args: unknown[]) => Promise<unknown>;
 declare global {

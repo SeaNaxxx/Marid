@@ -9,7 +9,7 @@ import type {
   IPluginUiAppToolsService,
   IPluginUiBridgeService,
   IPluginUiSamplingService,
-} from "@marid/services";
+} from "@qodex/services";
 import type {
   McpAppsToolInputPayload,
   McpAppsToolResultPayload,
@@ -17,7 +17,7 @@ import type {
   PluginSandboxPlatformPort,
   PluginSandboxTransportPort,
   PluginUiScopeRef,
-} from "@marid/shared/mcp-apps";
+} from "@qodex/shared/mcp-apps";
 import type { PluginUiPresentation, PluginUiResourceNotificationTarget } from "../contract.js";
 import type { PluginUiHostBridge } from "./pluginUiHostBridge.js";
 import { type PluginUiInteractionCallbacks } from "./pluginUiInteractionPorts.js";
@@ -135,7 +135,7 @@ export interface PluginUiHostController {
   callPanelTool(
     toolName: string,
     args?: Record<string, unknown>,
-  ): Promise<import("@marid/services").PluginUiCallToolResult>;
+  ): Promise<import("@qodex/services").PluginUiCallToolResult>;
   dispose(): Promise<void>;
   readonly phase: PluginUiHostPhase;
 }

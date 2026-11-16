@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { isValidCronExpr, type IClientScenesService } from "@marid/services";
+import { isValidCronExpr, type IClientScenesService } from "@qodex/services";
 import {
   isClientScenesBusinessError,
   useClientScenesResource,

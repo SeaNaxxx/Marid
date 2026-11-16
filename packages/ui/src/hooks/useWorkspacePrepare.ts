@@ -1,1 +1,1 @@
-export { prepareWorkspaceWithMaridSessionService } from "@/hooks/workspacePrepareRpc.js";
+export { prepareWorkspaceWithQodexSessionService } from "@/hooks/workspacePrepareRpc.js";

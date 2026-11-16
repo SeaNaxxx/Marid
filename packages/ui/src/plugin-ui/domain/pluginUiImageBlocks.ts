@@ -1,4 +1,4 @@
-import { MCP_APPS_IMAGE_MAX_BYTES, MCP_APPS_IMAGE_MIME_TYPES } from "@marid/shared/mcp-apps";
+import { MCP_APPS_IMAGE_MAX_BYTES, MCP_APPS_IMAGE_MIME_TYPES } from "@qodex/shared/mcp-apps";
 
 /** 一张已校验的图片块：base64 正文（无 data: 前缀）、mimeType 与解码后字节数。 */
 export interface PluginUiImageBlock {

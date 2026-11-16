@@ -1,4 +1,4 @@
-import { TID_V4_COMPOSER_INPUT, TID_V4_SESSION_PANE } from "@marid/shared/test-ids";
+import { TID_V4_COMPOSER_INPUT, TID_V4_SESSION_PANE } from "@qodex/shared/test-ids";
 import { clearAppData } from "#e2e/helpers/desktop-app";
 import {
   clickFirstV4Fork,
@@ -188,13 +188,13 @@ async function setComposerText(paneTestId: string, text: string): Promise<void> 
           const bridge = (
             input as
               | (HTMLElement & {
-                  __maridLexicalInputE2E?: {
+                  __qodexLexicalInputE2E?: {
                     getText: () => string;
                     setText: (value: string) => void;
                   };
                 })
               | undefined
-          )?.__maridLexicalInputE2E;
+          )?.__qodexLexicalInputE2E;
           if (!bridge) return false;
           bridge.setText(nextText);
           return bridge.getText() === nextText;
@@ -216,10 +216,10 @@ async function readComposerText(paneTestId: string): Promise<string | null> {
         (
           input as
             | (HTMLElement & {
-                __maridLexicalInputE2E?: { getText: () => string };
+                __qodexLexicalInputE2E?: { getText: () => string };
               })
             | undefined
-        )?.__maridLexicalInputE2E?.getText() ?? null
+        )?.__qodexLexicalInputE2E?.getText() ?? null
       );
     },
     paneTestId,

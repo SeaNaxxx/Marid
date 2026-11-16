@@ -1,4 +1,4 @@
-import type { MaridPluginInfo, MaridPluginUserConfigOption } from "@marid/shared";
+import type { QodexPluginInfo, QodexPluginUserConfigOption } from "@qodex/shared";
 
 export type PluginOptionDraftValue = string | number | boolean | null;
 
@@ -15,7 +15,7 @@ export interface PluginConfigPatch {
  * Workspace override。只有明确产生 draft 的字段才属于本次写入。
  */
 export function buildPluginConfigPatch(
-  plugin: Pick<MaridPluginInfo, "userConfig">,
+  plugin: Pick<QodexPluginInfo, "userConfig">,
   drafts: Record<string, PluginOptionDraftValue | undefined>,
 ): PluginConfigPatch {
   const options: Record<string, string | number | boolean> = {};
@@ -23,7 +23,7 @@ export function buildPluginConfigPatch(
 
   for (const [key, option] of Object.entries(plugin.userConfig ?? {}) as [
     string,
-    MaridPluginUserConfigOption,
+    QodexPluginUserConfigOption,
   ][]) {
     const draft = drafts[key];
     if (draft === undefined) continue;

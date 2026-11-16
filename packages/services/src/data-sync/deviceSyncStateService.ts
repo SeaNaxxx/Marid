@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import type { DeviceSyncResult, DeviceSyncState } from "@marid/shared";
+import type { DeviceSyncResult, DeviceSyncState } from "@qodex/shared";
 import { updateJsonObjectFile } from "#src/fs/atomicFileUtils.js";
 import type { IDeviceSyncStateService } from "./contract.js";
 

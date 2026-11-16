@@ -3,9 +3,9 @@ import { nanoid } from "nanoid";
 import {
   VIDEO_INPUT_MAX_BYTES,
   type CreateTempTextAttachmentResult,
-  type MaridPromptAttachment,
-} from "@marid/shared";
-import { PROTOCOL_V4_LIMITS } from "@marid/shared/marid-protocol-v4";
+  type QodexPromptAttachment,
+} from "@qodex/shared";
+import { PROTOCOL_V4_LIMITS } from "@qodex/shared/qodex-protocol-v4";
 import {
   MissingInlineImageContentError,
   MissingInlinePdfContentError,
@@ -163,7 +163,7 @@ function estimateDecodedBase64Bytes(dataBase64: string) {
 }
 
 export function restoreChatComposerAttachment(
-  attachment: MaridPromptAttachment,
+  attachment: QodexPromptAttachment,
 ): ChatComposerAttachment {
   const mimeType = normalizeComposerMimeType(
     attachment.mimeType || inferAttachmentMimeType(attachment.filename),
@@ -309,7 +309,7 @@ export function revokeChatComposerAttachment(attachment: ChatComposerAttachment)
 
 export async function serializeChatComposerAttachment(
   attachment: ChatComposerAttachment,
-): Promise<MaridPromptAttachment> {
+): Promise<QodexPromptAttachment> {
   const mimeType = normalizeComposerMimeType(
     attachment.mimeType || inferAttachmentMimeType(attachment.filename),
   );
@@ -450,7 +450,7 @@ async function readAttachmentBase64(attachment: ChatComposerAttachment): Promise
   return dataUrl.slice(base64MarkerIndex + 1);
 }
 
-export function getChatAttachmentPreviewUrl(attachment: MaridPromptAttachment): string | null {
+export function getChatAttachmentPreviewUrl(attachment: QodexPromptAttachment): string | null {
   if (!attachment.dataBase64) {
     return null;
   }

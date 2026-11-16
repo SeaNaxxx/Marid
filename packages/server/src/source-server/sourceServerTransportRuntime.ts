@@ -1,7 +1,7 @@
 import { Duplex } from "node:stream";
 import { StringDecoder } from "node:string_decoder";
-import { isPublicMaridErrorCode, type PublicMaridErrorCode } from "@marid/shared";
-import type { StdioStream } from "@marid/server/remote/backend.js";
+import { isPublicQodexErrorCode, type PublicQodexErrorCode } from "@qodex/shared";
+import type { StdioStream } from "@qodex/server/remote/backend.js";
 
 export interface RemoteExecResult {
   exitCode: number;
@@ -50,10 +50,10 @@ export function readStructuredCommandError(value: string): string | null {
 }
 
 /** 读取 Server CLI --json 失败结果里的公开错误码；没有或不是公开码时返回 null。 */
-export function readStructuredCommandCode(value: string): PublicMaridErrorCode | null {
+export function readStructuredCommandCode(value: string): PublicQodexErrorCode | null {
   try {
     const code = readLastJsonLine(value).code;
-    return isPublicMaridErrorCode(code) ? code : null;
+    return isPublicQodexErrorCode(code) ? code : null;
   } catch {
     return null;
   }
@@ -71,7 +71,7 @@ export function readUniqueVersion(value: string): string | undefined {
     if (version) versions.add(version);
   }
   const labelled = new RegExp(
-    `\\b(?:marid|source[ -]server)\\b[^\\n]*?\\bversion\\s*[:=]?\\s*v?${semver}\\b`,
+    `\\b(?:qodex|source[ -]server)\\b[^\\n]*?\\bversion\\s*[:=]?\\s*v?${semver}\\b`,
     "giu",
   );
   for (const match of value.matchAll(labelled)) {

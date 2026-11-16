@@ -7,7 +7,7 @@ import {
   type DatabaseStartupState,
   type DatabaseMigrationFacts,
   type StartupDiskSummary,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 type Report = (
   phase: DatabaseStartupState["phase"],

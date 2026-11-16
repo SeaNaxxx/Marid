@@ -1,6 +1,6 @@
-import type { MaridTaskRuntimeStatus } from "@marid/shared";
-import { getWorkspaceDisplayedTaskState } from "@/store/maridSessionStore.js";
-import type { MaridSessionStoreState, WorkspaceMaridUIState } from "@/store/maridSessionStore.js";
+import type { QodexTaskRuntimeStatus } from "@qodex/shared";
+import { getWorkspaceDisplayedTaskState } from "@/store/qodexSessionStore.js";
+import type { QodexSessionStoreState, WorkspaceQodexUIState } from "@/store/qodexSessionStore.js";
 
 interface RemoteWorkspaceRuntimeTab {
   workspacePath: string;
@@ -9,17 +9,17 @@ interface RemoteWorkspaceRuntimeTab {
 
 interface MarkRemoteWorkspaceRunningTasksFailedParams {
   tabs: RemoteWorkspaceRuntimeTab[];
-  getWorkspaceState: MaridSessionStoreState["getWorkspaceState"];
-  setTaskRuntimeState: MaridSessionStoreState["setTaskRuntimeState"];
+  getWorkspaceState: QodexSessionStoreState["getWorkspaceState"];
+  setTaskRuntimeState: QodexSessionStoreState["setTaskRuntimeState"];
   reason: string;
 }
 
-function isRunningRuntimeStatus(status: MaridTaskRuntimeStatus): boolean {
+function isRunningRuntimeStatus(status: QodexTaskRuntimeStatus): boolean {
   return status === "creating" || status === "restoring" || status === "streaming";
 }
 
 function shouldTreatPersistedRunningTaskAsRunning(
-  workspaceState: WorkspaceMaridUIState,
+  workspaceState: WorkspaceQodexUIState,
   taskId: string,
 ): boolean {
   const runtimeState = workspaceState.taskRuntimeByTaskId[taskId];
@@ -32,7 +32,7 @@ function shouldTreatPersistedRunningTaskAsRunning(
   return isRunningRuntimeStatus(runtimeState.status);
 }
 
-function collectRemoteWorkspaceRunningTaskIds(workspaceState: WorkspaceMaridUIState): string[] {
+function collectRemoteWorkspaceRunningTaskIds(workspaceState: WorkspaceQodexUIState): string[] {
   const taskIds = new Set<string>();
 
   if (

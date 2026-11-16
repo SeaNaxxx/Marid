@@ -69,6 +69,6 @@ V4 queue 在 CLI command core 内裁决，不再存在旧 renderer-local convers
 
 - `packages/ui/src/v4/SessionPane.tsx`
 - `packages/ui/src/v4/configCommandBarrier.ts`
-- `apps/marid-cli/packages/bootstrap/src/marid-protocol-v4/commands/handlers/session-flow.ts`
-- `apps/marid-cli/packages/bootstrap/src/marid-protocol-v4/commands/handlers/queue.ts`
-- `apps/marid-cli/packages/bootstrap/src/marid-protocol-v4/commands/prompt-turn.ts`
+- `apps/qodex-cli/packages/bootstrap/src/qodex-protocol-v4/commands/handlers/session-flow.ts`
+- `apps/qodex-cli/packages/bootstrap/src/qodex-protocol-v4/commands/handlers/queue.ts`
+- `apps/qodex-cli/packages/bootstrap/src/qodex-protocol-v4/commands/prompt-turn.ts`

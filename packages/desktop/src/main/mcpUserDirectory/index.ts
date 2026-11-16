@@ -14,8 +14,8 @@ import type {
   SettingsDirectorySource,
   NativeMcpServerRecord,
   SaveCliMcpToUserDirectoryRequest,
-} from "@marid/shared";
-import { readJsonObjectFileForUpdate, updateJsonObjectFile } from "@marid/services/node";
+} from "@qodex/shared";
+import { readJsonObjectFileForUpdate, updateJsonObjectFile } from "@qodex/services/node";
 import type { McpConfigKeyName } from "./types.js";
 import { isRecord } from "./utils.js";
 import { migrateLegacyCommonMcp } from "./legacy.js";
@@ -36,11 +36,11 @@ interface DirectoryMcpDescriptor {
   configKeyName: McpConfigKeyName;
 }
 
-const MARID_MCP_DESCRIPTOR: DirectoryMcpDescriptor = {
-  source: "maridagentmcp",
-  directorySource: "marid",
-  userConfigDirSegments: [".marid", "cli"],
-  workspaceConfigDirSegments: [".marid"],
+const QODEX_MCP_DESCRIPTOR: DirectoryMcpDescriptor = {
+  source: "qodexagentmcp",
+  directorySource: "qodex",
+  userConfigDirSegments: [".qodex", "cli"],
+  workspaceConfigDirSegments: [".qodex"],
   fileName: "config.json",
   format: "json",
   configKeyName: "mcp.servers",
@@ -52,7 +52,7 @@ const ENABLED_KEY = "enabled";
 const LEGACY_ENABLE_KEY = "enable";
 
 const AGENTS_MCP_DESCRIPTOR: DirectoryMcpDescriptor = {
-  source: "maridagentmcp",
+  source: "qodexagentmcp",
   directorySource: "agents",
   userConfigDirSegments: [".agents"],
   workspaceConfigDirSegments: [".agents"],
@@ -67,7 +67,7 @@ function resolveUserHomeDir(): string {
 }
 
 const DIRECTORY_MCP_DESCRIPTORS: readonly DirectoryMcpDescriptor[] = [
-  MARID_MCP_DESCRIPTOR,
+  QODEX_MCP_DESCRIPTOR,
   AGENTS_MCP_DESCRIPTOR,
 ];
 
@@ -88,7 +88,7 @@ function buildDirectoryConfigPath(
 }
 
 function getUserCliConfigPath(): string {
-  return buildDirectoryConfigPath(MARID_MCP_DESCRIPTOR, "user");
+  return buildDirectoryConfigPath(QODEX_MCP_DESCRIPTOR, "user");
 }
 
 function buildDirectoryMcpLocation(
@@ -346,26 +346,26 @@ async function readDirectoryServersFromPreferredSources(
   scope: Exclude<McpScope, "common">,
   workspacePath?: string,
 ): Promise<NativeMcpServerRecord[]> {
-  const maridServers = await readDirectoryServersFromFile(
-    MARID_MCP_DESCRIPTOR,
+  const qodexServers = await readDirectoryServersFromFile(
+    QODEX_MCP_DESCRIPTOR,
     scope,
     workspacePath,
   );
-  // `.marid` 是强优先级来源；只要读到 MCP server，同 scope 的 `.agents` 就不再参与。
-  if (maridServers.length > 0) {
-    return maridServers;
+  // `.qodex` 是强优先级来源；只要读到 MCP server，同 scope 的 `.agents` 就不再参与。
+  if (qodexServers.length > 0) {
+    return qodexServers;
   }
   return readDirectoryServersFromFile(AGENTS_MCP_DESCRIPTOR, scope, workspacePath);
 }
 
-/** 写前重读 `.marid` 的 server map，只改 update 涉及的 server，其他字段原样保留。 */
-async function updateMaridServersInFile(
+/** 写前重读 `.qodex` 的 server map，只改 update 涉及的 server，其他字段原样保留。 */
+async function updateQodexServersInFile(
   scope: Exclude<McpScope, "common">,
   workspacePath: string | undefined,
   update: (servers: Record<string, Record<string, unknown>>) => void,
 ): Promise<void> {
-  const filePath = buildDirectoryConfigPath(MARID_MCP_DESCRIPTOR, scope, workspacePath);
-  const key = MARID_MCP_DESCRIPTOR.configKeyName;
+  const filePath = buildDirectoryConfigPath(QODEX_MCP_DESCRIPTOR, scope, workspacePath);
+  const key = QODEX_MCP_DESCRIPTOR.configKeyName;
   await updateJsonObjectFile(filePath, (current) => {
     const servers = { ...migrateLegacyEnableFlag(readServerMapFromJson(current, key)).servers };
     update(servers);
@@ -378,7 +378,7 @@ export async function loadCliMcpFromUserDirectory(
 ): Promise<LoadCliMcpFromUserDirectoryResult> {
   const servers: NativeMcpServerRecord[] = [];
 
-  // 去掉其他 provider 后，Marid Agent 只按目录约定读取；先 workspace，再 user。
+  // 去掉其他 provider 后，Qodex Agent 只按目录约定读取；先 workspace，再 user。
   if (request?.workspacePath) {
     servers.push(
       ...(await readDirectoryServersFromPreferredSources("workspace", request.workspacePath)),
@@ -400,7 +400,7 @@ export async function saveCliMcpToUserDirectory(
     const scope: Exclude<McpScope, "common"> = payload.projectPath ? "workspace" : "user";
     const location =
       payload.location ??
-      buildDirectoryMcpLocation(MARID_MCP_DESCRIPTOR, scope, payload.projectPath);
+      buildDirectoryMcpLocation(QODEX_MCP_DESCRIPTOR, scope, payload.projectPath);
     await writeServerEnabledToFile(
       findDescriptorByLocation(location),
       location,
@@ -416,7 +416,7 @@ export async function saveCliMcpToUserDirectory(
   if (payload.action === "upsert" && !config) {
     throw new Error("Missing MCP config for upsert action");
   }
-  await updateMaridServersInFile(scope, payload.projectPath, (servers) => {
+  await updateQodexServersInFile(scope, payload.projectPath, (servers) => {
     if (config) {
       servers[payload.name] = config as Record<string, unknown>;
     } else {

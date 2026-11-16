@@ -4,8 +4,8 @@ import type { ConnectConfig } from "ssh2";
 import { createReadStream } from "node:fs";
 import type { Duplex } from "node:stream";
 import { posix } from "node:path";
-import { Emitter } from "@marid/rpc";
-import { resolveMaridRuntimeEnv } from "@marid/shared";
+import { Emitter } from "@qodex/rpc";
+import { resolveQodexRuntimeEnv } from "@qodex/shared";
 import type {
   IRemoteBackend,
   RemoteDisconnectEvent,
@@ -13,32 +13,32 @@ import type {
   RemoteEnvironment,
   RemoteUploadOptions,
   StdioStream,
-} from "@marid/server/remote/backend.js";
+} from "@qodex/server/remote/backend.js";
 import {
   normalizeRemoteArch,
   normalizeRemotePlatform,
   resolveRemotePlatform,
-} from "@marid/server/remote/detectEnv.js";
+} from "@qodex/server/remote/detectEnv.js";
 import {
   createCloseEventController,
   resolveRemoteExitCode,
-} from "@marid/server/remote/closeEvent.js";
+} from "@qodex/server/remote/closeEvent.js";
 import {
   buildPosixShellExecCommand,
   quotePosixShellArg,
   resolvePosixHomePath,
-} from "@marid/server/remote/posixShell.js";
+} from "@qodex/server/remote/posixShell.js";
 import {
   buildSSHConnectConfig,
   createKeyboardInteractiveResponder,
   normalizeSSHConnectError,
-} from "@marid/server/remote/sshAuth.js";
+} from "@qodex/server/remote/sshAuth.js";
 import {
   createSSHUploadProgressReporter,
   formatSSHUploadError,
   formatSSHUploadLabel,
   readLocalFileSize,
-} from "@marid/server/remote/sshUploadProgress.js";
+} from "@qodex/server/remote/sshUploadProgress.js";
 
 export interface SSHBackendOptions {
   host: string;
@@ -149,7 +149,7 @@ export class SSHBackend implements IRemoteBackend {
       password: options.password,
       agent: options.agent,
     });
-    if (resolveMaridRuntimeEnv(process.env) === "development") {
+    if (resolveQodexRuntimeEnv(process.env) === "development") {
       this.config.debug = (message: string) => {
         // SSH ready 超时只暴露 client-timeout 时无法判断卡在 TCP、协商还是认证。
         // 仅开发环境输出 ssh2 握手细节；CHANNEL_DATA / EXTENDED_DATA 是命令 stdout/stderr 数据包，

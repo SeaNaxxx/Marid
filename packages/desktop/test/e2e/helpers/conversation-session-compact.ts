@@ -6,7 +6,7 @@ import {
   TID_CHAT_COMPACT_MARKER,
   TID_CHAT_USER_MESSAGE,
   TID_CHAT_VIEW,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 
 export interface CompactMarkerSnapshot {
   attempt: number | null;
@@ -163,7 +163,7 @@ function getCompactMarkerDiagnostics() {
       }));
       const input = document.querySelector<
         HTMLElement & {
-          __maridLexicalInputE2E?: { getText?: () => string };
+          __qodexLexicalInputE2E?: { getText?: () => string };
         }
       >(`[data-testid="${inputTestId}"]`);
 
@@ -179,7 +179,7 @@ function getCompactMarkerDiagnostics() {
         },
         compactMarkers: [...legacyCompactMarkers, ...v4CompactMarkers],
         composer: {
-          bridgeText: input?.__maridLexicalInputE2E?.getText?.() ?? null,
+          bridgeText: input?.__qodexLexicalInputE2E?.getText?.() ?? null,
           domText: (input?.innerText || input?.textContent || "")
             .replace(/\u00a0/g, " ")
             .trim(),

@@ -34,8 +34,8 @@ json_extract_scalar(attributes, '$["error.cause.code"]')
 json_extract_scalar(attributes, '$["error.cause.message"]')
 ```
 
-可将这些字段与 `marid.model_attempt.error_category`、
-`marid.model_attempt.failure_stage`、HTTP 状态码和 request/session id 一起聚合。
+可将这些字段与 `qodex.model_attempt.error_category`、
+`qodex.model_attempt.failure_stage`、HTTP 状态码和 request/session id 一起聚合。
 
 ## Todo103 合入边界与验收
 

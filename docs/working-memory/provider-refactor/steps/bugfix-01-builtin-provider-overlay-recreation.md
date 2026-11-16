@@ -4,7 +4,7 @@
 >
 > 日期：2026-08-27
 >
-> 来源：正式版 Marid 3.9.2 Provider Settings 运行时复现
+> 来源：正式版 Qodex 3.9.2 Provider Settings 运行时复现
 
 ## 1. 问题
 
@@ -23,7 +23,7 @@ Provider deepseek 已删除或重命名
 ## 2. 目标边界
 
 ```text
-Marid Built-in Provider Config
+Qodex Built-in Provider Config
         |
         +-- Personal Overlay 不存在 --> “添加供应商”候选
         |

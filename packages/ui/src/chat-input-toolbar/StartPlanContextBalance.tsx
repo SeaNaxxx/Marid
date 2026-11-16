@@ -1,13 +1,13 @@
 import { CodingPlanEntryButton } from "@/settings/CodingPlanEntryButton.js";
 import { LoaderCircle, RocketIcon } from "lucide-react";
-import type { UsageEntitlementSnapshot, UsageQuotaLimit } from "@marid/shared";
+import type { UsageEntitlementSnapshot, UsageQuotaLimit } from "@qodex/shared";
 import { cn } from "@/components/lib/utils.js";
 import {
   CodingPlanBillingDiscountBadgePill,
   CodingPlanBillingDiscountInfoDialog,
   useCodingPlanBillingDiscount,
 } from "@/CodingPlanBillingDiscount.js";
-import type { useMaridIntl } from "@/i18n/IntlProvider.js";
+import type { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { getContextQuotaMeterGridClass } from "@/chat-input-toolbar/contextQuotaMeterGrid.js";
 import { formatStartPlanBucketResetTime } from "@/lib/codingPlanQuotaPresentation.js";
 import { formatQuotaModelDisplayName } from "@/settings/model-provider-section/quotaModelDisplayName.js";
@@ -120,7 +120,7 @@ export function ChatStartPlanBalancePanel({
   separated = false,
 }: {
   config: ChatStartPlanBalanceConfig;
-  intl: ReturnType<typeof useMaridIntl>["intl"];
+  intl: ReturnType<typeof useQodexIntl>["intl"];
   locale: string;
   separated?: boolean;
 }) {

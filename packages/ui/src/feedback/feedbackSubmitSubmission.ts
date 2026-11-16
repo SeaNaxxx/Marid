@@ -4,8 +4,8 @@ import {
   type FeedbackTicketSeverity,
   type FeedbackTicketType,
   type Locale,
-} from "@marid/shared";
-import type { IFeedbackService } from "@marid/services";
+} from "@qodex/shared";
+import type { IFeedbackService } from "@qodex/services";
 import { persistFeedbackContactPreference } from "@/feedback/feedbackContactPreference.js";
 import type { FeedbackSubmitDraft } from "@/feedback/feedbackStore.js";
 import type { ScreenshotAttachmentDraft } from "@/feedback/FeedbackScreenshotPicker.js";
@@ -20,7 +20,7 @@ import {
   type FeedbackSubmissionJob,
 } from "@/feedback/feedbackSubmissionJob.js";
 
-const FEEDBACK_MARID_AGENT_LABEL = "Marid Agent";
+const FEEDBACK_QODEX_AGENT_LABEL = "Qodex Agent";
 
 export const DEFAULT_FEEDBACK_TYPE: FeedbackTicketType = "bug";
 export const DEFAULT_FEEDBACK_SEVERITY: FeedbackTicketSeverity = "P2-中";
@@ -95,7 +95,7 @@ export async function startSimplifiedFeedbackSubmission({
       framework,
       device: {
         ...device,
-        agentProvider: FEEDBACK_MARID_AGENT_LABEL,
+        agentProvider: FEEDBACK_QODEX_AGENT_LABEL,
         agentFramework: framework,
         ...(modelContext.model ? { agentModel: modelContext.model } : {}),
         ...(modelContext.display ? { agentModelDisplay: modelContext.display } : {}),

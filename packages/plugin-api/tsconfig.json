@@ -10,8 +10,8 @@
     "lib": ["es2024", "dom"],
     "types": [],
     "paths": {
-      "@marid/shared/extension-host": ["../shared/src/extension-host/index.ts"],
-      "@marid/shared/marid-protocol-v4": ["../shared/src/marid-protocol-v4/index.ts"]
+      "@qodex/shared/extension-host": ["../shared/src/extension-host/index.ts"],
+      "@qodex/shared/qodex-protocol-v4": ["../shared/src/qodex-protocol-v4/index.ts"]
     }
   },
   "include": ["src"],

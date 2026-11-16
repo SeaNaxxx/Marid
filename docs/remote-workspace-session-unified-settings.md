@@ -18,15 +18,15 @@
 [
   {
     "kind": "local",
-    "workspacePath": "/Users/dev/MaridProject/3DAutoSnake"
+    "workspacePath": "/Users/dev/QodexProject/3DAutoSnake"
   },
   {
     "kind": "remote",
     "workspacePath": "/home/ubuntu",
-    "workspaceIdentity": "remote:docker:marid-ssh-container:/home/ubuntu",
+    "workspaceIdentity": "remote:docker:qodex-ssh-container:/home/ubuntu",
     "target": {
       "kind": "docker",
-      "container": "marid-ssh-container"
+      "container": "qodex-ssh-container"
     },
     "lastOpenedAt": 1776220448653,
     "lastConnectionStatus": "failed",

@@ -2,4 +2,4 @@ export {
   extractPlanStepsFromToolInput,
   extractPlanStepsFromToolOutput,
   isTodoPlanToolName,
-} from "@marid/shared";
+} from "@qodex/shared";

@@ -6,12 +6,12 @@ import { basename, join, win32 } from "node:path";
 import { homedir } from "node:os";
 import {
   DATA_BASE_DIR_FORBIDDEN_WINDOWS_INSTALL_DIR_ERROR_CODE,
-  MARID_AGENT_RUNTIME,
-} from "@marid/shared";
+  QODEX_AGENT_RUNTIME,
+} from "@qodex/shared";
 
 let _dataBaseDir: string | null = null;
-export const MARID_WINDOWS_APP_INSTALL_DIR_ENV = "MARID_WINDOWS_APP_INSTALL_DIR";
-const envDataBaseDir = process.env.MARID_DATA_BASE_DIR?.trim() || null;
+export const QODEX_WINDOWS_APP_INSTALL_DIR_ENV = "QODEX_WINDOWS_APP_INSTALL_DIR";
+const envDataBaseDir = process.env.QODEX_DATA_BASE_DIR?.trim() || null;
 const defaultDataBaseDir = process.env.HOME?.trim() || homedir();
 
 export interface DataBaseDirTargetValidationOptions {
@@ -33,7 +33,7 @@ export function setDataBaseDir(dir: string | null): void {
   _dataBaseDir = dir?.trim() || null;
 }
 
-/** Get the current base directory. Priority: setDataBaseDir() > env MARID_DATA_BASE_DIR > homedir(). */
+/** Get the current base directory. Priority: setDataBaseDir() > env QODEX_DATA_BASE_DIR > homedir(). */
 export function getDataBaseDir(): string {
   if (_dataBaseDir) return _dataBaseDir;
   if (envDataBaseDir) return envDataBaseDir;
@@ -42,26 +42,26 @@ export function getDataBaseDir(): string {
   return defaultDataBaseDir;
 }
 
-/** {dataBaseDir}/.marid */
-export function getMaridDataRootDir(): string {
-  return join(getDataBaseDir(), ".marid");
+/** {dataBaseDir}/.qodex */
+export function getQodexDataRootDir(): string {
+  return join(getDataBaseDir(), ".qodex");
 }
 
-/** 非项目对话共享的真实工作目录；默认 ~/.marid/workspace/default。 */
+/** 非项目对话共享的真实工作目录；默认 ~/.qodex/workspace/default。 */
 export function getConversationWorkspaceDir(): string {
-  return join(getMaridDataRootDir(), "workspace", "default");
+  return join(getQodexDataRootDir(), "workspace", "default");
 }
 
-/** {dataBaseDir}/.marid/v2 */
+/** {dataBaseDir}/.qodex/v2 */
 export function getAppConfigDir(): string {
-  return join(getMaridDataRootDir(), "v2");
+  return join(getQodexDataRootDir(), "v2");
 }
 
 /**
  * Agent 侧用户级默认指令（个性化）文件的 home 解析。
- * 必须与 CLI adapter（apps/marid-cli/packages/adapters/src/context/index.ts 的
+ * 必须与 CLI adapter（apps/qodex-cli/packages/adapters/src/context/index.ts 的
  * resolveUserHomeDir）保持完全一致：只认 HOME/USERPROFILE。不能改用
- * MARID_DATA_BASE_DIR（CLI 读该文件时忽略它）或 MARID_DESKTOP_HOME_DIR
+ * QODEX_DATA_BASE_DIR（CLI 读该文件时忽略它）或 QODEX_DESKTOP_HOME_DIR
  * （agent 子进程不认），否则 App 写的文件和 Agent 读的文件会分叉。
  */
 export function resolveAgentUserInstructionsHomeDir(env: NodeJS.ProcessEnv = process.env): string {
@@ -69,9 +69,9 @@ export function resolveAgentUserInstructionsHomeDir(env: NodeJS.ProcessEnv = pro
   return envHome && envHome.length > 0 ? envHome : homedir();
 }
 
-/** `{home}/.marid/AGENTS.md`：用户自定义指令（个性化）的唯一事实源文件。 */
+/** `{home}/.qodex/AGENTS.md`：用户自定义指令（个性化）的唯一事实源文件。 */
 export function getAgentUserInstructionsFilePath(env: NodeJS.ProcessEnv = process.env): string {
-  return join(resolveAgentUserInstructionsHomeDir(env), ".marid", "AGENTS.md");
+  return join(resolveAgentUserInstructionsHomeDir(env), ".qodex", "AGENTS.md");
 }
 
 function readEnvValue(env: Record<string, string | undefined>, key: string): string | undefined {
@@ -132,11 +132,11 @@ function collectWindowsForbiddenAppInstallDirs(
   const localAppData = readEnvValue(env, "LOCALAPPDATA");
   const candidates = [
     options.appInstallDir,
-    readEnvValue(env, MARID_WINDOWS_APP_INSTALL_DIR_ENV),
-    programFiles ? win32.join(programFiles, "Marid") : null,
-    programFilesX86 ? win32.join(programFilesX86, "Marid") : null,
-    programW6432 ? win32.join(programW6432, "Marid") : null,
-    localAppData ? win32.join(localAppData, "Programs", "Marid") : null,
+    readEnvValue(env, QODEX_WINDOWS_APP_INSTALL_DIR_ENV),
+    programFiles ? win32.join(programFiles, "Qodex") : null,
+    programFilesX86 ? win32.join(programFilesX86, "Qodex") : null,
+    programW6432 ? win32.join(programW6432, "Qodex") : null,
+    localAppData ? win32.join(localAppData, "Programs", "Qodex") : null,
   ];
   const seen = new Set<string>();
   const result: string[] = [];
@@ -179,15 +179,15 @@ export function validateDataBaseDirTarget(
 }
 
 export function getExportLogStageDir(): string {
-  return join(getMaridDataRootDir(), "export-log-stage");
+  return join(getQodexDataRootDir(), "export-log-stage");
 }
 
 export function getExportLogDir(): string {
-  return join(getMaridDataRootDir(), "export-log");
+  return join(getQodexDataRootDir(), "export-log");
 }
 
 export function getFeedbackRootDir(): string {
-  return join(getMaridDataRootDir(), "feedback");
+  return join(getQodexDataRootDir(), "feedback");
 }
 
 export function getFeedbackAttachmentDir(): string {
@@ -199,10 +199,10 @@ export function getFeedbackLogArchiveDir(): string {
 }
 
 export function getGitCheckpointIndexRootDir(): string {
-  return join(getMaridDataRootDir(), "git-checkpoint-index");
+  return join(getQodexDataRootDir(), "git-checkpoint-index");
 }
 
-/** ~/.marid/v2/tasks-index.sqlite */
+/** ~/.qodex/v2/tasks-index.sqlite */
 export function getTasksIndexDatabasePath(): string {
   return join(getAppConfigDir(), "tasks-index.sqlite");
 }
@@ -212,7 +212,7 @@ function getWorkspaceKey(workspacePath: string, workspaceIdentity?: string): str
   return workspaceIdentity?.trim() || workspacePath;
 }
 
-/** 与 Marid session 持久化一致：使用 workspaceKey 的 SHA-256 前 12 位 */
+/** 与 Qodex session 持久化一致：使用 workspaceKey 的 SHA-256 前 12 位 */
 export function getWorkspaceHash(workspacePath: string, workspaceIdentity?: string): string {
   return createHash("sha256")
     .update(getWorkspaceKey(workspacePath, workspaceIdentity))
@@ -220,12 +220,12 @@ export function getWorkspaceHash(workspacePath: string, workspaceIdentity?: stri
     .slice(0, 12);
 }
 
-/** ~/.marid/v2/sessions/{workspaceHash} */
+/** ~/.qodex/v2/sessions/{workspaceHash} */
 function getTaskSessionDir(workspacePath: string, workspaceIdentity?: string): string {
   return join(getAppConfigDir(), "sessions", getWorkspaceHash(workspacePath, workspaceIdentity));
 }
 
-/** ~/.marid/v2/sessions/{workspaceHash}/{taskId}.json */
+/** ~/.qodex/v2/sessions/{workspaceHash}/{taskId}.json */
 export function getLegacyTaskSessionSnapshotPath(
   workspacePath: string,
   taskId: string,
@@ -234,7 +234,7 @@ export function getLegacyTaskSessionSnapshotPath(
   return join(getTaskSessionDir(workspacePath, workspaceIdentity), `${taskId}.json`);
 }
 
-/** ~/.marid/v2/sessions/{workspaceHash}/{taskId}.deleted.json */
+/** ~/.qodex/v2/sessions/{workspaceHash}/{taskId}.deleted.json */
 export function getLegacyDeletedTaskSessionSnapshotPath(
   workspacePath: string,
   taskId: string,
@@ -244,24 +244,24 @@ export function getLegacyDeletedTaskSessionSnapshotPath(
 }
 
 /**
- * GLM（唯一 agent provider）的配置目录：~/.marid/cli。
- * Bugfix：GLM 配置改为直接读写新版 marid-cli 的全局配置目录，不做 workspace 隔离，
+ * GLM（唯一 agent provider）的配置目录：~/.qodex/cli。
+ * Bugfix：GLM 配置改为直接读写新版 qodex-cli 的全局配置目录，不做 workspace 隔离，
  * 避免同机不同工作区配置漂移。
  */
 export function getProviderWorkspaceConfigDir(): string {
-  return MARID_AGENT_RUNTIME.nativeConfigDir
-    ? join(getDataBaseDir(), MARID_AGENT_RUNTIME.nativeConfigDir)
-    : join(getDataBaseDir(), ".marid", "cli");
+  return QODEX_AGENT_RUNTIME.nativeConfigDir
+    ? join(getDataBaseDir(), QODEX_AGENT_RUNTIME.nativeConfigDir)
+    : join(getDataBaseDir(), ".qodex", "cli");
 }
 
 /**
- * Copy the .marid/v2 data directory from one base dir to another.
+ * Copy the .qodex/v2 data directory from one base dir to another.
  * Excludes setting.json and its transient atomic-write siblings — bootstrap
  * state must only live at the default homedir location.
  */
 export async function copyDataDirectory(oldBaseDir: string, newBaseDir: string): Promise<void> {
-  const oldDir = join(oldBaseDir, ".marid", "v2");
-  const newDir = join(newBaseDir, ".marid", "v2");
+  const oldDir = join(oldBaseDir, ".qodex", "v2");
+  const newDir = join(newBaseDir, ".qodex", "v2");
   await cp(oldDir, newDir, {
     recursive: true,
     force: false,

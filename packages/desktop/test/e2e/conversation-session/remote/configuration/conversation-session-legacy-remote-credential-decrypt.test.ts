@@ -32,7 +32,7 @@ const UNDECRYPTABLE_VALUE = [
 
 describe(`${CASE_MARKER}: 旧远程凭据无法解密时升级启动`, () => {
   const { credentialsFile, homeDir } = getE2EAppDataPaths();
-  const tasksIndexFile = join(homeDir, ".marid/v2/tasks-index.sqlite");
+  const tasksIndexFile = join(homeDir, ".qodex/v2/tasks-index.sqlite");
 
   after(async () => {
     await browser.electron.restoreAllMocks();

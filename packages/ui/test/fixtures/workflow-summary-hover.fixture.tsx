@@ -1,10 +1,10 @@
 import "@/styles.css";
 import { createRoot } from "react-dom/client";
-import { MaridIntlProvider } from "@/i18n/IntlProvider.js";
+import { QodexIntlProvider } from "@/i18n/IntlProvider.js";
 import { TooltipProvider } from "@/components/ui/tooltip.js";
 import { WorkflowToolSummary } from "@/v4/WorkflowToolSummary.js";
 createRoot(document.getElementById("root")!).render(
-  <MaridIntlProvider initialLocale="en-US">
+  <QodexIntlProvider initialLocale="en-US">
     <TooltipProvider>
       <WorkflowToolSummary
         toolCallId="hover"
@@ -14,5 +14,5 @@ createRoot(document.getElementById("root")!).render(
         }}
       />
     </TooltipProvider>
-  </MaridIntlProvider>,
+  </QodexIntlProvider>,
 );

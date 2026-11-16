@@ -1,5 +1,5 @@
-import type { WebRemoteControlFailure, WebRemoteControlV2QrParams } from "@marid/shared";
-import type { WebRemoteControlRelayV2Device } from "@marid/shared/web-remote-relay";
+import type { WebRemoteControlFailure, WebRemoteControlV2QrParams } from "@qodex/shared";
+import type { WebRemoteControlRelayV2Device } from "@qodex/shared/web-remote-relay";
 import type { WebOAuthProviderId } from "#src/auth/contract.js";
 import type { WebAuthService } from "#src/auth/contract.js";
 
@@ -49,7 +49,7 @@ export interface WebRemoteControlEntryOptions {
   // 浏览器 location/history/storage 经现有边界注入，不另存一份登录事实。
   auth: Pick<
     WebAuthService,
-    | "getMaridJwtToken"
+    | "getQodexJwtToken"
     | "getSessionRevision"
     | "subscribeSessionChange"
     | "getActiveAccount"

@@ -4,7 +4,7 @@ import type {
   ReadResourceResult,
 } from "@modelcontextprotocol/client";
 import { INVALID_PARAMS, ProtocolError } from "@modelcontextprotocol/client";
-import type { IPluginUiBridgeService, PluginUiPluginScope } from "@marid/services";
+import type { IPluginUiBridgeService, PluginUiPluginScope } from "@qodex/services";
 import type { PluginUiHostBridge } from "./pluginUiHostBridge.js";
 
 /**
@@ -105,7 +105,7 @@ export function createPluginUiResourceSubscriptions(
           ...(request?.cursor ? { cursor: request.cursor } : {}),
         })) as unknown as ListResourceTemplatesResult;
       };
-      // resources/subscribe 是 Marid 扩展（宣告 experimental["marid/resourceSubscribe"]），规范方法走二参形式。
+      // resources/subscribe 是 Qodex 扩展（宣告 experimental["qodex/resourceSubscribe"]），规范方法走二参形式。
       bridge.setRequestHandler("resources/subscribe", async (request) => {
         await subscribe(request.params.uri);
         return {};

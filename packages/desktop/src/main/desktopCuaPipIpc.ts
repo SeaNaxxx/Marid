@@ -1,5 +1,5 @@
 import { BrowserWindow, ipcMain } from "electron";
-import { PlatformChannels } from "@marid/shared";
+import { PlatformChannels } from "@qodex/shared";
 
 import { resolveCuaPipWindowKey } from "./cuaPipFocusRouter.js";
 

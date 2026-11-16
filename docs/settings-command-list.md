@@ -37,7 +37,7 @@ Command form scope
               |
               +-- resolve target Host service
               |
-              +-- write workspacePath/.marid/commands
+              +-- write workspacePath/.qodex/commands
 ```
 
 ## Impact brief

@@ -1,6 +1,6 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, type RefObject } from "react";
-import type { MaridModelTrajectoryRecord } from "@marid/services";
+import type { QodexModelTrajectoryRecord } from "@qodex/services";
 import {
   type TrajectorySearchMatch,
   type TrajectorySearchTimelineItem,
@@ -141,7 +141,7 @@ export function ModelTrajectoryTimeline({
   );
 }
 
-export function resolveTrajectoryTimelineItems(records: MaridModelTrajectoryRecord[]) {
+export function resolveTrajectoryTimelineItems(records: QodexModelTrajectoryRecord[]) {
   let previousConversationMessageCount = 0;
 
   return records.map((record, index) => {
@@ -165,11 +165,11 @@ export function resolveTrajectoryInputMessages({
   index,
   previousConversationMessageCount,
 }: {
-  record: MaridModelTrajectoryRecord;
+  record: QodexModelTrajectoryRecord;
   index: number;
   previousConversationMessageCount: number;
 }): {
-  inputMessages: MaridModelTrajectoryRecord["request"]["messages"];
+  inputMessages: QodexModelTrajectoryRecord["request"]["messages"];
   nextConversationMessageCount: number;
 } {
   const messages = record.request.messages;
@@ -192,16 +192,16 @@ export function resolveTrajectoryInputMessages({
   };
 }
 
-function shouldUseConversationDelta(record: MaridModelTrajectoryRecord): boolean {
+function shouldUseConversationDelta(record: QodexModelTrajectoryRecord): boolean {
   const kind = record.callSource?.kind;
   return kind === undefined || kind === "main" || kind === "subagent";
 }
 
 function computeDeltaMessages(
-  messages: MaridModelTrajectoryRecord["request"]["messages"],
+  messages: QodexModelTrajectoryRecord["request"]["messages"],
   previousMessageCount: number,
   index: number,
-): MaridModelTrajectoryRecord["request"]["messages"] {
+): QodexModelTrajectoryRecord["request"]["messages"] {
   if (index === 0) return messages;
   if (messages.length > previousMessageCount) return messages.slice(previousMessageCount);
   if (messages.length < previousMessageCount) return messages;

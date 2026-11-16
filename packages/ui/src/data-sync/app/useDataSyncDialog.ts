@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { IServiceAccessor } from "@marid/services";
+import type { IServiceAccessor } from "@qodex/services";
 import type {
   DataSyncImportItem,
   DataSyncImportResultItem,
@@ -7,7 +7,7 @@ import type {
   DataSyncWorkspaceMapping,
   DeviceSyncResult,
   SourceServerWorkspaceHistoryEntry,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { logger } from "@/logger.js";
 import type {
   DataSyncAfterPushContext,

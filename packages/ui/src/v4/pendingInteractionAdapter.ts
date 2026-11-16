@@ -1,15 +1,15 @@
 import type {
-  MaridPermissionOption,
-  MaridPermissionRequest,
-  MaridPermissionResponse,
-  MaridElicitationRequest,
-} from "@marid/shared";
+  QodexPermissionOption,
+  QodexPermissionRequest,
+  QodexPermissionResponse,
+  QodexElicitationRequest,
+} from "@qodex/shared";
 import {
   PERMISSION_FULL_ACCESS_OPTION_ID,
   type PendingInteraction,
   type PermissionRequestPayload,
   type UserInputRequestPayload,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 
 const LEGACY_PERMISSION_RULE_INPUT_KEYS = [
   "command",
@@ -22,7 +22,7 @@ const LEGACY_PERMISSION_RULE_INPUT_KEYS = [
 function permissionKindToResponse(
   kind: string,
   payload: PermissionRequestPayload,
-): MaridPermissionResponse {
+): QodexPermissionResponse {
   if (kind === "deny" || kind === "rejectOnce" || kind === "rejectAlways") {
     return { decision: "deny" };
   }
@@ -55,11 +55,11 @@ function permissionKindToResponse(
   return { decision: "allow" };
 }
 
-/** v4 permission payload → 旧 PermissionDialog 可消费的 MaridPermissionRequest。 */
+/** v4 permission payload → 旧 PermissionDialog 可消费的 QodexPermissionRequest。 */
 export function pendingPermissionToLegacyRequest(
   sessionId: string,
   interaction: PendingInteraction & { payload: PermissionRequestPayload },
-): MaridPermissionRequest {
+): QodexPermissionRequest {
   const { payload } = interaction;
   // 自主模式的危险请求仍给旧端两个普通选项；新版单独呈现显式切换动作。
   const switchOption =
@@ -73,7 +73,7 @@ export function pendingPermissionToLegacyRequest(
         }
       : undefined);
   const advertisedOptions = switchOption ? [...payload.options, switchOption] : payload.options;
-  const options: MaridPermissionOption[] = advertisedOptions.map((option) => ({
+  const options: QodexPermissionOption[] = advertisedOptions.map((option) => ({
     optionId: option.optionId,
     kind: option.kind,
     name: option.label,
@@ -126,7 +126,7 @@ export function pendingUserInputToViewModel(
 export function pendingUserInputToElicitationRequest(
   sessionId: string,
   interaction: PendingInteraction & { payload: UserInputRequestPayload },
-): MaridElicitationRequest | null {
+): QodexElicitationRequest | null {
   const { payload } = interaction;
   if (!payload.questions || payload.questions.length === 0) {
     return null;

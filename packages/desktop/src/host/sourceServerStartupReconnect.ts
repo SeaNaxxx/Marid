@@ -1,4 +1,4 @@
-import type { AppSettings } from "@marid/shared";
+import type { AppSettings } from "@qodex/shared";
 
 /**
  * Host 启动静默重连批次的唯一门禁编排（合同 §8.2）：

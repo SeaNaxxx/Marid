@@ -65,16 +65,16 @@ describe("desktop tsup chunk isolation", () => {
     expect(getExternal("host")).toContain("yaml");
   });
 
-  it("main/host/scheduler 应内联 CUA producer，安装包不能依赖被排除的 @marid node_modules", () => {
+  it("main/host/scheduler 应内联 CUA producer，安装包不能依赖被排除的 @qodex node_modules", () => {
     for (const configName of ["main", "host", "scheduler"]) {
-      expect(getNoExternal(configName)).toContain("@marid/marid-cua");
+      expect(getNoExternal(configName)).toContain("@qodex/qodex-cua");
     }
   });
 
   it("main/host/scheduler 应内联 Provider workspace 包，Electron 不能直接加载 TypeScript 源码", () => {
     for (const configName of ["main", "host", "scheduler"]) {
-      expect(getNoExternal(configName)).toContain("@marid/provider");
-      expect(getNoExternal(configName)).toContain("@marid/provider-node");
+      expect(getNoExternal(configName)).toContain("@qodex/provider");
+      expect(getNoExternal(configName)).toContain("@qodex/provider-node");
     }
   });
 
@@ -98,7 +98,7 @@ describe("desktop tsup chunk isolation", () => {
     expect(
       resolveDesktopTsupBundleSecurityOptions({
         NODE_ENV: "production",
-        MARID_E2E_COVERAGE: "1",
+        QODEX_E2E_COVERAGE: "1",
       }),
     ).toEqual({
       keepNames: false,
@@ -110,19 +110,19 @@ describe("desktop tsup chunk isolation", () => {
   it("remote runtime CDN 根应可由 CI 的 CDN_DOMAIN/OSS_PATH_PREFIX 多值注入", () => {
     expect(
       resolveBuildRemoteCdnReleaseRoots({
-        CDN_DOMAIN: "cdn-marid.z.ai,cdn.marid-ai.com",
-        OSS_PATH_PREFIX: "marid/electron/releases",
+        CDN_DOMAIN: "cdn-qodex.z.ai,cdn.qodex-ai.com",
+        OSS_PATH_PREFIX: "qodex/electron/releases",
       }),
     ).toEqual([
-      "https://cdn-marid.z.ai/marid/electron/releases",
-      "https://cdn.marid-ai.com/marid/electron/releases",
+      "https://cdn-qodex.z.ai/qodex/electron/releases",
+      "https://cdn.qodex-ai.com/qodex/electron/releases",
     ]);
   });
 
   it("remote runtime CDN 根的路径前缀数量不匹配时应失败", () => {
     expect(() =>
       resolveBuildRemoteCdnReleaseRoots({
-        CDN_DOMAIN: "cdn-marid.z.ai,cdn.marid-ai.com",
+        CDN_DOMAIN: "cdn-qodex.z.ai,cdn.qodex-ai.com",
         OSS_PATH_PREFIX: "new-prefix,old-prefix,extra-prefix",
       }),
     ).toThrow("OSS_PATH_PREFIX must contain one value or match CDN_DOMAIN count");
@@ -131,31 +131,31 @@ describe("desktop tsup chunk isolation", () => {
   it("正式安装包 Agent OTLP 配置应映射为 Main 使用的标准环境字段", () => {
     expect(
       resolveBuildPackagedAgentTelemetryEnv({
-        MARID_ENV: "production",
-        MARID_PACKAGED_AGENT_OTEL_ENDPOINT: "https://arms.example.com/otlp",
-        MARID_PACKAGED_AGENT_OTEL_HEADERS: "x-arms-license-key=write-only",
-        MARID_PACKAGED_AGENT_OTEL_SERVICE_NAME: "marid-cli-agent",
+        QODEX_ENV: "production",
+        QODEX_PACKAGED_AGENT_OTEL_ENDPOINT: "https://arms.example.com/otlp",
+        QODEX_PACKAGED_AGENT_OTEL_HEADERS: "x-arms-license-key=write-only",
+        QODEX_PACKAGED_AGENT_OTEL_SERVICE_NAME: "qodex-cli-agent",
       }),
     ).toEqual({
       OTEL_EXPORTER_OTLP_ENDPOINT: "https://arms.example.com/otlp",
       OTEL_EXPORTER_OTLP_HEADERS: "x-arms-license-key=write-only",
-      OTEL_SERVICE_NAME: "marid-cli-agent",
-      MARID_TELEMETRY_RUNTIME_DISTRIBUTION: "packaged",
+      OTEL_SERVICE_NAME: "qodex-cli-agent",
+      QODEX_TELEMETRY_RUNTIME_DISTRIBUTION: "packaged",
     });
   });
 
   it("正式安装包 Agent OTLP 配置不完整或生产环境使用 HTTP 时应阻止构建", () => {
     expect(() =>
       resolveBuildPackagedAgentTelemetryEnv({
-        MARID_ENV: "production",
-        MARID_PACKAGED_AGENT_OTEL_ENDPOINT: "https://arms.example.com/otlp",
+        QODEX_ENV: "production",
+        QODEX_PACKAGED_AGENT_OTEL_ENDPOINT: "https://arms.example.com/otlp",
       }),
     ).toThrow("must be configured together");
     expect(() =>
       resolveBuildPackagedAgentTelemetryEnv({
-        MARID_ENV: "production",
-        MARID_PACKAGED_AGENT_OTEL_ENDPOINT: "http://arms.example.com/otlp",
-        MARID_PACKAGED_AGENT_OTEL_HEADERS: "x-arms-license-key=write-only",
+        QODEX_ENV: "production",
+        QODEX_PACKAGED_AGENT_OTEL_ENDPOINT: "http://arms.example.com/otlp",
+        QODEX_PACKAGED_AGENT_OTEL_HEADERS: "x-arms-license-key=write-only",
       }),
     ).toThrow("must use HTTPS in production");
   });
@@ -177,19 +177,19 @@ describe("desktop tsup chunk isolation", () => {
   });
 
   it("安装包身份与后端环境作为两个编译期常量注入每个 bundle", () => {
-    // 打包后的应用不能依赖机器环境变量：MARID_PREVIEW_IDENTITY 在构建时折叠成 __MARID_PRODUCT_FLAVOR__。
+    // 打包后的应用不能依赖机器环境变量：QODEX_PREVIEW_IDENTITY 在构建时折叠成 __QODEX_PRODUCT_FLAVOR__。
     for (const entry of ["main", "host", "preload"] as const) {
       const defines = getDefines(entry);
-      expect(defines).toHaveProperty("__MARID_ENV__");
-      expect(defines).toHaveProperty("__MARID_PRODUCT_FLAVOR__");
-      expect(["\"production\"", "\"preview\""]).toContain(defines.__MARID_PRODUCT_FLAVOR__);
+      expect(defines).toHaveProperty("__QODEX_ENV__");
+      expect(defines).toHaveProperty("__QODEX_PRODUCT_FLAVOR__");
+      expect(["\"production\"", "\"preview\""]).toContain(defines.__QODEX_PRODUCT_FLAVOR__);
     }
   });
 
   it("Agent OTLP 部署默认值只应编译进 Main bundle", () => {
-    expect(getDefines("main")).toHaveProperty("__MARID_PACKAGED_AGENT_TELEMETRY_ENV__");
-    expect(getDefines("host")).not.toHaveProperty("__MARID_PACKAGED_AGENT_TELEMETRY_ENV__");
-    expect(getDefines("preload")).not.toHaveProperty("__MARID_PACKAGED_AGENT_TELEMETRY_ENV__");
+    expect(getDefines("main")).toHaveProperty("__QODEX_PACKAGED_AGENT_TELEMETRY_ENV__");
+    expect(getDefines("host")).not.toHaveProperty("__QODEX_PACKAGED_AGENT_TELEMETRY_ENV__");
+    expect(getDefines("preload")).not.toHaveProperty("__QODEX_PACKAGED_AGENT_TELEMETRY_ENV__");
   });
 
   it("所有 tsup 子构建都应关闭 esbuild legal comments 输出", () => {

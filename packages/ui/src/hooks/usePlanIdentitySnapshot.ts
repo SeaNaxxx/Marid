@@ -7,8 +7,8 @@ import {
   type PlanIdentitySnapshot,
   type ProviderFamilyConnectionSelection,
   type ProviderFamilyDomain,
-} from "@marid/shared";
-import type { IUsageStatsService } from "@marid/services";
+} from "@qodex/shared";
+import type { IUsageStatsService } from "@qodex/services";
 import { useUsageEntitlementWithService } from "@/hooks/useUsageEntitlement.js";
 import { useProviderSettingsView } from "@/hooks/useProviderSettingsView.js";
 import { resolveEntitledAccountProviderAccessFingerprint } from "@/lib/accountProviderAccess.js";

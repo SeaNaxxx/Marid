@@ -1,0 +1,12 @@
+{
+  "name": "@qodex/plugin-creator-plugin",
+  "version": "0.1.0-qodex",
+  "private": true,
+  "description": "Built-in Qodex plugin authoring skill and scaffolding helpers.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "test:integration": "node test/dev-workflow.integration.mjs ../cli/dist/qodex.cjs"
+  }
+}

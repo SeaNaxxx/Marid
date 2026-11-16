@@ -1,8 +1,8 @@
-# Marid Computer Use 权限设置入口
+# Qodex Computer Use 权限设置入口
 
 ## 目标
 
-Marid CUA 的 macOS product 权限主体必须是外置 `Marid Computer Use.app`。设置页保留用户主动
+Qodex CUA 的 macOS product 权限主体必须是外置 `Qodex Computer Use.app`。设置页保留用户主动
 权限入口；本地 desktop continuous 的官方 `request_access` 实时结果可以经可信 Host 确认后复用
 同一 onboarding。聊天错误、tool card 文本和 PermissionDialog 不挂 CUA 权限副作用。启用插件
 成功后只刷新状态，不自动打开权限 UI。
@@ -18,15 +18,15 @@ Marid CUA 的 macOS product 权限主体必须是外置 `Marid Computer Use.app`
 - Accessibility 入口会拉起 Helper，让 Helper 自己触发 macOS Accessibility prompt。Screen
   Recording 没有等价 prompt API，只打开对应系统设置页。
 - 后台任务的官方 `request_access` 明确报告缺权时，窗口级监听先只读复查 Helper 状态，再弹
-  Marid ConfirmDialog。用户确认后再次复查并按 Accessibility → Screen Recording 顺序打开仍缺失项；
+  Qodex ConfirmDialog。用户确认后再次复查并按 Accessibility → Screen Recording 顺序打开仍缺失项；
   取消、本轮重复结果、状态已恢复、未知或不可用均不打开系统设置。
 
 ## 边界
 
-- 授权目标固定为 `${MARID_HOME:-$HOME/.marid}/computer-use/Marid Computer Use.app`。
-- Python、Terminal、`uvx`、local checkout 或 legacy `Marid.app` broker 不得显示 product
+- 授权目标固定为 `${QODEX_HOME:-$HOME/.qodex}/computer-use/Qodex Computer Use.app`。
+- Python、Terminal、`uvx`、local checkout 或 legacy `Qodex.app` broker 不得显示 product
   onboarding。
-- `marid-cua` 通过 namespaced `_meta["marid.cua/request-access-status-v1"]` 提供最小权限快照，
+- `qodex-cua` 通过 namespaced `_meta["qodex.cua/request-access-status-v1"]` 提供最小权限快照，
   不新增 MCP tool，也不把 broker token、socket token、argv 或 config args 放进 UI metadata。
   Consumer 只接受 authority-verified official `request_access`，普通文本解析不能触发 onboarding。
 - Web/非 macOS 端不实现授权引导，只保留普通诊断或不显示该动作。

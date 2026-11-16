@@ -2,7 +2,7 @@ import type {
   GitCommitGraphCommit,
   GitCommitGraphRef,
   GitCommitGraphRefKind,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   createGitGraphLayoutModel,
   type BranchLineSeed,

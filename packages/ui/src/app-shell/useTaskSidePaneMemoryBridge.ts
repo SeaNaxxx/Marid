@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { GitChangeSourceId } from "@marid/shared";
+import type { GitChangeSourceId } from "@qodex/shared";
 import {
   buildTaskSidePaneMemoryKey,
   readTaskSidePaneMemoryState,

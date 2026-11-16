@@ -1,12 +1,12 @@
-import type { MaridConfigOption } from "@marid/shared";
+import type { QodexConfigOption } from "@qodex/shared";
 
 function areJsonEquivalent(left: unknown, right: unknown): boolean {
   return JSON.stringify(left) === JSON.stringify(right);
 }
 
 export function areConfigOptionsEquivalent(
-  left: readonly MaridConfigOption[] | null | undefined,
-  right: readonly MaridConfigOption[] | null | undefined,
+  left: readonly QodexConfigOption[] | null | undefined,
+  right: readonly QodexConfigOption[] | null | undefined,
 ): boolean {
   if (left === right) {
     return true;

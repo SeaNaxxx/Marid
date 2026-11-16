@@ -99,7 +99,7 @@ describe("TTFT01 真实 Composer 到最终 OTLP", () => {
         return records.some((record) =>
           record.data.resourceMetrics?.some((resource) =>
             resource.scopeMetrics.some((scope) =>
-              scope.metrics.some((metric) => metric.name === "marid.local_ttft.duration"),
+              scope.metrics.some((metric) => metric.name === "qodex.local_ttft.duration"),
             ),
           ),
         );
@@ -156,7 +156,7 @@ describe("TTFT01 真实 Composer 到最终 OTLP", () => {
       .flatMap((resource) => resource.scopeMetrics)
       .flatMap((scope) => scope.metrics);
     const total = metrics
-      .filter((metric) => metric.name === "marid.local_ttft.duration")
+      .filter((metric) => metric.name === "qodex.local_ttft.duration")
       .flatMap((metric) => metric.histogram?.dataPoints ?? []);
     expect(total.reduce((count, point) => count + Number(point.count), 0)).toBe(1);
     expect(total[0]?.explicitBounds).toEqual([
@@ -172,7 +172,7 @@ describe("TTFT01 真实 Composer 到最终 OTLP", () => {
     this.timeout(120000);
     await waitForV4ConversationState((state) => state.state === "idle", "正文轮尚未完成");
     await browser.execute(() => {
-      (window as unknown as { __maridTransportDelayE2E: unknown }).__maridTransportDelayE2E = {
+      (window as unknown as { __qodexTransportDelayE2E: unknown }).__qodexTransportDelayE2E = {
         commandMs: 250,
         ackMs: 7000,
       };
@@ -203,9 +203,9 @@ describe("TTFT01 真实 Composer 到最终 OTLP", () => {
     const ackReleased = await browser.execute(() => {
       const plan = (
         window as unknown as {
-          __maridTransportDelayE2E?: { consumed?: boolean; ackReleased?: boolean };
+          __qodexTransportDelayE2E?: { consumed?: boolean; ackReleased?: boolean };
         }
-      ).__maridTransportDelayE2E;
+      ).__qodexTransportDelayE2E;
       if (!plan?.consumed) throw new Error("真实 command 未进入延迟 seam");
       return plan.ackReleased === true;
     });

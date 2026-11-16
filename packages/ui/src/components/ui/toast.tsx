@@ -86,7 +86,7 @@ function ensureHost() {
   }
 
   const host = document.createElement("div");
-  host.id = "marid-toast-host";
+  host.id = "qodex-toast-host";
   document.body.appendChild(host);
   const root = createRoot(host);
   root.render(<ToastContainer />);

@@ -1,11 +1,11 @@
 import { readFile } from "node:fs/promises";
-import { BUILTIN_MODEL_PROVIDER_IDS } from "@marid/shared";
+import { BUILTIN_MODEL_PROVIDER_IDS } from "@qodex/shared";
 import {
   TID_TASK_SETTINGS_BUTTON,
   TID_SETTINGS_SECTION_NAV,
   TID_MODEL_PROVIDER_NAV_ITEM,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   clickTestIdByDom,
   clearAppData,

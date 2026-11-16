@@ -1,5 +1,5 @@
-import type { RemoteTarget } from "@marid/shared";
-import { WSLBackend } from "@marid/server/remote/wsl-backend.js";
+import type { RemoteTarget } from "@qodex/shared";
+import { WSLBackend } from "@qodex/server/remote/wsl-backend.js";
 
 type WslTarget = Extract<RemoteTarget, { kind: "wsl" }>;
 

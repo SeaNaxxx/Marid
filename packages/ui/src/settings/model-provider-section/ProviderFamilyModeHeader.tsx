@@ -3,12 +3,12 @@ import {
   isStartPlanModelProviderId,
   type ProviderFamilyConnectionSelectionSettings,
   type ProviderFamilyDomain,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   TID_MODEL_PROVIDER_CONNECTION_MODE_ITEM,
   TID_MODEL_PROVIDER_CONNECTION_MODE_TRIGGER,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { InfoIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import {
@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { connectionSelectionMatchesNavigationItem } from "@/settings/model-provider-section/useModelProviderNavigation.js";
 import { resolveModelProviderNavLogo } from "@/settings/model-provider-section/utils.js";
 import { ProviderLogo } from "./ProviderLogo.js";
@@ -112,7 +112,7 @@ export function ProviderFamilyPlanModeSwitch({
   activeProviderFamily?: ProviderFamilyDomain | null;
   onSelectNavItem?: (item: ModelProviderNavItem) => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   if (!selectedNavItem || !onSelectNavItem) {
     return null;
   }

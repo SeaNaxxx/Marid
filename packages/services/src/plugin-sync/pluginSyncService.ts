@@ -3,8 +3,8 @@ import { existsSync } from "node:fs";
 import { cp, lstat, mkdir, readFile, readdir, rm } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { dirname, isAbsolute, join, resolve } from "node:path";
-import type { PluginSyncMarketplaceMirrorInspection } from "@marid/shared";
-import { PLUGIN_DATA_SYNC_MAX_ITEM_BYTES } from "@marid/shared";
+import type { PluginSyncMarketplaceMirrorInspection } from "@qodex/shared";
+import { PLUGIN_DATA_SYNC_MAX_ITEM_BYTES } from "@qodex/shared";
 import type { IPluginSyncService } from "./pluginSync.js";
 import {
   createPluginSyncArchive,
@@ -61,7 +61,7 @@ const DEFAULT_MAX_ARCHIVE_BYTES = PLUGIN_DATA_SYNC_MAX_ITEM_BYTES;
 const MARKETPLACE_SOURCE_ROOT_DIRECTORY = "marketplace-sources";
 const MIRRORED_MARKETPLACE_PLUGIN_ROOT = "plugins";
 const PLUGIN_MANIFEST_RELATIVE_PATHS = [
-  [".marid-plugin", "plugin.json"],
+  [".qodex-plugin", "plugin.json"],
   [".claude-plugin", "plugin.json"],
   [".codex-plugin", "plugin.json"],
 ] as const;
@@ -116,12 +116,12 @@ export function resolveUserHomeDir(): string {
   return process.env.HOME?.trim() || process.env.USERPROFILE?.trim() || homedir();
 }
 
-export function getUserMaridConfigPath(): string {
-  return join(resolveUserHomeDir(), ".marid", "cli", "config.json");
+export function getUserQodexConfigPath(): string {
+  return join(resolveUserHomeDir(), ".qodex", "cli", "config.json");
 }
 
-export function getUserMaridPluginRoot(): string {
-  return join(resolveUserHomeDir(), ".marid", "plugins");
+export function getUserQodexPluginRoot(): string {
+  return join(resolveUserHomeDir(), ".qodex", "plugins");
 }
 
 async function exportMarketplaceSourceArchiveInternal(
@@ -218,7 +218,7 @@ async function importMarketplaceSourceArchiveInternal(
   archive: Uint8Array,
   maxArchiveBytes: number,
 ) {
-  const tempRoot = join(tmpdir(), `marid-plugin-marketplace-source-${randomUUID()}`);
+  const tempRoot = join(tmpdir(), `qodex-plugin-marketplace-source-${randomUUID()}`);
   try {
     await extractPluginSyncArchive(archive, tempRoot, {
       maxExtractedBytes: maxArchiveBytes,
@@ -232,7 +232,7 @@ async function importMarketplaceSourceArchiveInternal(
         `marketplace source archive id mismatch: ${manifest.name} !== ${metadata.marketplaceId}`,
       );
     }
-    const targetRoot = join(getUserMaridPluginRoot(), MARKETPLACE_SOURCE_ROOT_DIRECTORY);
+    const targetRoot = join(getUserQodexPluginRoot(), MARKETPLACE_SOURCE_ROOT_DIRECTORY);
     const targetPath = resolvePluginSyncPathWithin(targetRoot, directoryName);
     if (existsSync(targetPath)) {
       return {
@@ -258,7 +258,7 @@ async function importMarketplaceSourceArchiveInternal(
 }
 
 export async function readUserPluginConfigState(): Promise<UserPluginConfigState> {
-  const parsed = await readJsonFileOrEmpty(getUserMaridConfigPath());
+  const parsed = await readJsonFileOrEmpty(getUserQodexConfigPath());
   const plugins = isRecord(parsed.plugins) ? parsed.plugins : {};
   const enabledPlugins = isRecord(plugins.enabledPlugins) ? plugins.enabledPlugins : {};
   const enabledOverrides = new Map<string, boolean>();

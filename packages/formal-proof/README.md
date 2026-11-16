@@ -1,11 +1,11 @@
 # Formal Proof
 
-这是 Marid 的产品行为状态空间枚举器。当前版本聚焦对话场景里的 compact、fork、goal、消息队列和 query 编辑组合。
+这是 Qodex 的产品行为状态空间枚举器。当前版本聚焦对话场景里的 compact、fork、goal、消息队列和 query 编辑组合。
 
 启动：
 
 ```sh
-pnpm --filter @marid/formal-proof dev
+pnpm --filter @qodex/formal-proof dev
 ```
 
 打开：

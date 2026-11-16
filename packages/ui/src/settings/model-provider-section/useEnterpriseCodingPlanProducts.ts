@@ -4,10 +4,10 @@ import {
   type CodingPlanStaticTeamProduct,
   type EnterpriseCodingPlanPricingResponse,
   type ProviderFamilyDomain,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { useOptionalServices } from "@/hooks/useServices.js";
 import { isRemoteWorkspaceDisconnectedError } from "@/lib/remoteWorkspaceServiceError.js";
-import { useMaridStoreWithDefault } from "@/store/StoreProvider.js";
+import { useQodexStoreWithDefault } from "@/store/StoreProvider.js";
 import { logger } from "@/logger.js";
 import {
   resolveEnterpriseCodingPlanProductList,
@@ -99,7 +99,7 @@ export function useEnterpriseCodingPlanProducts({
 }) {
   const services = useOptionalServices();
   const service = services?.codingPlanSubscriptionService;
-  const authScope = useMaridStoreWithDefault(
+  const authScope = useQodexStoreWithDefault(
     (state) => (state.user ? state.user.id + ":" + state.authSessionSeq : "signed-out"),
     "unscoped",
   );

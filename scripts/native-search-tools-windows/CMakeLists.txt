@@ -1,20 +1,20 @@
 cmake_minimum_required(VERSION 3.21)
 
 cmake_policy(SET CMP0091 NEW)
-project(marid_native_ugrep LANGUAGES C CXX)
+project(qodex_native_ugrep LANGUAGES C CXX)
 
 if(NOT MSVC)
-  message(FATAL_ERROR "Marid Windows ugrep must be built with MSVC")
+  message(FATAL_ERROR "Qodex Windows ugrep must be built with MSVC")
 endif()
 
 foreach(source_name UGREP PCRE2 ZLIB BZIP2 ZSTD BROTLI)
-  if(NOT DEFINED MARID_${source_name}_SOURCE_DIR)
-    message(FATAL_ERROR "Missing MARID_${source_name}_SOURCE_DIR")
+  if(NOT DEFINED QODEX_${source_name}_SOURCE_DIR)
+    message(FATAL_ERROR "Missing QODEX_${source_name}_SOURCE_DIR")
   endif()
 endforeach()
 
-if(NOT DEFINED MARID_UGREP_OUTPUT_DIR)
-  message(FATAL_ERROR "Missing MARID_UGREP_OUTPUT_DIR")
+if(NOT DEFINED QODEX_UGREP_OUTPUT_DIR)
+  message(FATAL_ERROR "Missing QODEX_UGREP_OUTPUT_DIR")
 endif()
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
@@ -22,8 +22,8 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
 
 # 随机构建目录不能进入最终 PE，否则同版本工具无法跨 CLI 复用同一份 runtime cache。
-if(DEFINED MARID_BUILD_PATH)
-  add_compile_options("/pathmap:${MARID_BUILD_PATH}=marid-native-search")
+if(DEFINED QODEX_BUILD_PATH)
+  add_compile_options("/pathmap:${QODEX_BUILD_PATH}=qodex-native-search")
 endif()
 
 set(BUILD_STATIC_LIBS ON CACHE BOOL "" FORCE)
@@ -35,22 +35,22 @@ set(PCRE2_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(PCRE2_SHOW_REPORT OFF CACHE BOOL "" FORCE)
 set(PCRE2_STATIC_RUNTIME ON CACHE BOOL "" FORCE)
 set(PCRE2_SUPPORT_JIT ON CACHE BOOL "" FORCE)
-add_subdirectory("${MARID_PCRE2_SOURCE_DIR}" pcre2 EXCLUDE_FROM_ALL)
+add_subdirectory("${QODEX_PCRE2_SOURCE_DIR}" pcre2 EXCLUDE_FROM_ALL)
 
 set(SKIP_INSTALL_ALL ON CACHE BOOL "" FORCE)
-add_subdirectory("${MARID_ZLIB_SOURCE_DIR}" zlib EXCLUDE_FROM_ALL)
+add_subdirectory("${QODEX_ZLIB_SOURCE_DIR}" zlib EXCLUDE_FROM_ALL)
 
-add_library(marid_bzip2 STATIC
-  "${MARID_BZIP2_SOURCE_DIR}/blocksort.c"
-  "${MARID_BZIP2_SOURCE_DIR}/huffman.c"
-  "${MARID_BZIP2_SOURCE_DIR}/crctable.c"
-  "${MARID_BZIP2_SOURCE_DIR}/randtable.c"
-  "${MARID_BZIP2_SOURCE_DIR}/compress.c"
-  "${MARID_BZIP2_SOURCE_DIR}/decompress.c"
-  "${MARID_BZIP2_SOURCE_DIR}/bzlib.c"
+add_library(qodex_bzip2 STATIC
+  "${QODEX_BZIP2_SOURCE_DIR}/blocksort.c"
+  "${QODEX_BZIP2_SOURCE_DIR}/huffman.c"
+  "${QODEX_BZIP2_SOURCE_DIR}/crctable.c"
+  "${QODEX_BZIP2_SOURCE_DIR}/randtable.c"
+  "${QODEX_BZIP2_SOURCE_DIR}/compress.c"
+  "${QODEX_BZIP2_SOURCE_DIR}/decompress.c"
+  "${QODEX_BZIP2_SOURCE_DIR}/bzlib.c"
 )
-target_compile_definitions(marid_bzip2 PRIVATE _CRT_SECURE_NO_WARNINGS)
-target_include_directories(marid_bzip2 PUBLIC "${MARID_BZIP2_SOURCE_DIR}")
+target_compile_definitions(qodex_bzip2 PRIVATE _CRT_SECURE_NO_WARNINGS)
+target_include_directories(qodex_bzip2 PUBLIC "${QODEX_BZIP2_SOURCE_DIR}")
 
 set(ZSTD_BUILD_CONTRIB OFF CACHE BOOL "" FORCE)
 set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)
@@ -58,77 +58,77 @@ set(ZSTD_BUILD_SHARED OFF CACHE BOOL "" FORCE)
 set(ZSTD_BUILD_STATIC ON CACHE BOOL "" FORCE)
 set(ZSTD_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(ZSTD_USE_STATIC_RUNTIME ON CACHE BOOL "" FORCE)
-add_subdirectory("${MARID_ZSTD_SOURCE_DIR}/build/cmake" zstd EXCLUDE_FROM_ALL)
+add_subdirectory("${QODEX_ZSTD_SOURCE_DIR}/build/cmake" zstd EXCLUDE_FROM_ALL)
 
 set(BROTLI_BUNDLED_MODE ON CACHE BOOL "" FORCE)
-add_subdirectory("${MARID_BROTLI_SOURCE_DIR}" brotli EXCLUDE_FROM_ALL)
+add_subdirectory("${QODEX_BROTLI_SOURCE_DIR}" brotli EXCLUDE_FROM_ALL)
 
-set(MARID_VIIZ_SOURCE_DIR "${MARID_UGREP_SOURCE_DIR}/lzma/C")
-add_library(marid_viiz STATIC
-  "${MARID_VIIZ_SOURCE_DIR}/viizip.c"
-  "${MARID_VIIZ_SOURCE_DIR}/7zAlloc.c"
-  "${MARID_VIIZ_SOURCE_DIR}/7zArcIn.c"
-  "${MARID_VIIZ_SOURCE_DIR}/7zBuf.c"
-  "${MARID_VIIZ_SOURCE_DIR}/7zBuf2.c"
-  "${MARID_VIIZ_SOURCE_DIR}/7zCrc.c"
-  "${MARID_VIIZ_SOURCE_DIR}/7zCrcOpt.c"
-  "${MARID_VIIZ_SOURCE_DIR}/7zDec.c"
-  "${MARID_VIIZ_SOURCE_DIR}/7zFile.c"
-  "${MARID_VIIZ_SOURCE_DIR}/7zStream.c"
-  "${MARID_VIIZ_SOURCE_DIR}/Bcj2.c"
-  "${MARID_VIIZ_SOURCE_DIR}/Bra.c"
-  "${MARID_VIIZ_SOURCE_DIR}/Bra86.c"
-  "${MARID_VIIZ_SOURCE_DIR}/BraIA64.c"
-  "${MARID_VIIZ_SOURCE_DIR}/CpuArch.c"
-  "${MARID_VIIZ_SOURCE_DIR}/Delta.c"
-  "${MARID_VIIZ_SOURCE_DIR}/Lzma2Dec.c"
-  "${MARID_VIIZ_SOURCE_DIR}/LzmaDec.c"
-  "${MARID_VIIZ_SOURCE_DIR}/Ppmd7.c"
-  "${MARID_VIIZ_SOURCE_DIR}/Ppmd7Dec.c"
+set(QODEX_VIIZ_SOURCE_DIR "${QODEX_UGREP_SOURCE_DIR}/lzma/C")
+add_library(qodex_viiz STATIC
+  "${QODEX_VIIZ_SOURCE_DIR}/viizip.c"
+  "${QODEX_VIIZ_SOURCE_DIR}/7zAlloc.c"
+  "${QODEX_VIIZ_SOURCE_DIR}/7zArcIn.c"
+  "${QODEX_VIIZ_SOURCE_DIR}/7zBuf.c"
+  "${QODEX_VIIZ_SOURCE_DIR}/7zBuf2.c"
+  "${QODEX_VIIZ_SOURCE_DIR}/7zCrc.c"
+  "${QODEX_VIIZ_SOURCE_DIR}/7zCrcOpt.c"
+  "${QODEX_VIIZ_SOURCE_DIR}/7zDec.c"
+  "${QODEX_VIIZ_SOURCE_DIR}/7zFile.c"
+  "${QODEX_VIIZ_SOURCE_DIR}/7zStream.c"
+  "${QODEX_VIIZ_SOURCE_DIR}/Bcj2.c"
+  "${QODEX_VIIZ_SOURCE_DIR}/Bra.c"
+  "${QODEX_VIIZ_SOURCE_DIR}/Bra86.c"
+  "${QODEX_VIIZ_SOURCE_DIR}/BraIA64.c"
+  "${QODEX_VIIZ_SOURCE_DIR}/CpuArch.c"
+  "${QODEX_VIIZ_SOURCE_DIR}/Delta.c"
+  "${QODEX_VIIZ_SOURCE_DIR}/Lzma2Dec.c"
+  "${QODEX_VIIZ_SOURCE_DIR}/LzmaDec.c"
+  "${QODEX_VIIZ_SOURCE_DIR}/Ppmd7.c"
+  "${QODEX_VIIZ_SOURCE_DIR}/Ppmd7Dec.c"
 )
-target_compile_definitions(marid_viiz PRIVATE
+target_compile_definitions(qodex_viiz PRIVATE
   Z7_PPMD_SUPPORT
   Z7_EXTRACT_ONLY
   NDEBUG
   _CRT_SECURE_NO_WARNINGS
 )
-target_include_directories(marid_viiz PUBLIC "${MARID_VIIZ_SOURCE_DIR}")
+target_include_directories(qodex_viiz PUBLIC "${QODEX_VIIZ_SOURCE_DIR}")
 
-set(MARID_REFLEX_SOURCES
-  "${MARID_UGREP_SOURCE_DIR}/lib/block_scripts.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/lib/composer.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/lib/convert.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/lib/debug.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/lib/error.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/lib/input.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/lib/language_scripts.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/lib/letter_case.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/lib/letter_scripts.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/lib/matcher.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/lib/pattern.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/lib/posix.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/lib/simd.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/lib/unicode.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/lib/utf8.cpp"
+set(QODEX_REFLEX_SOURCES
+  "${QODEX_UGREP_SOURCE_DIR}/lib/block_scripts.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/lib/composer.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/lib/convert.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/lib/debug.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/lib/error.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/lib/input.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/lib/language_scripts.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/lib/letter_case.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/lib/letter_scripts.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/lib/matcher.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/lib/pattern.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/lib/posix.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/lib/simd.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/lib/unicode.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/lib/utf8.cpp"
 )
 
-add_library(marid_reflex STATIC ${MARID_REFLEX_SOURCES})
-target_compile_definitions(marid_reflex PRIVATE WITH_NO_CODEGEN)
+add_library(qodex_reflex STATIC ${QODEX_REFLEX_SOURCES})
+target_compile_definitions(qodex_reflex PRIVATE WITH_NO_CODEGEN)
 
 add_executable(ugrep
-  "${MARID_UGREP_SOURCE_DIR}/src/ugrep.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/src/cnf.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/src/glob.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/src/output.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/src/query.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/src/screen.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/src/stats.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/src/vkey.cpp"
-  "${MARID_UGREP_SOURCE_DIR}/src/zopen.c"
+  "${QODEX_UGREP_SOURCE_DIR}/src/ugrep.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/src/cnf.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/src/glob.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/src/output.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/src/query.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/src/screen.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/src/stats.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/src/vkey.cpp"
+  "${QODEX_UGREP_SOURCE_DIR}/src/zopen.c"
 )
 
-add_library(marid_ugrep_contract INTERFACE)
-target_compile_definitions(marid_ugrep_contract INTERFACE
+add_library(qodex_ugrep_contract INTERFACE)
+target_compile_definitions(qodex_ugrep_contract INTERFACE
   HAVE_LIBBROTLI
   HAVE_LIBBZ2
   HAVE_LIBZ
@@ -143,30 +143,30 @@ target_compile_definitions(marid_ugrep_contract INTERFACE
   _CRT_SECURE_NO_WARNINGS
 )
 if(CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
-  target_compile_definitions(marid_ugrep_contract INTERFACE HAVE_NEON)
+  target_compile_definitions(qodex_ugrep_contract INTERFACE HAVE_NEON)
 else()
-  target_compile_definitions(marid_ugrep_contract INTERFACE HAVE_SSE2)
+  target_compile_definitions(qodex_ugrep_contract INTERFACE HAVE_SSE2)
 endif()
-target_compile_features(marid_ugrep_contract INTERFACE cxx_std_17)
+target_compile_features(qodex_ugrep_contract INTERFACE cxx_std_17)
 # ugrep 固定源码是无 BOM UTF-8；中文 Windows 按 CP936 解析时会触发 C4819/C1070，并改写 UTF-8 字符串字面量。
-target_compile_options(marid_ugrep_contract INTERFACE
+target_compile_options(qodex_ugrep_contract INTERFACE
   /utf-8
   $<$<COMPILE_LANGUAGE:CXX>:/EHsc>
 )
-target_include_directories(marid_ugrep_contract INTERFACE
-  "${MARID_UGREP_SOURCE_DIR}/include"
-  "${MARID_UGREP_SOURCE_DIR}/src"
-  "${MARID_VIIZ_SOURCE_DIR}"
+target_include_directories(qodex_ugrep_contract INTERFACE
+  "${QODEX_UGREP_SOURCE_DIR}/include"
+  "${QODEX_UGREP_SOURCE_DIR}/src"
+  "${QODEX_VIIZ_SOURCE_DIR}"
 )
 
-target_link_libraries(marid_reflex PRIVATE marid_ugrep_contract pcre2-8-static)
+target_link_libraries(qodex_reflex PRIVATE qodex_ugrep_contract pcre2-8-static)
 target_link_libraries(ugrep PRIVATE
-  marid_ugrep_contract
-  marid_reflex
-  marid_viiz
+  qodex_ugrep_contract
+  qodex_reflex
+  qodex_viiz
   pcre2-8-static
   zlibstatic
-  marid_bzip2
+  qodex_bzip2
   libzstd_static
   brotlienc
   brotlidec
@@ -174,6 +174,6 @@ target_link_libraries(ugrep PRIVATE
 )
 target_link_options(ugrep PRIVATE /Brepro)
 set_target_properties(ugrep PROPERTIES
-  RUNTIME_OUTPUT_DIRECTORY "${MARID_UGREP_OUTPUT_DIR}"
-  RUNTIME_OUTPUT_DIRECTORY_RELEASE "${MARID_UGREP_OUTPUT_DIR}"
+  RUNTIME_OUTPUT_DIRECTORY "${QODEX_UGREP_OUTPUT_DIR}"
+  RUNTIME_OUTPUT_DIRECTORY_RELEASE "${QODEX_UGREP_OUTPUT_DIR}"
 )

@@ -3,7 +3,7 @@ import {
   BROWSER_VIEWPORT_LIMITS,
   BROWSER_VIEWPORT_PRESETS,
   type BrowserViewportSize,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   TID_BROWSER_RESPONSIVE_HEIGHT_INPUT,
   TID_BROWSER_RESPONSIVE_PRESET_OPTION,
@@ -12,7 +12,7 @@ import {
   TID_BROWSER_RESPONSIVE_WIDTH_INPUT,
   TID_BROWSER_RESPONSIVE_ZOOM_OPTION,
   TID_BROWSER_RESPONSIVE_ZOOM_SELECT,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   BROWSER_VIEWPORT_ZOOM_OPTIONS,
   type BrowserViewportZoom,
@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select.js";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 type ViewportDimension = "height" | "width";
 
@@ -70,7 +70,7 @@ export function BrowserViewportToolbar({
   viewportSize: BrowserViewportSize;
   zoom: BrowserViewportZoom;
 }): React.JSX.Element {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const [widthDraft, setWidthDraft] = useState(String(viewportSize.width));
   const [heightDraft, setHeightDraft] = useState(String(viewportSize.height));
   const [invalidDrafts, setInvalidDrafts] = useState<Record<ViewportDimension, boolean>>({

@@ -1,4 +1,4 @@
-import { ServiceChannels } from "@marid/shared";
+import { ServiceChannels } from "@qodex/shared";
 import { createServiceDescriptor } from "../descriptors.js";
 
 /**

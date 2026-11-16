@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import type { IFileWatcherService } from "@marid/services";
+import type { IFileWatcherService } from "@qodex/services";
 import { logger } from "@/logger.js";
 import type { WorkspaceFileTreeWatcherRegistration } from "@/workspace-file-tree/types.js";
 

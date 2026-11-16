@@ -1,5 +1,5 @@
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
-import { useMaridAgentService } from "@/hooks/useMaridAgentService.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
+import { useQodexAgentService } from "@/hooks/useQodexAgentService.js";
 import { toast } from "@/components/ui/toast.js";
 /* eslint-disable max-lines -- Composer 草稿 owner 同时收口选择、正文与提交生命周期，保持单一状态边界。 */
 // 当前编辑由 Composer 持有；进入已有 Session 从当前快照恢复权限/Plan，在线只响应新变化。
@@ -8,25 +8,25 @@ import { toast } from "@/components/ui/toast.js";
 // Workspace presentation 水合只提供 mode 与 slash commands；模型候选、能力和首选值
 // 统一来自目标 Host ModelSelectionView。
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { MARID_AGENT_PROVIDER, resolveExecutionState } from "@marid/shared";
+import { QODEX_AGENT_PROVIDER, resolveExecutionState } from "@qodex/shared";
 import type {
-  MaridConfigOption,
+  QodexConfigOption,
   ModelSelection,
-  MaridProvider,
-  MaridSlashCommand,
-} from "@marid/shared";
-import type { SessionConfigState } from "@marid/shared/marid-protocol-v4";
-import type { IModelSelectionService } from "@marid/services";
-import { completeNewModelSelection } from "@marid/provider";
+  QodexProvider,
+  QodexSlashCommand,
+} from "@qodex/shared";
+import type { SessionConfigState } from "@qodex/shared/qodex-protocol-v4";
+import type { IModelSelectionService } from "@qodex/services";
+import { completeNewModelSelection } from "@qodex/provider";
 import {
   useModelSelectionServiceView,
   type ModelSelectionRead,
 } from "@/hooks/useModelSelectionView.js";
-import { submissionModeSchema } from "@marid/shared/marid-protocol-v4";
-import { prepareWorkspaceWithMaridSessionService } from "@/hooks/useWorkspacePrepare.js";
-import { useMaridSessionService } from "@/hooks/useMaridSessionService.js";
+import { submissionModeSchema } from "@qodex/shared/qodex-protocol-v4";
+import { prepareWorkspaceWithQodexSessionService } from "@/hooks/useWorkspacePrepare.js";
+import { useQodexSessionService } from "@/hooks/useQodexSessionService.js";
 import { useSettings } from "@/hooks/useSettingService.js";
-import { parseModelPickerValue } from "@/lib/maridSessionProjection.js";
+import { parseModelPickerValue } from "@/lib/qodexSessionProjection.js";
 import { resolveDraftInitialModelSelection } from "@/lib/composerRecent.js";
 import { initializeNewTaskDraft } from "@/v4/composer/newTaskDraft.js";
 import { useComposerClientNamespace } from "@/hooks/useServices.js";
@@ -41,7 +41,7 @@ import {
 import { resolveAppFollowupMode } from "@/v4/composer/followupModeSettings.js";
 import { isComposerEditScopeId } from "@/composer-edit-mode/contract.js";
 import { logger } from "@/logger.js";
-import { useMaridSessionStore } from "@/store/maridSessionStore.js";
+import { useQodexSessionStore } from "@/store/qodexSessionStore.js";
 
 /** 目录水合单飞（per workspaceKey）：draft、已有 session 和严格模式双挂载共享一次 RPC。 */
 const workspaceCatalogHydrationFlights = new Map<string, Promise<void>>();
@@ -67,9 +67,9 @@ export function applyDraftModelSelection(
 }
 
 export function shouldHydrateWorkspaceCatalog(params: {
-  configOptions: readonly MaridConfigOption[];
+  configOptions: readonly QodexConfigOption[];
   sessionId: string | null;
-  slashCommands: readonly MaridSlashCommand[];
+  slashCommands: readonly QodexSlashCommand[];
 }): boolean {
   const hasModePresentation = params.configOptions.some(
     (option) => option.category === "mode" && option.type === "select",
@@ -170,7 +170,7 @@ function hasSameComposerDraftContent(left: V4ComposerDraft, right: V4ComposerDra
 export function useDraftConfigControl(params: {
   workspacePath: string;
   workspaceIdentity?: string;
-  provider?: MaridProvider;
+  provider?: QodexProvider;
   /** 会话切换恢复文字/模型，权限和 Plan 使用当前快照。 */
   sessionId: string | null;
   /** 仅匹配当前 Session 的首份投影可用作初始化；null 表示还没恢复完成。 */
@@ -181,7 +181,7 @@ export function useDraftConfigControl(params: {
   /** composer 编辑态：草稿切到该 Session 的 edit scope，原草稿留在原 scope 不动。 */
   editScopeId?: string | null;
 }): DraftConfigControl {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const {
     workspacePath,
     workspaceIdentity,
@@ -193,8 +193,8 @@ export function useDraftConfigControl(params: {
     editScopeId = null,
   } = params;
   const workspaceKey = workspaceIdentity?.trim() || workspacePath;
-  const displayProvider = provider ?? MARID_AGENT_PROVIDER;
-  const agentService = useMaridAgentService(workspacePath, null, workspaceIdentity);
+  const displayProvider = provider ?? QODEX_AGENT_PROVIDER;
+  const agentService = useQodexAgentService(workspacePath, null, workspaceIdentity);
   useEffect(() => {
     const subscription = agentService.onDynamicPluginStartupDegraded({
       workspacePath,
@@ -208,19 +208,19 @@ export function useDraftConfigControl(params: {
     });
     return () => subscription.dispose();
   }, [agentService, intl, workspacePath, workspaceIdentity, workspaceKey]);
-  const maridSessionService = useMaridSessionService(workspacePath, null, workspaceIdentity);
+  const qodexSessionService = useQodexSessionService(workspacePath, null, workspaceIdentity);
   const { settings: sharedSettings } = useSettings();
   const appFollowupMode = resolveAppFollowupMode(sharedSettings);
   const scopeId = sessionId === null ? V4_DRAFT_SCOPE_ROOT : (editScopeId ?? sessionId);
   const clientNamespace = useComposerClientNamespace();
-  const draftProjectId = useMaridSessionStore(
+  const draftProjectId = useQodexSessionStore(
     (state) => state.workspaces[workspaceKey]?.draftProjectId,
   );
   const rootScope = useMemo(
     () => resolveComposerScope(draftProjectId, workspaceIdentity, clientNamespace),
     [draftProjectId, workspaceIdentity, clientNamespace],
   );
-  const draftFocusVersion = useMaridSessionStore((state) =>
+  const draftFocusVersion = useQodexSessionStore((state) =>
     sessionId === null ? (state.workspaces[workspaceKey]?.draftFocusVersion ?? 0) : 0,
   );
   // New Task 可以复用同一个 pane；无文字时必须重新取 Recent，不能只清磁盘留旧内存。
@@ -230,7 +230,7 @@ export function useDraftConfigControl(params: {
     draftFocusVersion,
     sessionId === null ? composerScopeKey(rootScope) : null,
   ]);
-  const navigationInitialization = useMaridSessionStore((state) => {
+  const navigationInitialization = useQodexSessionStore((state) => {
     const workspace = state.workspaces[workspaceKey];
     return workspace?.activeTaskId === sessionId &&
       workspace?.composerInitialization?.taskId === sessionId
@@ -410,11 +410,11 @@ export function useDraftConfigControl(params: {
   draftConfigRef.current = draftConfig;
   const createDraftPersistence = useCallback(
     (targetScopeId = stateRef.current.promotedSessionId ?? scopeId) => {
-      const workspace = useMaridSessionStore
+      const workspace = useQodexSessionStore
         .getState()
         .getWorkspaceState(workspacePath, workspaceIdentity);
       return (value: V4ComposerDraft) => {
-        const current = useMaridSessionStore
+        const current = useQodexSessionStore
           .getState()
           .getWorkspaceState(workspacePath, workspaceIdentity);
         // Bug 根因：自动保存不再触发父级 render 后，旧闭包可能把已关闭的分组归属写回来。
@@ -483,7 +483,7 @@ export function useDraftConfigControl(params: {
   }, []);
   useEffect(() => {
     if (navigationInitialization)
-      useMaridSessionStore
+      useQodexSessionStore
         .getState()
         .consumeComposerInitialization(workspacePath, navigationInitialization, workspaceIdentity);
   }, [scopeKey, navigationInitialization, workspacePath, workspaceIdentity]);
@@ -493,7 +493,7 @@ export function useDraftConfigControl(params: {
       stateRef.current.scopeKey === scopeKey &&
       stateRef.current.incarnation === incarnation &&
       (sessionId !== null ||
-        (useMaridSessionStore.getState().getWorkspaceState(workspacePath, workspaceIdentity)
+        (useQodexSessionStore.getState().getWorkspaceState(workspacePath, workspaceIdentity)
           .draftFocusVersion ?? 0) === draftFocusVersion),
     [scopeKey, incarnation, sessionId, workspacePath, workspaceIdentity, draftFocusVersion],
   );
@@ -902,7 +902,7 @@ export function useDraftConfigControl(params: {
   // 目录已 ready（reload/广播/上次水合写过）则跳过；否则读取最小 workspace presentation。
   useEffect(() => {
     const isDraft = sessionId === null;
-    const store = useMaridSessionStore.getState();
+    const store = useQodexSessionStore.getState();
     const workspaceState = store.getWorkspaceState(workspacePath, workspaceIdentity);
     if (!agentStartupAllowed) {
       // V4 目录水合曾在无模型时直接进入 RPC，虽然 Host 不会启动 CLI，
@@ -938,11 +938,11 @@ export function useDraftConfigControl(params: {
     }
 
     store.setConfigOptionsStatus(workspacePath, "loading", workspaceIdentity);
-    const flight = prepareWorkspaceWithMaridSessionService({
+    const flight = prepareWorkspaceWithQodexSessionService({
       workspacePath,
       workspaceIdentity,
       provider: displayProvider,
-      maridSessionService,
+      qodexSessionService,
     })
       .then((prepareResult) => {
         const baseOptions = prepareResult.configOptions ?? [];
@@ -956,7 +956,7 @@ export function useDraftConfigControl(params: {
           ),
           workspaceKey,
         });
-        const latest = useMaridSessionStore.getState();
+        const latest = useQodexSessionStore.getState();
         latest.setConfigOptions(workspacePath, baseOptions, workspaceIdentity);
         latest.setConfigOptionsStatus(workspacePath, "ready", workspaceIdentity);
         latest.setSlashCommands(
@@ -966,7 +966,7 @@ export function useDraftConfigControl(params: {
         );
       })
       .catch((error) => {
-        useMaridSessionStore
+        useQodexSessionStore
           .getState()
           .setConfigOptionsStatus(workspacePath, "error", workspaceIdentity);
         logger.warn(`[v4-workspace-catalog] workspace 目录水合失败: ${String(error)}`);
@@ -982,7 +982,7 @@ export function useDraftConfigControl(params: {
     workspaceIdentity,
     workspaceKey,
     workspacePath,
-    maridSessionService,
+    qodexSessionService,
   ]);
 
   const handleDraftSelectModel = useCallback(

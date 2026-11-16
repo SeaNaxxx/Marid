@@ -3,8 +3,8 @@ import type {
   PluginSyncMarketplaceMirrorInspection,
   PluginSyncMarketplaceSourceArchiveExportResult,
   PluginSyncMarketplaceSourceImportResult,
-} from "@marid/shared";
-import { ServiceChannels } from "@marid/shared";
+} from "@qodex/shared";
+import { ServiceChannels } from "@qodex/shared";
 import { createServiceDescriptor } from "../descriptors.js";
 import type { IDataSyncCategoryService } from "../data-sync/contract.js";
 

@@ -1,8 +1,8 @@
-import type { MaridStreamEvent, MaridTaskRuntimeStatus } from "@marid/shared";
+import type { QodexStreamEvent, QodexTaskRuntimeStatus } from "@qodex/shared";
 import type { TaskChatMessage } from "@/lib/taskChatMessageTypes.js";
-import { hasRunningMaridTimeline } from "@/lib/maridTimelineRuntime.js";
+import { hasRunningQodexTimeline } from "@/lib/qodexTimelineRuntime.js";
 
-type TaskStreamMirrorBatchEvent = Extract<MaridStreamEvent, { type: "task_stream_mirror_batch" }>;
+type TaskStreamMirrorBatchEvent = Extract<QodexStreamEvent, { type: "task_stream_mirror_batch" }>;
 type TaskStreamMirrorOp = TaskStreamMirrorBatchEvent["ops"][number];
 
 export function shouldMarkMainActiveFromStreamMirrorOps(
@@ -19,7 +19,7 @@ export function shouldMarkMainActiveFromStreamMirrorOps(
   });
 }
 
-export function shouldMarkMainActiveFromStreamEvent(event: MaridStreamEvent): boolean {
+export function shouldMarkMainActiveFromStreamEvent(event: QodexStreamEvent): boolean {
   switch (event.type) {
     case "task_run_started":
     case "goal_iteration_started":
@@ -55,19 +55,19 @@ function isTaskChatTimelineMessage(message: TaskChatMessage): boolean {
   );
 }
 
-function isTaskRuntimeBusy(taskStatus: MaridTaskRuntimeStatus): boolean {
+function isTaskRuntimeBusy(taskStatus: QodexTaskRuntimeStatus): boolean {
   return taskStatus === "creating" || taskStatus === "restoring" || taskStatus === "streaming";
 }
 
 export function hasForegroundActivityFromMessages(messages: readonly TaskChatMessage[]): boolean {
-  return hasForegroundStreamingAssistantMessage(messages) || hasRunningMaridTimeline(messages);
+  return hasForegroundStreamingAssistantMessage(messages) || hasRunningQodexTimeline(messages);
 }
 
 export function isMainActivityRuntimeBusy(params: {
   currentStatus?: "idle" | "submitting" | "streaming" | "error";
   runtimeState?: {
     activeInputId?: unknown;
-    status: MaridTaskRuntimeStatus;
+    status: QodexTaskRuntimeStatus;
   } | null;
   isMainActive: boolean;
   hasForegroundActivity?: boolean;
@@ -92,7 +92,7 @@ export function isMainActivityRuntimeBusy(params: {
 
 function isMainAgentStreamEvent(
   event: Extract<
-    MaridStreamEvent,
+    QodexStreamEvent,
     { type: "agent_message_chunk" | "agent_thought_chunk" | "tool_call" | "tool_call_update" }
   >,
 ): boolean {

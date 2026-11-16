@@ -1,8 +1,8 @@
-import { ProviderConfig } from "@marid/provider";
-import { NodePersonalProviderConfigRepository } from "@marid/provider-node";
+import { ProviderConfig } from "@qodex/provider";
+import { NodePersonalProviderConfigRepository } from "@qodex/provider-node";
 import { DatabaseSync } from "node:sqlite";
 import { join } from "node:path";
-import { type ModelSelection, BUILTIN_MODEL_PROVIDER_IDS } from "@marid/shared";
+import { type ModelSelection, BUILTIN_MODEL_PROVIDER_IDS } from "@qodex/shared";
 import {
   TID_MODEL_PROVIDER_CONNECTION_MODE_ITEM,
   TID_MODEL_PROVIDER_CONNECTION_MODE_TRIGGER,
@@ -21,7 +21,7 @@ import {
   TID_AUTOMATION_CARD,
   TID_AUTOMATION_CARD_MENU,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   clearAppData,
   clickTestIdByDom,
@@ -200,7 +200,7 @@ describe("SR87 当前有效选择与原意图", () => {
         text: document.body.innerText.slice(-5000),
         drafts: Object.fromEntries(
           Object.entries(localStorage).filter(([key]) =>
-            key.startsWith("marid-v4-composer-drafts:v1:"),
+            key.startsWith("qodex-v4-composer-drafts:v1:"),
           ),
         ),
       }));
@@ -271,7 +271,7 @@ describe("SR87 当前有效选择与原意图", () => {
     await clickTestIdByDom(TID_AUTOMATION_CREATE_MANUALLY);
     // 自动化有独立项目 Select；旧 Composer 的菜单入口已移除。
     await $('[data-testid="automation-project-select"]').click();
-    await $('[role="option"][data-project-name="MaridProject"]').click();
+    await $('[role="option"][data-project-name="QodexProject"]').click();
     await selectRegistryProviderModelById(E2E_PLAN_NON_DEFAULT_MODEL, {
       providerId: individual,
       includePlainModelFallback: false,
@@ -437,11 +437,11 @@ async function seedLegacyDisabledPlanModel() {
 async function currentDraftStorageKey() {
   return browser.execute((workspace) => {
     const raw = localStorage.getItem(
-      `marid-composer-workspace-scope:v1:${JSON.stringify(["desktop", workspace])}`,
+      `qodex-composer-workspace-scope:v1:${JSON.stringify(["desktop", workspace])}`,
     );
     if (!raw) throw new Error("草稿缺少 workspace 到项目 scope 的映射");
     const intent = JSON.parse(raw);
-    return `marid-v4-composer-project-drafts:v1:${JSON.stringify([
+    return `qodex-v4-composer-project-drafts:v1:${JSON.stringify([
       intent.clientNamespace,
       intent.hostId,
       intent.projectId,

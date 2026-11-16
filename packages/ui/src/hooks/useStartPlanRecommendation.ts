@@ -1,12 +1,12 @@
 import { useProviderSettingsView } from "@/hooks/useProviderSettingsView.js";
 import { buildStartPlanEntitlementOptions } from "@/lib/startPlanEntitlementOptions.js";
 import { useCallback } from "react";
-import type { ModelSelectionView } from "@marid/provider";
-import { isStartPlanModelProviderId, type ModelSelection } from "@marid/shared";
-import { TID_START_PLAN_RECOMMENDATION_DIALOG } from "@marid/shared/test-ids";
+import type { ModelSelectionView } from "@qodex/provider";
+import { isStartPlanModelProviderId, type ModelSelection } from "@qodex/shared";
+import { TID_START_PLAN_RECOMMENDATION_DIALOG } from "@qodex/shared/test-ids";
 import { useOptionalBaseWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
 import { useUsageEntitlementWithService } from "@/hooks/useUsageEntitlement.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { useConfirmDialogStore } from "@/store/confirmDialogStore.js";
 import { resolveStartPlanRecommendation } from "@/lib/startPlanRecommendation.js";
 import { toast } from "@/components/ui/toast.js";
@@ -18,7 +18,7 @@ export function useStartPlanRecommendation(
   surface?: "subagent",
 ) {
   const services = useOptionalBaseWorkspaceServices();
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const requestChoice = useConfirmDialogStore((state) => state.requestChoice);
   // Registry 已完成登录品牌、权益、模型配置校验，不从展示名称推测执行身份。
   const start = view?.providers.find((provider) => isStartPlanModelProviderId(provider.providerId));

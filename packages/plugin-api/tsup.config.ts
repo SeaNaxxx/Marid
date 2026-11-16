@@ -16,7 +16,7 @@ export default defineConfig({
   clean: true,
   dts: {
     only: true,
-    resolve: [/^@marid\//, /^#/],
+    resolve: [/^@qodex\//, /^#/],
     compilerOptions: {
       // tsup 内部会设 baseUrl，TypeScript 6 对它报弃用。
       ignoreDeprecations: "6.0",
@@ -28,9 +28,9 @@ export default defineConfig({
       lib: ["es2024", "dom"],
       types: ["node"],
       paths: {
-        "@marid/shared/extension-host": ["../shared/src/extension-host/index.ts"],
-        "@marid/shared/marid-protocol-v4": ["../shared/src/marid-protocol-v4/index.ts"],
-        "@marid/session-control/contracts": ["../session-control/src/contract.ts"],
+        "@qodex/shared/extension-host": ["../shared/src/extension-host/index.ts"],
+        "@qodex/shared/qodex-protocol-v4": ["../shared/src/qodex-protocol-v4/index.ts"],
+        "@qodex/session-control/contracts": ["../session-control/src/contract.ts"],
         "#src/*": ["../shared/src/*"],
         "#session-control/*": ["../session-control/src/*"],
       },

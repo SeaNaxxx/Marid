@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type {
   WindowHostControllerTaskListItem,
-  MaridTaskListQuery,
-  MaridTaskListWorkspaceScope,
-} from "@marid/services";
+  QodexTaskListQuery,
+  QodexTaskListWorkspaceScope,
+} from "@qodex/services";
 import { logger } from "@/logger.js";
 import { useBaseWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
 import type { WorkspaceTabState } from "@/store/tabStore.js";
-import { selectWorkspaceMaridState, useMaridSessionStore } from "@/store/maridSessionStore.js";
+import { selectWorkspaceQodexState, useQodexSessionStore } from "@/store/qodexSessionStore.js";
 import { attachTaskListRowActivity } from "@/v4/taskListRowActivity.js";
 import { stabilizeTaskListItems } from "@/v4/taskListItemStabilization.js";
 import { getWindowControllerTaskListRegistry } from "@/v4/windowControllerTaskListRegistry.js";
@@ -18,8 +18,8 @@ type GlobalTaskListItem = WindowHostControllerTaskListItem;
 const subscribeToNothing = () => () => {};
 const zeroRevision = () => 0;
 
-function buildWorkspaceScopes(workspaceTabs: WorkspaceTabState[]): MaridTaskListWorkspaceScope[] {
-  const scopes = new Map<string, MaridTaskListWorkspaceScope>();
+function buildWorkspaceScopes(workspaceTabs: WorkspaceTabState[]): QodexTaskListWorkspaceScope[] {
+  const scopes = new Map<string, QodexTaskListWorkspaceScope>();
   for (const tab of workspaceTabs) {
     const scope = {
       workspacePath: tab.workspacePath,
@@ -34,7 +34,7 @@ function buildWorkspaceScopes(workspaceTabs: WorkspaceTabState[]): MaridTaskList
 }
 
 export function useGlobalTaskList(params: {
-  kind: MaridTaskListQuery["kind"];
+  kind: QodexTaskListQuery["kind"];
   scope?: "host";
   enabled?: boolean;
   workspaceTabs: WorkspaceTabState[];
@@ -92,11 +92,11 @@ export function useGlobalTaskList(params: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [workspaceSignature, params.scope],
   );
-  const taskListVersionSignature = useMaridSessionStore((state) =>
+  const taskListVersionSignature = useQodexSessionStore((state) =>
     JSON.stringify(
       params.workspaceTabs
         .map((tab) => {
-          const workspace = selectWorkspaceMaridState(
+          const workspace = selectWorkspaceQodexState(
             state,
             tab.workspacePath,
             tab.workspaceIdentity,

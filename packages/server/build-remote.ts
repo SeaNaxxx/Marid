@@ -7,12 +7,12 @@ import {
 import { loadBuiltinProviderConfig } from "../../scripts/builtin-provider-config.mjs";
 import { stageThirdPartyNotices } from "../../scripts/third-party-notices.mjs";
 
-const { version, maridCompatibility } = JSON.parse(readFileSync("../../package.json", "utf-8")) as {
+const { version, qodexCompatibility } = JSON.parse(readFileSync("../../package.json", "utf-8")) as {
   version: string;
-  maridCompatibility?: { minCompatibleVersion?: string };
+  qodexCompatibility?: { minCompatibleVersion?: string };
 };
-const minCompatibleVersion = maridCompatibility?.minCompatibleVersion ?? version;
-const { content: maridBuiltinProviderConfigJson } = await loadBuiltinProviderConfig();
+const minCompatibleVersion = qodexCompatibility?.minCompatibleVersion ?? version;
+const { content: qodexBuiltinProviderConfigJson } = await loadBuiltinProviderConfig();
 
 /**
  * Let esbuild bundle node-pty's JS code normally, but keep .node native
@@ -37,7 +37,7 @@ const nativeAddonPlugin: Plugin = {
 const buildResult = await build({
   entryPoints: ["src/entry-stdio.ts"],
   bundle: true,
-  outfile: "dist/remote/marid-server.cjs",
+  outfile: "dist/remote/qodex-server.cjs",
   platform: "node",
   format: "cjs",
   target: "node22",
@@ -51,17 +51,17 @@ const buildResult = await build({
   define: {
     "import.meta.url": "__import_meta_url",
     "import.meta.dirname": "__import_meta_dirname",
-    __MARID_VERSION__: JSON.stringify(version),
-    __MARID_MIN_COMPATIBLE_VERSION__: JSON.stringify(minCompatibleVersion),
-    __MARID_BUILTIN_PROVIDER_CONFIG_JSON__: JSON.stringify(maridBuiltinProviderConfigJson),
+    __QODEX_VERSION__: JSON.stringify(version),
+    __QODEX_MIN_COMPATIBLE_VERSION__: JSON.stringify(minCompatibleVersion),
+    __QODEX_BUILTIN_PROVIDER_CONFIG_JSON__: JSON.stringify(qodexBuiltinProviderConfigJson),
   },
   metafile: true,
 });
 
-const remoteBundleSource = readFileSync("dist/remote/marid-server.cjs", "utf-8");
+const remoteBundleSource = readFileSync("dist/remote/qodex-server.cjs", "utf-8");
 const bundledInputs = Object.keys(buildResult.metafile.inputs);
 validateRemoteServerBundle({ bundledInputs, source: remoteBundleSource });
 // 修复：remote 单文件 bundle 内联第三方代码，dist/remote 也必须附完整声明。
 await stageThirdPartyNotices("dist/remote");
 
-console.log("Built dist/remote/marid-server.cjs");
+console.log("Built dist/remote/qodex-server.cjs");

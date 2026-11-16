@@ -3,24 +3,24 @@ import type {
   IPlatformService,
   WebRemoteControlRendererActionRequest,
   WebRemoteControlRendererActionResult,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { useBaseWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
 import { resolveRemoteWorkspaceSessionIdForTarget } from "@/hooks/useResolvedRemoteWorkspaceSessionId.js";
 import { mutateProjectTask } from "@/project-sidebar/task-mutation.js";
 import type {
   IProjectService,
   IWindowControllerService,
-  IMaridTaskService,
+  IQodexTaskService,
 } from "@/project-sidebar/contract.js";
 import { useRemoteWorkspaceSessionStore } from "@/store/remoteWorkspaceSessionStore.js";
-import { useMaridSessionStore } from "@/store/maridSessionStore.js";
+import { useQodexSessionStore } from "@/store/qodexSessionStore.js";
 import { logger } from "@/logger.js";
 
 export interface WebRemoteControlRendererActionPorts {
   services: {
-    maridTaskService: IMaridTaskService;
+    qodexTaskService: IQodexTaskService;
     windowControllerService?: IWindowControllerService;
-    /** 只用桌面 scratch workspace 的目录创建能力（~/MaridProject/<name>）。 */
+    /** 只用桌面 scratch workspace 的目录创建能力（~/QodexProject/<name>）。 */
     fileService: { createScratchWorkspace(params: { name: string }): Promise<{ path: string }> };
     projectService?: IProjectService;
   };
@@ -35,7 +35,7 @@ async function createLocalProject(
   ports: WebRemoteControlRendererActionPorts,
   name: string,
 ): Promise<{ workspacePath: string; projectId?: string; hostId?: string }> {
-  // 目录与校验复用桌面 scratch workspace：~/MaridProject/<name>，同名目录幂等复用。
+  // 目录与校验复用桌面 scratch workspace：~/QodexProject/<name>，同名目录幂等复用。
   const { path: workspacePath } = await ports.services.fileService.createScratchWorkspace({ name });
   const projectService = ports.services.projectService;
   if (!projectService) return { workspacePath };
@@ -78,7 +78,7 @@ export async function executeWebRemoteControlRendererAction(
     ...(request.workspaceIdentity ? { workspaceIdentity: request.workspaceIdentity } : {}),
   };
   const taskPorts = {
-    service: ports.services.maridTaskService,
+    service: ports.services.qodexTaskService,
     controller: ports.services.windowControllerService,
   };
   const remoteSessionId = ports.resolveRemoteSessionId(target);
@@ -119,7 +119,7 @@ export function useWebRemoteControlRendererActions(platform: IPlatformService): 
               workspaceIdentity: target.workspaceIdentity,
               state: useRemoteWorkspaceSessionStore.getState(),
             }),
-          removeTaskState: (...args) => useMaridSessionStore.getState().removeTaskState(...args),
+          removeTaskState: (...args) => useQodexSessionStore.getState().removeTaskState(...args),
         });
       } catch (error) {
         logger.warn("[web-remote-control] 手机动作执行失败", { kind: request.kind, error });

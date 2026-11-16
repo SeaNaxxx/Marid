@@ -1,5 +1,5 @@
 import { createBrowserNonce } from "#src/auth/oauthStateCodec.js";
-import { BIGMODEL_PROVIDER_ID, ZAI_PROVIDER_ID, type UserInfo } from "@marid/shared";
+import { BIGMODEL_PROVIDER_ID, ZAI_PROVIDER_ID, type UserInfo } from "@qodex/shared";
 import {
   initializeRegionalOAuth,
   pollRegionalOAuth,
@@ -239,13 +239,13 @@ export class WebAuthService {
       redirectUri,
     });
 
-    const token = exchange.tokenSet.maridJwtToken;
+    const token = exchange.tokenSet.qodexJwtToken;
     if (
       !token ||
       !(await this.repo.commitPrimarySession(
         {
           provider,
-          maridJwtToken: token,
+          qodexJwtToken: token,
           userInfo: exchange.userInfo,
           revision: this.runtime.createNonce(),
           ...(exchange.tokenSet.accessToken
@@ -282,8 +282,8 @@ export class WebAuthService {
     return this.repo.getSessionRevision();
   }
 
-  getMaridJwtToken(): string | null {
-    return this.repo.loadMaridJwtToken();
+  getQodexJwtToken(): string | null {
+    return this.repo.loadQodexJwtToken();
   }
 
   /** 设备页账号行的展示资料；只读，不参与登录判断。 */

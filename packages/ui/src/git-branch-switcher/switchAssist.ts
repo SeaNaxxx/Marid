@@ -1,5 +1,5 @@
-import type { IGitService } from "@marid/services";
-import type { GitBranchMutationIssue, GitBranchMutationResult, GitIdentity } from "@marid/shared";
+import type { IGitService } from "@qodex/services";
+import type { GitBranchMutationIssue, GitBranchMutationResult, GitIdentity } from "@qodex/shared";
 import {
   buildGitBranchCommitPreviewFiles,
   getPrimaryGitBranchIssue,

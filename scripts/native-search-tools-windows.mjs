@@ -70,7 +70,7 @@ export function buildNativeSearchToolsWindows({
     arch: config.arch,
     outputDir,
   });
-  const workDir = mkdtempSync(join(tmpdir(), "marid-native-search-build-"));
+  const workDir = mkdtempSync(join(tmpdir(), "qodex-native-search-build-"));
   const cmakeBuildDir = join(workDir, "cmake-build");
   const cmakeOutputDir = join(workDir, "cmake-output");
   const env = {
@@ -79,7 +79,7 @@ export function buildNativeSearchToolsWindows({
     LC_ALL: "C",
   };
 
-  console.log("==> Marid native search build");
+  console.log("==> Qodex native search build");
   console.log(`    target:  ${plan.platformKey}`);
   console.log(`    output:  ${plan.outputDir}`);
   console.log(`    workdir: ${workDir}`);
@@ -109,14 +109,14 @@ export function buildNativeSearchToolsWindows({
         config.generator,
         "-A",
         config.generatorArchitecture,
-        `-DMARID_BUILD_PATH=${toCmakePath(workDir)}`,
-        `-DMARID_UGREP_OUTPUT_DIR=${toCmakePath(cmakeOutputDir)}`,
-        `-DMARID_UGREP_SOURCE_DIR=${toCmakePath(sources.ugrep)}`,
-        `-DMARID_PCRE2_SOURCE_DIR=${toCmakePath(sources.pcre2)}`,
-        `-DMARID_ZLIB_SOURCE_DIR=${toCmakePath(sources.zlib)}`,
-        `-DMARID_BZIP2_SOURCE_DIR=${toCmakePath(sources.bzip2)}`,
-        `-DMARID_ZSTD_SOURCE_DIR=${toCmakePath(sources.zstd)}`,
-        `-DMARID_BROTLI_SOURCE_DIR=${toCmakePath(sources.brotli)}`,
+        `-DQODEX_BUILD_PATH=${toCmakePath(workDir)}`,
+        `-DQODEX_UGREP_OUTPUT_DIR=${toCmakePath(cmakeOutputDir)}`,
+        `-DQODEX_UGREP_SOURCE_DIR=${toCmakePath(sources.ugrep)}`,
+        `-DQODEX_PCRE2_SOURCE_DIR=${toCmakePath(sources.pcre2)}`,
+        `-DQODEX_ZLIB_SOURCE_DIR=${toCmakePath(sources.zlib)}`,
+        `-DQODEX_BZIP2_SOURCE_DIR=${toCmakePath(sources.bzip2)}`,
+        `-DQODEX_ZSTD_SOURCE_DIR=${toCmakePath(sources.zstd)}`,
+        `-DQODEX_BROTLI_SOURCE_DIR=${toCmakePath(sources.brotli)}`,
       ],
       { env, quiet },
     );

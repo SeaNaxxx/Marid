@@ -11,7 +11,7 @@ import type {
   SaveCliMcpToUserDirectoryRequest,
   SettingsDirectoryLocation,
   SettingsDirectorySource,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type { IMcpSyncService } from "./mcpSync.js";
 import { createMcpDataSyncMethods } from "../data-sync/node.js";
 import { createServiceLogger } from "../logger/serviceLogger.js";
@@ -37,11 +37,11 @@ export interface UserMcpRecord {
   path: string;
 }
 
-const MARID_MCP_DESCRIPTOR: DirectoryMcpDescriptor = {
-  source: "marid",
-  directorySource: "marid",
-  userConfigDirSegments: [".marid", "cli"],
-  workspaceConfigDirSegments: [".marid"],
+const QODEX_MCP_DESCRIPTOR: DirectoryMcpDescriptor = {
+  source: "qodex",
+  directorySource: "qodex",
+  userConfigDirSegments: [".qodex", "cli"],
+  workspaceConfigDirSegments: [".qodex"],
   fileName: "config.json",
   configKeyName: "mcp.servers",
 };
@@ -62,7 +62,7 @@ const ENABLED_KEY = "enabled";
 const LEGACY_ENABLE_KEY = "enable";
 const SECRET_CONFIG_FILE_MODE = 0o600;
 const DIRECTORY_MCP_DESCRIPTORS: readonly DirectoryMcpDescriptor[] = [
-  MARID_MCP_DESCRIPTOR,
+  QODEX_MCP_DESCRIPTOR,
   AGENTS_MCP_DESCRIPTOR,
 ];
 
@@ -124,8 +124,8 @@ function buildUserConfigPath(descriptor: DirectoryMcpDescriptor): string {
   return buildDirectoryConfigPath(descriptor, "user");
 }
 
-export function getUserMaridMcpConfigPath(): string {
-  return buildUserConfigPath(MARID_MCP_DESCRIPTOR);
+export function getUserQodexMcpConfigPath(): string {
+  return buildUserConfigPath(QODEX_MCP_DESCRIPTOR);
 }
 
 function buildDirectoryMcpLocation(
@@ -153,9 +153,9 @@ function findDescriptorByLocation(location: SettingsDirectoryLocation): Director
 }
 
 export async function collectEffectiveUserMcpRecords(): Promise<UserMcpRecord[]> {
-  const maridRecords = await readUserMcpRecordsFromFile(MARID_MCP_DESCRIPTOR);
-  if (maridRecords.length > 0) {
-    return sortMcpRecords(maridRecords);
+  const qodexRecords = await readUserMcpRecordsFromFile(QODEX_MCP_DESCRIPTOR);
+  if (qodexRecords.length > 0) {
+    return sortMcpRecords(qodexRecords);
   }
   return sortMcpRecords(await readUserMcpRecordsFromFile(AGENTS_MCP_DESCRIPTOR));
 }
@@ -181,7 +181,7 @@ async function saveMcpToUserDirectory(payload: SaveCliMcpToUserDirectoryRequest)
     const scope: Exclude<McpScope, "common"> = payload.projectPath ? "workspace" : "user";
     const location =
       payload.location ??
-      buildDirectoryMcpLocation(MARID_MCP_DESCRIPTOR, scope, payload.projectPath);
+      buildDirectoryMcpLocation(QODEX_MCP_DESCRIPTOR, scope, payload.projectPath);
     await writeServerEnabledToFile(
       findDescriptorByLocation(location),
       location,
@@ -194,7 +194,7 @@ async function saveMcpToUserDirectory(payload: SaveCliMcpToUserDirectoryRequest)
 
   const scope: Exclude<McpScope, "common"> = payload.projectPath ? "workspace" : "user";
   const existingServers = await readDirectoryServersFromFile(
-    MARID_MCP_DESCRIPTOR,
+    QODEX_MCP_DESCRIPTOR,
     scope,
     payload.projectPath,
   );
@@ -211,7 +211,7 @@ async function saveMcpToUserDirectory(payload: SaveCliMcpToUserDirectoryRequest)
     delete nextServers[payload.name];
   }
 
-  await writeMaridServersToFile(scope, nextServers, payload.projectPath);
+  await writeQodexServersToFile(scope, nextServers, payload.projectPath);
 }
 
 function sortMcpRecords(records: UserMcpRecord[]): UserMcpRecord[] {
@@ -222,13 +222,13 @@ async function readDirectoryServersFromPreferredSources(
   scope: Exclude<McpScope, "common">,
   workspacePath?: string,
 ): Promise<NativeMcpServerRecord[]> {
-  const maridServers = await readDirectoryServersFromFile(
-    MARID_MCP_DESCRIPTOR,
+  const qodexServers = await readDirectoryServersFromFile(
+    QODEX_MCP_DESCRIPTOR,
     scope,
     workspacePath,
   );
-  if (maridServers.length > 0) {
-    return maridServers;
+  if (qodexServers.length > 0) {
+    return qodexServers;
   }
   return readDirectoryServersFromFile(AGENTS_MCP_DESCRIPTOR, scope, workspacePath);
 }
@@ -250,7 +250,7 @@ async function readDirectoryServersFromFile(
   );
   const location = buildDirectoryMcpLocation(descriptor, scope, workspacePath);
   return Object.entries(serverMap).map(([name, config]) => ({
-    source: "maridagentmcp",
+    source: "qodexagentmcp",
     scope,
     name,
     config: config as McpServerConfig,
@@ -264,23 +264,23 @@ async function readDirectoryServersFromFile(
   }));
 }
 
-async function writeMaridServersToFile(
+async function writeQodexServersToFile(
   scope: Exclude<McpScope, "common">,
   servers: Record<string, Record<string, unknown>>,
   workspacePath?: string,
 ): Promise<void> {
-  const filePath = buildDirectoryConfigPath(MARID_MCP_DESCRIPTOR, scope, workspacePath);
+  const filePath = buildDirectoryConfigPath(QODEX_MCP_DESCRIPTOR, scope, workspacePath);
   const current = (await readJsonObject(filePath)) ?? {};
-  const next = writeServerMapToJson(current, MARID_MCP_DESCRIPTOR.configKeyName, servers);
+  const next = writeServerMapToJson(current, QODEX_MCP_DESCRIPTOR.configKeyName, servers);
   await writeTextAtomic(filePath, `${JSON.stringify(next, null, 2)}\n`);
 }
 
 async function readUserCliConfig(): Promise<Record<string, unknown>> {
-  return (await readJsonObject(getUserMaridMcpConfigPath())) ?? {};
+  return (await readJsonObject(getUserQodexMcpConfigPath())) ?? {};
 }
 
 async function writeUserCliConfig(config: Record<string, unknown>): Promise<void> {
-  await writeTextAtomic(getUserMaridMcpConfigPath(), `${JSON.stringify(config, null, 2)}\n`);
+  await writeTextAtomic(getUserQodexMcpConfigPath(), `${JSON.stringify(config, null, 2)}\n`);
 }
 
 function removeLegacyMcpEnabledOverride(
@@ -487,18 +487,18 @@ function writeServerMapToJson(
 }
 
 /** 读取 `config.json` 的 `mcp.servers`（已折叠历史 enable 字段），供数据同步在写前重读后使用。 */
-export function readMaridServerMap(
+export function readQodexServerMap(
   config: Record<string, unknown>,
 ): Record<string, Record<string, unknown>> {
-  return migrateLegacyEnableFlag(readServerMapFromJson(config, MARID_MCP_DESCRIPTOR.configKeyName))
+  return migrateLegacyEnableFlag(readServerMapFromJson(config, QODEX_MCP_DESCRIPTOR.configKeyName))
     .servers;
 }
 
-export function writeMaridServerMap(
+export function writeQodexServerMap(
   config: Record<string, unknown>,
   servers: Record<string, Record<string, unknown>>,
 ): Record<string, unknown> {
-  return writeServerMapToJson(config, MARID_MCP_DESCRIPTOR.configKeyName, servers);
+  return writeServerMapToJson(config, QODEX_MCP_DESCRIPTOR.configKeyName, servers);
 }
 
 export interface McpPathRewrite {

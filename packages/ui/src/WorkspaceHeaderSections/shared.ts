@@ -1,22 +1,22 @@
 import type {
-  MaridTaskMeta,
-  MaridProvider,
-  MaridTaskChangeSummary,
+  QodexTaskMeta,
+  QodexProvider,
+  QodexTaskChangeSummary,
   EditorInfo,
   GitRepositorySummary,
   RemoteTarget,
   UserInfo,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export interface WorkspaceHeaderState {
-  selectedProvider: MaridProvider;
+  selectedProvider: QodexProvider;
 }
 
 export type WorkspaceHeaderVariant = "task" | "draft";
 
 export interface WorkspaceHeaderReloadSessionOptions {
   resumeTaskId?: string | null;
-  provider?: MaridProvider | null;
+  provider?: QodexProvider | null;
 }
 
 export interface WorkspaceHeaderTitleSectionProps {
@@ -29,16 +29,16 @@ export interface WorkspaceHeaderTitleSectionProps {
   localWorkspacePath?: string;
   projectName: string;
   activeTaskTitle: string;
-  activeTaskChangeSummary?: MaridTaskChangeSummary | null;
+  activeTaskChangeSummary?: QodexTaskChangeSummary | null;
   activeTaskId: string | null;
   activeTraceId: string | null;
   activeSessionId: string | null;
-  activeTaskProvider: MaridProvider | null;
-  resolvedActiveTaskMeta?: MaridTaskMeta | null;
+  activeTaskProvider: QodexProvider | null;
+  resolvedActiveTaskMeta?: QodexTaskMeta | null;
   gitSummary: GitRepositorySummary;
   gitDirtyFileCount: number;
   sessionLogPath: string | null;
-  nativeSessionLogProvider: MaridProvider | null;
+  nativeSessionLogProvider: QodexProvider | null;
   nativeSessionLogPath: string | null;
   nativeSessionLogExists: boolean;
   nativeSessionLogLoading: boolean;

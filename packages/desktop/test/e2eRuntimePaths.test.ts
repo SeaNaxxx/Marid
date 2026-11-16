@@ -22,7 +22,7 @@ const E2E_DIR = join(DESKTOP_TEST_DIR, "e2e");
 const SOURCE_EXTENSIONS = new Set([".js", ".json", ".mjs", ".ts", ".tsx"]);
 // 这条守卫约束的是「Desktop E2E 自己的 runtime 文件不许落在本机系统 /tmp」。
 // R3A-BLD-09 的被测对象恰好是远端主机的 /tmp（8MB noexec tmpfs），用例必须断言
-// 远端 mount 属性以及安装后 /tmp 无 marid-server 残留，这里的 /tmp 不是本地 runtime 路径。
+// 远端 mount 属性以及安装后 /tmp 无 qodex-server 残留，这里的 /tmp 不是本地 runtime 路径。
 // 新增豁免必须像这样显式登记并说明理由，避免守卫被整体放宽。
 const REMOTE_TMP_ASSERTION_SOURCES = new Set([
   "conversation-session/remote/installation/manual-review/pending/conversation-session-r3-install-environment.test.ts",
@@ -42,14 +42,14 @@ const REMOTE_TMP_ASSERTION_SOURCES = new Set([
 ]);
 // 只匹配作为绝对路径起点的系统 /tmp：前面不能紧跟路径字符，后面不能继续是单词字符。
 // 缺陷原因：此前用 includes("/tmp") 子串匹配，把远端 Source 的私有 staging 目录
-// "$HOME/.marid/tmp/prompt-attachments" 也当成了系统 /tmp（R3 attachments 用例被误报）。
+// "$HOME/.qodex/tmp/prompt-attachments" 也当成了系统 /tmp（R3 attachments 用例被误报）。
 const SYSTEM_TMP_PATH_PATTERN = /(?<![\w.\-~}$])\/tmp(?![\w-])/u;
 
 describe("Desktop E2E runtime paths", () => {
   it("keeps runtime files below the isolated Agent execution workspace", () => {
     const e2eHomeDir = resolve("root", "isolated-e2e-home");
 
-    expect(resolveE2ERuntimeRoot(e2eHomeDir)).toBe(join(e2eHomeDir, "MaridProject", ".marid-e2e"));
+    expect(resolveE2ERuntimeRoot(e2eHomeDir)).toBe(join(e2eHomeDir, "QodexProject", ".qodex-e2e"));
     expect(resolveE2ERuntimePath("bg25", "release-child-bash")).toBe(
       join(resolveE2ERuntimeRoot(), "bg25", "release-child-bash"),
     );
@@ -60,9 +60,9 @@ describe("Desktop E2E runtime paths", () => {
       resolveE2ERuntimePath("bg25", "continued-work.txt").replaceAll("\\", "/"),
     );
     expect(resolveE2EShellPath("bg25", "release-child-bash")).toBe(
-      ".marid-e2e/bg25/release-child-bash",
+      ".qodex-e2e/bg25/release-child-bash",
     );
-    expect(E2E_RUNTIME_RELATIVE_ROOT).toBe(".marid-e2e");
+    expect(E2E_RUNTIME_RELATIVE_ROOT).toBe(".qodex-e2e");
     expect(E2E_RUNTIME_ROOT_REPLAY_TOKEN).toBe("{{e2eRuntimeRoot}}");
     expect(createE2EReplayFixtureVariables(resolve("root", "fixture-home"))).toEqual({
       e2eRuntimeRoot: resolveE2ERuntimeRoot(resolve("root", "fixture-home")).replaceAll("\\", "/"),
@@ -73,24 +73,24 @@ describe("Desktop E2E runtime paths", () => {
     expect(
       resolveE2EHomeDir({
         cwd: resolve("root", "desktop"),
-        env: { MARID_DATA_BASE_DIR: resolve("root", "data-base") },
+        env: { QODEX_DATA_BASE_DIR: resolve("root", "data-base") },
       }),
     ).toBe(resolve("root", "data-base"));
     expect(
       resolveE2EHomeDir({
         cwd: resolve("root", "desktop"),
         env: {
-          MARID_DATA_BASE_DIR: resolve("root", "data-base"),
-          MARID_E2E_HOME_DIR: resolve("root", "explicit-home"),
+          QODEX_DATA_BASE_DIR: resolve("root", "data-base"),
+          QODEX_E2E_HOME_DIR: resolve("root", "explicit-home"),
         },
       }),
     ).toBe(resolve("root", "explicit-home"));
   });
 
-  it("keeps the E2E CLI storage under the legacy .marid directory", () => {
+  it("keeps the E2E CLI storage under the legacy .qodex directory", () => {
     const homeDir = resolve("root", "isolated-e2e-home");
 
-    expect(resolveE2EStorageRoot(homeDir)).toBe(join(homeDir, ".marid"));
+    expect(resolveE2EStorageRoot(homeDir)).toBe(join(homeDir, ".qodex"));
   });
 
   it("accepts only runner-isolated E2E HOME directories for fixture-writing guards", () => {
@@ -139,12 +139,12 @@ it("Bash 输出查找按 session/tool 隔离，区分清理完成与多个实际
     return path;
   };
   try {
-    await create("marid-bash-other", "session_other");
+    await create("qodex-bash-other", "session_other");
     const options = { tempRoot: root, storageRoot };
     expect(await findE2EBashOutputPath(sessionId, toolCallId, options)).toBeNull();
-    const path = await create("marid-bash-current");
+    const path = await create("qodex-bash-current");
     expect(await findE2EBashOutputPath(sessionId, toolCallId, options)).toBe(path);
-    await create("marid-bash-duplicate");
+    await create("qodex-bash-duplicate");
     await expect(findE2EBashOutputPath(sessionId, toolCallId, options)).rejects.toThrow("没有唯一");
   } finally {
     await rm(root, { recursive: true, force: true });

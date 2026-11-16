@@ -1,4 +1,4 @@
-import type { HighspeedCardSnapshot, HighspeedMessageMeta } from "@marid/shared";
+import type { HighspeedCardSnapshot, HighspeedMessageMeta } from "@qodex/shared";
 import { planHighspeedTranscriptHydration } from "@/highspeed/highspeedTurnHydration.js";
 import { calculateHighspeedSavedDurationMs } from "@/highspeed/highspeedSavedTime.js";
 import { isHighspeedShareEligible } from "@/highspeed/highspeedShare.js";

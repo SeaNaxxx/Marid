@@ -1,4 +1,4 @@
-# Marid Design System
+# Qodex Design System
 
 Portable design system for AI-assisted UI work in this repository.
 
@@ -25,7 +25,7 @@ Treat violations of this section as design-system defects, not stylistic prefere
 
 ## Product Character
 
-Marid is a desktop-first and web-compatible AI workspace. The interface should feel calm, dense, and operational rather than decorative.
+Qodex is a desktop-first and web-compatible AI workspace. The interface should feel calm, dense, and operational rather than decorative.
 
 Design for:
 
@@ -571,7 +571,7 @@ Extension slots are shell-owned positions where extensions supply data only (spe
 
 ## Elevation and Depth
 
-Marid should use restrained depth. Layer primarily through background contrast, borders, and radius before relying on heavy shadows.
+Qodex should use restrained depth. Layer primarily through background contrast, borders, and radius before relying on heavy shadows.
 
 Recommended elevation levels:
 

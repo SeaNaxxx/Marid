@@ -1,5 +1,5 @@
-import { TID_CHAT_WORKFLOW_ARTIFACT_CHIP } from "@marid/shared";
-import type { WorkflowNotificationMeta } from "@marid/shared/marid-protocol-v4";
+import { TID_CHAT_WORKFLOW_ARTIFACT_CHIP } from "@qodex/shared";
+import type { WorkflowNotificationMeta } from "@qodex/shared/qodex-protocol-v4";
 import { WorkflowArtifactStrip } from "@/components/workflow-timeline/WorkflowArtifactStrip.js";
 
 /**

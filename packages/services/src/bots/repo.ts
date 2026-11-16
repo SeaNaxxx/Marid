@@ -1,13 +1,13 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { atomicWritePrivateTextFile, withFileLock } from "@marid/shared/node";
+import { atomicWritePrivateTextFile, withFileLock } from "@qodex/shared/node";
 import {
   botsConfigFileSchema,
   botsStateFileSchema,
   type BotsConfigFile,
   type BotsStateFile,
   type BotContextState,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { getAppConfigDir } from "../paths.js";
 import {
   BOTS_CONFIG_FILE,

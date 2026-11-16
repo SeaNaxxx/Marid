@@ -1,16 +1,16 @@
 import { useEffect } from "react";
-import type { CuaAccessibilitySettingsResult, CuaPermissionKind } from "@marid/shared";
-import { requiredCuaPermissionsForRequestAccessStatus } from "@marid/shared/marid-protocol-v4";
+import type { CuaAccessibilitySettingsResult, CuaPermissionKind } from "@qodex/shared";
+import { requiredCuaPermissionsForRequestAccessStatus } from "@qodex/shared/qodex-protocol-v4";
 import {
   isCuaPermissionStatusAvailable,
   type CuaPermissionRestartOptions,
   type CuaPermissionStatusResult,
-  type MaridAgentCuaPermissionObservation,
-} from "@marid/services";
+  type QodexAgentCuaPermissionObservation,
+} from "@qodex/services";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
 import { useServices } from "@/hooks/useServices.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { shouldRestartHelperAfterCuaPermissionReturn } from "@/lib/cuaPermissionAction.js";
 import { createCuaPermissionOnboardingOperationId } from "@/lib/cuaPermissionOnboardingOperation.js";
 import { fetchCuaPermissionStatus } from "@/lib/cuaPermissionStatusStore.js";
@@ -54,7 +54,7 @@ async function runWithOneRetry<T>(
 }
 
 export function cuaPermissionObservationKey(
-  observation: MaridAgentCuaPermissionObservation,
+  observation: QodexAgentCuaPermissionObservation,
 ): string {
   const workspaceKey = observation.workspaceIdentity?.trim() || observation.workspacePath;
   const missing = requiredCuaPermissionsForRequestAccessStatus(observation.permissionStatus);
@@ -115,14 +115,14 @@ export function CuaPermissionObservationAttachment() {
   const services = useServices();
   const platform = usePlatform();
   const confirmDialog = useConfirmDialog();
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
 
   useEffect(() => {
     const permissionService = services.cuaPermissionService;
     if (
       !permissionService ||
       !platform.openCuaPermissionOnboarding ||
-      typeof services.maridAgentService.onDynamicCuaPermissionObservation !== "function"
+      typeof services.qodexAgentService.onDynamicCuaPermissionObservation !== "function"
     ) {
       return;
     }
@@ -132,7 +132,7 @@ export function CuaPermissionObservationAttachment() {
     let chain = Promise.resolve();
     let activeOperationId: string | null = null;
     let disposed = false;
-    const subscription = services.maridAgentService.onDynamicCuaPermissionObservation()(
+    const subscription = services.qodexAgentService.onDynamicCuaPermissionObservation()(
       (observation) => {
         const missing = requiredCuaPermissionsForRequestAccessStatus(observation.permissionStatus);
         const key = cuaPermissionObservationKey(observation);

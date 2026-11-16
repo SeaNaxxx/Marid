@@ -1,4 +1,4 @@
-import type { TelemetryRendererContext } from "@marid/shared";
+import type { TelemetryRendererContext } from "@qodex/shared";
 
 interface StartupCoordinatorLike {
   onRendererReady(input: { hasPendingOAuthCallback: boolean; rendererId: number }): boolean;

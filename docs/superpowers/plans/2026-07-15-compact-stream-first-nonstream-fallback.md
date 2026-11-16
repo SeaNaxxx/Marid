@@ -34,7 +34,7 @@
 ### Checklist
 
 - [x] 确认目标路径为 streaming-first，pre-commit terminal failure 后可转 non-stream。
-- [x] 确认 Marid 变更前 compact 入口直接调用 `generateText()`。
+- [x] 确认 Qodex 变更前 compact 入口直接调用 `generateText()`。
 - [x] 区分逻辑 compact attempt 与 provider 物理 SSE/HTTP request。
 - [x] 明确 cache-sharing fork 与 transport fallback 是两个独立概念，本次不实现前者。
 
@@ -83,11 +83,11 @@ node scripts/audit-conversation-session-case-coverage.mjs --check --json
 
 ### 文件
 
-- `apps/marid-cli/packages/core/src/runtime/methods/compact-summary-model-request.ts`
-- `apps/marid-cli/packages/core/src/runtime/methods/compact-active.ts`
-- `apps/marid-cli/packages/core/tests/compact-summary-model-request.test.ts`
-- `apps/marid-cli/packages/core/tests/runtime-compact.test.ts`
-- `apps/marid-cli/packages/core/tests/media-budget.test.ts`
+- `apps/qodex-cli/packages/core/src/runtime/methods/compact-summary-model-request.ts`
+- `apps/qodex-cli/packages/core/src/runtime/methods/compact-active.ts`
+- `apps/qodex-cli/packages/core/tests/compact-summary-model-request.test.ts`
+- `apps/qodex-cli/packages/core/tests/runtime-compact.test.ts`
+- `apps/qodex-cli/packages/core/tests/media-budget.test.ts`
 
 ### Checklist
 
@@ -108,7 +108,7 @@ node scripts/audit-conversation-session-case-coverage.mjs --check --json
 ### 验收
 
 ```bash
-pnpm --filter @marid/core exec vitest run \
+pnpm --filter @qodex/core exec vitest run \
   tests/compact-summary-model-request.test.ts \
   tests/runtime-compact.test.ts \
   tests/media-budget.test.ts \
@@ -119,10 +119,10 @@ pnpm --filter @marid/core exec vitest run \
 
 ### 文件
 
-- `apps/marid-cli/packages/contracts/src/model/index.ts`
-- `apps/marid-cli/packages/adapters/src/model/streaming-tool-call-assembler.ts`
-- `apps/marid-cli/packages/adapters/src/model/runner-stream.ts`
-- `apps/marid-cli/packages/adapters/tests/runner.test.ts`
+- `apps/qodex-cli/packages/contracts/src/model/index.ts`
+- `apps/qodex-cli/packages/adapters/src/model/streaming-tool-call-assembler.ts`
+- `apps/qodex-cli/packages/adapters/src/model/runner-stream.ts`
+- `apps/qodex-cli/packages/adapters/tests/runner.test.ts`
 
 ### Checklist
 
@@ -151,7 +151,7 @@ pnpm --filter @marid/core exec vitest run \
 ### 验收
 
 ```bash
-pnpm --filter @marid/adapters exec vitest run \
+pnpm --filter @qodex/adapters exec vitest run \
   tests/runner.test.ts \
   tests/runner-retry.test.ts \
   tests/openai-responses-json-compat.test.ts
@@ -198,8 +198,8 @@ pnpm --dir packages/desktop typecheck:e2e
 
 ### 文件
 
-- `apps/marid-cli/e2e/compact-microcompact/README.md`
-- `apps/marid-cli/e2e/compact-microcompact/case-openai-responses-compact.mjs`
+- `apps/qodex-cli/e2e/compact-microcompact/README.md`
+- `apps/qodex-cli/e2e/compact-microcompact/case-openai-responses-compact.mjs`
 - `packages/desktop/test/e2e/conversation-session/context/conversation-session-compact-stream-fallback.test.ts`
 - `packages/desktop/test/e2e/fixtures/cases/conversation-session/conversation-session-compact-stream-fallback.json`
 - `packages/desktop/test/e2e/fixtures/upstream/conversation-session/conversation-session-compact-stream-fallback.json`
@@ -228,9 +228,9 @@ setup main stream success
 ### 验收
 
 ```bash
-pnpm --dir apps/marid-cli build
-pnpm --filter marid-cli exec tsx \
-  ../../apps/marid-cli/e2e/compact-microcompact/run.mjs \
+pnpm --dir apps/qodex-cli build
+pnpm --filter qodex-cli exec tsx \
+  ../../apps/qodex-cli/e2e/compact-microcompact/run.mjs \
   --case=openai-responses-compact --keep-tmp
 
 pnpm --dir packages/desktop test:e2e:serial -- \
@@ -253,9 +253,9 @@ pnpm --dir packages/desktop test:e2e:serial -- \
 ### 命令
 
 ```bash
-pnpm --dir apps/marid-cli typecheck
-pnpm --dir apps/marid-cli build
-pnpm --dir apps/marid-cli lint
+pnpm --dir apps/qodex-cli typecheck
+pnpm --dir apps/qodex-cli build
+pnpm --dir apps/qodex-cli lint
 
 pnpm --dir packages/desktop typecheck:e2e
 pnpm typecheck

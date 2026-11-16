@@ -2,7 +2,7 @@
 import type { SettingsDirectoryLocation } from "./settings-source.js";
 
 export type CommandSource = "user" | "plugin";
-export type CommandAgentSource = "maridAgent";
+export type CommandAgentSource = "qodexAgent";
 
 export interface CommandInfo {
   name: string;
@@ -34,13 +34,13 @@ export interface PluginCommand extends Omit<CommandInfo, "filePath"> {
   filePath: string;
 }
 
-export type MaridCommand = UserCommand | PluginCommand;
+export type QodexCommand = UserCommand | PluginCommand;
 
-export function isUserCommand(command: MaridCommand): command is UserCommand {
+export function isUserCommand(command: QodexCommand): command is UserCommand {
   return command.source === "user";
 }
 
-export function isPluginCommand(command: MaridCommand): command is PluginCommand {
+export function isPluginCommand(command: QodexCommand): command is PluginCommand {
   return command.source === "plugin";
 }
 
@@ -60,7 +60,7 @@ export interface CommandsCapability {
 }
 
 export interface CommandsListResult {
-  commands: MaridCommand[];
+  commands: QodexCommand[];
   userCommands: UserCommand[];
   pluginCommands: PluginCommand[];
   capability: CommandsCapability;

@@ -7,11 +7,11 @@
  * 进程内因此仍然只有一个遥测定时器；任何一步失败只丢当前样本，Host 服务不受影响。
  */
 
-import { HostResponseTypes } from "@marid/shared";
+import { HostResponseTypes } from "@qodex/shared";
 import {
   createNodeSelfResourceSampler,
   type NodeSelfResourceSamplerOptions,
-} from "@marid/shared/node";
+} from "@qodex/shared/node";
 import {
   startHostMemoryDiagnosticsLog,
   type StartHostMemoryDiagnosticsLogOptions,

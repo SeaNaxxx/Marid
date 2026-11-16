@@ -134,12 +134,12 @@ export function projectAssistantCodeComments(
     } else {
       const prefixStart = findAssistantDirectivePrefixStart(
         content,
-        [CODE_COMMENT_DIRECTIVE_NAME, "marid-file-citation"],
+        [CODE_COMMENT_DIRECTIVE_NAME, "qodex-file-citation"],
         protectedRanges,
         {
-          minimumSingleColonPrefixLength: ":marid".length,
-          singleColonDirectiveNames: ["marid-file-citation"],
-          tripleColonDirectiveNames: ["marid-file-citation"],
+          minimumSingleColonPrefixLength: ":qodex".length,
+          singleColonDirectiveNames: ["qodex-file-citation"],
+          tripleColonDirectiveNames: ["qodex-file-citation"],
         },
       );
       if (prefixStart !== null) {

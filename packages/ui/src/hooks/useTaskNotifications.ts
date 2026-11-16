@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { IPlatformService, TaskNotificationPayload } from "@marid/shared";
-import type { ConversationSnapshot, SessionSummary } from "@marid/shared/marid-protocol-v4";
+import type { IPlatformService, TaskNotificationPayload } from "@qodex/shared";
+import type { ConversationSnapshot, SessionSummary } from "@qodex/shared/qodex-protocol-v4";
 import { useServices } from "@/hooks/useServices.js";
 import type { IntlInstance } from "@/i18n/index.js";
 import { logger } from "@/logger.js";
@@ -94,7 +94,7 @@ export function useWorkspaceTerminalTaskNotifications({
   platform,
   formatMessage,
 }: WorkspaceTerminalTaskNotificationsParams): void {
-  const { maridAgentService } = useServices();
+  const { qodexAgentService } = useServices();
   const workspaceIdentity = trimOptional(rawWorkspaceIdentity);
   const endpointKey = trimOptional(rawEndpointKey);
   const workspaceKey = workspaceIdentity ?? workspacePath;
@@ -135,7 +135,7 @@ export function useWorkspaceTerminalTaskNotifications({
       ...(workspaceIdentity ? { workspaceIdentity } : {}),
       ...(endpointKey ? { endpointKey } : {}),
     };
-    const store = acquireSessionsIndex(registryScope, maridAgentService);
+    const store = acquireSessionsIndex(registryScope, qodexAgentService);
     const syncState = () => {
       setIndexState({
         signature,
@@ -159,7 +159,7 @@ export function useWorkspaceTerminalTaskNotifications({
     workspaceIdentity,
     workspaceKey,
     workspacePath,
-    maridAgentService,
+    qodexAgentService,
   ]);
 
   useEffect(() => {

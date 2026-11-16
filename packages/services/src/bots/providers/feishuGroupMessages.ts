@@ -1,4 +1,4 @@
-import { channelContentText, type ChannelContentPart } from "@marid/shared";
+import { channelContentText, type ChannelContentPart } from "@qodex/shared";
 function record(value: unknown): Record<string, unknown> | null {
   return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : null;
 }

@@ -4,9 +4,9 @@ import type {
   McpToolUiCsp,
   PluginSandboxHandle,
   PluginUiScopeRef,
-} from "@marid/shared/mcp-apps";
-import { buildPluginSandboxScopeId } from "@marid/shared/mcp-apps";
-import type { AttachmentRef, ConversationInputSource } from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/mcp-apps";
+import { buildPluginSandboxScopeId } from "@qodex/shared/mcp-apps";
+import type { AttachmentRef, ConversationInputSource } from "@qodex/shared/qodex-protocol-v4";
 import type { ReactNode } from "react";
 import type { PluginUiImageBlock } from "./domain/pluginUiImageBlocks.js";
 

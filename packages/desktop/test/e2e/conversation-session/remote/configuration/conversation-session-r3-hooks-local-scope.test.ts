@@ -5,7 +5,7 @@ import {
   TID_SETTINGS_SECTION_NAV,
   TID_TASK_SETTINGS_BUTTON,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   clearAppData,
   clickTestIdByDom,
@@ -29,7 +29,7 @@ import { prepareV4ConversationE2E, startNewV4Draft } from "#e2e/helpers/v4-conve
 
 const CASE_MARKER = "E2E_R3_HOOKS_LOCAL_SCOPE";
 const artifactDir = resolve(
-  process.env.MARID_E2E_ARTIFACT_DIR ?? ".e2e-artifacts/r3-hooks-local-scope",
+  process.env.QODEX_E2E_ARTIFACT_DIR ?? ".e2e-artifacts/r3-hooks-local-scope",
 );
 const LOCAL_MARKER = "E2E_R3_HOOKS_LOCAL_SCOPE_LOCAL";
 const REMOTE_MARKER = "E2E_R3_HOOKS_LOCAL_SCOPE_REMOTE";
@@ -159,10 +159,10 @@ describe(`${CASE_MARKER}: 远端项目激活时钩子按选中的 scope 落盘`,
     this.timeout(20 * 60_000);
     const config = readSSHRuntimeConfig(CASE_MARKER);
     const [workspaceA] = config.workspacePaths;
-    const localConfigPath = join(DEFAULT_WORKSPACE, ".marid", "config.json");
+    const localConfigPath = join(DEFAULT_WORKSPACE, ".qodex", "config.json");
     await prepareSSHConnectionPage(CASE_MARKER);
     await prepareV4ConversationE2E({ skipProvider: true });
-    await runSSHCommand(config, `rm -f "${workspaceA}/.marid/config.json"`);
+    await runSSHCommand(config, `rm -f "${workspaceA}/.qodex/config.json"`);
 
     // 活动工作区切到远端项目 A。
     await startNewV4Draft();
@@ -192,7 +192,7 @@ describe(`${CASE_MARKER}: 远端项目激活时钩子按选中的 scope 落盘`,
     expect(localConfig).toContain(LOCAL_MARKER);
     const remoteAfterLocal = await runSSHCommand(
       config,
-      `grep -rl "${LOCAL_MARKER}" "$HOME/.marid" "${workspaceA}" 2>/dev/null; echo END`,
+      `grep -rl "${LOCAL_MARKER}" "$HOME/.qodex" "${workspaceA}" 2>/dev/null; echo END`,
     );
     facts.remoteAfterLocal = remoteAfterLocal.stdout.trim();
     expect(remoteAfterLocal.stdout.trim()).toBe("END");
@@ -206,7 +206,7 @@ describe(`${CASE_MARKER}: 远端项目激活时钩子按选中的 scope 落盘`,
     await browser.waitUntil(
       async () => {
         remoteConfig = (
-          await runSSHCommand(config, `cat "${workspaceA}/.marid/config.json" 2>/dev/null`)
+          await runSSHCommand(config, `cat "${workspaceA}/.qodex/config.json" 2>/dev/null`)
         ).stdout;
         return remoteConfig.includes(REMOTE_MARKER);
       },

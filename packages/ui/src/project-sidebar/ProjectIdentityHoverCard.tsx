@@ -2,13 +2,13 @@ import { useEffect, useRef, useState, type ReactElement, type PointerEvent } fro
 import { HoverCard as HoverCardPrimitive } from "radix-ui";
 import { ChevronRight, Settings } from "lucide-react";
 import { Anchor, createPopperScope } from "@radix-ui/react-popper";
-import { sourceServerConnectionStateSchema } from "@marid/shared";
+import { sourceServerConnectionStateSchema } from "@qodex/shared";
 import type { RemoteProjectHost } from "@/project-sidebar/contract.js";
 import { remoteHostLabel } from "@/project-sidebar/RemoteHostSection.js";
 import { RemoteConnectionProgressSection } from "@/project-sidebar/RemoteConnectionProgressSection.js";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card.js";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import {
   formatRemoteProjectConnectionAddress,
   resolveRemoteConnectionPresentation,
@@ -43,7 +43,7 @@ export function ProjectIdentityHoverCard({
   onOpenDeviceSettings?: () => void;
   children: ReactElement;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const scope = useHoverCardScope(undefined);
   const popperScope = usePopperScope(scope.__scopeHoverCard);
   const trigger = useRef<HTMLAnchorElement>(null);

@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { Hook, HookConfig } from "@marid/shared";
-import type { IHooksService } from "@marid/services";
+import type { Hook, HookConfig } from "@qodex/shared";
+import type { IHooksService } from "@qodex/services";
 import { getWorkspaceKey } from "@/lib/workspaceKey.js";
 
 interface HooksStoreState {
@@ -65,26 +65,26 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-function buildMaridHookLocation(
+function buildQodexHookLocation(
   workspacePath: string,
   storageLevel: "user" | "project" = "user",
 ): Hook["location"] {
   return storageLevel === "project"
     ? {
-        source: "marid",
+        source: "qodex",
         scope: "project",
         directoryPath: "",
         projectPath: workspacePath,
       }
     : {
-        source: "marid",
+        source: "qodex",
         scope: "user",
         directoryPath: "",
       };
 }
 
 function isEditableHook(hook: Hook): boolean {
-  return hook.editable ?? (!hook.location || hook.location.source === "marid");
+  return hook.editable ?? (!hook.location || hook.location.source === "qodex");
 }
 
 function hookFromConfig(config: HookConfig, workspacePath: string): Hook {
@@ -101,7 +101,7 @@ function hookFromConfig(config: HookConfig, workspacePath: string): Hook {
     timeout: config.timeout ?? 60,
     enabled: config.enabled ?? true,
     custom: config.custom,
-    location: buildMaridHookLocation(workspacePath, config.storageLevel),
+    location: buildQodexHookLocation(workspacePath, config.storageLevel),
   };
 }
 
@@ -313,12 +313,12 @@ export const useHooksStore = create<HooksStoreState>((set, get) => ({
     const { hooks, workspacePath } = get();
     if (!workspacePath) throw new Error("No workspace path set");
     const source = hooks.find((hook) => hook.id === id);
-    if (!source || source.location?.source === "marid") throw new Error("Hook is not importable");
+    if (!source || source.location?.source === "qodex") throw new Error("Hook is not importable");
     const imported: Hook = {
       ...source,
       id: `hook-${crypto.randomUUID()}`,
       enabled: true,
-      location: buildMaridHookLocation(workspacePath, source.location?.scope ?? "user"),
+      location: buildQodexHookLocation(workspacePath, source.location?.scope ?? "user"),
     };
     await applyHookMutation(get, set, hooksService, [...hooks, imported], id);
   },

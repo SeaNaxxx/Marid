@@ -1,9 +1,9 @@
 // 全局工作流组的状态与动作。抽成 hook 让组件文件守住
-// max-lines 400；载体是 `useServices().maridAgentService`，RPC 一律带 `{ scope: "global" }`。
+// max-lines 400；载体是 `useServices().qodexAgentService`，RPC 一律带 `{ scope: "global" }`。
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { MaridSavedWorkflowEntry, MaridSavedWorkflowRun } from "@marid/shared";
+import type { QodexSavedWorkflowEntry, QodexSavedWorkflowRun } from "@qodex/shared";
 import { toast } from "@/components/ui/toast.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog.js";
 import { useServices } from "@/hooks/useServices.js";
 import { logger } from "@/logger.js";
@@ -64,16 +64,16 @@ export function useSavedWorkflowGlobalGroup({
   activeProjectKey,
   onMoved,
 }: UseSavedWorkflowGlobalGroupParams) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const requestConfirmation = useConfirmDialog();
-  const { maridAgentService: agentService, fileWatcherService } = useServices();
+  const { qodexAgentService: agentService, fileWatcherService } = useServices();
 
   const state = useSavedWorkflowStore((store) =>
     selectSavedWorkflowState(store, GLOBAL_SAVED_WORKFLOW_TARGET),
   );
   const load = useSavedWorkflowStore((store) => store.load);
-  const [launchEntry, setLaunchEntry] = useState<MaridSavedWorkflowEntry | null>(null);
-  const [moveEntry, setMoveEntry] = useState<MaridSavedWorkflowEntry | null>(null);
+  const [launchEntry, setLaunchEntry] = useState<QodexSavedWorkflowEntry | null>(null);
+  const [moveEntry, setMoveEntry] = useState<QodexSavedWorkflowEntry | null>(null);
   const [busyName, setBusyName] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
 
@@ -96,7 +96,7 @@ export function useSavedWorkflowGlobalGroup({
     void refresh({ bypassCache: true });
   }, [refresh, refreshSeq]);
 
-  // 目录监听：list 回的绝对目录（`~/.marid/workflows`）本机可直接 watch。
+  // 目录监听：list 回的绝对目录（`~/.qodex/workflows`）本机可直接 watch。
   useSavedWorkflowsDirectoryWatch({
     fileWatcherService,
     directory: state.dir,
@@ -128,7 +128,7 @@ export function useSavedWorkflowGlobalGroup({
 
   // 全局档一律弹窗——即使无实参，也需要「运行于」选择器。
   const handleRun = useCallback(
-    (entry: MaridSavedWorkflowEntry) => {
+    (entry: QodexSavedWorkflowEntry) => {
       launcher.clearError();
       setLaunchEntry(entry);
     },
@@ -136,7 +136,7 @@ export function useSavedWorkflowGlobalGroup({
   );
   const launch = useCallback(
     async (
-      entry: MaridSavedWorkflowEntry,
+      entry: QodexSavedWorkflowEntry,
       args: Record<string, unknown>,
       target?: AutomationWorkspaceOption,
     ) => {
@@ -154,7 +154,7 @@ export function useSavedWorkflowGlobalGroup({
     [launcher],
   );
   const handleRevise = useCallback(
-    (entry: MaridSavedWorkflowEntry) => {
+    (entry: QodexSavedWorkflowEntry) => {
       if (!actionTarget) return;
       onCreateViaChat?.(
         buildSavedWorkflowRevisePrompt({
@@ -173,7 +173,7 @@ export function useSavedWorkflowGlobalGroup({
     onCreateViaChat?.(buildSavedWorkflowCreatePrompt(locale, "global"), actionTarget);
   }, [actionTarget, locale, onCreateViaChat]);
   const handleCopyPath = useCallback(
-    (entry: MaridSavedWorkflowEntry) => {
+    (entry: QodexSavedWorkflowEntry) => {
       void navigator.clipboard
         ?.writeText(entry.path)
         .then(() => toast(intl.formatMessage({ id: "workflows.hub.copied" })))
@@ -186,7 +186,7 @@ export function useSavedWorkflowGlobalGroup({
     [intl],
   );
   const handleDelete = useCallback(
-    async (entry: MaridSavedWorkflowEntry) => {
+    async (entry: QodexSavedWorkflowEntry) => {
       const confirmed = await requestConfirmation({
         title: intl.formatMessage({ id: "workflows.hub.delete.title" }, { name: entry.name }),
         description: intl.formatMessage(
@@ -229,18 +229,18 @@ export function useSavedWorkflowGlobalGroup({
     [agentService, intl, mode, onBack, refresh, requestConfirmation],
   );
   const handleCardDelete = useCallback(
-    (entry: MaridSavedWorkflowEntry) => void handleDelete(entry),
+    (entry: QodexSavedWorkflowEntry) => void handleDelete(entry),
     [handleDelete],
   );
-  const handleCardMove = useCallback((entry: MaridSavedWorkflowEntry) => setMoveEntry(entry), []);
+  const handleCardMove = useCallback((entry: QodexSavedWorkflowEntry) => setMoveEntry(entry), []);
   const handleOpen = useCallback(
-    (entry: MaridSavedWorkflowEntry) => onOpenDetail(entry.name),
+    (entry: QodexSavedWorkflowEntry) => onOpenDetail(entry.name),
     [onOpenDetail],
   );
   // 全局档的目标项目按 `run.cwd` 反查已打开项目；没打开就两个入口都关掉
   // （实例必须开在发起它的项目）。门与实参构造与项目档共用（产物不需要 toolCallId）。
   const resolveRunTarget = useCallback(
-    (run: MaridSavedWorkflowRun) => findProjectByCwd(localProjects, run.cwd) ?? null,
+    (run: QodexSavedWorkflowRun) => findProjectByCwd(localProjects, run.cwd) ?? null,
     [localProjects],
   );
   const { handleOpenArtifact, handleOpenRun } = useSavedWorkflowRunOpeners({

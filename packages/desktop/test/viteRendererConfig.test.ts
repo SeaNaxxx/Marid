@@ -33,10 +33,10 @@ describe("desktop renderer Vite dependency aliases", () => {
   const isWindows = process.platform === "win32";
 
   (isWindows ? it.skip : it)(
-    "injects the selected Marid endpoint origin into renderer env",
+    "injects the selected Qodex endpoint origin into renderer env",
     async () => {
-      vi.stubEnv("MARID_ENV", "test");
-      vi.stubEnv("MARID_BASE_URL", "");
+      vi.stubEnv("QODEX_ENV", "test");
+      vi.stubEnv("QODEX_BASE_URL", "");
       const desktopRoot = resolve(import.meta.dirname, "..");
       const configFile = resolve(desktopRoot, "vite.config.ts");
       const result = await loadConfigFromFile(
@@ -52,15 +52,15 @@ describe("desktop renderer Vite dependency aliases", () => {
       );
 
       expect(result?.config.define).toMatchObject({
-        "import.meta.env.VITE_MARID_BASE_URL": JSON.stringify("https://marid.z.ai"),
-        "import.meta.env.VITE_MARID_ENDPOINT_ORIGIN": JSON.stringify("https://marid.z.ai"),
-        __MARID_LOCAL_DEVELOPMENT_RUNTIME__: JSON.stringify(false),
+        "import.meta.env.VITE_QODEX_BASE_URL": JSON.stringify("https://qodex.z.ai"),
+        "import.meta.env.VITE_QODEX_ENDPOINT_ORIGIN": JSON.stringify("https://qodex.z.ai"),
+        __QODEX_LOCAL_DEVELOPMENT_RUNTIME__: JSON.stringify(false),
       });
     },
   );
 
   it("marks non-production renderer builds as local development runtime", async () => {
-    vi.stubEnv("MARID_ENV", "production");
+    vi.stubEnv("QODEX_ENV", "production");
     const desktopRoot = resolve(import.meta.dirname, "..");
     const configFile = resolve(desktopRoot, "vite.config.ts");
     const result = await loadConfigFromFile(
@@ -76,10 +76,10 @@ describe("desktop renderer Vite dependency aliases", () => {
     );
 
     expect(result?.config.define).toMatchObject({
-      __MARID_ENV__: JSON.stringify("production"),
-      __MARID_PRODUCT_FLAVOR__: JSON.stringify("production"),
-      __MARID_LOCAL_DEVELOPMENT_RUNTIME__: JSON.stringify(true),
-      "import.meta.env.VITE_MARID_E2E_STORE_BRIDGE": JSON.stringify(""),
+      __QODEX_ENV__: JSON.stringify("production"),
+      __QODEX_PRODUCT_FLAVOR__: JSON.stringify("production"),
+      __QODEX_LOCAL_DEVELOPMENT_RUNTIME__: JSON.stringify(true),
+      "import.meta.env.VITE_QODEX_E2E_STORE_BRIDGE": JSON.stringify(""),
     });
   });
 
@@ -98,14 +98,14 @@ describe("desktop renderer Vite dependency aliases", () => {
       "silent",
     );
 
-    expect(result?.config.plugins?.some((plugin) => plugin.name === "marid:pdfjs-cmaps")).toBe(
+    expect(result?.config.plugins?.some((plugin) => plugin.name === "qodex:pdfjs-cmaps")).toBe(
       true,
     );
   });
 
   it("injects the E2E store bridge only from the runner flag", async () => {
-    vi.stubEnv("MARID_ENV", "test");
-    vi.stubEnv("VITE_MARID_E2E_STORE_BRIDGE", "1");
+    vi.stubEnv("QODEX_ENV", "test");
+    vi.stubEnv("VITE_QODEX_E2E_STORE_BRIDGE", "1");
     const desktopRoot = resolve(import.meta.dirname, "..");
     const configFile = resolve(desktopRoot, "vite.config.ts");
     const result = await loadConfigFromFile(
@@ -121,15 +121,15 @@ describe("desktop renderer Vite dependency aliases", () => {
     );
 
     expect(result?.config.define).toMatchObject({
-      __MARID_ENV__: JSON.stringify("test"),
-      __MARID_PRODUCT_FLAVOR__: JSON.stringify("preview"),
-      "import.meta.env.VITE_MARID_E2E_STORE_BRIDGE": JSON.stringify("1"),
+      __QODEX_ENV__: JSON.stringify("test"),
+      __QODEX_PRODUCT_FLAVOR__: JSON.stringify("preview"),
+      "import.meta.env.VITE_QODEX_E2E_STORE_BRIDGE": JSON.stringify("1"),
     });
   });
 
-  it("MARID_PREVIEW_IDENTITY=1 让生产后端的 renderer 编译成 Preview 身份", async () => {
-    vi.stubEnv("MARID_ENV", "production");
-    vi.stubEnv("MARID_PREVIEW_IDENTITY", "1");
+  it("QODEX_PREVIEW_IDENTITY=1 让生产后端的 renderer 编译成 Preview 身份", async () => {
+    vi.stubEnv("QODEX_ENV", "production");
+    vi.stubEnv("QODEX_PREVIEW_IDENTITY", "1");
     const desktopRoot = resolve(import.meta.dirname, "..");
     const configFile = resolve(desktopRoot, "vite.config.ts");
     const result = await loadConfigFromFile(
@@ -145,8 +145,8 @@ describe("desktop renderer Vite dependency aliases", () => {
     );
 
     expect(result?.config.define).toMatchObject({
-      __MARID_ENV__: JSON.stringify("production"),
-      __MARID_PRODUCT_FLAVOR__: JSON.stringify("preview"),
+      __QODEX_ENV__: JSON.stringify("production"),
+      __QODEX_PRODUCT_FLAVOR__: JSON.stringify("preview"),
     });
   });
 });
@@ -162,12 +162,12 @@ describe("desktop React Scan development tools", () => {
       desktopRoot,
       "silent",
     );
-    return result?.config.plugins?.flat().find((plugin) => plugin?.name === "marid:react-scan");
+    return result?.config.plugins?.flat().find((plugin) => plugin?.name === "qodex:react-scan");
   }
 
   it("serves Scan before React only in the main development entry", async () => {
-    vi.stubEnv("MARID_ENV", "production");
-    vi.stubEnv("MARID_REACT_SCAN", undefined);
+    vi.stubEnv("QODEX_ENV", "production");
+    vi.stubEnv("QODEX_REACT_SCAN", undefined);
     const plugin = await loadReactScanPlugin("serve", "development");
     expect(plugin).toBeDefined();
     const server = await createServer({
@@ -195,7 +195,7 @@ describe("desktop React Scan development tools", () => {
   });
 
   it("allows opting out of development instrumentation", async () => {
-    vi.stubEnv("MARID_REACT_SCAN", "0");
+    vi.stubEnv("QODEX_REACT_SCAN", "0");
     expect(await loadReactScanPlugin("serve", "development")).toBeUndefined();
   });
 
@@ -206,9 +206,9 @@ describe("desktop React Scan development tools", () => {
     ["build", "development", "0"],
     ["build", "development", "1"],
   ] as const)(
-    "excludes Scan from %s in %s mode with MARID_REACT_SCAN=%s",
+    "excludes Scan from %s in %s mode with QODEX_REACT_SCAN=%s",
     async (command, mode, scan) => {
-      vi.stubEnv("MARID_REACT_SCAN", scan);
+      vi.stubEnv("QODEX_REACT_SCAN", scan);
       expect(await loadReactScanPlugin(command, mode)).toBeUndefined();
     },
   );

@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "caseName": "conversation-session-workspace-qodexignore",
+  "spec": "./test/e2e/conversation-session/projects/conversation-session-workspace-qodexignore.test.ts",
+  "fixtures": []
+}

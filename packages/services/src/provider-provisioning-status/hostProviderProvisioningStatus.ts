@@ -2,7 +2,7 @@ import {
   HostMessageTypes,
   HostResponseTypes,
   type ProviderProvisioningLaneStatus,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type { IProviderProvisioningStatusService } from "./contract.js";
 
 type LaneAction = "read" | "wait" | "retry";

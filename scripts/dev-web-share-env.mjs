@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 
-const TEST_SHARE_ENDPOINT_ORIGIN = "https://marid.z.ai";
+const TEST_SHARE_ENDPOINT_ORIGIN = "https://qodex.z.ai";
 
 const mode = process.argv[2]?.trim().toLowerCase();
 if (mode !== "test" && mode !== "mock") {
@@ -11,14 +11,14 @@ if (mode !== "test" && mode !== "mock") {
 const pnpmCommand = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 const env = {
   ...process.env,
-  MARID_ENV: "test",
-  VITE_MARID_BASE_URL: TEST_SHARE_ENDPOINT_ORIGIN,
+  QODEX_ENV: "test",
+  VITE_QODEX_BASE_URL: TEST_SHARE_ENDPOINT_ORIGIN,
   VITE_DEV_ORIGIN: "http://localhost:5173",
   VITE_CONVERSATION_SHARE_PREVIEW_MOCK: mode === "mock" ? "true" : "false",
 };
 const args = [
   "--filter",
-  "@marid/web-share",
+  "@qodex/web-share",
   "exec",
   "vite",
   "dev",

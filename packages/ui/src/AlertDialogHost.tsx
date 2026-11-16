@@ -9,11 +9,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog.js";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { useAlertDialogStore } from "@/store/alertDialogStore.js";
 
 export function AlertDialogHost() {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const pendingRequest = useAlertDialogStore((state) => state.pendingRequest);
   const settleAlert = useAlertDialogStore((state) => state.settleAlert);
 

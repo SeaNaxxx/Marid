@@ -1,11 +1,11 @@
-import type { AppSettings } from "@marid/shared";
-import type { InputRouting, SessionConfigState } from "@marid/shared/marid-protocol-v4";
+import type { AppSettings } from "@qodex/shared";
+import type { InputRouting, SessionConfigState } from "@qodex/shared/qodex-protocol-v4";
 
 export function resolveAppFollowupMode(
   settings: AppSettings | null | undefined,
 ): SessionConfigState["followupMode"] | null {
   if (!settings) return null;
-  return settings.maridInteractionBehavior === "guide" ? "guide" : "queue";
+  return settings.qodexInteractionBehavior === "guide" ? "guide" : "queue";
 }
 
 export function resolveOppositeFollowupDelivery(

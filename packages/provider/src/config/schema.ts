@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { modelConfigDataSchema } from "@marid/shared/model-config";
+import { modelConfigDataSchema } from "@qodex/shared/model-config";
 import { providerConfigDataSchema, zhipuAccountAccessDataSchema } from "./provider-data-schema.js";
 import { ModelConfig, ModelConfigRules } from "./model-config.js";
 import {
@@ -33,7 +33,7 @@ export function parseProviderConfigMap(input: unknown): ProviderConfigMap {
   return createProviderRules(z.array(providerConfigRuleSchema).parse(input));
 }
 
-export function parseMaridBuiltinProviderConfigMap(input: unknown): ProviderConfigMap {
+export function parseQodexBuiltinProviderConfigMap(input: unknown): ProviderConfigMap {
   return createProviderRules(z.array(builtinProviderConfigRuleSchema).parse(input));
 }
 
@@ -41,7 +41,7 @@ export function parseProviderTemplateMap(input: unknown): ProviderTemplateMap {
   return createTemplateRules(z.array(providerTemplateConfigRuleSchema).parse(input));
 }
 
-export function parseMaridBuiltinProviderConfigRules(input: unknown): {
+export function parseQodexBuiltinProviderConfigRules(input: unknown): {
   providers: ProviderConfigMap;
   providerTemplates: ProviderTemplateMap;
 } {
@@ -75,7 +75,7 @@ export function parseModelConfig(input: unknown): ModelConfig {
   return createModelConfig(modelConfigDataSchema.parse(input));
 }
 
-export function parseMaridBuiltinModelConfigRules(input: unknown): ModelConfigRules {
+export function parseQodexBuiltinModelConfigRules(input: unknown): ModelConfigRules {
   const parsed = builtinModelConfigRulesSchema.parse(input);
   return new ModelConfigRules([
     ...parsed.modelRules.map((rule) => ({

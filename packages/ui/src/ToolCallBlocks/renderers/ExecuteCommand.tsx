@@ -1,11 +1,11 @@
 import { useId, useLayoutEffect, useRef, useState } from "react";
 import { ChevronDownIcon } from "lucide-react";
 import { Button } from "@/components/ui/button.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 
 export function ExecuteCommand({ command }: { command: string | undefined }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const id = useId();
   const content = useRef<HTMLDivElement>(null);
   const [expanded, setExpanded] = useState(false);

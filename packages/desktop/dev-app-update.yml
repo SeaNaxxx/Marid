@@ -3,4 +3,4 @@
 provider: generic
 url: http://localhost:8081
 useMultipleRangeRequest: false
-updaterCacheDirName: marid-dev-updater
+updaterCacheDirName: qodex-dev-updater

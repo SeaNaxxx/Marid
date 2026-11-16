@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/alert-dialog.js";
 import { Input } from "@/components/ui/input.js";
 import { toast } from "@/components/ui/toast.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 import type { ImagePreviewSurfaceProps } from "@/image-preview-editor/contract.js";
 import { captureImageComposerTarget } from "@/image-preview-editor/composerTarget.js";
@@ -50,7 +50,7 @@ export function ImagePreviewSurface({
   onClose,
   onNavigationGuardChange,
 }: ImagePreviewSurfaceProps) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const keepEditingRef = useRef<HTMLButtonElement>(null);
   const actionPending = useRef(false);
   const [actionBusy, setActionBusy] = useState(false);

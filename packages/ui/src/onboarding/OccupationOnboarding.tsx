@@ -12,14 +12,14 @@ import { useOnboardingRecordService } from "@/hooks/useOnboardingRecordService.j
 import { usePlatform } from "@/hooks/usePlatform.js";
 import { useEffectiveShortcutBindings } from "@/shortcuts/useShortcutBindings.js";
 import { matchesShortcutBinding } from "@/shortcuts/bindings.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { Button } from "@/components/ui/button.js";
 import { Checkbox } from "@/components/ui/checkbox.js";
-import { useMaridStore } from "@/store/StoreProvider.js";
+import { useQodexStore } from "@/store/StoreProvider.js";
 import type { InterfaceMode } from "@/lib/interfaceMode.js";
 import { logger } from "@/logger.js";
 import { DesktopWindowControls } from "@/DesktopWindowControls.js";
-import type { OnboardingRecordEntry } from "@marid/shared";
+import type { OnboardingRecordEntry } from "@qodex/shared";
 
 /** 追加本地引导记录（userId 由 host 补全）；channel 缺失挂起时 5 秒超时按写失败处理。 */
 async function appendOnboardingRecord(
@@ -52,21 +52,21 @@ export function OccupationOnboarding({
   const platform = usePlatform();
   const onboardingRecord = useOnboardingRecordService();
   const shortcutBindings = useEffectiveShortcutBindings();
-  const requested = useMaridStore((state) => state.newUserOnboardingOpen);
-  const setRequested = useMaridStore((state) => state.setNewUserOnboardingOpen);
+  const requested = useQodexStore((state) => state.newUserOnboardingOpen);
+  const setRequested = useQodexStore((state) => state.setNewUserOnboardingOpen);
   // 登录态变化（useRootOAuthEffects 登录成功后 setUser）时按 userId 重新判定是否触发引导。
-  const userId = useMaridStore((state) => state.user?.id) ?? null;
-  const { intl } = useMaridIntl();
+  const userId = useQodexStore((state) => state.user?.id) ?? null;
+  const { intl } = useQodexIntl();
   const t = (key: string) => intl.formatMessage({ id: `occupationOnboarding.${key}` });
   const [occupation, setOccupation] = useState<OccupationValue | null>("developer");
-  const savedInterfaceMode = useMaridStore((state) => state.interfaceMode);
-  const setInterfaceMode = useMaridStore((state) => state.setInterfaceMode);
+  const savedInterfaceMode = useQodexStore((state) => state.interfaceMode);
+  const setInterfaceMode = useQodexStore((state) => state.setInterfaceMode);
   const applyInterfaceMode = useSetInterfaceModeWithTelemetry(platform, "app.onboarding");
   // mode 为 null 表示模式页被"跳过"（跳过是显式答案，记录里保留 null 而非兜底值）。
   const [mode, setMode] = useState<InterfaceMode | null>(savedInterfaceMode);
   const [step, setStep] = useState<0 | 1 | 2>(0);
   const preferences = step === 2;
-  const requestOnboardingDialog = useMaridStore((state) => state.requestOnboardingDialog);
+  const requestOnboardingDialog = useQodexStore((state) => state.requestOnboardingDialog);
   const [migration, setMigration] = useState(false);
   const [memory, setMemory] = useState(savedInterfaceMode === "office");
   const [suggestions, setSuggestions] = useState(savedInterfaceMode === "office");

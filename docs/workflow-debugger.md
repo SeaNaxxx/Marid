@@ -1,10 +1,10 @@
 # Workflow Debugger
 
-Workflow Debugger is a lightweight side-pane tool for inspecting Marid Agent workflow runs.
+Workflow Debugger is a lightweight side-pane tool for inspecting Qodex Agent workflow runs.
 
 ## Scope
 
-The default workflow kind is `expert`, while the Marid task service/types accept arbitrary non-empty workflow kinds and optional `definitionId` values from newer Marid agents. The panel is intentionally debugging-oriented and shows:
+The default workflow kind is `expert`, while the Qodex task service/types accept arbitrary non-empty workflow kinds and optional `definitionId` values from newer Qodex agents. The panel is intentionally debugging-oriented and shows:
 
 - workflow run list for the active workspace
 - selected run snapshot
@@ -13,24 +13,24 @@ The default workflow kind is `expert`, while the Marid task service/types accept
 - activity to child session mapping
 - recent workflow events
 
-## Marid Integration
+## Qodex Integration
 
-The renderer never reads `~/.marid/cli/workflows` directly. It calls `IMaridTaskService`, which currently exposes the shared `IWorkflowService` shape.
+The renderer never reads `~/.qodex/cli/workflows` directly. It calls `IQodexTaskService`, which currently exposes the shared `IWorkflowService` shape.
 
-Current branch status: the UI and shared `MaridWorkflow*` types are still present, but the Marid task service adapter only returns empty workflow data and marks mutating workflow operations unsupported. The intended agent extension methods remain:
+Current branch status: the UI and shared `QodexWorkflow*` types are still present, but the Qodex task service adapter only returns empty workflow data and marks mutating workflow operations unsupported. The intended agent extension methods remain:
 
-- `marid.dev/workflow/start`
-- `marid.dev/workflow/list`
-- `marid.dev/workflow/get`
-- `marid.dev/workflow/cancel`
+- `qodex.dev/workflow/start`
+- `qodex.dev/workflow/list`
+- `qodex.dev/workflow/get`
+- `qodex.dev/workflow/cancel`
 
 Live updates are delivered through the extension notification:
 
-- `marid.dev/workflow/event`
+- `qodex.dev/workflow/event`
 
-When workflow transport is reconnected, the adapter must map that notification into a workspace event with type `workspace_workflow_event`, preserving `kind`, `nodeId`, and small structured `payload` fields. Preserving these fields is required for incremental scheduler/frontier updates from `marid-cli`; older clients that dropped them had to reload the full snapshot to understand node movement.
+When workflow transport is reconnected, the adapter must map that notification into a workspace event with type `workspace_workflow_event`, preserving `kind`, `nodeId`, and small structured `payload` fields. Preserving these fields is required for incremental scheduler/frontier updates from `qodex-cli`; older clients that dropped them had to reload the full snapshot to understand node movement.
 
-The graph view uses the `snapshot.graph` payload returned by `marid.dev/workflow/get`.
+The graph view uses the `snapshot.graph` payload returned by `qodex.dev/workflow/get`.
 When the response also includes `scheduler`, the graph view prefers that derived server state and falls back to local graph derivation for older agents.
 It derives:
 

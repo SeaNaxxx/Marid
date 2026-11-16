@@ -1,25 +1,25 @@
 /**
- * 构建期开关：为真时安装包使用 Preview 身份，而后端环境仍由 `MARID_ENV` 单独决定。
- * 典型用法是 `MARID_ENV=production MARID_PREVIEW_IDENTITY=1`，得到一个连接生产后端、
- * 可与正式版并排安装的 `Marid Preview`。
+ * 构建期开关：为真时安装包使用 Preview 身份，而后端环境仍由 `QODEX_ENV` 单独决定。
+ * 典型用法是 `QODEX_ENV=production QODEX_PREVIEW_IDENTITY=1`，得到一个连接生产后端、
+ * 可与正式版并排安装的 `Qodex Preview`。
  */
-export const MARID_PREVIEW_IDENTITY_ENV = "MARID_PREVIEW_IDENTITY";
+export const QODEX_PREVIEW_IDENTITY_ENV = "QODEX_PREVIEW_IDENTITY";
 
 const PRODUCTION_IDENTITY = Object.freeze({
   flavor: "production",
-  appId: "dev.marid.app",
-  productName: "Marid",
-  linuxExecutableName: "marid",
-  linuxPackageName: "marid",
+  appId: "dev.qodex.app",
+  productName: "Qodex",
+  linuxExecutableName: "qodex",
+  linuxPackageName: "qodex",
   cuaHelperInstallVariant: null,
 });
 
 const PREVIEW_IDENTITY = Object.freeze({
   flavor: "preview",
-  appId: "dev.marid.app.preview",
-  productName: "Marid Preview",
-  linuxExecutableName: "marid-preview",
-  linuxPackageName: "marid-preview",
+  appId: "dev.qodex.app.preview",
+  productName: "Qodex Preview",
+  linuxExecutableName: "qodex-preview",
+  linuxPackageName: "qodex-preview",
   cuaHelperInstallVariant: "preview",
 });
 
@@ -28,17 +28,17 @@ export const desktopProductIdentities = Object.freeze({
   preview: PREVIEW_IDENTITY,
 });
 
-function normalizeDesktopMaridEnv(env) {
-  return env.MARID_ENV?.trim().toLowerCase() === "production" ? "production" : "test";
+function normalizeDesktopQodexEnv(env) {
+  return env.QODEX_ENV?.trim().toLowerCase() === "production" ? "production" : "test";
 }
 
 /**
  * 开关只有一种开启拼写 `1`（`0` / 空 = 关闭），与 CI workflow 规则和 release 门的
- * `$MARID_PREVIEW_IDENTITY == "1"` 精确比较保持同一套语义。其它拼写在构建期直接失败，
+ * `$QODEX_PREVIEW_IDENTITY == "1"` 精确比较保持同一套语义。其它拼写在构建期直接失败，
  * 避免 `true` 之类在 YAML 路由层漏匹配、却在脚本层被当成开启，把 Preview 包打进生产验收目录。
  */
 export function isPreviewIdentityRequested(env = process.env) {
-  const value = env[MARID_PREVIEW_IDENTITY_ENV]?.trim() ?? "";
+  const value = env[QODEX_PREVIEW_IDENTITY_ENV]?.trim() ?? "";
   if (value === "1") {
     return true;
   }
@@ -46,21 +46,21 @@ export function isPreviewIdentityRequested(env = process.env) {
     return false;
   }
   throw new Error(
-    `invalid ${MARID_PREVIEW_IDENTITY_ENV}=${env[MARID_PREVIEW_IDENTITY_ENV]}; expected 1 or 0`,
+    `invalid ${QODEX_PREVIEW_IDENTITY_ENV}=${env[QODEX_PREVIEW_IDENTITY_ENV]}; expected 1 or 0`,
   );
 }
 
 /**
- * 产品身份（flavor）与后端环境（`MARID_ENV`）是两个轴：
- * - `MARID_ENV=test` 一律是 Preview，测试后端不能顶着正式 `Marid` 身份覆盖用户的正式安装；
- * - `MARID_ENV=production` 默认是正式身份，显式 `MARID_PREVIEW_IDENTITY=1` 时改用 Preview 身份。
- * 未知 `MARID_ENV` 继续按 test 处理，和共享层 normalizeMaridEnv 的 fail-safe 默认值一致。
+ * 产品身份（flavor）与后端环境（`QODEX_ENV`）是两个轴：
+ * - `QODEX_ENV=test` 一律是 Preview，测试后端不能顶着正式 `Qodex` 身份覆盖用户的正式安装；
+ * - `QODEX_ENV=production` 默认是正式身份，显式 `QODEX_PREVIEW_IDENTITY=1` 时改用 Preview 身份。
+ * 未知 `QODEX_ENV` 继续按 test 处理，和共享层 normalizeQodexEnv 的 fail-safe 默认值一致。
  */
 export function resolveDesktopProductFlavor(env = process.env) {
   if (isPreviewIdentityRequested(env)) {
     return "preview";
   }
-  return normalizeDesktopMaridEnv(env) === "production" ? "production" : "preview";
+  return normalizeDesktopQodexEnv(env) === "production" ? "production" : "preview";
 }
 
 export function resolveDesktopProductIdentity(env = process.env) {
@@ -69,10 +69,10 @@ export function resolveDesktopProductIdentity(env = process.env) {
 
 /**
  * 产物文件名后缀标记的是后端环境而不是身份：`_TEST` 只出现在测试后端的安装包上。
- * 生产后端的 Preview 包靠 productName（`Marid Preview-<version>-...`）与正式包区分。
+ * 生产后端的 Preview 包靠 productName（`Qodex Preview-<version>-...`）与正式包区分。
  */
 export function resolveDesktopArtifactSuffix(env = process.env) {
-  return normalizeDesktopMaridEnv(env) === "test" ? "_TEST" : "";
+  return normalizeDesktopQodexEnv(env) === "test" ? "_TEST" : "";
 }
 
 /**
@@ -84,7 +84,7 @@ export function resolveDesktopArtifactSuffix(env = process.env) {
  */
 export function resolveWindowsAppUserModelIdForFlavor(flavor, runtime = { isPackaged: true }) {
   if (runtime.isPackaged === false) {
-    return "cn.aminer.marid";
+    return "cn.aminer.qodex";
   }
   return desktopProductIdentities[flavor === "preview" ? "preview" : "production"].appId;
 }

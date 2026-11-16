@@ -2,12 +2,12 @@ import {
   collectTelemetryRendererContext,
   resolveWorkspaceTelemetryDetail,
   type RendererTelemetryEventPayload,
-} from "@marid/shared";
+} from "@qodex/shared";
 // 设置页插件管理薄服务实现——plugins/* 旧协议词的唯一 host 侧消费点。
-// 插件安装/市场/启停的事实源在 marid-cli 进程（读写 ~/.marid 插件目录并热更新
+// 插件安装/市场/启停的事实源在 qodex-cli 进程（读写 ~/.qodex 插件目录并热更新
 // 运行态），host 无副本，故实现保持 agent 协议往返；收敛价值在 UI 层不再直触
-// IMaridAgentService，词表消费面从 UI 散点收拢到本文件一处。
-import type { IMaridAgentService } from "../marid-agent/maridAgent.js";
+// IQodexAgentService，词表消费面从 UI 散点收拢到本文件一处。
+import type { IQodexAgentService } from "../qodex-agent/qodexAgent.js";
 import type { IPluginManagementService } from "./pluginManagement.js";
 
 /** 插件管理变更成功的信号（Window Host 侧）。action 与遥测的动作名相同。 */
@@ -27,8 +27,8 @@ export interface PluginManagementServiceDependencies {
    */
   onMutationSucceeded?: (event: PluginMutationSucceededEvent) => void;
   now?: () => number;
-  maridAgentService: Pick<
-    IMaridAgentService,
+  qodexAgentService: Pick<
+    IQodexAgentService,
     | "listPlugins"
     | "getPluginReferenceCatalog"
     | "resolveSuggestedPluginReference"
@@ -53,10 +53,10 @@ export interface PluginManagementServiceDependencies {
 export function createPluginManagementService(
   dependencies: PluginManagementServiceDependencies,
 ): IPluginManagementService {
-  const agent = dependencies.maridAgentService;
+  const agent = dependencies.qodexAgentService;
   const now = dependencies.now ?? Date.now;
   type Params =
-    import("../marid-agent/maridAgentPluginParams.js").MaridAgentPluginMutationTarget & {
+    import("../qodex-agent/qodexAgentPluginParams.js").QodexAgentPluginMutationTarget & {
       pluginId?: string;
       pluginName?: string;
       marketplace?: string;

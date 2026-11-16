@@ -5,7 +5,7 @@ export interface DevicePlatformIconProps {
   platform?: string;
   className?: string;
 }
-export interface MaridAppLogoProps {
+export interface QodexAppLogoProps {
   className?: string;
 }
 export type BottomSheetProps = ComponentProps<typeof Dialog.Root>;

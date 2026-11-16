@@ -10,7 +10,7 @@ import { classifyLintDiagnostics, parseLintCommand } from "./cli-lint-admission.
 
 const exec = promisify(execFile);
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const cli = resolve(root, "apps/marid-cli");
+const cli = resolve(root, "apps/qodex-cli");
 
 async function main() {
   const policy = await loadPolicy(root);

@@ -9,7 +9,7 @@ import type {
   McpServerConfig,
   MigrateLegacyCommonMcpRequest,
   MigrateLegacyCommonMcpResult,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { isRecord, normalizeServerMap } from "./utils.js";
 
 function extractBalancedJson(text: string, startIndex: number): string | null {
@@ -202,14 +202,14 @@ function buildLegacyCommonMcpStorageCandidates(request?: MigrateLegacyCommonMcpR
   const appData = process.env.APPDATA ?? join(homedir(), "AppData", "Roaming");
 
   // 优先从老的 store.json 读取 common MCP 配置
-  candidates.push(join(appData, "ai.z.marid", "store.json"));
+  candidates.push(join(appData, "ai.z.qodex", "store.json"));
 
   candidates.push(
     join(localAppData, "ai.z.work", "EBWebView", "Default", "Local Storage", "leveldb"),
-    join(appData, "Marid", "Local Storage", "leveldb"),
-    join(appData, "Marid", "Partitions", "marid-embedded-browser", "Local Storage", "leveldb"),
-    join(appData, "Marid Dev", "Local Storage", "leveldb"),
-    join(appData, "Marid Dev", "Partitions", "marid-embedded-browser", "Local Storage", "leveldb"),
+    join(appData, "Qodex", "Local Storage", "leveldb"),
+    join(appData, "Qodex", "Partitions", "qodex-embedded-browser", "Local Storage", "leveldb"),
+    join(appData, "Qodex Dev", "Local Storage", "leveldb"),
+    join(appData, "Qodex Dev", "Partitions", "qodex-embedded-browser", "Local Storage", "leveldb"),
   );
 
   return Array.from(new Set(candidates));

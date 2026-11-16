@@ -1,4 +1,4 @@
-import { maridProtocolTraceSchema } from "./marid-protocol/trace.js";
+import { qodexProtocolTraceSchema } from "./qodex-protocol/trace.js";
 import { z } from "zod";
 
 export const channelMentionSchema = z
@@ -122,7 +122,7 @@ export function resolveChannelReplyParts(
 
 export const channelReplyHostRequestSchema = channelReplyRequestSchema
   .extend({
-    trace: maridProtocolTraceSchema.optional(),
+    trace: qodexProtocolTraceSchema.optional(),
     workspacePath: z.string().min(1),
     workspaceIdentity: z.string().optional(),
     remoteSessionId: z.string().optional(),

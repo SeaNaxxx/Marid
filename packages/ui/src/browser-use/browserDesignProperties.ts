@@ -1,4 +1,4 @@
-import { parseCssColor, toHexColor, type DesignEditableProperty } from "@marid/design-runtime";
+import { parseCssColor, toHexColor, type DesignEditableProperty } from "@qodex/design-runtime";
 
 // 属性面板里能改的样式项与页面身份。纯函数，状态在 useBrowserDesignMode。
 

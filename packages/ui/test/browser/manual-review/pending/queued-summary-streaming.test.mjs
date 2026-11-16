@@ -12,7 +12,7 @@ import { chromium } from "playwright-core";
 
 const root = fileURLToPath(new URL("../../../../../../", import.meta.url));
 const artifacts =
-  process.env.MARID_SUMMARY_ARTIFACT_DIR ??
+  process.env.QODEX_SUMMARY_ARTIFACT_DIR ??
   join(root, "packages/desktop/.e2e-artifacts/queued-summary-streaming");
 let server, browser;
 before(async () => {
@@ -22,13 +22,13 @@ before(async () => {
     '<!doctype html><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="data:,"><div id="root"></div><script type="module" src="/summary-fixture.tsx"></script>',
   );
   const source = root + "packages/ui/src/ToolCallBlocks/QueuedSummaryContent.tsx";
-  const baseline = process.env.MARID_SUMMARY_BASELINE_REF
+  const baseline = process.env.QODEX_SUMMARY_BASELINE_REF
     ? (
         await promisify(execFile)(
           "git",
           [
             "show",
-            process.env.MARID_SUMMARY_BASELINE_REF +
+            process.env.QODEX_SUMMARY_BASELINE_REF +
               ":packages/ui/src/ToolCallBlocks/QueuedSummaryContent.tsx",
           ],
           { cwd: root },

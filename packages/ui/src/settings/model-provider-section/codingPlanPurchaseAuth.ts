@@ -6,7 +6,7 @@ import {
   type OAuthProviderId,
   type OAuthAccountAvailability,
   ZAI_PROVIDER_ID,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { type CodingPlanProviderId } from "@/settings/model-provider-section/constants.js";
 
 export type CodingPlanPurchaseAuthStatus =

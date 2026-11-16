@@ -1,4 +1,4 @@
-import type { ConversationRow, ConversationRowTarget } from "@marid/shared/marid-protocol-v4";
+import type { ConversationRow, ConversationRowTarget } from "@qodex/shared/qodex-protocol-v4";
 import type { AssistantPreviewCard } from "@/lib/assistantPreviewCards.js";
 import type { AssistantCodeCommentCard } from "@/lib/assistantCodeComment.js";
 import { extractPlanToolCallContent } from "@/lib/planToolCall.js";

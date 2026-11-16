@@ -476,7 +476,7 @@ New task 首页和 Automations 闲时任务资格提示统一创建：
 执行：
 
 ```bash
-pnpm --filter @marid/ui test
+pnpm --filter @qodex/ui test
 pnpm typecheck
 pnpm lint
 ```

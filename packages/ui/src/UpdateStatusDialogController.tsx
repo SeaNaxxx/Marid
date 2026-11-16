@@ -1,6 +1,6 @@
-import type { IPlatformService, UpdateStatePayload } from "@marid/shared";
+import type { IPlatformService, UpdateStatePayload } from "@qodex/shared";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog.js";
 import { UpdateStatusDialog } from "@/UpdateStatusDialog.js";
 import { formatUpdateReleaseDate, getLocalizedUpdateReleaseNotes } from "@/updateReleaseNotes.js";
@@ -28,7 +28,7 @@ export function UpdateStatusDialogController({
   edgeToEdge?: boolean;
   showOverlay?: boolean;
 }) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const requestConfirmation = useConfirmDialog();
   const [autoDownloadAndInstallUpdates, setAutoDownloadAndInstallUpdates] = useState(false);
   const [updateActionInFlight, setUpdateActionInFlightState] = useState<UpdateActionInFlight>(null);

@@ -1,4 +1,4 @@
-import type { IPlatformService } from "@marid/shared";
+import type { IPlatformService } from "@qodex/shared";
 import type { FeedbackAttachmentDraft } from "@/feedback/feedbackStore.js";
 
 export async function captureFeedbackScreenshotDraft(

@@ -1,7 +1,7 @@
 import {
   toolCallCreateWorkflowDisplaySchema,
   type ToolCallCreateWorkflowDisplay,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 import { isPlainRecord } from "@/ToolCallBlocks/renderers/createWorkflowInput.js";
 
 /**

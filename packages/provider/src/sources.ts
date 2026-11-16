@@ -14,19 +14,19 @@ export interface ProviderSource<TSnapshot> {
 
 export interface ProviderConfigSnapshot {
   readonly revision: string;
-  readonly maridBuiltinRevision: string;
+  readonly qodexBuiltinRevision: string;
   readonly personalRevision: string;
-  readonly maridBuiltinProviders: ProviderConfigMap;
-  readonly maridBuiltinProviderTemplates: ProviderTemplateMap;
+  readonly qodexBuiltinProviders: ProviderConfigMap;
+  readonly qodexBuiltinProviderTemplates: ProviderTemplateMap;
   readonly personalProviders: ProviderConfigMap;
-  readonly maridBuiltinModelRules: ModelConfigRules;
+  readonly qodexBuiltinModelRules: ModelConfigRules;
   readonly personalModels: ModelConfigRules;
   readonly personalProviderOrder?: readonly string[];
 }
 
 export interface AccountProviderConfigSnapshot {
   readonly revision: string;
-  readonly basedOnMaridBuiltinRevision: string;
+  readonly basedOnQodexBuiltinRevision: string;
   readonly providers: ProviderConfigMap;
   readonly states?: AccountProviderStates;
 }
@@ -36,7 +36,7 @@ export function createFailClosedAccountProviderConfigSnapshot(
   config: ProviderConfigSnapshot,
 ): AccountProviderConfigSnapshot {
   const unentitledProviders = new ProviderConfigMap(
-    config.maridBuiltinProviders.entries().flatMap(([providerId, provider]) =>
+    config.qodexBuiltinProviders.entries().flatMap(([providerId, provider]) =>
       provider.access?.type === "zhipu-account"
         ? ([
             [
@@ -49,17 +49,17 @@ export function createFailClosedAccountProviderConfigSnapshot(
         : [],
     ),
   );
-  return createAccountProviderConfigSnapshot(config.maridBuiltinRevision, unentitledProviders);
+  return createAccountProviderConfigSnapshot(config.qodexBuiltinRevision, unentitledProviders);
 }
 
 export function createAccountProviderConfigSnapshot(
-  basedOnMaridBuiltinRevision: string,
+  basedOnQodexBuiltinRevision: string,
   providers: ProviderConfigMap,
   states?: AccountProviderStates,
 ): AccountProviderConfigSnapshot {
   return Object.freeze({
-    revision: `account:${JSON.stringify([basedOnMaridBuiltinRevision, providers.toJSON(), states])}`,
-    basedOnMaridBuiltinRevision,
+    revision: `account:${JSON.stringify([basedOnQodexBuiltinRevision, providers.toJSON(), states])}`,
+    basedOnQodexBuiltinRevision,
     providers,
     ...(states ? { states } : {}),
   });
@@ -67,7 +67,7 @@ export function createAccountProviderConfigSnapshot(
 
 const EMPTY_ACCOUNT_PROVIDER_CONFIG_SNAPSHOT: AccountProviderConfigSnapshot = Object.freeze({
   revision: "empty-account-config-v1",
-  basedOnMaridBuiltinRevision: "uninitialized",
+  basedOnQodexBuiltinRevision: "uninitialized",
   providers: ProviderConfigMap.empty(),
 });
 
@@ -103,7 +103,7 @@ function freezeAccountProviderConfigSnapshot(
 ): AccountProviderConfigSnapshot {
   return Object.freeze({
     revision: snapshot.revision,
-    basedOnMaridBuiltinRevision: snapshot.basedOnMaridBuiltinRevision,
+    basedOnQodexBuiltinRevision: snapshot.basedOnQodexBuiltinRevision,
     providers: snapshot.providers,
     ...(snapshot.states ? { states: snapshot.states } : {}),
   });

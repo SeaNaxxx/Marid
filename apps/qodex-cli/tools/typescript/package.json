@@ -1,0 +1,12 @@
+{
+  "name": "@qodex/typescript",
+  "version": "0.1.0-qodex",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tsconfig.json": "./tsconfig.json"
+  },
+  "scripts": {
+    "build": "echo 'Shared TypeScript config - no compilation needed'"
+  }
+}

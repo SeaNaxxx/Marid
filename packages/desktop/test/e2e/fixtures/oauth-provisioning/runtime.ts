@@ -9,15 +9,15 @@ import {
   createProviderProvisioningTarget,
   EmptyAccountProviderConfigSource,
   OAuthCredentialRepo,
-} from "@marid/services/node";
+} from "@qodex/services/node";
 
-const base = process.env.MARID_DATA_BASE_DIR;
+const base = process.env.QODEX_DATA_BASE_DIR;
 if (!base?.includes("oauth-provisioning-e2e-"))
   throw new Error("isolated provisioning HOME required");
-const configDir = join(base, ".marid", "v2");
+const configDir = join(base, ".qodex", "v2");
 const personalConfigFilePath = join(configDir, "provider_config.json");
 const configRuntime = createProviderConfigRuntime({
-  maridBuiltinFilePath: resolve("../../config/provider/marid-builtin.json"),
+  qodexBuiltinFilePath: resolve("../../config/provider/qodex-builtin.json"),
   personalFilePath: personalConfigFilePath,
   watch: false,
   personalPollingIntervalMs: false,
@@ -59,7 +59,7 @@ store.updateMany = async (changes, options) => {
     await update({
       ...changes,
       "oauth:session_revision": "e2e-concurrent-revision",
-      maridjwttoken: "e2e-concurrent-primary",
+      qodexjwttoken: "e2e-concurrent-primary",
     });
   }
   throw new Error("e2e failure after atomic credential write");

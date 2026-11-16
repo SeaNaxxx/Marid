@@ -1,5 +1,5 @@
-import type { Event } from "@marid/rpc";
-import { ServiceChannels } from "@marid/shared";
+import type { Event } from "@qodex/rpc";
+import { ServiceChannels } from "@qodex/shared";
 import { createServiceDescriptor } from "#src/descriptors.js";
 import type { IProjectService } from "#src/project/contract.js";
 import type { IRemoteProjectService } from "#src/remote-projects/contract.js";

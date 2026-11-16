@@ -10,7 +10,7 @@ import {
 } from "@/web-remote-control/domain/presentation.js";
 import { memo, useEffect, useMemo, useState } from "react";
 import QRCode from "qrcode";
-import { DesktopCommandIds, type BotProvider, type WebRemoteControlStatus } from "@marid/shared";
+import { DesktopCommandIds, type BotProvider, type WebRemoteControlStatus } from "@qodex/shared";
 import {
   Bot as BotIcon,
   CopyIcon,
@@ -32,10 +32,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog.js";
 import { toast } from "@/components/ui/toast.js";
-import { useMaridStore } from "@/store/StoreProvider.js";
+import { useQodexStore } from "@/store/StoreProvider.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
 import { useOAuth } from "@/hooks/useOAuth.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 import { getBotProviderRegionTagLabelId } from "@/botsUi.js";
 
@@ -51,9 +51,9 @@ const REMOTE_CONTROL_BOT_ENTRIES: Array<{
 ];
 
 function WebRemoteControlLoginButton({ onOpenChange }: { onOpenChange: (open: boolean) => void }) {
-  const { intl } = useMaridIntl();
-  const hasUser = useMaridStore((state) => Boolean(state.user));
-  const requestLoginEntry = useMaridStore((state) => state.requestLoginEntry);
+  const { intl } = useQodexIntl();
+  const hasUser = useQodexStore((state) => Boolean(state.user));
+  const requestLoginEntry = useQodexStore((state) => state.requestLoginEntry);
   const { activeProvider, loadingProviders, refreshProviders } = useOAuth();
 
   return (
@@ -94,7 +94,7 @@ export const WebRemoteControlDialog = memo(function WebRemoteControlDialogCompon
   initialTaskId?: string;
 }) {
   const platform = usePlatform();
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const [status, setStatus] = useState<WebRemoteControlStatus>({
     status: "idle",
   });

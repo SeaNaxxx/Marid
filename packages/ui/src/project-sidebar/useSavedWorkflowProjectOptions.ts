@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { buildRemoteHostWorkspaceIdentity } from "@marid/shared";
+import { buildRemoteHostWorkspaceIdentity } from "@qodex/shared";
 import type { AutomationWorkspaceOption } from "@/settings/automationWorkspaceOptions.js";
 import { useOptionalProjectDirectory } from "@/project-sidebar/ProjectDirectoryProvider.js";
 import { projectKey } from "@/project-sidebar/view.js";

@@ -4,8 +4,8 @@ import {
   sanitizeTelemetryModelValue,
   type ArmsCustomEventPayload,
   type IPlatformService,
-  type MaridTaskNetworkDebugStatus,
-} from "@marid/shared";
+  type QodexTaskNetworkDebugStatus,
+} from "@qodex/shared";
 import { logger } from "@/logger.js";
 
 export const PLAN_USAGE_ARMS_GROUP = "plan_usage";
@@ -57,7 +57,7 @@ function nonNegativeInteger(value: number | undefined): number | undefined {
 }
 
 function networkRequestStatus(
-  statusType: MaridTaskNetworkDebugStatus["statusType"],
+  statusType: QodexTaskNetworkDebugStatus["statusType"],
 ): PlanUsageRequestStatus {
   switch (statusType) {
     case "model_request_started":
@@ -166,7 +166,7 @@ export function reportPlanUsageRequestToArms(
 
 export function reportPlanUsageModelRequestStartedToArms(
   reporter: ArmsReporter | null | undefined,
-  event: MaridTaskNetworkDebugStatus,
+  event: QodexTaskNetworkDebugStatus,
 ): void {
   if (!reporter) {
     return;

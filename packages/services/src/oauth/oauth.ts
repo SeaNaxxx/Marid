@@ -8,9 +8,9 @@ import type {
   OAuthSessionState,
   OAuthStartResponse,
   UserInfo,
-} from "@marid/shared";
-import { ServiceChannels } from "@marid/shared";
-import type { Event } from "@marid/rpc";
+} from "@qodex/shared";
+import { ServiceChannels } from "@qodex/shared";
+import type { Event } from "@qodex/rpc";
 import { createServiceDescriptor } from "../descriptors.js";
 
 /**

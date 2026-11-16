@@ -280,10 +280,10 @@ function signalPosixProcesses(pids: number[], signal: NodeJS.Signals) {
 }
 
 function collectCurrentE2EProcessTreePids(rootPids: number[] = []) {
-  const homeDir = process.env.MARID_E2E_HOME_DIR?.trim();
-  const runId = process.env.MARID_E2E_RUN_ID?.trim();
+  const homeDir = process.env.QODEX_E2E_HOME_DIR?.trim();
+  const runId = process.env.QODEX_E2E_RUN_ID?.trim();
   if (!homeDir || !runId) {
-    throw new Error("Electron reload 缺少 MARID_E2E_HOME_DIR 或 MARID_E2E_RUN_ID");
+    throw new Error("Electron reload 缺少 QODEX_E2E_HOME_DIR 或 QODEX_E2E_RUN_ID");
   }
   return listE2EProcessTreePids({
     currentPid: process.pid,

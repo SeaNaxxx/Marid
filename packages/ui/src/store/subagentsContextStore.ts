@@ -1,18 +1,18 @@
 import { create } from "zustand";
-import type { ISubagentsService } from "@marid/services";
+import type { ISubagentsService } from "@qodex/services";
 import {
-  normalizeAgentProviderToMaridAgent,
+  normalizeAgentProviderToQodexAgent,
   type AgentSummary,
   type AgentsCapability,
-  type MaridProvider,
-} from "@marid/shared";
+  type QodexProvider,
+} from "@qodex/shared";
 import { logger } from "@/logger.js";
 import { getServiceAuthorityId } from "@/store/serviceAuthorityKey.js";
 
 export interface SubagentsContextSnapshot {
   workspacePath: string;
   workspaceIdentity: string | null;
-  provider: MaridProvider;
+  provider: QodexProvider;
   agents: AgentSummary[];
   capability: AgentsCapability | null;
   loading: boolean;
@@ -24,19 +24,19 @@ interface SubagentsContextStoreState {
   contexts: Record<string, SubagentsContextSnapshot>;
   initialize: (
     workspacePath: string,
-    provider: MaridProvider,
+    provider: QodexProvider,
     subagentsService: ISubagentsService,
     workspaceIdentity?: string,
   ) => Promise<void>;
   refresh: (
     workspacePath: string,
-    provider: MaridProvider,
+    provider: QodexProvider,
     subagentsService: ISubagentsService,
     workspaceIdentity?: string,
   ) => Promise<void>;
   setEnabled: (
     workspacePath: string,
-    provider: MaridProvider,
+    provider: QodexProvider,
     agentId: string,
     enabled: boolean,
     subagentsService: ISubagentsService,
@@ -50,12 +50,12 @@ let nextRequestId = 0;
 
 export function getSubagentsContextKey(
   workspacePath: string,
-  provider: MaridProvider,
+  provider: QodexProvider,
   workspaceIdentity: string | null | undefined,
   subagentsService: ISubagentsService,
 ): string {
   const authority = getServiceAuthorityId(subagentsService);
-  return `${authority}::${workspaceIdentity?.trim() || workspacePath}::${normalizeAgentProviderToMaridAgent(provider)}`;
+  return `${authority}::${workspaceIdentity?.trim() || workspacePath}::${normalizeAgentProviderToQodexAgent(provider)}`;
 }
 
 function updateContext(
@@ -69,7 +69,7 @@ function updateContext(
 function loadAgents(
   key: string,
   workspacePath: string,
-  provider: MaridProvider,
+  provider: QodexProvider,
   subagentsService: ISubagentsService,
   workspaceIdentity?: string,
   bypassCache = false,
@@ -90,7 +90,7 @@ function loadAgents(
 async function loadContext(
   params: {
     workspacePath: string;
-    provider: MaridProvider;
+    provider: QodexProvider;
     subagentsService: ISubagentsService;
     workspaceIdentity?: string;
     bypassCache: boolean;
@@ -100,7 +100,7 @@ async function loadContext(
   ) => void,
   get: () => SubagentsContextStoreState,
 ): Promise<void> {
-  const provider = normalizeAgentProviderToMaridAgent(params.provider);
+  const provider = normalizeAgentProviderToQodexAgent(params.provider);
   const workspaceIdentity = params.workspaceIdentity?.trim() || undefined;
   const key = getSubagentsContextKey(
     params.workspacePath,

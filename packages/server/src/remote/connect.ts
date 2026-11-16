@@ -1,23 +1,23 @@
-import { SocketProtocol, ChannelClient, ChannelServer, type IServerChannel } from "@marid/rpc";
-import type { IServiceAccessor } from "@marid/services";
-import { RemoteServiceAccess } from "@marid/client";
+import { SocketProtocol, ChannelClient, ChannelServer, type IServerChannel } from "@qodex/rpc";
+import type { IServiceAccessor } from "@qodex/services";
+import { RemoteServiceAccess } from "@qodex/client";
 import {
   SERVICE_AUTHORITY_MODE_ENV,
   TOPIC_RESOURCE_RELAY_CHANNEL,
-  MARID_APP_VERSION_ENV,
-  MARID_DESKTOP_CONTEXT_PROMPT_ENABLED_ENV,
-  MARID_DYNAMIC_WORKFLOW_MODE_ENV,
+  QODEX_APP_VERSION_ENV,
+  QODEX_DESKTOP_CONTEXT_PROMPT_ENABLED_ENV,
+  QODEX_DYNAMIC_WORKFLOW_MODE_ENV,
   formatLogPrefix,
-  MARID_REMOTE_HTTP_PROXY_ENV_KEY,
-  MARID_REMOTE_NO_PROXY_ENV_KEY,
-  MARID_REMOTE_RUNTIME_NETWORK_AUTHORITY_ENV_KEY,
-} from "@marid/shared";
+  QODEX_REMOTE_HTTP_PROXY_ENV_KEY,
+  QODEX_REMOTE_NO_PROXY_ENV_KEY,
+  QODEX_REMOTE_RUNTIME_NETWORK_AUTHORITY_ENV_KEY,
+} from "@qodex/shared";
 import type { IRemoteBackend } from "./backend.js";
 import { wrapStdioStream } from "./stdio-socket.js";
 import { performHandshake } from "./handshake.js";
 import { deployServer } from "./deploy.js";
 import type { DeployOptions } from "./deploy.js";
-import { assertSupportedRemoteEnvironment } from "@marid/server/remote/remotePlatformSupport.js";
+import { assertSupportedRemoteEnvironment } from "@qodex/server/remote/remotePlatformSupport.js";
 import { quotePosixShellArg } from "./posixShell.js";
 import { formatWslProxyForLog } from "./wslProxy.js";
 
@@ -57,11 +57,11 @@ export interface RemoteConnection {
 }
 
 const REMOTE_RUNTIME_ENV_KEYS = [
-  "MARID_ENV",
-  "MARID_BASE_URL",
-  "MARID_ENDPOINT_ORIGIN",
-  "MARID_TEST_BASE_URL",
-  "MARID_PRODUCTION_BASE_URL",
+  "QODEX_ENV",
+  "QODEX_BASE_URL",
+  "QODEX_ENDPOINT_ORIGIN",
+  "QODEX_TEST_BASE_URL",
+  "QODEX_PRODUCTION_BASE_URL",
   "ZAI_OAUTH_ORIGIN",
   "ZAI_TEST_OAUTH_ORIGIN",
   "ZAI_PRODUCTION_OAUTH_ORIGIN",
@@ -72,10 +72,10 @@ const REMOTE_RUNTIME_ENV_KEYS = [
   "ZAI_TEST_OAUTH_CLIENT_ID",
   "ZAI_PRODUCTION_OAUTH_CLIENT_ID",
   // Desktop Main 已完成的单功能灰度结果；远端 server 只消费，不重新分桶。
-  MARID_DESKTOP_CONTEXT_PROMPT_ENABLED_ENV,
+  QODEX_DESKTOP_CONTEXT_PROMPT_ENABLED_ENV,
   // 同上：本地覆盖由 Desktop Main 按构建档位写定（buildHostProcessEnv），
   // 透传后 SSH/WSL/Docker 远端 Host 与本地 Host 得到同一档位。
-  MARID_DYNAMIC_WORKFLOW_MODE_ENV,
+  QODEX_DYNAMIC_WORKFLOW_MODE_ENV,
 ] as const;
 
 export type RemoteRuntimeEnvKey = (typeof REMOTE_RUNTIME_ENV_KEYS)[number];
@@ -108,7 +108,7 @@ function throwIfRemoteConnectAborted(signal: AbortSignal | undefined): void {
 }
 
 /**
- * Connect to a remote marid server via an IRemoteBackend.
+ * Connect to a remote qodex server via an IRemoteBackend.
  *
  * Steps:
  * 1. detect() → { platform, arch }
@@ -207,7 +207,7 @@ async function connectRemoteUnchecked(
 
   // Forward stderr for debugging
   stream.stderr.on("data", (chunk: Buffer) => {
-    // 远端 marid-server 的服务日志走 stderr，直接写 host stderr 时可能被结构化日志中继吞掉。
+    // 远端 qodex-server 的服务日志走 stderr，直接写 host stderr 时可能被结构化日志中继吞掉。
     // 这里转成 host 的 console 日志，让 remote sqlite 初始化/锁冲突日志能稳定出现在连接日志面板和启动终端。
     console.log(`[remote] ${chunk.toString().trimEnd()}`);
   });
@@ -379,7 +379,7 @@ function buildRemoteServerCommand(
 ): string {
   const envParts = [
     `${SERVICE_AUTHORITY_MODE_ENV}="desktop-attached-remote"`,
-    'MARID_SERVER_RUNTIME_ROOT="$HOME/.marid/server"',
+    'QODEX_SERVER_RUNTIME_ROOT="$HOME/.qodex/server"',
   ];
   for (const [key, value] of Object.entries(
     pickRemoteRuntimeEnv(options?.remoteRuntimeEnv ?? {}),
@@ -390,20 +390,20 @@ function buildRemoteServerCommand(
   if (appVersion) {
     // 远端 server 是通过 SSH/WSL/Docker 单独启动的，不会继承桌面 host env。
     // 这里显式把 app 版本作为远端进程 env 注入，远端 agent 才能在模型请求 header 中带上版本。
-    envParts.push(`${MARID_APP_VERSION_ENV}=${quotePosixShellArg(appVersion)}`);
+    envParts.push(`${QODEX_APP_VERSION_ENV}=${quotePosixShellArg(appVersion)}`);
   }
   if (remoteRuntimeNetwork?.authoritative) {
-    envParts.push(`${MARID_REMOTE_RUNTIME_NETWORK_AUTHORITY_ENV_KEY}='1'`);
+    envParts.push(`${QODEX_REMOTE_RUNTIME_NETWORK_AUTHORITY_ENV_KEY}='1'`);
     if (remoteRuntimeNetwork.httpProxy !== undefined) {
       envParts.push(
-        `${MARID_REMOTE_HTTP_PROXY_ENV_KEY}=${quotePosixShellArg(remoteRuntimeNetwork.httpProxy)}`,
+        `${QODEX_REMOTE_HTTP_PROXY_ENV_KEY}=${quotePosixShellArg(remoteRuntimeNetwork.httpProxy)}`,
       );
     }
     if (remoteRuntimeNetwork.noProxy !== undefined) {
       envParts.push(
-        `${MARID_REMOTE_NO_PROXY_ENV_KEY}=${quotePosixShellArg(remoteRuntimeNetwork.noProxy)}`,
+        `${QODEX_REMOTE_NO_PROXY_ENV_KEY}=${quotePosixShellArg(remoteRuntimeNetwork.noProxy)}`,
       );
     }
   }
-  return `${envParts.join(" ")} ~/.marid/server/node ~/.marid/server/marid-server.cjs --prepare-credentials`;
+  return `${envParts.join(" ")} ~/.qodex/server/node ~/.qodex/server/qodex-server.cjs --prepare-credentials`;
 }

@@ -1,12 +1,12 @@
-import type { ICommandsService, ISkillsService, IMaridAgentService } from "@marid/services";
+import type { ICommandsService, ISkillsService, IQodexAgentService } from "@qodex/services";
 import { logger } from "@/logger.js";
-import { invalidateDeferredDraftSessionForSkillChange } from "@/lib/maridDraftSkillInvalidation.js";
+import { invalidateDeferredDraftSessionForSkillChange } from "@/lib/qodexDraftSkillInvalidation.js";
 import { refreshSharedSkillStoreForWorkspace } from "@/lib/skillStoreRefresh.js";
 import { mergeSlashCommandsAfterCommandRefresh } from "@/settings/pluginSlashCommandRefresh.js";
 import { useCommandsStore } from "@/store/commandsStore.js";
 import { useMcpStore } from "@/store/mcpStore.js";
 import { notifyPluginManagementChange } from "@/store/pluginManagementStoreLoading.js";
-import { useMaridSessionStore } from "@/store/maridSessionStore.js";
+import { useQodexSessionStore } from "@/store/qodexSessionStore.js";
 
 function toMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
@@ -48,15 +48,15 @@ export async function refreshSlashCommandsAfterRemoteSync(params: {
       });
     }
 
-    const maridSessionStore = useMaridSessionStore.getState();
-    const currentSlashCommands = maridSessionStore.getWorkspaceState(
+    const qodexSessionStore = useQodexSessionStore.getState();
+    const currentSlashCommands = qodexSessionStore.getWorkspaceState(
       workspacePath,
       workspaceIdentityParam,
     ).slashCommands;
     // 远程插件同步入口不一定打开过命令设置页，commandsStore 可能尚未初始化。
-    // 输入框 `/` 面板读取的是 maridSessionStore.slashCommands，所以同步后必须直接
+    // 输入框 `/` 面板读取的是 qodexSessionStore.slashCommands，所以同步后必须直接
     // 向当前远端 workspace 拉取 commands 并写回 slashCommands，不能只刷新设置页 store。
-    maridSessionStore.setSlashCommands(
+    qodexSessionStore.setSlashCommands(
       workspacePath,
       mergeSlashCommandsAfterCommandRefresh(currentSlashCommands, result.commands),
       workspaceIdentityParam,
@@ -112,7 +112,7 @@ export async function refreshWorkspacePluginCapabilitiesAfterRemoteSync(params: 
   skillsService: ISkillsService;
   workspaceIdentity?: string | null;
   workspacePath?: string | null;
-  maridAgentService: IMaridAgentService;
+  qodexAgentService: IQodexAgentService;
 }): Promise<void> {
   const workspacePath = params.workspacePath;
   if (!workspacePath) {

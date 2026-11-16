@@ -1,4 +1,4 @@
-import type { BrowserCommand, BrowserCommandResult } from "@marid/shared";
+import type { BrowserCommand, BrowserCommandResult } from "@qodex/shared";
 import {
   handleCheck,
   handleClick,

@@ -1,6 +1,6 @@
-import type { MaridPluginReferenceCatalogEntry } from "@marid/shared";
+import type { QodexPluginReferenceCatalogEntry } from "@qodex/shared";
 import { buildPluginMentionMarkdown } from "@/mentions/mentionMarkdown.js";
-import type { ComposerMentionPrefill } from "@/store/maridSessionStoreTypes.js";
+import type { ComposerMentionPrefill } from "@/store/qodexSessionStoreTypes.js";
 
 export interface DraftSuggestedPromptPluginReference {
   stableId: string;
@@ -39,7 +39,7 @@ export async function buildDraftSuggestedPromptPrefill({
 }: {
   prompt: string;
   plugin?: DraftSuggestedPromptPluginReference;
-  loadPluginCatalog: () => Promise<readonly MaridPluginReferenceCatalogEntry[]>;
+  loadPluginCatalog: () => Promise<readonly QodexPluginReferenceCatalogEntry[]>;
   onCatalogError?: (error: unknown) => void;
 }): Promise<DraftSuggestedPromptPrefill> {
   const text = prompt.trim();
@@ -47,7 +47,7 @@ export async function buildDraftSuggestedPromptPrefill({
     return { text };
   }
 
-  let catalog: readonly MaridPluginReferenceCatalogEntry[];
+  let catalog: readonly QodexPluginReferenceCatalogEntry[];
   try {
     catalog = await loadPluginCatalog();
   } catch (error) {

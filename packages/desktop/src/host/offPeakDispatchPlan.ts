@@ -1,4 +1,4 @@
-import { OffPeakPermanentDispatchError } from "@marid/services/node";
+import { OffPeakPermanentDispatchError } from "@qodex/services/node";
 
 /**
  * 闲时派发三分支：

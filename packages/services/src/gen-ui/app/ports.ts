@@ -1,11 +1,11 @@
-import type { Event } from "@marid/rpc";
+import type { Event } from "@qodex/rpc";
 import type {
   GenUiScope,
   GenUiStateChange,
   GenUiStateEntry,
   GenUiStateTarget,
   GenUiWidgetState,
-} from "@marid/shared/gen-ui";
+} from "@qodex/shared/gen-ui";
 export interface GenUiStateStorage {
   get(target: GenUiStateTarget): Promise<GenUiWidgetState | null>;
   set(target: GenUiStateTarget, state: GenUiWidgetState): Promise<void>;

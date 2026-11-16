@@ -7,19 +7,19 @@ import {
   type RefObject,
 } from "react";
 import {
-  maridProviderRuntimeHeadersErrorCode,
-  type MaridApiRetryStatus,
-  type MaridConfigOption,
-  type MaridConfigSelectValue,
-  type MaridProvider,
-} from "@marid/shared";
+  qodexProviderRuntimeHeadersErrorCode,
+  type QodexApiRetryStatus,
+  type QodexConfigOption,
+  type QodexConfigSelectValue,
+  type QodexProvider,
+} from "@qodex/shared";
 import {
   TID_CHAT_MODE_SELECT_ITEM,
   TID_CHAT_MODE_SELECT_TRIGGER,
   TID_CHAT_THOUGHT_LEVEL_SELECT_ITEM,
   TID_CHAT_THOUGHT_LEVEL_SELECT_TRIGGER,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
 import {
   Select,
@@ -33,7 +33,7 @@ import {
   shouldRestoreChatInputFocusAfterPickerClose,
 } from "@/lib/pickerFocus.js";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 import {
   ChevronDownIcon,
@@ -44,8 +44,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import {
-  MARID_MODE_OPTION_DESCRIPTION_IDS,
-  MARID_MODE_OPTION_LABEL_IDS,
+  QODEX_MODE_OPTION_DESCRIPTION_IDS,
+  QODEX_MODE_OPTION_LABEL_IDS,
 } from "./display-help.js";
 import { RollingToolbarLabel } from "@/chat-input-toolbar/RollingToolbarLabel.js";
 
@@ -64,7 +64,7 @@ type ConfigSelectTriggerVariant = ComponentProps<
  * 系统事件误当成用户选择（如 Automations 编辑页仅打开详情就被标记未保存修改）。
  * 用户只能点到已渲染的 option，值域外的选择回调一律丢弃。 */
 export function isConfigSelectValueInOptions(
-  option: MaridConfigOption,
+  option: QodexConfigOption,
   value: string,
 ): boolean {
   return option.options?.some((entry) => String(entry.value) === value) ?? false;
@@ -80,7 +80,7 @@ const HIGH_PERMISSION_MODE_VALUES = new Set([
 ]);
 
 function getConfigSelectTriggerTestId(
-  option: MaridConfigOption,
+  option: QodexConfigOption,
 ): string | undefined {
   if (option.category === "thought_level") {
     return TID_CHAT_THOUGHT_LEVEL_SELECT_TRIGGER;
@@ -94,8 +94,8 @@ function getConfigSelectTriggerTestId(
 }
 
 function getConfigSelectItemTestId(
-  option: MaridConfigOption,
-  entry: MaridConfigSelectValue,
+  option: QodexConfigOption,
+  entry: QodexConfigSelectValue,
 ): string | undefined {
   if (option.category === "thought_level") {
     return testId(TID_CHAT_THOUGHT_LEVEL_SELECT_ITEM, entry.value);
@@ -138,8 +138,8 @@ export function ChatApiRetryStatus({
   intl,
   locale,
 }: {
-  apiRetry: MaridApiRetryStatus | null;
-  intl: ReturnType<typeof useMaridIntl>["intl"];
+  apiRetry: QodexApiRetryStatus | null;
+  intl: ReturnType<typeof useQodexIntl>["intl"];
   locale: string;
 }) {
   const retryLabel = useMemo(() => {
@@ -147,14 +147,14 @@ export function ChatApiRetryStatus({
       return null;
     }
 
-    // 当前 Marid Agent 只会推送某一刻的 retryDelayMs 快照，不会每秒递减。
+    // 当前 Qodex Agent 只会推送某一刻的 retryDelayMs 快照，不会每秒递减。
     // 继续把这个值渲染成“X 秒后继续”会给用户造成倒计时在卡住的错觉。
     // 这里先收敛成稳定的重试状态文案，只展示第几次重试。
     const formatter = new Intl.NumberFormat(locale);
     return intl.formatMessage(
       {
         id:
-          apiRetry.error === maridProviderRuntimeHeadersErrorCode.configNetwork
+          apiRetry.error === qodexProviderRuntimeHeadersErrorCode.configNetwork
             ? "chat.configReadRetryStatus"
             : "chat.apiRetryStatus",
       },
@@ -189,9 +189,9 @@ export function ChatApiRetryStatus({
 }
 
 export function getModeOptionDisplayLabel(
-  intl: ReturnType<typeof useMaridIntl>["intl"],
-  provider: MaridProvider | undefined,
-  entry: Pick<MaridConfigSelectValue, "name" | "value">,
+  intl: ReturnType<typeof useQodexIntl>["intl"],
+  provider: QodexProvider | undefined,
+  entry: Pick<QodexConfigSelectValue, "name" | "value">,
 ): string {
   const labelMessageId = getModeOptionLabelMessageId(provider, entry);
   if (!labelMessageId) {
@@ -202,32 +202,32 @@ export function getModeOptionDisplayLabel(
 }
 
 export function getModeOptionLabelMessageId(
-  provider: MaridProvider | undefined,
-  entry: Pick<MaridConfigSelectValue, "value">,
+  provider: QodexProvider | undefined,
+  entry: Pick<QodexConfigSelectValue, "value">,
 ): string | null {
   if (!provider) {
     return null;
   }
 
-  return MARID_MODE_OPTION_LABEL_IDS[provider]?.[entry.value] ?? null;
+  return QODEX_MODE_OPTION_LABEL_IDS[provider]?.[entry.value] ?? null;
 }
 
 export function getModeOptionDescriptionMessageId(
-  provider: MaridProvider | undefined,
-  entry: Pick<MaridConfigSelectValue, "value">,
+  provider: QodexProvider | undefined,
+  entry: Pick<QodexConfigSelectValue, "value">,
 ): string | null {
   if (!provider) {
     return null;
   }
 
-  return MARID_MODE_OPTION_DESCRIPTION_IDS[provider]?.[entry.value] ?? null;
+  return QODEX_MODE_OPTION_DESCRIPTION_IDS[provider]?.[entry.value] ?? null;
 }
 
 export function getConfigOptionEntryLabel(
-  intl: ReturnType<typeof useMaridIntl>["intl"],
-  provider: MaridProvider | undefined,
-  option: MaridConfigOption,
-  entry: MaridConfigSelectValue,
+  intl: ReturnType<typeof useQodexIntl>["intl"],
+  provider: QodexProvider | undefined,
+  option: QodexConfigOption,
+  entry: QodexConfigSelectValue,
 ): string {
   if (option.category === "mode") {
     return getModeOptionDisplayLabel(intl, provider, entry);
@@ -237,10 +237,10 @@ export function getConfigOptionEntryLabel(
 }
 
 export function getConfigOptionEntryDescription(
-  intl: ReturnType<typeof useMaridIntl>["intl"],
-  provider: MaridProvider | undefined,
-  option: MaridConfigOption,
-  entry: MaridConfigSelectValue,
+  intl: ReturnType<typeof useQodexIntl>["intl"],
+  provider: QodexProvider | undefined,
+  option: QodexConfigOption,
+  entry: QodexConfigSelectValue,
 ): string | undefined {
   if (option.category !== "mode") {
     return entry.description;
@@ -300,7 +300,7 @@ export function ConfigSelect({
   provider,
   restoreFocusSelector = '[data-testid="chat-input"]',
 }: {
-  option: MaridConfigOption;
+  option: QodexConfigOption;
   onValueChange: (value: string) => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -314,10 +314,10 @@ export function ConfigSelect({
   triggerSize?: ConfigSelectTriggerSize;
   leadingIcon?: LucideIcon;
   labelVisibilityClassName?: string;
-  provider?: MaridProvider;
+  provider?: QodexProvider;
   restoreFocusSelector?: string | null;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
 
   // 注意：handleContentKeyDown 必须在 early return 之前调用。
   // 之前 `if (option.type !== "select" ...) return null` 写在 useCallback 之前，

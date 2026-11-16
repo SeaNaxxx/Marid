@@ -1,7 +1,7 @@
 import { reloadElectronSessionPreservingBrowserProfile } from "#e2e/helpers/e2e-electron-reload";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { parseRemoteWorkspaceIdentity } from "@marid/shared";
+import { parseRemoteWorkspaceIdentity } from "@qodex/shared";
 import { clearAppData, DEFAULT_WORKSPACE, readSettings } from "#e2e/helpers/desktop-app";
 import {
   connectSSHWorkspaceAndSendFirstTurn,
@@ -26,7 +26,7 @@ import {
 
 const CASE_MARKER = "E2E_R3_MIXED_ENTRIES";
 const artifactDir = resolve(
-  process.env.MARID_E2E_ARTIFACT_DIR ?? ".e2e-artifacts/r3-mixed-entries",
+  process.env.QODEX_E2E_ARTIFACT_DIR ?? ".e2e-artifacts/r3-mixed-entries",
 );
 
 interface TabRow {
@@ -40,7 +40,7 @@ function readTabs(): Promise<{ active: string | null; tabs: TabRow[] }> {
   return browser.execute(() => {
     const store = (
       window as Window & {
-        __maridTabStoreE2E?: {
+        __qodexTabStoreE2E?: {
           getState?: () => {
             activeWorkspaceIdentity?: string | null;
             activeWorkspacePath?: string | null;
@@ -53,7 +53,7 @@ function readTabs(): Promise<{ active: string | null; tabs: TabRow[] }> {
           };
         };
       }
-    ).__maridTabStoreE2E;
+    ).__qodexTabStoreE2E;
     const state = store?.getState?.();
     return {
       active: state?.activeWorkspaceIdentity ?? state?.activeWorkspacePath ?? null,

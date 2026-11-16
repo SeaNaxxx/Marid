@@ -3,7 +3,7 @@ import { promisify } from "node:util";
 import {
   STORAGE_MIGRATION_COMMAND,
   storageMigrationReportSchema,
-} from "@marid/shared/sqlite-migrations";
+} from "@qodex/shared/sqlite-migrations";
 import type { StartupStorageContract } from "./contract.js";
 export type { StartupStorageContract, AgentStorageMigrationInput } from "./contract.js";
 const execute = promisify(execFile);

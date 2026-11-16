@@ -25,15 +25,15 @@ import {
   resolveStartPlanFamilyFromOAuthProvider,
   toZhOrEnLocale,
   ZAI_PROVIDER_ID,
-} from "@marid/shared";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+} from "@qodex/shared";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { Button } from "@/components/ui/button.js";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog.js";
 import { useModelProviders } from "@/hooks/useModelProviders.js";
 import { resolveEntitledAccountProviderAccess } from "@/lib/accountProviderAccess.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
 import { useServices } from "@/hooks/useServices.js";
-import { useMaridStore } from "@/store/StoreProvider.js";
+import { useQodexStore } from "@/store/StoreProvider.js";
 import { logger } from "@/logger.js";
 import {
   PRESET_PROVIDER_SPECS,
@@ -252,7 +252,7 @@ export function ModelProviderSection({
   pendingModelProviderTarget?: SettingsModelProviderTarget;
   onConsumePendingModelProviderTarget?: () => void;
 } = {}) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const confirmDialog = useConfirmDialog();
   const platform = usePlatform();
   const { modelSelectionService, oauthService } = useServices();
@@ -395,10 +395,10 @@ export function ModelProviderSection({
   const codingPlanStatusSyncAttemptsRef = useRef(
     new Map<string, "inFlight" | "succeeded" | "failed">(),
   );
-  const requestLoginEntry = useMaridStore((state) => state.requestLoginEntry);
-  const setUser = useMaridStore((state) => state.setUser);
-  const oauthError = useMaridStore((state) => state.oauthError);
-  const setOAuthError = useMaridStore((state) => state.setOAuthError);
+  const requestLoginEntry = useQodexStore((state) => state.requestLoginEntry);
+  const setUser = useQodexStore((state) => state.setUser);
+  const oauthError = useQodexStore((state) => state.oauthError);
+  const setOAuthError = useQodexStore((state) => state.setOAuthError);
   const {
     settings: sharedSettings,
     loading: sharedSettingsLoading,

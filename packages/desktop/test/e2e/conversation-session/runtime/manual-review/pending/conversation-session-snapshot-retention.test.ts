@@ -1,7 +1,7 @@
 // 生产 renderer 的独立 CDP E2E；使用 node:test，不能放入 WDIO/Docker preset。
 // 前置：隔离 HOME 中播种 8 个 sess_probe_retention_0..7 已完成会话，启动未开启 E2E bridge 的 App。
-// MARID_RETENTION_CDP_URL=http://127.0.0.1:9326 MARID_RETENTION_ARTIFACT_DIR=<dir>
-// pnpm --filter @marid/desktop test:e2e:retention
+// QODEX_RETENTION_CDP_URL=http://127.0.0.1:9326 QODEX_RETENTION_ARTIFACT_DIR=<dir>
+// pnpm --filter @qodex/desktop test:e2e:retention
 import assert from "node:assert/strict";
 import { createWriteStream } from "node:fs";
 import { mkdir, writeFile, appendFile } from "node:fs/promises";
@@ -13,9 +13,9 @@ import { countRetainedHistory } from "#e2e/helpers/session-pane-retention-heap";
 
 const prefix = "sess_probe_retention_";
 // SPR03 的 fixture 使用 8 个独立工作区，覆盖每个 transport 各遗留一个预热 owner 的路径。
-const crossWorkspace = process.env.MARID_RETENTION_CROSS_WORKSPACE === "1";
+const crossWorkspace = process.env.QODEX_RETENTION_CROSS_WORKSPACE === "1";
 // SPR04/05 复用同工作区 fixture，直接检查已脱离 store 的历史 snapshot。
-const sameWorkspace = process.env.MARID_RETENTION_SAME_WORKSPACE === "1";
+const sameWorkspace = process.env.QODEX_RETENTION_SAME_WORKSPACE === "1";
 const returnToDraft = crossWorkspace || sameWorkspace;
 
 function rendererPage(browser: Browser) {
@@ -35,9 +35,9 @@ test(
       : "SPR01: 136 session switches release inactive snapshots and closed stores",
   { timeout: 1_200_000 },
   async () => {
-    const endpoint = process.env.MARID_RETENTION_CDP_URL;
-    const artifactDir = process.env.MARID_RETENTION_ARTIFACT_DIR;
-    const sourceMapPath = process.env.MARID_RETENTION_RENDERER_SOURCEMAP;
+    const endpoint = process.env.QODEX_RETENTION_CDP_URL;
+    const artifactDir = process.env.QODEX_RETENTION_ARTIFACT_DIR;
+    const sourceMapPath = process.env.QODEX_RETENTION_RENDERER_SOURCEMAP;
     assert(!sameWorkspace || sourceMapPath, "SPR04/05 需要精确生产 renderer sourcemap 校验回调族");
     assert(endpoint && artifactDir, "需要显式指定隔离 App CDP 与证据目录");
     const output = resolve(artifactDir);
@@ -50,14 +50,14 @@ test(
       assert.deepEqual(
         await page.evaluate((allowEmptyTrajectoryBridge) => {
           return Object.keys(window).filter((key) => {
-            if (!/^__marid.*StoreE2E$/u.test(key)) return false;
+            if (!/^__qodex.*StoreE2E$/u.test(key)) return false;
             // 现有生产构建无条件暴露该无历史入口。保留它，只接受空请求；不能删除根来伪造回收。
-            if (allowEmptyTrajectoryBridge && key === "__maridModelTrajectoryStoreE2E") {
+            if (allowEmptyTrajectoryBridge && key === "__qodexModelTrajectoryStoreE2E") {
               const bridge = (
                 window as Window & {
-                  __maridModelTrajectoryStoreE2E?: { getState(): { pendingRequest: unknown } };
+                  __qodexModelTrajectoryStoreE2E?: { getState(): { pendingRequest: unknown } };
                 }
-              ).__maridModelTrajectoryStoreE2E;
+              ).__qodexModelTrajectoryStoreE2E;
               return bridge?.getState().pendingRequest !== null;
             }
             return true;

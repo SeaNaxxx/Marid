@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { AppSettings } from "@marid/shared";
+import type { AppSettings } from "@qodex/shared";
 import type { useOnboardingRecordService } from "@/hooks/useOnboardingRecordService.js";
 import { logger } from "@/logger.js";
 

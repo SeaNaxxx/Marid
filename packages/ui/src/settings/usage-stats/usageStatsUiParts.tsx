@@ -1,7 +1,7 @@
-import type { AppUsageRange } from "@marid/shared";
+import type { AppUsageRange } from "@qodex/shared";
 import { Flame } from "lucide-react";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { formatCompactTokenNumber } from "@/lib/tokenNumberFormat.js";
 
 export const RANGE_OPTIONS: AppUsageRange[] = ["7d", "30d"];
@@ -83,7 +83,7 @@ export function formatMonth(locale: string, dateKey: string): string {
 }
 
 export function resolveModelLabel(
-  intl: ReturnType<typeof useMaridIntl>["intl"],
+  intl: ReturnType<typeof useQodexIntl>["intl"],
   modelId: string | null,
 ): string {
   return (

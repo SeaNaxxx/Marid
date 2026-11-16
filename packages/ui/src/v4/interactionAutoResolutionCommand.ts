@@ -1,4 +1,4 @@
-import type { CommandAck, CommandEnvelope } from "@marid/shared/marid-protocol-v4";
+import type { CommandAck, CommandEnvelope } from "@qodex/shared/qodex-protocol-v4";
 import { logger } from "@/logger.js";
 import { createCommandEnvelope } from "@/v4/commandFactory.js";
 import { pendingCommandRegistry } from "@/v4/pendingCommandRegistry.js";

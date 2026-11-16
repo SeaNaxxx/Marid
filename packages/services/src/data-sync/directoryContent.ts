@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { lstat, readFile, readdir, readlink } from "node:fs/promises";
 import { dirname, isAbsolute, join, posix, relative, sep } from "node:path";
-import type { DataSyncItemSignature } from "@marid/shared";
+import type { DataSyncItemSignature } from "@qodex/shared";
 
 export interface DirectoryContentScan extends DataSyncItemSignature {
   /** 目录内部存在软链（不跟随）。 */

@@ -16,24 +16,24 @@ import { Button } from "@/components/ui/button.js";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog.js";
 import { Switch } from "@/components/ui/switch.js";
 import type {
-  MaridProvider,
+  QodexProvider,
   SkillDiagnostic,
   SkillDiagnosticCode,
   SkillSummary,
   SkillsCapability,
   RemoteTarget,
-} from "@marid/shared";
-import type { IServiceAccessor } from "@marid/services";
-import { MARID_AGENT_PROVIDER } from "@marid/shared";
+} from "@qodex/shared";
+import type { IServiceAccessor } from "@qodex/services";
+import { QODEX_AGENT_PROVIDER } from "@qodex/shared";
 import type { CreateTaskRequest } from "@/app-shell/types.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { toast } from "@/components/ui/toast.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
 import { useConfigWorkspaceServicesResolution as useWorkspaceServicesResolution } from "@/workspace-config-catalog/index.js";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog.js";
 import { buildSkillMentionMarkdown } from "@/mentions/mentionMarkdown.js";
 import { filterSkillsForProvider } from "@/lib/skillSourceFilter.js";
-import { invalidateDeferredDraftSessionForSkillChange } from "@/lib/maridDraftSkillInvalidation.js";
+import { invalidateDeferredDraftSessionForSkillChange } from "@/lib/qodexDraftSkillInvalidation.js";
 import { PluginStoreAvatar } from "@/settings/PluginStoreAvatar.js";
 import { SettingsResourceHeaderActions } from "@/settings/SettingsResourceHeaderActions.js";
 import {
@@ -181,7 +181,7 @@ export function SkillsSection({
   unscopedServices,
   cacheAuthorityKey,
 }: SkillsSectionProps) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const platform = usePlatform();
   const plugins = usePluginManagementStore((state) => state.plugins);
   const installedPlugins = usePluginManagementStore((state) => state.installedPlugins);
@@ -329,7 +329,7 @@ export function SkillsSection({
         const result = await skillsService.list({
           workspacePath: activeWorkspacePath,
           workspaceIdentity: activeWorkspaceIdentity,
-          provider: MARID_AGENT_PROVIDER,
+          provider: QODEX_AGENT_PROVIDER,
         });
         if (requestId !== latestRequestIdRef.current) {
           return;
@@ -387,9 +387,9 @@ export function SkillsSection({
       if (!activeWorkspacePath) {
         return;
       }
-      // 移除三方来源后，技能状态统一写入 Marid Agent 上下文，避免旧 provider 前缀带来分桶漂移。
+      // 移除三方来源后，技能状态统一写入 Qodex Agent 上下文，避免旧 provider 前缀带来分桶漂移。
       const targetSkill = skills.find((skill) => skill.id === skillId);
-      const effectiveProvider: MaridProvider = MARID_AGENT_PROVIDER;
+      const effectiveProvider: QodexProvider = QODEX_AGENT_PROVIDER;
       try {
         await skillsService.setEnabled({
           workspacePath: activeWorkspacePath,
@@ -471,7 +471,7 @@ export function SkillsSection({
   );
 
   const scopedProviderSkills = useMemo(() => {
-    const allProviderSkills = filterSkillsForProvider(skills, MARID_AGENT_PROVIDER);
+    const allProviderSkills = filterSkillsForProvider(skills, QODEX_AGENT_PROVIDER);
     const pluginStoreMatchesTarget =
       (pluginWorkspaceIdentity?.trim() || pluginWorkspacePath || "") ===
         (activeWorkspaceIdentity?.trim() || activeWorkspacePath || "") &&
@@ -527,7 +527,7 @@ export function SkillsSection({
     if (!activeWorkspacePath || !onCreateTask) {
       return;
     }
-    const effectiveProvider: MaridProvider = MARID_AGENT_PROVIDER;
+    const effectiveProvider: QodexProvider = QODEX_AGENT_PROVIDER;
     const skillCreator = filterSkillsForProvider(skills, effectiveProvider).find(
       (skill) => skill.name === "skill-creator",
     );

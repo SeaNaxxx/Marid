@@ -28,7 +28,7 @@ Add a small Node-based `.tar.gz` helper in `packages/server/src/remote`:
 - `extractTarGzArchive(archivePath, targetDir)`
 - `createTarGzArchive(archivePath, entries)`
 
-The helper uses Node built-ins (`zlib`, `fs/promises`, `path`) and supports the archive shapes used by Marid remote assets:
+The helper uses Node built-ins (`zlib`, `fs/promises`, `path`) and supports the archive shapes used by Qodex remote assets:
 
 - regular files
 - directories

@@ -1,7 +1,7 @@
 import { AppWindow } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useToolPresentationCapabilities } from "@/ToolCallBlocks/presentationCapabilities.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import type { ToolCallBlockRenderContext } from "@/ToolCallBlocks/shared.js";
 import { readToolResultDisplay } from "@/ToolCallBlocks/toolResultDisplay.js";
 
@@ -117,7 +117,7 @@ export function buildCuaDetailList(
 }
 
 function CuaAppList({ items }: { items: CuaAppItem[] }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const platform = useToolPresentationCapabilities();
   const [icons, setIcons] = useState<Record<string, string>>({});
 
@@ -173,7 +173,7 @@ function CuaAppList({ items }: { items: CuaAppItem[] }) {
 }
 
 function CuaWindowList({ items }: { items: CuaWindowItem[] }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   return (
     <div className="max-h-64 space-y-1 overflow-y-auto pr-1">
       {items.map((item, index) => (
@@ -209,7 +209,7 @@ function CuaWindowList({ items }: { items: CuaWindowItem[] }) {
 }
 
 export function CuaDetailListSection({ list }: { list: CuaDetailList }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   return (
     <section className="space-y-2 border-t border-border pt-3">
       <h4 className="text-sm text-foreground-subtle">

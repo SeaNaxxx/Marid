@@ -1,12 +1,12 @@
 /* eslint-disable max-lines -- Provisioning target keeps transaction and rollback invariants together. */
 import { readFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
-import { atomicWritePrivateTextFile, withFileLock } from "@marid/shared/node";
+import { atomicWritePrivateTextFile, withFileLock } from "@qodex/shared/node";
 import {
   type PersonalProviderConfigRepository,
   type ProviderConfigLayerUpdate,
-} from "@marid/provider";
-import { decodeProviderConfigFile, encodeProviderConfigFile } from "@marid/provider-node";
+} from "@qodex/provider";
+import { decodeProviderConfigFile, encodeProviderConfigFile } from "@qodex/provider-node";
 import {
   providerProvisioningEnvelopeSchema,
   OAUTH_SESSION_REVISION_KEY,
@@ -15,11 +15,11 @@ import {
   type ProviderProvisioningEnvelope,
   type ProviderProvisioningResult,
   type ProviderProvisioningErrorCode,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type { LocalCredentialService } from "#src/credential/credentialService.js";
 import type { ISettingService } from "../setting/setting.js";
 import type { ProviderRuntime } from "./providerRuntime.js";
-import type { AccountProviderService } from "@marid/provider";
+import type { AccountProviderService } from "@qodex/provider";
 import type { IProviderProvisioningTargetService } from "./providerProvisioning.js";
 import {
   PROVIDER_PROVISIONING_OAUTH_CREDENTIAL_KEYS,

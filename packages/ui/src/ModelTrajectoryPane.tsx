@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button.js";
 import { toast } from "@/components/ui/toast.js";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { useModelTrajectory } from "@/hooks/useModelTrajectory.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
 import { getContainingDirectoryPath } from "@/lib/path.js";
@@ -49,7 +49,7 @@ export function ModelTrajectoryPane({
   workspaceIdentity?: string;
   onClose?: () => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const platform = usePlatform();
   const { loading, data, error, refresh } = useModelTrajectory(
     workspacePath,

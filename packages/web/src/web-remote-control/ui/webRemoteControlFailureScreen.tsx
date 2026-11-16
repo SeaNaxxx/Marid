@@ -1,5 +1,5 @@
-import { Button } from "@marid/ui/button";
-import type { WebRemoteControlFailure } from "@marid/shared";
+import { Button } from "@qodex/ui/button";
+import type { WebRemoteControlFailure } from "@qodex/shared";
 import { WebRemoteControlSwitchAccountDialog } from "#src/web-remote-control/ui/webRemoteControlSwitchAccountDialog.js";
 
 import {

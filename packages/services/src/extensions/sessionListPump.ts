@@ -1,11 +1,11 @@
-import type { AppSessionRef } from "@marid/session-control/contracts";
+import type { AppSessionRef } from "@qodex/session-control/contracts";
 import {
   ExtensionError,
   SESSION_LIST_MAX_ROWS,
   type SessionListEvent,
   type SessionListRow,
-} from "@marid/shared/extension-host";
-import type { WindowHostControllerTaskRow } from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/extension-host";
+import type { WindowHostControllerTaskRow } from "@qodex/shared/qodex-protocol-v4";
 import type { ServiceLogger } from "#src/logger/serviceLogger.js";
 import type { CapabilitySubscription } from "#src/extensions/capabilityTypes.js";
 

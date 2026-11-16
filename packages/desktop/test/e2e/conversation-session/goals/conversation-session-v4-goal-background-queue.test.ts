@@ -1,5 +1,5 @@
 // BG34：active goal 仅剩 background Agent 时输入直发；notification verifier 完成后自动消费 future queue。
-import { TID_V4_COMPOSER } from "@marid/shared/test-ids";
+import { TID_V4_COMPOSER } from "@qodex/shared/test-ids";
 import { clearAppData } from "#e2e/helpers/desktop-app";
 import {
   countUpstreamRequests,

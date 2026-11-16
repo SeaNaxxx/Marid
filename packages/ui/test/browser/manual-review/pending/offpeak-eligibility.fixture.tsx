@@ -1,10 +1,10 @@
 import { useState } from "react";
-import type { AppSettings } from "@marid/shared";
+import type { AppSettings } from "@qodex/shared";
 import type {
   IServiceAccessor,
   IProviderSettingsService,
   ProviderSettingsView,
-} from "@marid/services";
+} from "@qodex/services";
 import { ServiceProvider } from "@/hooks/useServices.js";
 import { useProviderSettingsView } from "@/hooks/useProviderSettingsView.js";
 import { useOffPeakEligibility } from "@/hooks/useOffPeakEligibility.js";

@@ -1,12 +1,12 @@
 import { HardDrive } from "lucide-react";
-import { type StorageVolumeGroup } from "@marid/shared";
+import { type StorageVolumeGroup } from "@qodex/shared";
 import {
   TID_RESOURCE_MANAGER_STORAGE_DISK_CARD,
   TID_RESOURCE_MANAGER_STORAGE_ROOT,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { formatBytes } from "@/resource-manager/resourceUsageView.js";
 import { storageCategoryTitleId, type StorageLegendItem } from "./storageCategoryPresentation.js";
 
@@ -25,7 +25,7 @@ export function StorageDiskCard({
   selectable: boolean;
   onSelect: () => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const label =
     group.volume?.mountPoint ?? intl.formatMessage({ id: "resourceManager.storage.disk" });
   const body = (

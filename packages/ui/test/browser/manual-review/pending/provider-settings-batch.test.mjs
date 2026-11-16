@@ -60,7 +60,7 @@ after(async () => {
   await server?.close();
 });
 
-const artifacts = join(tmpdir(), "marid-provider-settings-batch");
+const artifacts = join(tmpdir(), "qodex-provider-settings-batch");
 registerOffPeakEligibilityCases(() => ({ browser, origin }));
 registerProviderPresentationCases(() => ({ browser, origin, artifacts }));
 registerProviderModelEditorCases(() => ({ browser, origin, artifacts }));

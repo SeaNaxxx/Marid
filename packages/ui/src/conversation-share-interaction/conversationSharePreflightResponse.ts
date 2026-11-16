@@ -2,7 +2,7 @@ import type {
   ConversationSharePreflightResult,
   ConversationShareTurnPreflightResult,
 } from "@/conversation-share-interaction/contract.js";
-import type { ConversationRow } from "@marid/shared/marid-protocol-v4";
+import type { ConversationRow } from "@qodex/shared/qodex-protocol-v4";
 import { logger } from "@/logger.js";
 import {
   getConversationShareErrorDetails,

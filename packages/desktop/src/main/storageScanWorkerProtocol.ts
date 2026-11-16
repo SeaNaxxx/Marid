@@ -1,5 +1,5 @@
-import type { StorageRootSpec } from "@marid/services";
-import type { StorageScanProgress } from "@marid/services/node";
+import type { StorageRootSpec } from "@qodex/services";
+import type { StorageScanProgress } from "@qodex/services/node";
 
 export interface StorageScanWorkerData {
   roots: StorageRootSpec[];

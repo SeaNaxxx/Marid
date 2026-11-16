@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import type { AppUsageHeatmapCell } from "@marid/shared";
+import type { AppUsageHeatmapCell } from "@qodex/shared";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
 import { cn } from "@/components/lib/utils.js";
 

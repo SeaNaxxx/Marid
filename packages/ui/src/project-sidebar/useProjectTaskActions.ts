@@ -4,18 +4,18 @@ import type { ProjectTask } from "@/project-sidebar/contract.js";
 import { ProjectTaskListContext } from "@/project-sidebar/ProjectTaskListContext.js";
 import { useBaseWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
 import { useResolvedRemoteWorkspaceSessionId } from "@/hooks/useResolvedRemoteWorkspaceSessionId.js";
-import { useMaridSessionStore } from "@/store/maridSessionStore.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexSessionStore } from "@/store/qodexSessionStore.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { toast } from "@/components/ui/toast.js";
 import { logger } from "@/logger.js";
 
 /** UI 命令适配：复用原 Host 入口，成功后仅处理本窗口展示，不保存会话事实。 */
 export function useProjectTaskActions(task: ProjectTask, refresh: () => Promise<void>) {
-  const { maridTaskService: service, windowControllerService: controller } =
+  const { qodexTaskService: service, windowControllerService: controller } =
     useBaseWorkspaceServices();
   const { onPin } = useContext(ProjectTaskListContext);
-  const removeTaskState = useMaridSessionStore((state) => state.removeTaskState);
-  const { intl } = useMaridIntl();
+  const removeTaskState = useQodexSessionStore((state) => state.removeTaskState);
+  const { intl } = useQodexIntl();
   const remoteSessionId = useResolvedRemoteWorkspaceSessionId(
     task.workspacePath,
     undefined,

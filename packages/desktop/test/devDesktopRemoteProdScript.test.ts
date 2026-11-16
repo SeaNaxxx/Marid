@@ -19,15 +19,15 @@ describe("dev desktop remote production-like script", () => {
     );
   });
 
-  it("macOS 默认应复用正式版 Marid remote cache", () => {
+  it("macOS 默认应复用正式版 Qodex remote cache", () => {
     expect(resolveProductionRemoteAssetCacheDir({}, "darwin", "/Users/alice")).toBe(
-      "/Users/alice/Library/Application Support/Marid/remote-assets-cache",
+      "/Users/alice/Library/Application Support/Qodex/remote-assets-cache",
     );
   });
 
-  it("Linux 默认应复用正式版 Marid remote cache", () => {
+  it("Linux 默认应复用正式版 Qodex remote cache", () => {
     expect(resolveProductionRemoteAssetCacheDir({}, "linux", "/home/alice")).toBe(
-      "/home/alice/.config/Marid/remote-assets-cache",
+      "/home/alice/.config/Qodex/remote-assets-cache",
     );
     expect(
       resolveProductionRemoteAssetCacheDir(
@@ -35,33 +35,33 @@ describe("dev desktop remote production-like script", () => {
         "linux",
         "/home/alice",
       ),
-    ).toBe("/home/alice/.config-custom/Marid/remote-assets-cache");
+    ).toBe("/home/alice/.config-custom/Qodex/remote-assets-cache");
   });
 
-  it("Windows 默认应复用正式版 Marid remote cache", () => {
+  it("Windows 默认应复用正式版 Qodex remote cache", () => {
     expect(
       resolveProductionRemoteAssetCacheDir(
         { APPDATA: "C:\\Users\\Alice\\AppData\\Roaming" },
         "win32",
         "C:\\Users\\Alice",
       ),
-    ).toBe("C:\\Users\\Alice\\AppData\\Roaming\\Marid\\remote-assets-cache");
+    ).toBe("C:\\Users\\Alice\\AppData\\Roaming\\Qodex\\remote-assets-cache");
   });
 
   it("启动 env 应强制走 CDN，并允许显式 cache 覆盖", () => {
     const env = buildDesktopRemoteProdEnv(
       {
-        MARID_ENV: "test",
-        MARID_DEV_REMOTE_ASSET_USE_CDN: "0",
-        MARID_REMOTE_ASSET_CACHE_DIR: "/tmp/custom-cache",
+        QODEX_ENV: "test",
+        QODEX_DEV_REMOTE_ASSET_USE_CDN: "0",
+        QODEX_REMOTE_ASSET_CACHE_DIR: "/tmp/custom-cache",
       },
       "darwin",
       "/Users/alice",
     );
 
-    expect(env.MARID_ENV).toBe("production");
-    expect(env.MARID_DEV_REMOTE_ASSET_USE_CDN).toBe("1");
-    expect(env.MARID_REMOTE_ASSET_CACHE_DIR).toBe("/tmp/custom-cache");
+    expect(env.QODEX_ENV).toBe("production");
+    expect(env.QODEX_DEV_REMOTE_ASSET_USE_CDN).toBe("1");
+    expect(env.QODEX_REMOTE_ASSET_CACHE_DIR).toBe("/tmp/custom-cache");
   });
 
   it("Windows 下应使用 pnpm.cmd 启动", () => {

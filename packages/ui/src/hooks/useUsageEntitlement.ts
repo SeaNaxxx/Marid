@@ -2,13 +2,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   UsageEntitlementSnapshot,
-  MaridAccountAccess,
-  MaridProviderAccountAccess,
-} from "@marid/shared";
-import type { IUsageStatsService } from "@marid/services";
+  QodexAccountAccess,
+  QodexProviderAccountAccess,
+} from "@qodex/shared";
+import type { IUsageStatsService } from "@qodex/services";
 import { useOptionalBaseWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
 import { useStableAccountAccess } from "@/hooks/useStableAccountAccess.js";
-import { useMaridStoreWithDefault } from "@/store/StoreProvider.js";
+import { useQodexStoreWithDefault } from "@/store/StoreProvider.js";
 import { logger } from "@/logger.js";
 import {
   readCachedUsageEntitlementSnapshot,
@@ -137,7 +137,7 @@ export interface UseUsageEntitlementOptions {
   enabled?: boolean;
   includeSubscription?: boolean;
   preferredProviderId?: string;
-  accountAccess?: MaridProviderAccountAccess | MaridAccountAccess;
+  accountAccess?: QodexProviderAccountAccess | QodexAccountAccess;
   allowDisabledPreferredProvider?: boolean;
   requirePreferredProvider?: boolean;
   allowEnvApiKey?: boolean;
@@ -168,7 +168,7 @@ export function useUsageEntitlementWithService(
   const allowDisabledPreferredProvider = options.allowDisabledPreferredProvider === true;
   const requirePreferredProvider = options.requirePreferredProvider === true;
   const allowEnvApiKey = options.allowEnvApiKey;
-  const authScope = useMaridStoreWithDefault(
+  const authScope = useQodexStoreWithDefault(
     (store) => (store.user ? `${store.user.id}:${store.authSessionSeq}` : "signed-out"),
     "unscoped",
   );

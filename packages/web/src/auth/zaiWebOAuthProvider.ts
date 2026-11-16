@@ -1,5 +1,5 @@
-import { BIGMODEL_PROVIDER_ID, ZAI_PROVIDER_ID } from "@marid/shared";
-import type { OAuthTokenSet, UserInfo } from "@marid/shared";
+import { BIGMODEL_PROVIDER_ID, ZAI_PROVIDER_ID } from "@qodex/shared";
+import type { OAuthTokenSet, UserInfo } from "@qodex/shared";
 import type { WebOAuthProviderId } from "#src/auth/contract.js";
 
 export interface WebZaiOAuthProviderConfig {
@@ -118,8 +118,8 @@ function normalizeTokenResponse(
     throw new Error(payload.msg?.trim() || "OAuth token exchange failed");
   }
 
-  const maridJwtToken = payload.data?.token?.trim();
-  if (!maridJwtToken) {
+  const qodexJwtToken = payload.data?.token?.trim();
+  if (!qodexJwtToken) {
     throw new Error("Token exchange response missing data.token");
   }
 
@@ -154,7 +154,7 @@ function normalizeTokenResponse(
   return {
     tokenSet: {
       accessToken,
-      maridJwtToken,
+      qodexJwtToken,
       ...(expiresAt ? { expiresAt } : {}),
     },
     userInfo,

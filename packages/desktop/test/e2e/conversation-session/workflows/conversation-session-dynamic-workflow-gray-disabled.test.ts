@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
-import { TID_SETTINGS_DYNAMIC_WORKFLOW_MODE_ITEM } from "@marid/shared";
-import { testId } from "@marid/shared/test-ids";
+import { TID_SETTINGS_DYNAMIC_WORKFLOW_MODE_ITEM } from "@qodex/shared";
+import { testId } from "@qodex/shared/test-ids";
 import {
   clearAppData,
   pinE2ELocale,

@@ -1,25 +1,25 @@
 /* eslint-disable max-lines -- autoUpdater 需要集中维护 Electron 事件、菜单状态与 IPC 交互，过度拆分会让更新状态流更难追踪 */
 import { app, BrowserWindow, ipcMain, Menu } from "electron";
-import type { ISettingService } from "@marid/services";
+import type { ISettingService } from "@qodex/services";
 import pkg, { CancellationToken } from "electron-updater";
 import semver from "semver";
 const { autoUpdater } = pkg;
 import {
   DEFAULT_LOCALE,
-  DEFAULT_MARID_ENDPOINT_ORIGIN,
-  TEST_MARID_ENDPOINT_ORIGIN,
+  DEFAULT_QODEX_ENDPOINT_ORIGIN,
+  TEST_QODEX_ENDPOINT_ORIGIN,
   PlatformChannels,
-  MARID_VERSION,
+  QODEX_VERSION,
   desktopMenuMessageIds,
   formatDesktopMenuMessage,
   getDesktopMenuMessage,
-  resolveRuntimeMaridEndpointOrigin,
+  resolveRuntimeQodexEndpointOrigin,
   type ElectronReleaseChannel,
   type Locale,
   type PostUpdateReleaseNotesPayload,
   type UpdateCheckResultPayload,
   type UpdateStatePayload,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { logger } from "./logger.js";
 import { verifyWindowsAuthenticodeSignature } from "../../scripts/powershell-command.mjs";
 import { ManifestUpdateProvider, getElectronReleasePlatform } from "./manifestUpdateProvider.js";
@@ -27,12 +27,12 @@ import { ManifestUpdateProvider, getElectronReleasePlatform } from "./manifestUp
 export const CHECK_FOR_UPDATE_MENU_ID = "check-for-update";
 const AUTO_UPDATE_POLL_INTERVAL_MS = 15 * 60 * 1000;
 const AUTO_UPDATE_VISIBLE_POLL_INTERVAL_MS = 2 * 60 * 1000;
-const UPDATE_FEED_URL_ENV = "MARID_UPDATE_FEED_URL";
-const UPDATE_FEED_URL_SWITCH = "--marid-update-feed-url";
-const DEV_AUTO_UPDATE_ENV = "MARID_AUTO_UPDATE_DEV";
-const DEV_AUTO_UPDATE_SWITCH = "--marid-auto-update-dev";
-const DEV_AUTO_UPDATE_VERSION_ENV = "MARID_AUTO_UPDATE_DEV_VERSION";
-const DEV_AUTO_UPDATE_VERSION_SWITCH = "--marid-auto-update-dev-version";
+const UPDATE_FEED_URL_ENV = "QODEX_UPDATE_FEED_URL";
+const UPDATE_FEED_URL_SWITCH = "--qodex-update-feed-url";
+const DEV_AUTO_UPDATE_ENV = "QODEX_AUTO_UPDATE_DEV";
+const DEV_AUTO_UPDATE_SWITCH = "--qodex-auto-update-dev";
+const DEV_AUTO_UPDATE_VERSION_ENV = "QODEX_AUTO_UPDATE_DEV_VERSION";
+const DEV_AUTO_UPDATE_VERSION_SWITCH = "--qodex-auto-update-dev-version";
 let readyUpdateVersion: string | null = null;
 let readyUpdateReleaseNotes: PostUpdateReleaseNotesPayload | null = null;
 let readyUpdateRestoredFromPendingReleaseNotes = false;
@@ -77,7 +77,7 @@ type UpdateDownloadedInfoLike = {
   path?: string | null;
   files?: Array<{ url?: string | null } | null> | null;
   packages?: Record<string, { path?: string | null } | null> | null;
-  maridReleaseChannel?: ElectronReleaseChannel | null;
+  qodexReleaseChannel?: ElectronReleaseChannel | null;
   releaseName?: string | null;
   releaseNotes?: string | ReleaseNoteInfoLike[] | null;
   releaseDate?: string | Date | null;
@@ -120,7 +120,7 @@ interface InitAutoUpdaterOptions {
   updateFeedSource?: RuntimeUpdateFeedSource;
   deviceMid?: string;
   resolveEndpointOrigin?: () => string | Promise<string>;
-  resolveMaridJwtToken?: () => Promise<string | null | undefined>;
+  resolveQodexJwtToken?: () => Promise<string | null | undefined>;
 }
 
 let quitAndInstallState: "idle" | "preparing" | "installing" | "recovering" = "idle";
@@ -190,7 +190,7 @@ function resolveDevAutoUpdateVersion(): string | null {
   const configuredVersion =
     process.env[DEV_AUTO_UPDATE_VERSION_ENV]?.trim() ||
     readCommandLineSwitchValue(DEV_AUTO_UPDATE_VERSION_SWITCH)?.trim() ||
-    MARID_VERSION;
+    QODEX_VERSION;
   const parsed = semver.parse(configuredVersion);
   if (!parsed) {
     logger.warn(`[auto-update] ignore invalid dev update version=${configuredVersion}`);
@@ -276,8 +276,8 @@ function getAutoUpdaterReleaseChannelForCurrentState(): ElectronReleaseChannel {
 function readUpdateInfoReleaseChannel(
   info: UpdateDownloadedInfoLike,
 ): ElectronReleaseChannel | null {
-  return info.maridReleaseChannel === "preview" || info.maridReleaseChannel === "stable"
-    ? info.maridReleaseChannel
+  return info.qodexReleaseChannel === "preview" || info.qodexReleaseChannel === "stable"
+    ? info.qodexReleaseChannel
     : null;
 }
 
@@ -841,22 +841,22 @@ function applyManifestUpdateProvider(options: InitAutoUpdaterOptions): void {
   autoUpdater.setFeedURL({
     provider: "custom",
     updateProvider: ManifestUpdateProvider,
-    endpointOrigin: DEFAULT_MARID_ENDPOINT_ORIGIN,
+    endpointOrigin: DEFAULT_QODEX_ENDPOINT_ORIGIN,
     ...(manifestUrl ? { manifestUrl } : {}),
     releasePlatform: getElectronReleasePlatform(),
     deviceMid: options.deviceMid,
-    resolveMaridJwtToken: options.resolveMaridJwtToken,
+    resolveQodexJwtToken: options.resolveQodexJwtToken,
     resolveEndpointOrigin: async () => {
       const origin = await (
-        options.resolveEndpointOrigin ?? (() => resolveRuntimeMaridEndpointOrigin(process.env))
+        options.resolveEndpointOrigin ?? (() => resolveRuntimeQodexEndpointOrigin(process.env))
       )();
       // 通用后端覆盖不是更新发布授权；正式包只允许既有官方 HTTPS 入口。
       if (
         app.isPackaged &&
-        origin !== DEFAULT_MARID_ENDPOINT_ORIGIN &&
-        origin !== TEST_MARID_ENDPOINT_ORIGIN
+        origin !== DEFAULT_QODEX_ENDPOINT_ORIGIN &&
+        origin !== TEST_QODEX_ENDPOINT_ORIGIN
       ) {
-        return DEFAULT_MARID_ENDPOINT_ORIGIN;
+        return DEFAULT_QODEX_ENDPOINT_ORIGIN;
       }
       return origin;
     },

@@ -4,7 +4,7 @@ import {
   type TopicWireAssemblyFault,
   type TopicFrameDeliveryKind,
   type TopicWireFrameCandidate,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 import { logger } from "@/logger.js";
 
 export interface TopicWireDecoder {

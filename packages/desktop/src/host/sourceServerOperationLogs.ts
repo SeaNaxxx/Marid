@@ -1,4 +1,4 @@
-import { Emitter } from "@marid/rpc";
+import { Emitter } from "@qodex/rpc";
 import {
   normalizeRemoteConnectionError,
   remoteConnectionFailureLogLevel,
@@ -7,8 +7,8 @@ import {
   type ConnectionProfile,
   type RemoteTarget,
   type SourceServerOperationLog,
-} from "@marid/shared";
-import type { TransportContext } from "@marid/server/source-server";
+} from "@qodex/shared";
+import type { TransportContext } from "@qodex/server/source-server";
 
 type Operation = { sequence: number; logs: SourceServerOperationLog[] };
 

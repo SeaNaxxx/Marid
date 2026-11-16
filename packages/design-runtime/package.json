@@ -1,5 +1,5 @@
 {
-  "name": "@marid/design-runtime",
+  "name": "@qodex/design-runtime",
   "private": true,
   "type": "module",
   "exports": {

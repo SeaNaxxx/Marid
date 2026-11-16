@@ -2,7 +2,7 @@ import {
   BROWSER_LOCAL_PREVIEW_PRIVILEGES,
   installBrowserLocalPreview,
 } from "@desktop/main/browser-local-preview/index.js";
-import { createRemoteConversationTelemetryDispatcher } from "@marid/shared/conversation-telemetry";
+import { createRemoteConversationTelemetryDispatcher } from "@qodex/shared/conversation-telemetry";
 import { installRequestSecurityDiagnostics } from "./request-security-edition/index.js";
 import { createLocalTtftExporter } from "./localTtftExporter.js";
 /* eslint-disable max-lines */
@@ -69,13 +69,13 @@ import {
   getConversationWorkspaceDir,
   getDataBaseDir,
   getExportLogDir,
-  getMaridDataRootDir,
+  getQodexDataRootDir,
   normalizeRuntimeProcessEnv,
   setDataBaseDir,
   migrateApplicationStorage,
-  resolveDefaultMaridAgentCommand,
+  resolveDefaultQodexAgentCommand,
   startupStorage,
-} from "@marid/services/node";
+} from "@qodex/services/node";
 import {
   desktopMenuMessageIds,
   type HostQuitBlocker,
@@ -83,23 +83,23 @@ import {
   type AppSettings,
   type appSettingsPatchSchema,
   PlatformChannels,
-  MARID_ENV,
-  MARID_PRODUCT_FLAVOR,
-  MARID_AUTO_UPDATE_ENABLED,
-  DEFAULT_MARID_ENDPOINT_ORIGIN,
+  QODEX_ENV,
+  QODEX_PRODUCT_FLAVOR,
+  QODEX_AUTO_UPDATE_ENABLED,
+  DEFAULT_QODEX_ENDPOINT_ORIGIN,
   DEFAULT_LOCALE,
   toZhOrEnLocale,
-  TEST_MARID_ENDPOINT_ORIGIN,
-  MARID_VERSION,
-  buildMaridEndpointUrls,
+  TEST_QODEX_ENDPOINT_ORIGIN,
+  QODEX_VERSION,
+  buildQodexEndpointUrls,
   resolveWebRemoteControlRelayWsUrl,
-  resolveMaridEndpointOrigin,
+  resolveQodexEndpointOrigin,
   shouldEnableE2ETestBridge,
   type UpdateStatePayload,
   type TelemetryEventPayload,
   HostMessageTypes,
   InternalChannels,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { logger, webRemoteControlRelayLogger, flushLocalTtftLogs } from "./logger.js";
 import { markMainLaunchAppReady } from "./desktopLaunchMarks.js";
 import { createCuaPipFocusRouter, resolveCuaPipWindowKey } from "./cuaPipFocusRouter.js";
@@ -157,7 +157,7 @@ import {
   getDesktopMenuLabel as getDesktopMenuLabelByLocale,
   rebuildApplicationMenu,
   resolveSystemApplicationLocale,
-  updateMaridStdioTapDevMenuState,
+  updateQodexStdioTapDevMenuState,
 } from "./desktopApplicationMenu.js";
 import { applyAppIcon } from "./desktopWindowChrome.js";
 import { resolveWindowsAppUserModelIdForFlavor } from "../../scripts/desktop-product-identity.mjs";
@@ -180,7 +180,7 @@ import {
   syncApplicationUnreadBadge,
   handleDesktopWindowCloseRequest,
 } from "./desktopWindowLifecycle.js";
-import { resolveMaridBuiltinProviderConfigFilePath } from "./desktopProviderConfig.js";
+import { resolveQodexBuiltinProviderConfigFilePath } from "./desktopProviderConfig.js";
 import {
   getCredentialsDir,
   isDockerDaemonAvailable,
@@ -190,7 +190,7 @@ import {
   loadHostProcessEnvFromLocalFiles,
   resolveBundledGlmBinaryPath,
   resolveRemoteAssetDirs,
-  resolveMaridEndpointEnvBaseOrigin,
+  resolveQodexEndpointEnvBaseOrigin,
   desktopRuntimeEnv,
   runtimeApplicationName,
   runtimeHomePath,
@@ -267,9 +267,9 @@ import {
 } from "./desktopResourceTelemetry.js";
 import { registerRendererHeapSampleIpc } from "./processResourceRendererHeapSource.js";
 import {
-  registerDesktopMaridDataSizeTelemetry,
-  stopDesktopMaridDataSizeTelemetry,
-} from "./desktopMaridDataSizeTelemetry.js";
+  registerDesktopQodexDataSizeTelemetry,
+  stopDesktopQodexDataSizeTelemetry,
+} from "./desktopQodexDataSizeTelemetry.js";
 import { configureDesktopMcpTelemetry, reportMcpTelemetryToArms } from "./desktopMcpTelemetry.js";
 import {
   configureDesktopNetworkTelemetry,
@@ -283,7 +283,7 @@ import {
   createEmbeddedBrowserPermissionUiBridge,
   setActiveEmbeddedBrowserPermissionUiBridge,
 } from "./embeddedBrowserPermissionUiBridge.js";
-import { mapMaridEnvToArmsRumEnv } from "@marid/shared";
+import { mapQodexEnvToArmsRumEnv } from "@qodex/shared";
 import {
   findWindowsProcessesReferencingResourceMarkers,
   probeWindowsPackagedResourceWritable,
@@ -298,7 +298,7 @@ import {
   getPluginSandboxHost,
   installPluginSandboxHost,
 } from "./pluginSandbox/index.js";
-import { enablePrivateFileKeyFallback } from "@marid/shared/credential-security";
+import { enablePrivateFileKeyFallback } from "@qodex/shared/credential-security";
 
 // Bug 原因：Linux 的 Secret Service（GNOME Keyring/KWallet）不是必备组件；没有 keyring 服务，
 // 或 keyring 被锁且用户取消解锁框时，Main 取不到系统密钥，登录永远保存失败。
@@ -320,9 +320,9 @@ registerLocalMediaPreviewScheme(protocol, [
 const localMediaPreviewPathRegistry = createLocalMediaPreviewPathRegistry();
 
 // e2e 由 Chromedriver 管理远程调试端口；如果这里继续固定到 9229，
-// 会和开发态已打开的 Marid Dev 抢端口，导致 WebDriver session 创建前白屏超时。
+// 会和开发态已打开的 Qodex Dev 抢端口，导致 WebDriver session 创建前白屏超时。
 // 仅本地开发运行默认开启远程调试端口，并允许 e2e 通过环境变量交给 Chromedriver 接管。
-if (!app.isPackaged && process.env.MARID_DISABLE_FIXED_REMOTE_DEBUGGING_PORT !== "1") {
+if (!app.isPackaged && process.env.QODEX_DISABLE_FIXED_REMOTE_DEBUGGING_PORT !== "1") {
   app.commandLine.appendSwitch("remote-debugging-port", "9229");
 }
 
@@ -617,7 +617,7 @@ async function runBrowserCommandOnView(params: {
 let currentDesktopZoomLevel = 0;
 let currentDesktopWindowSize: DesktopWindowSize | undefined;
 const preloadPath = join(import.meta.dirname, "../preload/index.cjs");
-const settingsFile = join(homedir(), ".marid", "v2", "setting.json");
+const settingsFile = join(homedir(), ".qodex", "v2", "setting.json");
 let activeAppShutdownPolicy = resolveAppShutdownPolicy("normal", process.platform);
 let activeAppShutdownKind: AppShutdownKind | null = null;
 const WINDOWS_AGENT_FORCE_KILL_TIMEOUT_MS = 2_000;
@@ -782,11 +782,11 @@ const appLaunchGate = createAppLaunchGate();
 const appLaunchCoordinator = createAppLaunchCoordinator(appLaunchGate);
 const appTelemetryCredentialService = createCredentialService();
 const autoUpdateCredentialService = createCredentialService();
-async function resolveCurrentMaridEndpointOrigin() {
-  return resolveMaridEndpointOrigin({
-    env: MARID_ENV,
-    envBaseOrigin: resolveMaridEndpointEnvBaseOrigin(hostProcessLocalEnv),
-    overrideOrigin: (await mainSettingService.get()).maridEndpointOrigin,
+async function resolveCurrentQodexEndpointOrigin() {
+  return resolveQodexEndpointOrigin({
+    env: QODEX_ENV,
+    envBaseOrigin: resolveQodexEndpointEnvBaseOrigin(hostProcessLocalEnv),
+    overrideOrigin: (await mainSettingService.get()).qodexEndpointOrigin,
   });
 }
 let desktopContextPromptRollout: ReturnType<typeof createDesktopContextPromptRollout> | undefined;
@@ -839,7 +839,7 @@ const appTelemetryCore = createTelemetryCore({
   loadUserId: createTelemetryUserIdLoader(appTelemetryCredentialService),
   loadAuthorization: createTelemetryAuthorizationLoader(appTelemetryCredentialService),
   loadMarketingParams: createTelemetryMarketingParamsLoader(appTelemetryCredentialService),
-  resolveMaridEndpointOrigin: resolveCurrentMaridEndpointOrigin,
+  resolveQodexEndpointOrigin: resolveCurrentQodexEndpointOrigin,
   // 遥测的语言取 Main 的实时界面语言，不用 renderer 的 Intl 系统语言；未确定前不覆盖。
   resolveClientLanguage: resolveKnownApplicationLocale,
   fetchImpl: createDesktopTelemetryFetch({
@@ -893,7 +893,7 @@ function syncAppTelemetryInteractiveState(): void {
 app.on("browser-window-focus", (_event, win) => {
   syncAppTelemetryInteractiveState();
   rebuildMenu();
-  // 设置/更新等无 Host 的 Marid 窗口也算前台：router 会先把旧 workspace Host 清成 null，
+  // 设置/更新等无 Host 的 Qodex 窗口也算前台：router 会先把旧 workspace Host 清成 null，
   // 再把无 Host 的新窗口事实静默丢弃，避免旧会话 PiP 继续显示。
   cuaPipFocusRouter.focusWindow(resolveCuaPipWindowKey(win));
 });
@@ -930,20 +930,20 @@ const webRemoteControlSharedHostAttachments = createWebRemoteControlSharedHostAt
 const deviceMid = ensureDesktopDeviceMidSync();
 // 帮助和灰度共用当前凭据来源，但分别维护各自裁剪后的配置缓存。
 const readHelpConfig = createDesktopHelpConfigReader({
-  resolveMaridJwtToken: () => autoUpdateCredentialService.load("maridjwttoken"),
-  appVersion: MARID_VERSION || app.getVersion(),
+  resolveQodexJwtToken: () => autoUpdateCredentialService.load("qodexjwttoken"),
+  appVersion: QODEX_VERSION || app.getVersion(),
   deviceMid,
   getClientLanguage: () => currentApplicationLocale,
-  resolveEndpointOrigin: resolveCurrentMaridEndpointOrigin,
+  resolveEndpointOrigin: resolveCurrentQodexEndpointOrigin,
 });
 // 同一个 /api/v1/client/configs fetcher 供两个灰度 rollout 共用（请求参数与鉴权完全一致，
 // 各自独立缓存/去重，服务端按 data.configs.<key> 区分功能）。
 const electronClientConfigsFetcher = createElectronDesktopContextPromptConfigFetcher({
-  resolveMaridJwtToken: () => autoUpdateCredentialService.load("maridjwttoken"),
-  appVersion: MARID_VERSION || app.getVersion(),
+  resolveQodexJwtToken: () => autoUpdateCredentialService.load("qodexjwttoken"),
+  appVersion: QODEX_VERSION || app.getVersion(),
   deviceMid,
   getClientLanguage: () => currentApplicationLocale,
-  resolveEndpointOrigin: resolveCurrentMaridEndpointOrigin,
+  resolveEndpointOrigin: resolveCurrentQodexEndpointOrigin,
 });
 desktopContextPromptRollout = createDesktopContextPromptRollout({
   fetchConfig: electronClientConfigsFetcher,
@@ -955,7 +955,7 @@ const rendererActionTraceRollout = createRendererActionTraceRollout({
 });
 const localTtftExporter = createLocalTtftExporter({
   env: { ...hostProcessLocalEnv, ...process.env },
-  version: MARID_VERSION || app.getVersion(),
+  version: QODEX_VERSION || app.getVersion(),
   logger,
 });
 ipcMain.on(PlatformChannels.ReportLocalTtftBatch, (_event, batch: unknown) =>
@@ -973,13 +973,13 @@ const armsUserIdentitySync = createArmsUserIdentitySync({
   deviceMid,
   setUser: (user) => armsRum.setConfig("user", user),
 });
-const webRemoteControlAppVersion = MARID_VERSION || app.getVersion();
-const defaultMaridEndpointUrls = buildMaridEndpointUrls(DEFAULT_MARID_ENDPOINT_ORIGIN, {
+const webRemoteControlAppVersion = QODEX_VERSION || app.getVersion();
+const defaultQodexEndpointUrls = buildQodexEndpointUrls(DEFAULT_QODEX_ENDPOINT_ORIGIN, {
   appVersion: webRemoteControlAppVersion,
 });
 const webRemoteControlRelayWsEnvOverride =
-  process.env["MARID_WEB_REMOTE_CONTROL_RELAY_WS_URL"]?.trim();
-const webRemoteControlUrlEnvOverride = process.env["MARID_WEB_REMOTE_CONTROL_URL"]?.trim();
+  process.env["QODEX_WEB_REMOTE_CONTROL_RELAY_WS_URL"]?.trim();
+const webRemoteControlUrlEnvOverride = process.env["QODEX_WEB_REMOTE_CONTROL_URL"]?.trim();
 
 function extractOpenWorkspacePathFromDeepLinkUrl(url: string): string | null {
   try {
@@ -1017,7 +1017,7 @@ function getMobileLogSink(): MobileLogSink {
 const webRemoteControlManager = createWebRemoteControlManager({
   mobileLogSink: { append: (target, events) => getMobileLogSink().append(target, events) },
   getEndpointUrls: async () => {
-    const derived = buildMaridEndpointUrls(await resolveCurrentMaridEndpointOrigin(), {
+    const derived = buildQodexEndpointUrls(await resolveCurrentQodexEndpointOrigin(), {
       appVersion: webRemoteControlAppVersion,
     });
     return {
@@ -1030,10 +1030,10 @@ const webRemoteControlManager = createWebRemoteControlManager({
     };
   },
   relayWsUrl: resolveWebRemoteControlRelayWsUrl({
-    endpointOrigin: DEFAULT_MARID_ENDPOINT_ORIGIN,
+    endpointOrigin: DEFAULT_QODEX_ENDPOINT_ORIGIN,
     overrideUrl: webRemoteControlRelayWsEnvOverride,
   }),
-  mobileRemoteControlUrl: webRemoteControlUrlEnvOverride || defaultMaridEndpointUrls.remoteUrl,
+  mobileRemoteControlUrl: webRemoteControlUrlEnvOverride || defaultQodexEndpointUrls.remoteUrl,
   // 远控通知轮询在模块加载时就启动，界面语言确定前不带语言头（不拿默认中文冒充）。
   getClientLanguage: resolveKnownApplicationLocale,
   deviceMid,
@@ -1313,7 +1313,7 @@ async function prepareAppQuit(reason: string, kind: AppShutdownKind = "normal"):
   // Bug 根因：资源样本改为 5 分钟窗口后，退出仍直接 stop 会清空未满窗口的数据。
   // 退出时只排空已存在的角色 / Agent 内存窗口，不启动新采样、目录扫描或外部探针。
   stopDesktopResourceTelemetry({ flushPendingWindows: true });
-  stopDesktopMaridDataSizeTelemetry();
+  stopDesktopQodexDataSizeTelemetry();
   stopDesktopNetworkTelemetry();
   stopRemoteUsageArmsPeriodicSampling();
   disposeRendererActionTraceIpc?.();
@@ -1388,7 +1388,7 @@ async function prepareAppQuit(reason: string, kind: AppShutdownKind = "normal"):
     })
     .finally(() => {
       // before-quit 是同步事件。只发 Dispose 就继续退出 main 的话，
-      // host 还没等到 agent 进程树的 SIGTERM/SIGKILL 兜底完成就被带走，marid-cli 会被 init 接管成残留进程。
+      // host 还没等到 agent 进程树的 SIGTERM/SIGKILL 兜底完成就被带走，qodex-cli 会被 init 接管成残留进程。
       // 这里先拦截第一次退出，等待 host 清理完成后再放行第二次 app.quit。
       hasPreparedAppQuit = true;
       appQuitPreparationInFlight = null;
@@ -1399,7 +1399,7 @@ async function prepareAppQuit(reason: string, kind: AppShutdownKind = "normal"):
 
 function exitPreparedApp(reason: string): never | void {
   logger.info(`[app-quit] exiting prepared app (${reason})`);
-  if (process.env.MARID_E2E_RUN_ID?.trim()) {
+  if (process.env.QODEX_E2E_RUN_ID?.trim()) {
     flushMainE2ECoverage((error) => {
       logger.warn("[e2e-coverage] main coverage flush failed", error);
     });
@@ -1621,7 +1621,7 @@ function shouldConfirmAppQuit() {
   // 开发环境里的普通会话经常需要重启 Electron，只在 production 下拦截，避免打断调试。
   // 正在创建的 worktree 关闭后无法恢复，任何环境都要确认。
   return (
-    (MARID_ENV === "production" && getRunningAgentSessionCount() > 0) ||
+    (QODEX_ENV === "production" && getRunningAgentSessionCount() > 0) ||
     getCreatingWorktreeCount() > 0
   );
 }
@@ -1654,7 +1654,7 @@ function confirmWindowCloseWithQuitBlockers(win: BrowserWindow): boolean {
 
 function confirmAppQuit(originWindow?: BrowserWindow | null) {
   if (!shouldConfirmAppQuit()) {
-    logger.info(`[app-quit] quit confirmation skipped in ${MARID_ENV}`);
+    logger.info(`[app-quit] quit confirmation skipped in ${QODEX_ENV}`);
     return true;
   }
 
@@ -1700,14 +1700,14 @@ async function executeDesktopCommandForApp(
     command,
     senderWindow,
     logger,
-    updateMaridStdioTapDevMenuState,
+    updateQodexStdioTapDevMenuState,
     onDesktopZoomChanged: (zoomLevel) => {
       currentDesktopZoomLevel = clampDesktopZoomLevel(zoomLevel);
       rebuildMenu();
     },
     settingService: mainSettingService,
-    onMaridEndpointChanged: handleMaridEndpointChanged,
-    maridEndpointEnvBaseOrigin: resolveMaridEndpointEnvBaseOrigin(hostProcessLocalEnv),
+    onQodexEndpointChanged: handleQodexEndpointChanged,
+    qodexEndpointEnvBaseOrigin: resolveQodexEndpointEnvBaseOrigin(hostProcessLocalEnv),
     onRelaunchApp: async () => {
       await prepareAppQuit("desktop-command-relaunch");
       app.relaunch();
@@ -1735,21 +1735,21 @@ async function executeDesktopCommandForApp(
   });
 }
 
-async function resolveMaridEndpointSelection(): Promise<"production" | "test" | "custom"> {
-  if (MARID_ENV === "production") {
+async function resolveQodexEndpointSelection(): Promise<"production" | "test" | "custom"> {
+  if (QODEX_ENV === "production") {
     return "production";
   }
-  const origin = await resolveCurrentMaridEndpointOrigin();
-  if (origin === DEFAULT_MARID_ENDPOINT_ORIGIN) {
+  const origin = await resolveCurrentQodexEndpointOrigin();
+  if (origin === DEFAULT_QODEX_ENDPOINT_ORIGIN) {
     return "production";
   }
-  if (origin === TEST_MARID_ENDPOINT_ORIGIN) {
+  if (origin === TEST_QODEX_ENDPOINT_ORIGIN) {
     return "test";
   }
   return "custom";
 }
 
-async function handleMaridEndpointChanged() {
+async function handleQodexEndpointChanged() {
   rebuildMenu();
   for (const win of getApplicationWindowsExcludingCuaIndicator()) {
     await webRemoteControlManagerRef.current?.suspend(win.id, "endpoint-changed");
@@ -1791,11 +1791,11 @@ function resetShortcutRecordingForWebContents(webContentsId: number) {
 }
 
 function rebuildMenu() {
-  void Promise.all([resolveMaridEndpointSelection(), mainSettingService.get()]).then(
-    ([maridEndpointSelection, settings]) => {
+  void Promise.all([resolveQodexEndpointSelection(), mainSettingService.get()]).then(
+    ([qodexEndpointSelection, settings]) => {
       rebuildApplicationMenu({
         currentApplicationLocale,
-        maridEndpointSelection,
+        qodexEndpointSelection,
         executeDesktopCommand: executeDesktopCommandForApp,
         currentZoomLevel: resolveFocusedDesktopZoomLevel(),
         // 菜单 accelerator 跟随用户快捷键设置（shortcutBindings 用户覆盖）
@@ -2071,7 +2071,7 @@ function createWindowInstance(startupBootstrap: StartupWindowBootstrap = {}) {
         {
           ...initMessage,
           browserBackendIdentity: browserGuestManager.getBackendIdentity(win.id),
-          maridBuiltinProviderConfigFilePath: resolveMaridBuiltinProviderConfigFilePath(),
+          qodexBuiltinProviderConfigFilePath: resolveQodexBuiltinProviderConfigFilePath(),
         },
         {
           hostProcessLocalEnv,
@@ -2248,7 +2248,7 @@ app.whenReady().then(async () => {
   installLocalMediaPreviewProtocol(session.defaultSession.protocol, {
     isPathAuthorized: localMediaPreviewPathRegistry.isAuthorized,
   });
-  // 插件 UI 沙箱：注册表 + renderer 可调 IPC；scheme 的 privileged 注册已随 marid-media 在 ready 前完成。
+  // 插件 UI 沙箱：注册表 + renderer 可调 IPC；scheme 的 privileged 注册已随 qodex-media 在 ready 前完成。
   installPluginSandboxHost({
     preloadPath: join(import.meta.dirname, "../preload/pluginSandbox.cjs"),
     rendererDir: join(import.meta.dirname, "../renderer"),
@@ -2261,10 +2261,10 @@ app.whenReady().then(async () => {
       : {}),
     logger: console,
     // e2e L05（配额）：只在 e2e run 里允许缩小注册表容量。
-    ...(process.env.MARID_E2E_RUN_ID?.trim() &&
-    Number.isInteger(Number(process.env.MARID_E2E_PLUGIN_SANDBOX_MAX_ENTRIES)) &&
-    Number(process.env.MARID_E2E_PLUGIN_SANDBOX_MAX_ENTRIES) > 0
-      ? { registryMaxEntries: Number(process.env.MARID_E2E_PLUGIN_SANDBOX_MAX_ENTRIES) }
+    ...(process.env.QODEX_E2E_RUN_ID?.trim() &&
+    Number.isInteger(Number(process.env.QODEX_E2E_PLUGIN_SANDBOX_MAX_ENTRIES)) &&
+    Number(process.env.QODEX_E2E_PLUGIN_SANDBOX_MAX_ENTRIES) > 0
+      ? { registryMaxEntries: Number(process.env.QODEX_E2E_PLUGIN_SANDBOX_MAX_ENTRIES) }
       : {}),
   });
   installBrowserLocalPreview(session.fromPartition(EMBEDDED_BROWSER_PARTITION));
@@ -2346,7 +2346,7 @@ app.whenReady().then(async () => {
     // 打包态必须与 NSIS 快捷方式使用同一 AUMID，否则 Shell 把它们当成不同应用。
     // 使用构建期产品身份，不依赖用户机器环境；开发态继续保持独立身份。
     app.setAppUserModelId(
-      resolveWindowsAppUserModelIdForFlavor(MARID_PRODUCT_FLAVOR, { isPackaged: app.isPackaged }),
+      resolveWindowsAppUserModelIdForFlavor(QODEX_PRODUCT_FLAVOR, { isPackaged: app.isPackaged }),
     );
   }
 
@@ -2402,11 +2402,11 @@ app.whenReady().then(async () => {
   logWindowsBundledRuntimeIntegrityDiagnostic();
 
   // 启动自动更新检查（后台执行，不阻塞主界面）
-  // Preview 身份无论连接哪个后端都不自动更新：stable feed 上只分发正式 Marid 安装包，
+  // Preview 身份无论连接哪个后端都不自动更新：stable feed 上只分发正式 Qodex 安装包，
   // 不向 Preview 渠道提供更新。构建期未启用自动更新时同样不更新
   // （见 docs/desktop/build-time-optional-capabilities.md）。
   void initAutoUpdater({
-    enabled: MARID_PRODUCT_FLAVOR === "production" && MARID_AUTO_UPDATE_ENABLED,
+    enabled: QODEX_PRODUCT_FLAVOR === "production" && QODEX_AUTO_UPDATE_ENABLED,
     onBeforeQuitAndInstall: async () => {
       notifyStabilityLifecycle("update_install");
       await prepareAppQuit("auto-update quitAndInstall", "update-install");
@@ -2417,8 +2417,8 @@ app.whenReady().then(async () => {
     settingService: mainSettingService,
     locale: currentApplicationLocale,
     deviceMid,
-    resolveEndpointOrigin: resolveCurrentMaridEndpointOrigin,
-    resolveMaridJwtToken: () => autoUpdateCredentialService.load("maridjwttoken"),
+    resolveEndpointOrigin: resolveCurrentQodexEndpointOrigin,
+    resolveQodexJwtToken: () => autoUpdateCredentialService.load("qodexjwttoken"),
     updateFeedSource: resolveUpdateFeedSourceFromStartupConfig({
       argv: process.argv,
       env: process.env,
@@ -2522,7 +2522,7 @@ app.whenReady().then(async () => {
     applyApplicationLocale: async (locale) => {
       currentApplicationLocale = locale;
       applicationLocaleResolved = true;
-      // Host 的 Marid endpoint 请求以此为实时语言；setting.json 写入可能滞后或失败，不能作为来源。
+      // Host 的 Qodex endpoint 请求以此为实时语言；setting.json 写入可能滞后或失败，不能作为来源。
       for (const child of windowHostProcessMap.values()) {
         child.postMessage({ type: HostMessageTypes.ApplicationLocaleChanged, locale });
       }
@@ -2624,8 +2624,8 @@ app.whenReady().then(async () => {
     armsCustomContext: {
       deviceMid,
       platform: process.platform,
-      appVersion: MARID_VERSION,
-      armsEnv: mapMaridEnvToArmsRumEnv(desktopRuntimeEnv),
+      appVersion: QODEX_VERSION,
+      armsEnv: mapQodexEnvToArmsRumEnv(desktopRuntimeEnv),
     },
     finalArmsCustomEventE2EEnabled: shouldEnableE2ETestBridge(process.env),
     webRemoteControlManager,
@@ -2673,35 +2673,35 @@ app.whenReady().then(async () => {
   configureDesktopStabilityTelemetry({
     deviceMid,
     platform: process.platform,
-    appVersion: MARID_VERSION,
-    armsEnv: mapMaridEnvToArmsRumEnv(desktopRuntimeEnv),
+    appVersion: QODEX_VERSION,
+    armsEnv: mapQodexEnvToArmsRumEnv(desktopRuntimeEnv),
   });
   configureDesktopResourceTelemetry({
     deviceMid,
     platform: process.platform,
-    appVersion: MARID_VERSION,
-    armsEnv: mapMaridEnvToArmsRumEnv(desktopRuntimeEnv),
+    appVersion: QODEX_VERSION,
+    armsEnv: mapQodexEnvToArmsRumEnv(desktopRuntimeEnv),
   });
   configureDesktopMcpTelemetry({
     deviceMid,
-    appVersion: MARID_VERSION,
-    armsEnv: mapMaridEnvToArmsRumEnv(desktopRuntimeEnv),
+    appVersion: QODEX_VERSION,
+    armsEnv: mapQodexEnvToArmsRumEnv(desktopRuntimeEnv),
   });
   configureDesktopNetworkTelemetry({
     deviceMid,
     platform: process.platform,
-    appVersion: MARID_VERSION,
-    armsEnv: mapMaridEnvToArmsRumEnv(desktopRuntimeEnv),
+    appVersion: QODEX_VERSION,
+    armsEnv: mapQodexEnvToArmsRumEnv(desktopRuntimeEnv),
   });
   registerDesktopStabilityMonitors(logger, crashCapturePaths);
   registerDesktopResourceTelemetry(logger);
   // 主窗口 renderer 的 60 秒 heap 样本入口；随 App 生命周期常驻，只注册一次。
   registerRendererHeapSampleIpc();
   const defaultDataBaseDir = process.env.HOME?.trim() || homedir();
-  registerDesktopMaridDataSizeTelemetry({
+  registerDesktopQodexDataSizeTelemetry({
     context: {
-      appVersion: MARID_VERSION,
-      armsEnv: mapMaridEnvToArmsRumEnv(desktopRuntimeEnv),
+      appVersion: QODEX_VERSION,
+      armsEnv: mapQodexEnvToArmsRumEnv(desktopRuntimeEnv),
       dataRootKind:
         resolve(getDataBaseDir()) === resolve(defaultDataBaseDir) ? "default" : "custom",
       deviceMid,
@@ -2709,33 +2709,33 @@ app.whenReady().then(async () => {
     },
     getSystemIdleTimeSeconds: () => powerMonitor.getSystemIdleTime(),
     isAppBackground: () => resolveResourceUsageScene() === "background",
-    isMaridBusy: () => getRunningAgentSessionCount() > 0,
+    isQodexBusy: () => getRunningAgentSessionCount() > 0,
     logger,
-    rootPath: getMaridDataRootDir(),
-    stateFile: join(app.getPath("userData"), "marid-data-size-telemetry.json"),
+    rootPath: getQodexDataRootDir(),
+    stateFile: join(app.getPath("userData"), "qodex-data-size-telemetry.json"),
   });
   registerDesktopNetworkTelemetry(logger);
 
   // 本地未打包 dev 构建（app.isPackaged === false）必须跳过远端强制升级 gate。
-  // 原因：force-update gate 只看 MARID_ENV === "production"，但 dev 构建（如 dev:desktop:cua
+  // 原因：force-update gate 只看 QODEX_ENV === "production"，但 dev 构建（如 dev:desktop:cua
   // 连真实后端测 computer use）虽指向 production 后端，版本号却滞后于线上 release（feature
   // 分支不 bump 版本），会被 release minimalVersion 误判为"需强制升级"而启动秒退。force-update
   // 是面向打包发布客户端的安全门，对未打包 dev 运行时无意义。打包版 app.isPackaged === true，
   // gate 照常生效，对真实用户零影响。
   const skipForceUpdateForLocalDevRuntime = !app.isPackaged;
   const forceUpdateGuardResult =
-    MARID_PRODUCT_FLAVOR === "production" && !skipForceUpdateForLocalDevRuntime
+    QODEX_PRODUCT_FLAVOR === "production" && !skipForceUpdateForLocalDevRuntime
       ? await maybeBlockStartupForForceUpdate({
-          resolveMaridJwtToken: () => autoUpdateCredentialService.load("maridjwttoken"),
+          resolveQodexJwtToken: () => autoUpdateCredentialService.load("qodexjwttoken"),
           locale: currentApplicationLocale,
           logger,
-          endpointOrigin: await resolveCurrentMaridEndpointOrigin(),
+          endpointOrigin: await resolveCurrentQodexEndpointOrigin(),
           onBlocked: () => {
             forceUpdateMainWindowCreationBlocked = true;
           },
         })
       : { blocked: false };
-  if (MARID_PRODUCT_FLAVOR !== "production") {
+  if (QODEX_PRODUCT_FLAVOR !== "production") {
     logger.info("[force-update] Preview 跳过远端强制升级检查");
   } else if (skipForceUpdateForLocalDevRuntime) {
     logger.info("[force-update] 本地 dev 构建（未打包）跳过远端强制升级检查");

@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
-import type { ConversationTelemetryFact } from "@marid/shared/marid-protocol-v4";
-import { resolveWorkspaceTelemetryDetail, type IPlatformService } from "@marid/shared";
-import { createConversationTelemetryService, type IServiceAccessor } from "@marid/services";
+import type { ConversationTelemetryFact } from "@qodex/shared/qodex-protocol-v4";
+import { resolveWorkspaceTelemetryDetail, type IPlatformService } from "@qodex/shared";
+import { createConversationTelemetryService, type IServiceAccessor } from "@qodex/services";
 import { useOptionalPlatform } from "@/hooks/usePlatform.js";
 import { ConversationTelemetrySupervisor } from "@/v4/telemetry/conversationTelemetrySupervisor.js";
 
@@ -74,7 +74,7 @@ function acquireSupervisor(
   platform: Pick<IPlatformService, "reportArmsCustomEvent" | "reportTelemetryEvent">,
 ): SupervisorLease {
   const logicalScopeKey = logicalAttachmentScopeKey(scope);
-  const key = attachmentScopeKey(scope, services.maridAgentService);
+  const key = attachmentScopeKey(scope, services.qodexAgentService);
   // service generation 换代时，零引用旧 supervisor 立即销毁；仍被 pane 使用的旧代标 stale，
   // 等末位 lease 释放再清理。不能让旧/新 generation 同时长期订阅同一 workspace。
   for (const [candidateKey, candidate] of supervisorRegistry) {
@@ -160,7 +160,7 @@ function ensureSupervisorSubscription(
   services: IServiceAccessor,
 ): void {
   if (entry.subscription) return;
-  const telemetryService = createConversationTelemetryService(services.maridAgentService);
+  const telemetryService = createConversationTelemetryService(services.qodexAgentService);
   const factEvent = telemetryService.onFact({
     workspacePath: scope.workspacePath,
     ...(scope.workspaceIdentity ? { workspaceIdentity: scope.workspaceIdentity } : {}),
@@ -201,7 +201,7 @@ export function ConversationTelemetryWorkspaceAttachment({
     [remoteSessionId, workspaceIdentity, workspacePath],
   );
   const lease = useMemo(() => {
-    const agentService = services.maridAgentService as object | null | undefined;
+    const agentService = services.qodexAgentService as object | null | undefined;
     if (!enabled || !platform || !agentService) return null;
     // Bug 根因：Root 的隔离渲染和远端 service 准备阶段可能尚无 PlatformProvider 或 agent service。
     // telemetry 是旁路能力，不能因依赖未就绪阻断 workspace 主界面；依赖齐备后再按 generation 建 lease。

@@ -1,12 +1,12 @@
 import { useCallback, useState } from "react";
-import type { GitChangeSourceId } from "@marid/shared";
+import type { GitChangeSourceId } from "@qodex/shared";
 import { toast } from "@/components/ui/toast.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 
 export function useGitActions(options: { workspacePath: string }) {
   const { workspacePath } = options;
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const [refreshVersion, setRefreshVersion] = useState(0);
 
   const announcePlaceholder = useCallback(

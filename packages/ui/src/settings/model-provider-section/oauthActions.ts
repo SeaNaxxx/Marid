@@ -1,5 +1,5 @@
-import type { BuiltinModelProviderId, IPlatformService } from "@marid/shared";
-import type { IOAuthService } from "@marid/services";
+import type { BuiltinModelProviderId, IPlatformService } from "@qodex/shared";
+import type { IOAuthService } from "@qodex/services";
 import { resolveOAuthProviderIdByPreset } from "./utils.js";
 import {
   reportAppTelemetryEvent,

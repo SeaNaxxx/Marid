@@ -1,15 +1,15 @@
-import { Emitter, type Event } from "@marid/rpc";
-import { ESTIMATED_TOKEN_CHAR_DIVISOR, calculateOutputTps } from "@marid/shared";
+import { Emitter, type Event } from "@qodex/rpc";
+import { ESTIMATED_TOKEN_CHAR_DIVISOR, calculateOutputTps } from "@qodex/shared";
 import {
   GENERATION_STREAMING_PUSH_INTERVAL_MS,
   type GenerationMetrics,
   type WorkspaceRef,
-} from "@marid/shared/extension-host";
+} from "@qodex/shared/extension-host";
 import type {
   ConversationTelemetryFact,
   ModelRequestMetricsFact,
-} from "@marid/shared/marid-protocol-v4";
-import type { IMaridAgentService } from "#src/marid-agent/maridAgent.js";
+} from "@qodex/shared/qodex-protocol-v4";
+import type { IQodexAgentService } from "#src/qodex-agent/qodexAgent.js";
 import type { ServiceLogger } from "#src/logger/serviceLogger.js";
 import {
   createWorkspaceSubscriptions,
@@ -42,7 +42,7 @@ export interface GenerationPump {
 
 export function createGenerationPump(deps: {
   agent: Pick<
-    IMaridAgentService,
+    IQodexAgentService,
     "onDynamicConversationTelemetryFact" | "onDynamicModelRequestMetrics"
   >;
   workbench: WorkbenchState;

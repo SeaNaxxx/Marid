@@ -1,5 +1,5 @@
-import type { IUsageStatsService } from "@marid/services";
-import type { CodingPlanResetOpportunityResult, CodingPlanResetScopeRequest } from "@marid/shared";
+import type { IUsageStatsService } from "@qodex/services";
+import type { CodingPlanResetOpportunityResult, CodingPlanResetScopeRequest } from "@qodex/shared";
 import { logger } from "@/logger.js";
 
 const STATUS_POLL_INTERVAL_MS = 5 * 60_000;

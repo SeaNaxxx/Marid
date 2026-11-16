@@ -1,5 +1,5 @@
-import type { IPlatformService, LocalTtftRecord } from "@marid/shared";
-import { LocalTtftObserver, setLocalTtftObserver } from "@marid/ui";
+import type { IPlatformService, LocalTtftRecord } from "@qodex/shared";
+import { LocalTtftObserver, setLocalTtftObserver } from "@qodex/ui";
 
 /** 本地日志默认开启；原有云端出口选择在发送开始时冻结。 */
 export function initializeDesktopLocalTtft(platform: IPlatformService): () => void {

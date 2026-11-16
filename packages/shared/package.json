@@ -1,5 +1,5 @@
 {
-  "name": "@marid/shared",
+  "name": "@qodex/shared",
   "private": true,
   "type": "module",
   "imports": {
@@ -20,10 +20,10 @@
     "./config-schema": "./src/config-schema.ts",
     "./node": "./src/node.ts",
     "./sqlite-migrations": "./src/sqlite-migrations/index.ts",
-    "./maridEndpoint": "./src/maridEndpoint.ts",
+    "./qodexEndpoint": "./src/qodexEndpoint.ts",
     "./workspaceFileSearch": "./src/workspaceFileSearch.ts",
     "./workspaceFileEntriesCodec": "./src/workspaceFileEntriesCodec.ts",
-    "./marid-protocol-v4": "./src/marid-protocol-v4/index.ts",
+    "./qodex-protocol-v4": "./src/qodex-protocol-v4/index.ts",
     "./mcp-apps": "./src/mcp-apps/index.ts",
     "./extension-host": "./src/extension-host/index.ts",
     "./workspace-hook-discovery": "./src/workspace-hook-discovery.ts",
@@ -46,8 +46,8 @@
   },
   "dependencies": {
     "@napi-rs/keyring": "2.1.2",
-    "@marid/model-option-map": "workspace:*",
-    "@marid/session-control": "workspace:*",
+    "@qodex/model-option-map": "workspace:*",
+    "@qodex/session-control": "workspace:*",
     "zod": "4.6.5"
   },
   "devDependencies": {

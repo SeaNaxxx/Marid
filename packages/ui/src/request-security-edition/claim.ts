@@ -1,5 +1,5 @@
-import type { ICodingPlanSubscriptionService } from "@marid/services";
-import type { RequestVerificationProof } from "@marid/shared";
+import type { ICodingPlanSubscriptionService } from "@qodex/services";
+import type { RequestVerificationProof } from "@qodex/shared";
 export function useRequestVerificationPrewarm(_visible: boolean): void {}
 export async function prepareRequestVerificationClaim(
   _service: ICodingPlanSubscriptionService,

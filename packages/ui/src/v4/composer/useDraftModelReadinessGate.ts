@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { isMaridAgentProvider, MARID_AGENT_PROVIDER, type MaridProvider } from "@marid/shared";
-import type { IModelSelectionService, ModelSelectionView } from "@marid/services";
+import { isQodexAgentProvider, QODEX_AGENT_PROVIDER, type QodexProvider } from "@qodex/shared";
+import type { IModelSelectionService, ModelSelectionView } from "@qodex/services";
 import {
   buildModelConfigMissingUiError,
   type ModelConfigMissingUiError,
@@ -42,14 +42,14 @@ export function resolveModelSelectionReadinessStatus(
 export function useDraftModelReadinessGate(params: {
   workspacePath: string;
   workspaceIdentity?: string;
-  provider?: MaridProvider;
+  provider?: QodexProvider;
   sessionId: string | null;
   modelSelectionService: Pick<IModelSelectionService, "getView" | "onDidChange">;
 }): DraftModelReadinessGate {
   const { workspacePath, workspaceIdentity, provider, sessionId, modelSelectionService } = params;
   const workspaceKey = workspaceIdentity?.trim() || workspacePath;
-  const displayProvider = provider ?? MARID_AGENT_PROVIDER;
-  const enabled = sessionId === null && isMaridAgentProvider(displayProvider);
+  const displayProvider = provider ?? QODEX_AGENT_PROVIDER;
+  const enabled = sessionId === null && isQodexAgentProvider(displayProvider);
   const gateKey = `${workspaceKey}\u0000${displayProvider}`;
   const scope = useMemo(() => ({ gateKey }), [enabled, gateKey, modelSelectionService]);
   const [state, setState] = useState<DraftModelReadinessState>(() => ({

@@ -1,16 +1,16 @@
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { isLocale, resolvePersistedUiLocale } from "@marid/shared";
-import type { Locale } from "@marid/shared";
+import { isLocale, resolvePersistedUiLocale } from "@qodex/shared";
+import type { Locale } from "@qodex/shared";
 
 /**
- * 与 settingService 的 resolveUserHomeDir 保持同一优先级：独立 Dev 实例用 MARID_DESKTOP_HOME_DIR，
+ * 与 settingService 的 resolveUserHomeDir 保持同一优先级：独立 Dev 实例用 QODEX_DESKTOP_HOME_DIR，
  * 否则用 HOME / USERPROFILE。不能直接用 os.homedir()，否则隔离实例会读到真实用户的设置。
  */
 function resolveBootstrapHomeDir(): string {
   const envHome =
-    process.env.MARID_DESKTOP_HOME_DIR?.trim() ||
+    process.env.QODEX_DESKTOP_HOME_DIR?.trim() ||
     process.env.HOME?.trim() ||
     process.env.USERPROFILE?.trim();
   return envHome && envHome.length > 0 ? envHome : homedir();
@@ -19,7 +19,7 @@ function resolveBootstrapHomeDir(): string {
 export function resolveApplicationLocaleBootstrapSettingsFile(
   homePath: string = resolveBootstrapHomeDir(),
 ): string {
-  return join(homePath, ".marid", "v2", "setting.json");
+  return join(homePath, ".qodex", "v2", "setting.json");
 }
 
 export function extractBootstrapApplicationLocale(rawValue: unknown): Locale | undefined {

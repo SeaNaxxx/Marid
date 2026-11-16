@@ -6,8 +6,8 @@ import type {
   SettingsSyncImportResult,
   SettingsSyncProgressEvent,
   SettingsSyncSelection,
-} from "@marid/shared";
-import { ServiceChannels } from "@marid/shared";
+} from "@qodex/shared";
+import { ServiceChannels } from "@qodex/shared";
 import { createServiceDescriptor } from "../descriptors.js";
 
 export interface ISettingsSyncService {
@@ -15,7 +15,7 @@ export interface ISettingsSyncService {
     workspacePath?: string;
     workspaceIdentity?: string;
   }): Promise<SettingsSyncClaudeAgentsFileMigrationStatus>;
-  copyClaudeAgentsFileToMaridAgentsFile(request?: {
+  copyClaudeAgentsFileToQodexAgentsFile(request?: {
     workspacePath?: string;
     workspaceIdentity?: string;
     overwrite?: boolean;

@@ -3,7 +3,7 @@ import {
   TID_V4_COMPOSER,
   TID_V4_COMPOSER_INPUT,
   TID_V4_ROW_ATTACHMENTS,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { clearAppData } from "#e2e/helpers/desktop-app";
 import {
   beginFirstV4UserQueryEdit,
@@ -147,13 +147,13 @@ async function dispatchComposerContexts(): Promise<void> {
   const dispatched = await browser.execute(() => {
     const tabState = (
       window as typeof window & {
-        __maridTabStoreE2E?: { getState(): { activeWorkspacePath?: string } };
+        __qodexTabStoreE2E?: { getState(): { activeWorkspacePath?: string } };
       }
-    ).__maridTabStoreE2E?.getState();
+    ).__qodexTabStoreE2E?.getState();
     const workspacePath = tabState?.activeWorkspacePath;
     if (!workspacePath) return false;
     window.dispatchEvent(
-      new CustomEvent("marid:code-comment-add-to-chat", {
+      new CustomEvent("qodex:code-comment-add-to-chat", {
         cancelable: true,
         detail: {
           id: "e2e-comment",
@@ -168,7 +168,7 @@ async function dispatchComposerContexts(): Promise<void> {
       }),
     );
     window.dispatchEvent(
-      new CustomEvent("marid:web-element-context-add-to-chat", {
+      new CustomEvent("qodex:web-element-context-add-to-chat", {
         detail: {
           id: "e2e-web",
           workspacePath,
@@ -181,7 +181,7 @@ async function dispatchComposerContexts(): Promise<void> {
       }),
     );
     window.dispatchEvent(
-      new CustomEvent("marid:pptx-element-reference-add-to-chat", {
+      new CustomEvent("qodex:pptx-element-reference-add-to-chat", {
         detail: {
           id: "e2e-pptx",
           workspacePath,

@@ -26,7 +26,7 @@ export function registerSessionSelectionCases({
           await page.addInitScript(trackProjectRenders);
           await page.addInitScript(() =>
             localStorage.setItem(
-              "marid-project-sidebar-preferences",
+              "qodex-project-sidebar-preferences",
               JSON.stringify({
                 order: [],
                 view: "projects",

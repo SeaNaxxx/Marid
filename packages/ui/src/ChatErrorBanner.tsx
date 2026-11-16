@@ -5,21 +5,21 @@ import { CodingPlanEntryButton } from "@/settings/CodingPlanEntryButton.js";
 /**
  * ChatErrorBanner — 错误提示组件
  *
- * 显示 Marid Agent 链路中的错误，带 traceId 方便排查。
+ * 显示 Qodex Agent 链路中的错误，带 traceId 方便排查。
  */
 import { useState } from "react";
 import {
   MEDIA_BUDGET_CURRENT_ATTACHMENT_TOO_LARGE_ERROR_CODE,
   MEDIA_BUDGET_CURRENT_IMAGE_TOO_LARGE_ERROR_CODE,
   MEDIA_BUDGET_CURRENT_VIDEO_TOO_LARGE_ERROR_CODE,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   TID_CHAT_ERROR_DETAILS_BUTTON,
   TID_CHAT_ERROR_BANNER,
   TID_CHAT_ERROR_HOOK_ICON,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { AnchorIcon, CopyIcon, InfoIcon, RocketIcon, SettingsIcon, X } from "lucide-react";
-import { useMaridIntl } from "./i18n/IntlProvider.js";
+import { useQodexIntl } from "./i18n/IntlProvider.js";
 import type { IntlInstance } from "./i18n/IntlProvider.js";
 import { Button } from "./components/ui/button.js";
 import {
@@ -39,7 +39,7 @@ import {
   resolveOffPeakTicketExpiredBusinessCode,
   resolveRequestVerificationBusinessCode,
 } from "@/lib/providerBusinessError.js";
-import type { MaridUiError } from "@/lib/maridUiError.js";
+import type { QodexUiError } from "@/lib/qodexUiError.js";
 
 const HISTORICAL_MODEL_UNAVAILABLE_MESSAGES = [
   "历史任务使用的模型已不可用",
@@ -56,8 +56,8 @@ const LOCALIZED_ERROR_CODES = new Set([
   MEDIA_BUDGET_CURRENT_VIDEO_TOO_LARGE_ERROR_CODE,
   // 服务层错误 message 是跨进程兜底，不能作为最终 UI 语言来源。
   // 历史任务模型不可用要按稳定 code 本地化，避免英文界面显示中文提示。
-  "MARID_RUNTIME_MODEL_UNAVAILABLE",
-  "MARID_BIGMODEL_TEAM_PLAN_MEMBER_REQUIRED",
+  "QODEX_RUNTIME_MODEL_UNAVAILABLE",
+  "QODEX_BIGMODEL_TEAM_PLAN_MEMBER_REQUIRED",
 ]);
 
 const MODEL_CONFIG_MISSING_CODES = new Set([
@@ -73,11 +73,11 @@ const MODEL_CONFIG_MISSING_CODES = new Set([
 const MODEL_NOT_IN_REGISTRY_CODES = new Set(["provider_not_found", "model_not_found"]);
 
 /** 投影错误是否只是「会话模型不在 Registry」这一事实的 Core 侧表达。 */
-export function isModelNotInRegistryError(error: Pick<MaridUiError, "code">): boolean {
+export function isModelNotInRegistryError(error: Pick<QodexUiError, "code">): boolean {
   return Boolean(error.code && MODEL_NOT_IN_REGISTRY_CODES.has(error.code));
 }
 
-function isModelConfigMissingError(error: Pick<MaridUiError, "code" | "message">): boolean {
+function isModelConfigMissingError(error: Pick<QodexUiError, "code" | "message">): boolean {
   // Bugfix: 桌面端发送前 registry 为空时，agent 会退回 CLI config 并抛 Model config is missing。
   // 真实原因是“当前没有可用模型”，不能把 CLI 配置路径直接暴露给桌面用户。
   // 这里只按结构化 code 识别，避免 UNKNOWN/SEND_FAILED 等包装错误的可读 message
@@ -107,7 +107,7 @@ function parseClaudeUnknownCommandMessage(message: string): {
 export type ChatErrorBannerModelConfigTarget = "local" | "remote";
 
 export function resolveChatErrorBannerDisplayMessage(
-  error: MaridUiError,
+  error: QodexUiError,
   intl: IntlInstance,
   modelConfigTarget: ChatErrorBannerModelConfigTarget = "local",
 ): string {
@@ -137,11 +137,11 @@ export function resolveChatErrorBannerDisplayMessage(
     // 重新本地化，否则英文界面会混入中文错误提示。
     return parsed.args
       ? intl.formatMessage(
-          { id: "marid.error.CLAUDE_UNKNOWN_COMMAND_WITH_ARGS" },
+          { id: "qodex.error.CLAUDE_UNKNOWN_COMMAND_WITH_ARGS" },
           { command: parsed.command, args: parsed.args },
         )
       : intl.formatMessage(
-          { id: "marid.error.CLAUDE_UNKNOWN_COMMAND" },
+          { id: "qodex.error.CLAUDE_UNKNOWN_COMMAND" },
           { command: parsed.command },
         );
   }
@@ -159,25 +159,25 @@ export function resolveChatErrorBannerDisplayMessage(
   }
 
   if (isSuspiciousEmptyModelResultMessage(error.message)) {
-    return intl.formatMessage({ id: "marid.error.modelSuspiciousEmpty" });
+    return intl.formatMessage({ id: "qodex.error.modelSuspiciousEmpty" });
   }
 
   if (isModelNotInRegistryError(error)) {
-    return intl.formatMessage({ id: "marid.error.MARID_RUNTIME_MODEL_UNAVAILABLE" });
+    return intl.formatMessage({ id: "qodex.error.QODEX_RUNTIME_MODEL_UNAVAILABLE" });
   }
 
   return error.code && LOCALIZED_ERROR_CODES.has(error.code)
-    ? intl.formatMessage({ id: `marid.error.${error.code}` })
+    ? intl.formatMessage({ id: `qodex.error.${error.code}` })
     : error.message;
 }
 
 export function shouldSuppressChatErrorBanner(
-  error: Pick<MaridUiError, "code" | "message">,
+  error: Pick<QodexUiError, "code" | "message">,
 ): boolean {
   // 只有历史恢复残留的模型不可用提示才隐藏；当前发送/草稿报错需要展示，
   // 否则 registry 移除模型后用户会看到“请求没返回”而没有任何可操作反馈。
   return Boolean(
-    error.code === "MARID_RUNTIME_MODEL_UNAVAILABLE" &&
+    error.code === "QODEX_RUNTIME_MODEL_UNAVAILABLE" &&
     HISTORICAL_MODEL_UNAVAILABLE_MESSAGES.some((message) => error.message.includes(message)),
   );
 }
@@ -194,7 +194,7 @@ export function ChatErrorBanner({
   onReconnect,
   remoteKind,
 }: {
-  error: MaridUiError;
+  error: QodexUiError;
   onReconnect?: () => void;
   remoteKind?: string;
   onRetry?: () => void;
@@ -205,7 +205,7 @@ export function ChatErrorBanner({
   onOpenUpgrade?: () => void;
   modelConfigTarget?: ChatErrorBannerModelConfigTarget;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const openFeedbackSubmit = useFeedbackStore((state) => state.openSubmit);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const actionButtonClassName = "shrink-0";

@@ -45,7 +45,7 @@ export const SOURCE_SERVER_STOP_FAILED_ERROR_CODE = "source-server-stop-failed" 
 export const SOURCE_SERVER_CONTROL_UNRESPONSIVE_ERROR_CODE =
   "source-server-control-unresponsive" as const;
 
-export const PUBLIC_MARID_ERROR_CODES = [
+export const PUBLIC_QODEX_ERROR_CODES = [
   "remote-authentication-failed",
   // 服务器在密码之后还要求交互验证（例如动态口令）；当前只支持密码、私钥与 SSH agent。
   "remote-authentication-unsupported",
@@ -85,12 +85,12 @@ export const PUBLIC_MARID_ERROR_CODES = [
   SOURCE_SERVER_CONTROL_UNRESPONSIVE_ERROR_CODE,
 ] as const;
 
-export type PublicMaridErrorCode = (typeof PUBLIC_MARID_ERROR_CODES)[number];
+export type PublicQodexErrorCode = (typeof PUBLIC_QODEX_ERROR_CODES)[number];
 
-export const publicMaridErrorCodeSchema = z.enum(PUBLIC_MARID_ERROR_CODES);
+export const publicQodexErrorCodeSchema = z.enum(PUBLIC_QODEX_ERROR_CODES);
 
-const publicMaridErrorCodeSet = new Set<string>(PUBLIC_MARID_ERROR_CODES);
+const publicQodexErrorCodeSet = new Set<string>(PUBLIC_QODEX_ERROR_CODES);
 
-export function isPublicMaridErrorCode(value: unknown): value is PublicMaridErrorCode {
-  return typeof value === "string" && publicMaridErrorCodeSet.has(value);
+export function isPublicQodexErrorCode(value: unknown): value is PublicQodexErrorCode {
+  return typeof value === "string" && publicQodexErrorCodeSet.has(value);
 }

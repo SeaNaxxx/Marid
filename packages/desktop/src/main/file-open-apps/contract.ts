@@ -1,4 +1,4 @@
-import type { FileApplicationInfo, FileApplicationTarget } from "@marid/shared";
+import type { FileApplicationInfo, FileApplicationTarget } from "@qodex/shared";
 
 /** 系统关联的真实身份不跨 IPC，只将其摘要给 renderer。 */
 export interface NativeFileApplication {

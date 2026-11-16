@@ -9,10 +9,10 @@ import type {
   ConversationShareRecord,
   ConversationShareTtlOptions,
   Locale,
-} from "@marid/shared";
-import { ServiceChannels } from "@marid/shared";
-import type { WireConversationRow } from "@marid/shared/marid-protocol-v4";
-import { Event as RpcEvent, type Event } from "@marid/rpc";
+} from "@qodex/shared";
+import { ServiceChannels } from "@qodex/shared";
+import type { WireConversationRow } from "@qodex/shared/qodex-protocol-v4";
+import { Event as RpcEvent, type Event } from "@qodex/rpc";
 
 import { createServiceDescriptor } from "../descriptors.js";
 import type { ConversationShareClientErrorKind } from "./conversationShareHttpClient.js";

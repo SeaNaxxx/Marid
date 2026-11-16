@@ -1,6 +1,6 @@
-import type { MaridTaskMeta } from "@marid/shared";
-import { getTaskMeta, useMaridSessionStore } from "@/store/maridSessionStore.js";
-import { mergeTaskMetaCandidates } from "@/lib/maridTaskMetaMerge.js";
+import type { QodexTaskMeta } from "@qodex/shared";
+import { getTaskMeta, useQodexSessionStore } from "@/store/qodexSessionStore.js";
+import { mergeTaskMetaCandidates } from "@/lib/qodexTaskMetaMerge.js";
 import {
   applyTaskQueryCacheMutation,
   updateTaskQueryCacheTaskMetaPreservingMembership,
@@ -15,7 +15,7 @@ const ABSENT_MEMBERSHIP: TaskListMembershipState = {
   archived: true,
 };
 
-function sortTasksByUpdatedAt(tasks: readonly MaridTaskMeta[]): MaridTaskMeta[] {
+function sortTasksByUpdatedAt(tasks: readonly QodexTaskMeta[]): QodexTaskMeta[] {
   return [...tasks].sort((left, right) => {
     if (right.updatedAt !== left.updatedAt) {
       return right.updatedAt - left.updatedAt;
@@ -30,14 +30,14 @@ function sortTasksByUpdatedAt(tasks: readonly MaridTaskMeta[]): MaridTaskMeta[] 
 export function syncTaskMetaToTaskCaches(params: {
   workspacePath: string;
   workspaceIdentity?: string;
-  task: MaridTaskMeta;
+  task: QodexTaskMeta;
   membership?: TaskListMembershipState;
   forceInsertMembership?: boolean;
   ensureInWorkspaceTaskCache?: boolean;
   preserveListMembership?: boolean;
   applyQueryCacheMutation?: boolean;
 }): void {
-  const store = useMaridSessionStore.getState();
+  const store = useQodexSessionStore.getState();
   const workspaceState = store.getWorkspaceState(params.workspacePath, params.workspaceIdentity);
   const previousTask = getTaskMeta(workspaceState, params.task.taskId);
   const queryTask =
@@ -105,7 +105,7 @@ export function syncTaskMetaToTaskCaches(params: {
 export function insertTaskIntoTaskCaches(params: {
   workspacePath: string;
   workspaceIdentity?: string;
-  task: MaridTaskMeta;
+  task: QodexTaskMeta;
   membership: TaskListMembershipState;
 }): void {
   // Bugfix: 新建/fork/远控 shared-host 创建 task 都应走同一条“无 -> 有”成员变更。

@@ -5,7 +5,7 @@ import {
   type ChannelContentPart,
   type ChannelReplyHostRequest,
   type ChannelReplyResult,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 type Mention = Extract<ChannelContentPart, { type: "channelMention" }>;
 type Clarification = Extract<ChannelReplyResult, { status: "needs_clarification" }>;

@@ -1,4 +1,4 @@
-import type { PluginSandboxHandle } from "@marid/shared/mcp-apps";
+import type { PluginSandboxHandle } from "@qodex/shared/mcp-apps";
 import { randomUUID } from "node:crypto";
 import type {
   PluginSandboxRecord,

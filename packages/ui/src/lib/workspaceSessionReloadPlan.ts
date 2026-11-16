@@ -1,4 +1,4 @@
-import type { MaridProvider, MaridError } from "@marid/shared";
+import type { QodexProvider, QodexError } from "@qodex/shared";
 import { buildWorkspacePrepareUiError } from "@/lib/chatPrepareError.js";
 
 export const WORKSPACE_SESSION_RELOAD_DEBOUNCE_MS = 1200;
@@ -10,7 +10,7 @@ interface WorkspaceSessionReloadPlan {
 
 interface WorkspaceSessionReloadDraftErrorContext {
   workspacePath: string;
-  provider: MaridProvider;
+  provider: QodexProvider;
 }
 
 export function buildWorkspaceSessionReloadPlan(activeTaskId: string | null): WorkspaceSessionReloadPlan {
@@ -32,7 +32,7 @@ export function buildWorkspaceSessionReloadPlan(activeTaskId: string | null): Wo
 export function buildWorkspaceSessionReloadDraftError(
   err: unknown,
   context: WorkspaceSessionReloadDraftErrorContext,
-): MaridError & { detail?: string } {
+): QodexError & { detail?: string } {
   return buildWorkspacePrepareUiError(err, {
     workspacePath: context.workspacePath,
     provider: context.provider,

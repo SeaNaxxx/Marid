@@ -1,10 +1,10 @@
 import type {
-  MaridPersistedFileChange,
-  MaridTaskChangeSummary,
-  MaridTaskChangedFileSummary,
-  MaridTaskMeta,
-} from "@marid/shared";
-import { computeLineChangeStat } from "@marid/shared";
+  QodexPersistedFileChange,
+  QodexTaskChangeSummary,
+  QodexTaskChangedFileSummary,
+  QodexTaskMeta,
+} from "@qodex/shared";
+import { computeLineChangeStat } from "@qodex/shared";
 import { getPathLeaf } from "@/lib/path.js";
 import type { TaskChatMessage } from "@/lib/taskChatMessageTypes.js";
 import { readRawToolCallFileSummaries } from "@/ToolCallBlocks/fileSummaries.js";
@@ -29,8 +29,8 @@ function trimTrailingSeparators(path: string): string {
 }
 
 export function getTaskChangeSummary(
-  task: Pick<MaridTaskMeta, "changeSummary"> | null | undefined,
-): MaridTaskChangeSummary | null {
+  task: Pick<QodexTaskMeta, "changeSummary"> | null | undefined,
+): QodexTaskChangeSummary | null {
   if (!task?.changeSummary || task.changeSummary.files.length === 0) {
     return null;
   }
@@ -39,7 +39,7 @@ export function getTaskChangeSummary(
 }
 
 function formatTaskChangeStats(
-  summary: MaridTaskChangeSummary,
+  summary: QodexTaskChangeSummary,
   intl: TaskChangeSummaryIntl,
 ): string {
   return intl.formatMessage(
@@ -53,7 +53,7 @@ function formatTaskChangeStats(
 
 export function formatTaskTitleWithChanges(
   title: string,
-  summary: MaridTaskChangeSummary | null,
+  summary: QodexTaskChangeSummary | null,
   intl: TaskChangeSummaryIntl,
 ): string {
   if (!summary) {
@@ -92,7 +92,7 @@ export function toWorkspaceRelativePath(
 
 export function formatTaskChangedFileLabel(
   workspacePath: string,
-  file: MaridTaskChangedFileSummary,
+  file: QodexTaskChangedFileSummary,
 ): string {
   const relativePath = toWorkspaceRelativePath(workspacePath, file.path);
   const statParts: string[] = [];
@@ -109,9 +109,9 @@ export function formatTaskChangedFileLabel(
 }
 
 export function buildPerTurnFileChangeMap(
-  fileChanges: readonly MaridPersistedFileChange[] | undefined,
-): Map<number, MaridPersistedFileChange> {
-  const result = new Map<number, MaridPersistedFileChange>();
+  fileChanges: readonly QodexPersistedFileChange[] | undefined,
+): Map<number, QodexPersistedFileChange> {
+  const result = new Map<number, QodexPersistedFileChange>();
   if (!fileChanges || fileChanges.length === 0) {
     return result;
   }
@@ -128,8 +128,8 @@ export function buildPerTurnFileChangeMap(
 }
 
 export function buildTaskChangeSummary(
-  fileChanges: readonly MaridPersistedFileChange[] | undefined,
-): MaridTaskChangeSummary | null {
+  fileChanges: readonly QodexPersistedFileChange[] | undefined,
+): QodexTaskChangeSummary | null {
   if (!fileChanges || fileChanges.length === 0) {
     return null;
   }
@@ -162,7 +162,7 @@ export function buildTaskChangeSummary(
 
   let added = 0;
   let removed = 0;
-  const files: MaridTaskChangedFileSummary[] = Array.from(changedFileMap.values())
+  const files: QodexTaskChangedFileSummary[] = Array.from(changedFileMap.values())
     .map((file) => {
       const fileStat = computeLineChangeStat(
         file.originalContent,
@@ -228,13 +228,13 @@ export function buildToolCallChangeSummary(
   turnIndex: number,
 ): {
   patchesByPath?: ReadonlyMap<string, string>;
-  summary: MaridTaskChangeSummary | null;
+  summary: QodexTaskChangeSummary | null;
 } {
   if (message.role !== "assistant" || !message.toolCalls?.length) {
     return { summary: null };
   }
 
-  const filesByPath = new Map<string, MaridTaskChangedFileSummary>();
+  const filesByPath = new Map<string, QodexTaskChangedFileSummary>();
   const patchesByPath = new Map<string, string>();
   for (const toolCall of message.toolCalls) {
     if (hasUnsuccessfulToolStatus(toolCall)) {
@@ -291,12 +291,12 @@ export function buildToolCallChangeSummary(
 
 export function buildTaskChangeSummaryFromToolCalls(
   messages: readonly TaskChatMessage[] | undefined,
-): MaridTaskChangeSummary | null {
+): QodexTaskChangeSummary | null {
   if (!messages || messages.length === 0) {
     return null;
   }
 
-  const filesByPath = new Map<string, MaridTaskChangedFileSummary>();
+  const filesByPath = new Map<string, QodexTaskChangedFileSummary>();
   for (let messageIndex = 0; messageIndex < messages.length; messageIndex++) {
     const message = messages[messageIndex]!;
     const turnIndex =
@@ -348,8 +348,8 @@ export function buildTaskChangeSummaryFromToolCalls(
 }
 
 export function buildTurnChangeSummary(
-  turn: MaridPersistedFileChange | null | undefined,
-): MaridTaskChangeSummary | null {
+  turn: QodexPersistedFileChange | null | undefined,
+): QodexTaskChangeSummary | null {
   if (!turn || turn.snapshots.length === 0) {
     return null;
   }
@@ -383,7 +383,7 @@ export function buildTurnChangeSummary(
 
   let added = 0;
   let removed = 0;
-  const files: MaridTaskChangedFileSummary[] = Array.from(filesByPath.entries())
+  const files: QodexTaskChangedFileSummary[] = Array.from(filesByPath.entries())
     .map(([path, snapshot]) => {
       const fileStat = computeLineChangeStat(
         snapshot.beforeContent,
@@ -414,9 +414,9 @@ export function buildTurnChangeSummary(
  * 用于在每条 assistant 消息下方显示该轮的文件改动。
  */
 export function buildPerTurnChangeSummaries(
-  fileChanges: readonly MaridPersistedFileChange[] | undefined,
-): Map<number, MaridTaskChangeSummary> {
-  const result = new Map<number, MaridTaskChangeSummary>();
+  fileChanges: readonly QodexPersistedFileChange[] | undefined,
+): Map<number, QodexTaskChangeSummary> {
+  const result = new Map<number, QodexTaskChangeSummary>();
   if (!fileChanges || fileChanges.length === 0) {
     return result;
   }

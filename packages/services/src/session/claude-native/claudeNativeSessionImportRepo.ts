@@ -1,7 +1,7 @@
 import { copyFile, mkdir, readdir, rename, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import { basename, dirname, join, normalize, resolve, sep } from "node:path";
-import type { MaridImportableSessionCandidate } from "@marid/shared";
+import type { QodexImportableSessionCandidate } from "@qodex/shared";
 import { createServiceLogger } from "#src/logger/serviceLogger.js";
 import { getAppConfigDir, getDataBaseDir, getWorkspaceHash } from "#src/paths.js";
 import {
@@ -60,8 +60,8 @@ export class ClaudeNativeSessionImportRepo {
       homes.add(dataBaseDir);
     }
 
-    // 关键业务逻辑：扫描 Claude Code 原生历史目录 ~/.claude/projects，不是 marid 自己的数据目录。
-    // 当 MARID_DATA_BASE_DIR 把 .marid 放到别处时，原生 .claude 往往仍在真实用户 HOME 下。
+    // 关键业务逻辑：扫描 Claude Code 原生历史目录 ~/.claude/projects，不是 qodex 自己的数据目录。
+    // 当 QODEX_DATA_BASE_DIR 把 .qodex 放到别处时，原生 .claude 往往仍在真实用户 HOME 下。
     return [...homes].map((homePath) => join(homePath, ".claude", "projects"));
   }
 
@@ -129,7 +129,7 @@ export class ClaudeNativeSessionImportRepo {
     workspacePath?: string;
     modifiedSince?: number;
     limit?: number;
-  }): Promise<MaridImportableSessionCandidate[]> {
+  }): Promise<QodexImportableSessionCandidate[]> {
     const workspaceKey = params.workspacePath
       ? normalizePathForComparison(params.workspacePath)
       : null;
@@ -142,7 +142,7 @@ export class ClaudeNativeSessionImportRepo {
         ).flat(),
       ),
     ];
-    const candidates: MaridImportableSessionCandidate[] = [];
+    const candidates: QodexImportableSessionCandidate[] = [];
 
     for (const filePath of sessionFiles) {
       let fileStat;
@@ -209,7 +209,7 @@ export class ClaudeNativeSessionImportRepo {
   async findImportableSession(params: {
     workspacePath?: string;
     sessionId: string;
-  }): Promise<MaridImportableSessionCandidate | null> {
+  }): Promise<QodexImportableSessionCandidate | null> {
     const workspaceKey = params.workspacePath
       ? normalizePathForComparison(params.workspacePath)
       : null;
@@ -267,7 +267,7 @@ export class ClaudeNativeSessionImportRepo {
     workspaceIdentity?: string;
     sourcePath: string;
   }): Promise<{ outputPath: string; createdOutputPaths: string[] }> {
-    // 导入副本沿用历史目录布局 ~/.marid/v2/agent-config/claude/{workspaceHash}/projects；
+    // 导入副本沿用历史目录布局 ~/.qodex/v2/agent-config/claude/{workspaceHash}/projects；
     // 这是 Claude 历史导入的存储位置，与 agent runtime provider（glm）无关。
     const relativeProjectsPath = this.getRelativeProjectsPath(params.sourcePath);
     const outputPath = join(

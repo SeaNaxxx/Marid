@@ -7,12 +7,12 @@ import {
 import { createDiffsWorkerHighlighterOptions } from "@/lib/diffsHighlighterEngine.js";
 import { logger } from "@/logger.js";
 import { DEFAULT_CODE_PREVIEW_SETTINGS } from "@/store/index.js";
-import { useMaridStore } from "@/store/StoreProvider.js";
+import { useQodexStore } from "@/store/StoreProvider.js";
 
 function createDiffsWorker(): Worker {
   return new Worker(new URL("../workers/diffs.worker.ts", import.meta.url), {
     type: "module",
-    name: "marid-diffs-worker",
+    name: "qodex-diffs-worker",
   });
 }
 
@@ -60,7 +60,7 @@ function WorkerRenderOptionsSync({
 }
 
 export function DiffsWorkerPoolProvider({ children }: { children: ReactNode }) {
-  const codePreviewSettings = useMaridStore(
+  const codePreviewSettings = useQodexStore(
     (state) => state.codePreviewSettings ?? DEFAULT_CODE_PREVIEW_SETTINGS,
   );
 

@@ -1,4 +1,4 @@
-import type { ProviderApiType } from "@marid/provider";
+import type { ProviderApiType } from "@qodex/provider";
 import {
   Select,
   SelectContent,
@@ -6,12 +6,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import {
   TID_MODEL_PROVIDER_API_FORMAT_ITEM,
   TID_MODEL_PROVIDER_API_FORMAT_TRIGGER,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 
 export const PROVIDER_CONNECTION_API_FORMATS: readonly ProviderApiType[] = [
   "anthropic-messages",
@@ -56,7 +56,7 @@ export function ProviderApiFormatSelect({
   value: ProviderApiType;
   onChange: (value: ProviderApiType) => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
 
   return (
     <Select value={value} onValueChange={(nextValue) => onChange(nextValue as ProviderApiType)}>

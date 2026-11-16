@@ -1,12 +1,12 @@
 /**
- * 数据根解析：R1 = 家目录下的 .marid（永远存在），R2 = 自定义数据存储路径下的 .marid（仅当设置了且 ≠ 家目录）。
+ * 数据根解析：R1 = 家目录下的 .qodex（永远存在），R2 = 自定义数据存储路径下的 .qodex（仅当设置了且 ≠ 家目录）。
  * 路径来源由调用方注入（desktop host 传 homedir 与 getDataBaseDir），模块内不读环境变量。
  */
 import { join, resolve } from "node:path";
 import type { RootsResolverPort } from "../app/ports.js";
-import type { StorageRootSpec } from "@marid/shared";
+import type { StorageRootSpec } from "@qodex/shared";
 
-export const MARID_DATA_DIR_NAME = ".marid";
+export const QODEX_DATA_DIR_NAME = ".qodex";
 
 export function resolveStorageRoots(params: {
   homeDir: string;
@@ -16,12 +16,12 @@ export function resolveStorageRoots(params: {
   const dataBase = resolve(params.dataBaseDir);
   const hasCustomDataBaseDir = dataBase !== home;
   const roots: StorageRootSpec[] = [
-    { id: "home", path: join(home, MARID_DATA_DIR_NAME), hasCustomDataBaseDir },
+    { id: "home", path: join(home, QODEX_DATA_DIR_NAME), hasCustomDataBaseDir },
   ];
   if (hasCustomDataBaseDir) {
     roots.push({
       id: "dataBaseDir",
-      path: join(dataBase, MARID_DATA_DIR_NAME),
+      path: join(dataBase, QODEX_DATA_DIR_NAME),
       hasCustomDataBaseDir,
     });
   }

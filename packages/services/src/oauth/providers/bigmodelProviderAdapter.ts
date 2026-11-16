@@ -6,14 +6,14 @@ import {
   type OAuthProviderMeta,
   type OAuthTokenSet,
   type OAuthUserProfile,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { readApiJson } from "../../providers/api/apiJson.js";
 import { createServiceLogger } from "../../logger/serviceLogger.js";
 import { parseOAuthLoginAttribution } from "../callbackAttribution.js";
 import type { OAuthProviderRuntimeConfig } from "../runtimeConfig.js";
 import type { OAuthProviderAdapter, OAuthProviderContext } from "./providerAdapter.js";
 
-interface BigModelMaridTokenEnvelope {
+interface BigModelQodexTokenEnvelope {
   code?: number;
   msg?: string;
   data?: {
@@ -119,18 +119,18 @@ export class BigModelProviderAdapter implements OAuthProviderAdapter {
     params: OAuthCallbackParams,
     _context: OAuthProviderContext,
   ): Promise<OAuthTokenSet> {
-    const tokenSet = await this.exchangeMaridJwtToken(params, _context);
+    const tokenSet = await this.exchangeQodexJwtToken(params, _context);
 
     return {
       ...tokenSet,
     };
   }
 
-  private async exchangeMaridJwtToken(
+  private async exchangeQodexJwtToken(
     params: OAuthCallbackParams,
     context: OAuthProviderContext,
   ): Promise<OAuthTokenSet> {
-    log.info(undefined, "marid token request", {
+    log.info(undefined, "qodex token request", {
       method: "POST",
       url: this.config.tokenUrl,
       headers: { "Content-Type": "application/json" },
@@ -144,13 +144,13 @@ export class BigModelProviderAdapter implements OAuthProviderAdapter {
     });
 
     try {
-      const payload = await readApiJson<BigModelMaridTokenEnvelope>(
+      const payload = await readApiJson<BigModelQodexTokenEnvelope>(
         this.apiClient,
         this.config.tokenUrl,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          // marid JWT 的后端 token 路由按 OAuth callback 授权码语义解析。
+          // qodex JWT 的后端 token 路由按 OAuth callback 授权码语义解析。
           // BigModel Start Plan 不能在后续 balance 查询阶段用 access_token 二次兑换，
           // 否则 body 与 Z.ai 登录链路不一致并触发 HTTP 400。provider 用 shared
           // 中的 OAuth provider 枚举值，避免前后端新增多 provider 后只靠 redirect_uri 猜身份。
@@ -163,34 +163,34 @@ export class BigModelProviderAdapter implements OAuthProviderAdapter {
         },
       );
       if (payload.code !== undefined && payload.code !== 0) {
-        // BigModel 的一次性 authCode 现在只交给 marid token 路由。
+        // BigModel 的一次性 authCode 现在只交给 qodex token 路由。
         // 如果这里失败，不能继续保存半登录态，否则 Start Plan 仍会显示未连接。
-        log.warn(undefined, "marid token business response rejected", {
+        log.warn(undefined, "qodex token business response rejected", {
           code: payload.code,
           msg: payload.msg,
         });
         throw new Error(
-          payload.msg?.trim() || `BigModel marid token 交换失败（code: ${payload.code}）`,
+          payload.msg?.trim() || `BigModel qodex token 交换失败（code: ${payload.code}）`,
         );
       }
-      const maridJwtToken = payload.data?.token?.trim() || "";
-      if (!maridJwtToken) {
-        log.warn(undefined, "marid token response missing data.token", {
+      const qodexJwtToken = payload.data?.token?.trim() || "";
+      if (!qodexJwtToken) {
+        log.warn(undefined, "qodex token response missing data.token", {
           code: payload.code,
           msg: payload.msg,
         });
-        throw new Error("BigModel marid token 交换失败：响应缺少 data.token");
+        throw new Error("BigModel qodex token 交换失败：响应缺少 data.token");
       }
       const accessToken = resolveBigModelBusinessAccessToken(payload);
       if (!accessToken) {
         // Coding Plan 付费套餐仍调用 bigmodel.cn 业务接口，只能使用
-        // BigModel 业务 access token；marid JWT 只能写入 maridjwttoken 给 Start Plan 使用。
-        // 如果继续把 marid JWT 写进 oauth:bigmodel:access_token，套餐预览会稳定报“令牌已过期”。
-        log.warn(undefined, "marid token response missing bigmodel access token", {
+        // BigModel 业务 access token；qodex JWT 只能写入 qodexjwttoken 给 Start Plan 使用。
+        // 如果继续把 qodex JWT 写进 oauth:bigmodel:access_token，套餐预览会稳定报“令牌已过期”。
+        log.warn(undefined, "qodex token response missing bigmodel access token", {
           code: payload.code,
           msg: payload.msg,
         });
-        throw new Error("BigModel marid token 交换失败：响应缺少 data.bigmodel.access_token");
+        throw new Error("BigModel qodex token 交换失败：响应缺少 data.bigmodel.access_token");
       }
 
       const refreshToken =
@@ -200,12 +200,12 @@ export class BigModelProviderAdapter implements OAuthProviderAdapter {
       return {
         accessToken,
         ...(refreshToken ? { refreshToken } : {}),
-        maridJwtToken,
+        qodexJwtToken,
       };
     } catch (error) {
       // BigModel callback code 是一次性的，客户端不能再先调用
-      // tokenByAuthCode 消费它；marid token 交换失败时直接中止登录并记录链路头。
-      log.warn(undefined, "marid token request failed", {
+      // tokenByAuthCode 消费它；qodex token 交换失败时直接中止登录并记录链路头。
+      log.warn(undefined, "qodex token request failed", {
         message: error instanceof Error ? error.message : String(error),
         ...(error instanceof ApiError
           ? {
@@ -224,9 +224,9 @@ export class BigModelProviderAdapter implements OAuthProviderAdapter {
     tokenSet: OAuthTokenSet,
     _context: OAuthProviderContext,
   ): Promise<OAuthUserProfile> {
-    if (tokenSet.maridJwtToken && tokenSet.accessToken === tokenSet.maridJwtToken) {
+    if (tokenSet.qodexJwtToken && tokenSet.accessToken === tokenSet.qodexJwtToken) {
       // 移除 tokenByAuthCode 后 callback 阶段没有 BigModel access token。
-      // marid JWT 不能调用 bigmodel.cn 的 customer 接口，避免无意义的鉴权失败请求。
+      // qodex JWT 不能调用 bigmodel.cn 的 customer 接口，避免无意义的鉴权失败请求。
       return {
         id: "unknown",
         username: "user",
@@ -298,7 +298,7 @@ export class BigModelProviderAdapter implements OAuthProviderAdapter {
   }
 }
 
-function resolveBigModelBusinessAccessToken(payload: BigModelMaridTokenEnvelope): string {
+function resolveBigModelBusinessAccessToken(payload: BigModelQodexTokenEnvelope): string {
   return (
     payload.data?.bigmodel?.access_token?.trim() ??
     payload.data?.bigmodel?.accessToken?.trim() ??

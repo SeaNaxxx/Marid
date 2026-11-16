@@ -1,4 +1,4 @@
-import { TID_TASK_ITEM, testId } from "@marid/shared/test-ids";
+import { TID_TASK_ITEM, testId } from "@qodex/shared/test-ids";
 import { DEFAULT_WORKSPACE, clearAppData, waitForWorkspaceApp } from "#e2e/helpers/desktop-app";
 import {
   TASK_INDEX_ROW_AUTHORITY_MISSING_SUMMARY_ID,

@@ -1,11 +1,11 @@
 import { memo } from "react";
 import { SquareArrowRightEnter } from "lucide-react";
 
-import type { Locale } from "@marid/shared";
-import type { ConversationRow } from "@marid/shared/marid-protocol-v4";
+import type { Locale } from "@qodex/shared";
+import type { ConversationRow } from "@qodex/shared/qodex-protocol-v4";
 
 import type { MessageFileLinkTarget } from "@/components/ai-elements/message.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import type { CodeViewerSource } from "@/lib/codeViewer.js";
 import type { CodePreviewSettings } from "@/lib/codePreviewSettings.js";
 import type { Theme } from "@/useTheme.js";
@@ -59,7 +59,7 @@ export const ConversationShareImportNotice = memo(function ConversationShareImpo
   onOpenFileLink?: (target: MessageFileLinkTarget) => void;
   onOpenCodeViewer?: (source: CodeViewerSource) => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const label = intl.formatMessage({ id: "conversationShare.import.dividerLabel" });
   return (
     <div data-conversation-share-import-notice="true" className="flex w-full flex-col">

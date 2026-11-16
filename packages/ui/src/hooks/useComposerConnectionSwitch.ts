@@ -1,11 +1,11 @@
-import { completeNewModelSelection } from "@marid/provider";
+import { completeNewModelSelection } from "@qodex/provider";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   useBaseWorkspaceServices,
   useWorkspaceServicesResolution,
 } from "@/hooks/useWorkspaceServices.js";
 import { useSettings } from "@/hooks/useSettingService.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { persistProviderFamilyConnection } from "@/lib/providerFamilyConnectionTransition.js";
 import {
   chooseConnectionModel,
@@ -13,14 +13,14 @@ import {
   type ComposerConnection,
 } from "@/lib/composerPlanGroups.js";
 import { buildRegistryModelSelectGroups } from "@/lib/modelSelectionGroups.js";
-import { decodeCustomModelValue } from "@/lib/maridCustomModelValue.js";
+import { decodeCustomModelValue } from "@/lib/qodexCustomModelValue.js";
 import { logger } from "@/logger.js";
-import type { ModelSelectionView, ProviderSettingsView } from "@marid/services";
+import type { ModelSelectionView, ProviderSettingsView } from "@qodex/services";
 import {
   resolveModelProviderFamilySpecByProviderId,
   type ProviderFamilyConnectionSelection,
-  type MaridProvider,
-} from "@marid/shared";
+  type QodexProvider,
+} from "@qodex/shared";
 
 export function useComposerConnectionSwitch({
   workspacePath,
@@ -39,7 +39,7 @@ export function useComposerConnectionSwitch({
 }: {
   workspacePath: string;
   workspaceIdentity?: string;
-  agentProvider: MaridProvider;
+  agentProvider: QodexProvider;
   normalizedValue: string;
   currentReasoningLevel?: string;
   onSelectModel: (value: string, reasoningLevel?: string) => void | Promise<void>;
@@ -58,7 +58,7 @@ export function useComposerConnectionSwitch({
     workspaceIdentity,
   );
   const { update, refresh: refreshSettings } = useSettings({ services: base });
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const workspaceKey = workspaceIdentity?.trim() || workspacePath;
   const token = useMemo(() => ({}), [target, base, workspaceKey, scopeId]);
   const owner = useRef({ token, mounted: true });

@@ -18,9 +18,9 @@
 | `SS` | `retired:packages/services/test/subagentsService.test.ts`                                                                              |
 | `SU` | `retired:packages/ui/test/subagentsSection.test.ts`                                                                                    |
 | `TC` | `retired:packages/ui/test/thoughtLevelCycleControlSelectionValue.test.ts`                                                              |
-| `SC` | `apps/marid-cli/packages/core/tests/subagent-explore.test.ts`、`apps/marid-cli/packages/core/tests/subagent-profile.test.ts`           |
-| `BT` | `apps/marid-cli/packages/bootstrap/tests/subagents.test.ts`、`apps/marid-cli/packages/bootstrap/tests/runtime-config.test.ts`          |
-| `RM` | `apps/marid-cli/packages/bootstrap/tests/runtime-model-metadata.test.ts`                                                               |
+| `SC` | `apps/qodex-cli/packages/core/tests/subagent-explore.test.ts`、`apps/qodex-cli/packages/core/tests/subagent-profile.test.ts`           |
+| `BT` | `apps/qodex-cli/packages/bootstrap/tests/subagents.test.ts`、`apps/qodex-cli/packages/bootstrap/tests/runtime-config.test.ts`          |
+| `RM` | `apps/qodex-cli/packages/bootstrap/tests/runtime-model-metadata.test.ts`                                                               |
 
 ## 覆盖清单
 

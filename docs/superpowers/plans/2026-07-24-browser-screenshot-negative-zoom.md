@@ -617,8 +617,8 @@ logical `1280 × 720` viewport with `dontSetVisibleSize: true`.
 Temporarily execute the baseline branch before applying capture scale:
 
 ```powershell
-$env:MARID_SCREENSHOT_SMOKE_SCALE_FACTOR='1.25'
-pnpm --filter @marid/desktop test:browser-screenshot-surface-smoke
+$env:QODEX_SCREENSHOT_SMOKE_SCALE_FACTOR='1.25'
+pnpm --filter @qodex/desktop test:browser-screenshot-surface-smoke
 ```
 
 Expected: non-zero exit with `stale tiled surface detected` or a corner sentinel mismatch.
@@ -649,9 +649,9 @@ Capture, validate, and restore the normal metrics override in `finally`.
 Run:
 
 ```powershell
-$env:MARID_SCREENSHOT_SMOKE_SCALE_FACTOR='1.25'
-pnpm --filter @marid/desktop test:browser-screenshot-surface-smoke
-Remove-Item Env:MARID_SCREENSHOT_SMOKE_SCALE_FACTOR
+$env:QODEX_SCREENSHOT_SMOKE_SCALE_FACTOR='1.25'
+pnpm --filter @qodex/desktop test:browser-screenshot-surface-smoke
+Remove-Item Env:QODEX_SCREENSHOT_SMOKE_SCALE_FACTOR
 ```
 
 Expected stdout:

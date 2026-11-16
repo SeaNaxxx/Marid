@@ -1,5 +1,5 @@
 import { app } from "electron";
-import { getAppConfigDir } from "@marid/services/node";
+import { getAppConfigDir } from "@qodex/services/node";
 
 export type ElectronAppPathName = "appData" | "userData";
 

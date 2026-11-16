@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "marid: tsup watch (debug)",
+      "label": "qodex: tsup watch (debug)",
       "type": "process",
       "command": "node",
       "args": [
@@ -15,7 +15,7 @@
       "presentation": {
         "reveal": "always",
         "panel": "dedicated",
-        "group": "marid-debug"
+        "group": "qodex-debug"
       },
       "problemMatcher": {
         "owner": "custom",
@@ -31,7 +31,7 @@
       }
     },
     {
-      "label": "marid: vite dev",
+      "label": "qodex: vite dev",
       "type": "process",
       "command": "node",
       "args": [
@@ -44,7 +44,7 @@
       "presentation": {
         "reveal": "always",
         "panel": "dedicated",
-        "group": "marid-debug"
+        "group": "qodex-debug"
       },
       "problemMatcher": {
         "owner": "custom",
@@ -60,15 +60,15 @@
       }
     },
     {
-      "label": "marid: prepare desktop debug",
+      "label": "qodex: prepare desktop debug",
       "dependsOn": [
-        "marid: tsup watch (debug)",
-        "marid: vite dev"
+        "qodex: tsup watch (debug)",
+        "qodex: vite dev"
       ],
       "dependsOrder": "parallel"
     },
     {
-      "label": "marid: start electron (debug)",
+      "label": "qodex: start electron (debug)",
       "type": "process",
       "command": "node",
       "args": [
@@ -79,12 +79,12 @@
       },
       "isBackground": true,
       "dependsOn": [
-        "marid: prepare desktop debug"
+        "qodex: prepare desktop debug"
       ],
       "presentation": {
         "reveal": "always",
         "panel": "dedicated",
-        "group": "marid-debug"
+        "group": "qodex-debug"
       },
       "problemMatcher": {
         "owner": "custom",
@@ -100,7 +100,7 @@
       }
     },
     {
-      "label": "marid: start electron (debug with host inspect)",
+      "label": "qodex: start electron (debug with host inspect)",
       "type": "process",
       "command": "node",
       "args": [
@@ -112,12 +112,12 @@
       },
       "isBackground": true,
       "dependsOn": [
-        "marid: prepare desktop debug"
+        "qodex: prepare desktop debug"
       ],
       "presentation": {
         "reveal": "always",
         "panel": "dedicated",
-        "group": "marid-debug"
+        "group": "qodex-debug"
       },
       "problemMatcher": {
         "owner": "custom",

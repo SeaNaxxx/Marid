@@ -1,5 +1,5 @@
-import type { HelloMessage, HelloAckMessage } from "@marid/shared";
-import { MARID_VERSION, formatZodError, helloMessageSchema } from "@marid/shared";
+import type { HelloMessage, HelloAckMessage } from "@qodex/shared";
+import { QODEX_VERSION, formatZodError, helloMessageSchema } from "@qodex/shared";
 import type { StdioStream } from "./backend.js";
 
 const MAX_HANDSHAKE_DIAGNOSTIC_CHARS = 2048;
@@ -12,9 +12,9 @@ export interface HandshakeResult {
 
 /**
  * Perform the client-side handshake:
- * 1. Read lines from stdout until we find a marid-hello JSON
+ * 1. Read lines from stdout until we find a qodex-hello JSON
  *    (skip SSH banner/motd lines)
- * 2. Send a marid-hello-ack to stdin
+ * 2. Send a qodex-hello-ack to stdin
  * 3. Return the hello info and any remaining data
  */
 export function performHandshake(
@@ -46,7 +46,7 @@ export function performHandshake(
     };
 
     const timeout = setTimeout(() => {
-      rejectWithDiagnostics("Handshake timeout: no marid-hello received within timeout");
+      rejectWithDiagnostics("Handshake timeout: no qodex-hello received within timeout");
     }, timeoutMs);
 
     const onData = (chunk: Buffer) => {
@@ -76,8 +76,8 @@ export function performHandshake(
 
               // Send ack
               const ack: HelloAckMessage = {
-                type: "marid-hello-ack",
-                version: MARID_VERSION,
+                type: "qodex-hello-ack",
+                version: QODEX_VERSION,
                 clientId,
               };
               stream.stdin.write(JSON.stringify(ack) + "\n");
@@ -92,9 +92,9 @@ export function performHandshake(
               rawValue &&
               typeof rawValue === "object" &&
               "type" in rawValue &&
-              (rawValue as { type?: unknown }).type === "marid-hello"
+              (rawValue as { type?: unknown }).type === "qodex-hello"
             ) {
-              rejectWithDiagnostics(`Invalid marid-hello: ${formatZodError(result.error)}`);
+              rejectWithDiagnostics(`Invalid qodex-hello: ${formatZodError(result.error)}`);
               return;
             }
           } catch {

@@ -14,13 +14,13 @@ import { WorkspaceLastActivity } from "@/WorkspaceHeaderSections/WorkspaceLastAc
 import {
   parseRemoteWorkspaceIdentity,
   remoteHostIdFromWorkspaceIdentity,
-  type MaridTaskMeta,
-} from "@marid/shared";
+  type QodexTaskMeta,
+} from "@qodex/shared";
 import {
   TID_WORKSPACE_MORE_BUTTON,
   TID_WORKSPACE_PATH,
   TID_WORKSPACE_TITLE,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { useMemo, useRef, useState } from "react";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
 import { cn } from "@/components/lib/utils.js";
@@ -38,7 +38,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import {
   formatRemoteWorkspaceDisplayLabel,
   formatRemoteWorkspaceHeaderHostLabel,
@@ -54,7 +54,7 @@ import type {
   WorkspaceHeaderTitleSectionProps,
 } from "@/WorkspaceHeaderSections/shared.js";
 import { applyTaskQueryCacheMutation } from "@/store/taskQueryCacheStore.js";
-import { useMaridSessionStore } from "@/store/maridSessionStore.js";
+import { useQodexSessionStore } from "@/store/qodexSessionStore.js";
 import { TaskRenameDialog } from "@/TaskRenameDialog.js";
 import {
   DataSyncEntryMenuItems,
@@ -108,7 +108,7 @@ export function WorkspaceHeaderTitleSection({
   simplifyForNarrowRemote = false,
   compact = false,
 }: WorkspaceHeaderTitleSectionProps) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const openFeedbackSubmit = useFeedbackStore((state) => state.openSubmit);
   const services = useWorkspaceServices(workspaceAbsPath, remoteSessionId, workspaceIdentity);
   const taskRestart = useSessionRuntimeRestart(
@@ -117,13 +117,13 @@ export function WorkspaceHeaderTitleSection({
     remoteSessionId,
     workspaceIdentity,
   );
-  const upsertOptimisticTaskListItem = useMaridSessionStore(
+  const upsertOptimisticTaskListItem = useQodexSessionStore(
     (state) => state.upsertOptimisticTaskListItem,
   );
-  const removeOptimisticTaskListItem = useMaridSessionStore(
+  const removeOptimisticTaskListItem = useQodexSessionStore(
     (state) => state.removeOptimisticTaskListItem,
   );
-  const setTaskUnreadIndicator = useMaridSessionStore((state) => state.setTaskUnreadIndicator);
+  const setTaskUnreadIndicator = useQodexSessionStore((state) => state.setTaskUnreadIndicator);
   const [taskMenuOpen, setTaskMenuOpen] = useState(false);
   const [workspaceContextOpen, setWorkspaceContextOpen] = useState(false);
   const [renamingTaskId, setRenamingTaskId] = useState<string | null>(null);
@@ -307,9 +307,9 @@ export function WorkspaceHeaderTitleSection({
   };
 
   const buildHeaderTaskSnapshot = (
-    fallbackTask: MaridTaskMeta,
-    overrides?: Partial<MaridTaskMeta>,
-  ): MaridTaskMeta => {
+    fallbackTask: QodexTaskMeta,
+    overrides?: Partial<QodexTaskMeta>,
+  ): QodexTaskMeta => {
     if (activeTaskMeta) {
       return {
         ...activeTaskMeta,
@@ -337,7 +337,7 @@ export function WorkspaceHeaderTitleSection({
     }
 
     try {
-      const renamedTask = await services.maridTaskService.renameTask({
+      const renamedTask = await services.qodexTaskService.renameTask({
         taskId: renamingTaskId,
         workspacePath: workspaceAbsPath,
         title: normalizedTitle,
@@ -593,7 +593,7 @@ export function WorkspaceHeaderTitleSection({
                       nextState: { pinned: !isPinned, archived: false },
                     });
                   }
-                  void services.maridTaskService
+                  void services.qodexTaskService
                     .setTaskPinned({
                       taskId: resolvedTaskActionTaskId,
                       workspacePath: workspaceAbsPath,
@@ -630,7 +630,7 @@ export function WorkspaceHeaderTitleSection({
                   if (!resolvedTaskActionTaskId) {
                     return;
                   }
-                  void services.maridTaskService
+                  void services.qodexTaskService
                     .setTaskUnread({
                       taskId: resolvedTaskActionTaskId,
                       workspacePath: workspaceAbsPath,

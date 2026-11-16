@@ -1,7 +1,7 @@
 import { join } from "node:path";
 import { writeFile } from "node:fs/promises";
-import type { ProjectTree, RemoteProjectDirectory } from "@marid/services";
-import { ServiceChannels, type SourceServerManagementSnapshot } from "@marid/shared";
+import type { ProjectTree, RemoteProjectDirectory } from "@qodex/services";
+import { ServiceChannels, type SourceServerManagementSnapshot } from "@qodex/shared";
 import {
   TID_COMPOSER_WORKSPACE_TRIGGER,
   TID_COMPOSER_REMOTE_CONNECTION,
@@ -11,7 +11,7 @@ import {
   TID_TASK_ITEM,
   TID_VIRTUAL_PROJECT_CREATE_TASK,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { clearAppData } from "#e2e/helpers/desktop-app";
 import {
   getV4ComposerAttachments,
@@ -48,7 +48,7 @@ async function openFromChat(locale = "zh-CN", evidence?: string) {
   );
   if (evidence) {
     await settlePresentation();
-    await browser.saveScreenshot(join(process.env.MARID_E2E_ARTIFACT_DIR!, `menu-${evidence}.png`));
+    await browser.saveScreenshot(join(process.env.QODEX_E2E_ARTIFACT_DIR!, `menu-${evidence}.png`));
   }
   await entry.click();
   await $(`[data-testid="${TID_SETTINGS_PAGE}"]`).waitForDisplayed();
@@ -58,10 +58,10 @@ async function openFromChat(locale = "zh-CN", evidence?: string) {
 function readChatIdentity() {
   return browser.execute(() => {
     const windowState = window as Window & {
-      __maridTabStoreE2E?: {
+      __qodexTabStoreE2E?: {
         getState(): { activeWorkspacePath: string | null; activeWorkspaceIdentity: string | null };
       };
-      __maridSessionStoreE2E?: {
+      __qodexSessionStoreE2E?: {
         getState(): {
           workspaces: Record<
             string,
@@ -70,9 +70,9 @@ function readChatIdentity() {
         };
       };
     };
-    const tabs = windowState.__maridTabStoreE2E!.getState();
+    const tabs = windowState.__qodexTabStoreE2E!.getState();
     const workspaceKey = tabs.activeWorkspaceIdentity?.trim() || tabs.activeWorkspacePath!;
-    const workspace = windowState.__maridSessionStoreE2E!.getState().workspaces[workspaceKey]!;
+    const workspace = windowState.__qodexSessionStoreE2E!.getState().workspaces[workspaceKey]!;
     return {
       workspaceKey,
       workspacePath: tabs.activeWorkspacePath!,
@@ -98,7 +98,7 @@ async function readTaskIdentity(taskId: string) {
 async function createOriginalTask(target: Awaited<ReturnType<typeof readChatIdentity>>) {
   if (!target.projectId) throw new Error(`${marker}: project selection is not committed`);
   const result = await callHandoffHost<{ session: { sessionId: string } }>(
-    ServiceChannels.MaridAgent,
+    ServiceChannels.QodexAgent,
     "createSession",
     [
       {
@@ -118,7 +118,7 @@ async function createOriginalTask(target: Awaited<ReturnType<typeof readChatIden
     ],
   );
   const taskId = result.session.sessionId;
-  await callHandoffHost(ServiceChannels.MaridTask, "resumeTask", [
+  await callHandoffHost(ServiceChannels.QodexTask, "resumeTask", [
     { taskId, workspacePath: target.workspacePath },
   ]);
   const toggle = $(
@@ -199,11 +199,11 @@ describe(marker, () => {
         events: (window as Window & { __chatDeviceFocus?: unknown[] }).__chatDeviceFocus,
       }));
       await writeFile(
-        join(process.env.MARID_E2E_ARTIFACT_DIR!, "chat-device-focus.json"),
+        join(process.env.QODEX_E2E_ARTIFACT_DIR!, "chat-device-focus.json"),
         JSON.stringify(focus, null, 2),
       );
       await browser.saveScreenshot(
-        join(process.env.MARID_E2E_ARTIFACT_DIR!, "chat-device-failure.png"),
+        join(process.env.QODEX_E2E_ARTIFACT_DIR!, "chat-device-failure.png"),
       );
     }
   });
@@ -289,7 +289,7 @@ describe(marker, () => {
           await settlePresentation();
           await browser.saveScreenshot(
             join(
-              process.env.MARID_E2E_ARTIFACT_DIR!,
+              process.env.QODEX_E2E_ARTIFACT_DIR!,
               `cancel-return-${locale}-${theme}-${width}.png`,
             ),
           );
@@ -329,7 +329,7 @@ describe(marker, () => {
           const bounds = await folder.getLocation();
           expect(bounds.x).toBeGreaterThanOrEqual(0);
           await browser.saveScreenshot(
-            join(process.env.MARID_E2E_ARTIFACT_DIR!, `folder-${locale}-${theme}-${width}.png`),
+            join(process.env.QODEX_E2E_ARTIFACT_DIR!, `folder-${locale}-${theme}-${width}.png`),
           );
         }
       }

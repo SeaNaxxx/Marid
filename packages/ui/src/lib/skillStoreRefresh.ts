@@ -1,16 +1,16 @@
-import type { ISkillsService } from "@marid/services";
+import type { ISkillsService } from "@qodex/services";
 import {
-  normalizeAgentProviderToMaridAgent,
-  MARID_AGENT_PROVIDER,
-  type MaridProvider,
-} from "@marid/shared";
+  normalizeAgentProviderToQodexAgent,
+  QODEX_AGENT_PROVIDER,
+  type QodexProvider,
+} from "@qodex/shared";
 import { useSkillStore } from "@/store/skillStore.js";
 
 export async function refreshSharedSkillStoreForWorkspace(params: {
   workspacePath: string | null | undefined;
   workspaceIdentity?: string | null;
   skillsService: ISkillsService;
-  provider?: MaridProvider;
+  provider?: QodexProvider;
 }): Promise<void> {
   const workspacePath = params.workspacePath;
   if (!workspacePath) {
@@ -18,8 +18,8 @@ export async function refreshSharedSkillStoreForWorkspace(params: {
   }
   const skillStore = useSkillStore.getState();
   const normalizedWorkspaceIdentity = params.workspaceIdentity?.trim() || null;
-  const normalizedProvider = normalizeAgentProviderToMaridAgent(
-    params.provider ?? MARID_AGENT_PROVIDER,
+  const normalizedProvider = normalizeAgentProviderToQodexAgent(
+    params.provider ?? QODEX_AGENT_PROVIDER,
   );
   const refreshes: Promise<void>[] = [];
 
@@ -28,7 +28,7 @@ export async function refreshSharedSkillStoreForWorkspace(params: {
     skillStore.workspaceIdentity === normalizedWorkspaceIdentity &&
     skillStore.loadedWorkspacePath === workspacePath &&
     skillStore.loadedWorkspaceIdentity === normalizedWorkspaceIdentity &&
-    normalizeAgentProviderToMaridAgent(skillStore.provider) === normalizedProvider &&
+    normalizeAgentProviderToQodexAgent(skillStore.provider) === normalizedProvider &&
     skillStore.loadedProvider === normalizedProvider
   ) {
     refreshes.push(

@@ -12,7 +12,7 @@ import {
   type SVGProps,
 } from "react";
 import { CircleCheck, LoaderCircle, TriangleAlert } from "lucide-react";
-import { type MaridOffPeakTask } from "@marid/shared";
+import { type QodexOffPeakTask } from "@qodex/shared";
 import {
   TID_OFFPEAK_ACTION_CONTINUE,
   TID_OFFPEAK_ACTION_DELETE,
@@ -20,7 +20,7 @@ import {
   TID_OFFPEAK_CARD,
   TID_OFFPEAK_CARD_SESSION,
   TID_OFFPEAK_CARD_MENU,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,7 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.js";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
 import {
   AutomationCancelActionIcon,
@@ -50,21 +50,21 @@ import {
 } from "@/settings/offPeakUiPresentation.js";
 
 interface OffPeakTaskListProps {
-  tasks: readonly MaridOffPeakTask[];
+  tasks: readonly QodexOffPeakTask[];
   busyOperationId: string | null;
-  onOpen: (task: MaridOffPeakTask) => void;
-  onPause: (task: MaridOffPeakTask) => void;
-  onContinue: (task: MaridOffPeakTask) => void;
-  onCancel: (task: MaridOffPeakTask) => void;
-  onDelete: (task: MaridOffPeakTask) => void;
-  onOpenSession: (task: MaridOffPeakTask) => void;
+  onOpen: (task: QodexOffPeakTask) => void;
+  onPause: (task: QodexOffPeakTask) => void;
+  onContinue: (task: QodexOffPeakTask) => void;
+  onCancel: (task: QodexOffPeakTask) => void;
+  onDelete: (task: QodexOffPeakTask) => void;
+  onOpenSession: (task: QodexOffPeakTask) => void;
 }
 
 // 按状态分组会让任务在运行和终态切换时跳位，破坏用户对已有卡片位置的预期；
 // 列表只按不可变的创建时间倒序，状态变化不再影响顺序。
 export function sortOffPeakTasksByCreatedAt(
-  tasks: readonly MaridOffPeakTask[],
-): MaridOffPeakTask[] {
+  tasks: readonly QodexOffPeakTask[],
+): QodexOffPeakTask[] {
   return [...tasks].sort((a, b) => b.createdAt - a.createdAt);
 }
 
@@ -155,7 +155,7 @@ export function OffPeakTaskList({
   onDelete,
   onOpenSession,
 }: OffPeakTaskListProps) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const sorted = sortOffPeakTasksByCreatedAt(tasks);
 
   if (sorted.length === 0) {

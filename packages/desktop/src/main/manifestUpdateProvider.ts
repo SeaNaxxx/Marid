@@ -1,11 +1,11 @@
 import { posix } from "node:path";
 import type { CustomPublishOptions, PackageFileInfo } from "builder-util-runtime";
 import {
-  DEFAULT_MARID_ENDPOINT_ORIGIN,
-  normalizeMaridEndpointOrigin,
+  DEFAULT_QODEX_ENDPOINT_ORIGIN,
+  normalizeQodexEndpointOrigin,
   toBearerAuthorization,
   type ElectronReleaseChannel,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   Provider,
   AppImageUpdater,
@@ -32,7 +32,7 @@ export interface ManifestUpdateProviderOptions extends CustomPublishOptions {
   releaseChannel?: ElectronReleaseChannel;
   resolveEndpointOrigin?: () => string | Promise<string>;
   resolveReleaseChannel?: () => ElectronReleaseChannel | Promise<ElectronReleaseChannel>;
-  resolveMaridJwtToken?: () => Promise<string | null | undefined>;
+  resolveQodexJwtToken?: () => Promise<string | null | undefined>;
 }
 
 function normalizeReleaseChannel(channel: string | null | undefined): ElectronReleaseChannel {
@@ -85,7 +85,7 @@ export function buildElectronManifestUrl(options: {
 }): URL {
   const url = options.manifestUrl?.trim()
     ? new URL(options.manifestUrl.trim())
-    : new URL(ELECTRON_MANIFEST_API_PATH, normalizeMaridEndpointOrigin(options.endpointOrigin));
+    : new URL(ELECTRON_MANIFEST_API_PATH, normalizeQodexEndpointOrigin(options.endpointOrigin));
   url.searchParams.set("platform", options.platform);
   if (options.deviceMid?.trim()) {
     url.searchParams.set("device_mid", options.deviceMid.trim());
@@ -185,7 +185,7 @@ export class ManifestUpdateProvider extends Provider<UpdateInfo> {
   private readonly releasePlatform: string;
   private readonly linuxExtensions: readonly string[] | null;
   private readonly logger: AppUpdater["logger"];
-  private resolveBaseUrl = new URL(DEFAULT_MARID_ENDPOINT_ORIGIN);
+  private resolveBaseUrl = new URL(DEFAULT_QODEX_ENDPOINT_ORIGIN);
 
   constructor(
     options: ManifestUpdateProviderOptions,
@@ -198,7 +198,7 @@ export class ManifestUpdateProvider extends Provider<UpdateInfo> {
     this.linuxExtensions = getLinuxUpdateExtensions(updater);
     this.releasePlatform = options.releasePlatform?.trim() || getElectronReleasePlatform();
     this.resolveBaseUrl = new URL(
-      normalizeMaridEndpointOrigin(options.endpointOrigin ?? DEFAULT_MARID_ENDPOINT_ORIGIN),
+      normalizeQodexEndpointOrigin(options.endpointOrigin ?? DEFAULT_QODEX_ENDPOINT_ORIGIN),
     );
   }
 
@@ -222,7 +222,7 @@ export class ManifestUpdateProvider extends Provider<UpdateInfo> {
     // 只加到本次 manifest 请求，不设 updater 全局请求头，以免把登录凭据带到 CDN 下载。
     let authorization: string | null = null;
     try {
-      authorization = toBearerAuthorization(await this.options.resolveMaridJwtToken?.());
+      authorization = toBearerAuthorization(await this.options.resolveQodexJwtToken?.());
     } catch {
       // 登录凭据是可选信息；读取失败不能阻断更新恢复通道，也不能把异常中的凭据写入日志。
       this.logger?.warn(
@@ -251,7 +251,7 @@ export class ManifestUpdateProvider extends Provider<UpdateInfo> {
       // Bugfix: preview/stable 切换时旧 manifest 请求可能晚于新请求返回。
       // electron-updater 的 update-available 事件默认不带请求通道，main 进程无法识别过期结果；
       // 这里把本次请求通道随 UpdateInfo 带回去，避免旧通道覆盖更新弹窗内容。
-      maridReleaseChannel: releaseChannel,
+      qodexReleaseChannel: releaseChannel,
     } as UpdateInfo;
   }
 
@@ -263,8 +263,8 @@ export class ManifestUpdateProvider extends Provider<UpdateInfo> {
     const resolved =
       (await this.options.resolveEndpointOrigin?.()) ??
       this.options.endpointOrigin ??
-      DEFAULT_MARID_ENDPOINT_ORIGIN;
-    return normalizeMaridEndpointOrigin(resolved);
+      DEFAULT_QODEX_ENDPOINT_ORIGIN;
+    return normalizeQodexEndpointOrigin(resolved);
   }
 
   private async resolveReleaseChannel(): Promise<ElectronReleaseChannel> {

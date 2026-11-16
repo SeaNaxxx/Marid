@@ -1,4 +1,4 @@
-import { sanitizeRemoteConnectionLog } from "@marid/shared";
+import { sanitizeRemoteConnectionLog } from "@qodex/shared";
 import { AsyncLocalStorage } from "node:async_hooks";
 
 export type RemoteConnectionProgressLevel = "info" | "warn" | "error";

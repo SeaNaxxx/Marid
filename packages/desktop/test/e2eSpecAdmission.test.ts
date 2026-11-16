@@ -134,10 +134,10 @@ describe("desktop E2E environment-gated formal spec admission", () => {
 
   it("keeps explicit SSH runs fail-closed and admits configured default runs", () => {
     const env = {
-      MARID_E2E_SSH_HOST: "ssh.example.test",
-      MARID_E2E_SSH_USERNAME: "root",
-      MARID_E2E_SSH_PASSWORD: "secret-from-test-env",
-      MARID_E2E_SSH_CONTAINER: "marid-r3-server-example",
+      QODEX_E2E_SSH_HOST: "ssh.example.test",
+      QODEX_E2E_SSH_USERNAME: "root",
+      QODEX_E2E_SSH_PASSWORD: "secret-from-test-env",
+      QODEX_E2E_SSH_CONTAINER: "qodex-r3-server-example",
     };
     expect(hasRequiredSshE2EEnvironment(env)).toBe(true);
     expect(resolveEnvironmentGatedFormalSpecExcludes({ env, targeted: false })).toEqual([]);
@@ -147,9 +147,9 @@ describe("desktop E2E environment-gated formal spec admission", () => {
   it("requires the harness container for queued remote targets", () => {
     // 远程队列按 case 准备干净目标；只有共享 SSH 凭据的 runner 不能运行这些用例。
     const credentials = {
-      MARID_E2E_SSH_HOST: "ssh.example.test",
-      MARID_E2E_SSH_USERNAME: "root",
-      MARID_E2E_SSH_PASSWORD: "secret-from-test-env",
+      QODEX_E2E_SSH_HOST: "ssh.example.test",
+      QODEX_E2E_SSH_USERNAME: "root",
+      QODEX_E2E_SSH_PASSWORD: "secret-from-test-env",
     };
     const queued =
       "./test/e2e/conversation-session/remote/configuration/conversation-session-r3-model-switch.test.ts";
@@ -172,7 +172,7 @@ describe("desktop E2E environment-gated formal spec admission", () => {
     expect(
       isFormalSpecAdmittedByEnvironment(queued, {
         ...credentials,
-        MARID_E2E_SSH_CONTAINER: "marid-r3-server-example",
+        QODEX_E2E_SSH_CONTAINER: "qodex-r3-server-example",
       }),
     ).toBe(true);
     expect(

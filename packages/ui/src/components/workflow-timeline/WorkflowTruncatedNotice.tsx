@@ -1,6 +1,6 @@
-import { workflowRunStepCounts, type WorkflowRunState } from "@marid/shared/marid-protocol-v4";
+import { workflowRunStepCounts, type WorkflowRunState } from "@qodex/shared/qodex-protocol-v4";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 /**
  * 「仅展示 {shown}/{total} 步的详情」（docs/dynamic-workflow/presentation.md「The run card」
@@ -23,7 +23,7 @@ export function WorkflowTruncatedNotice({
   run: WorkflowRunState | undefined;
   testId: string;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   if (run?.truncated !== true) return null;
   const shown = run.nodes.length;
   const { total } = workflowRunStepCounts(run);

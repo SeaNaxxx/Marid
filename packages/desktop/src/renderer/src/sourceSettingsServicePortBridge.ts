@@ -1,6 +1,6 @@
-import { createMessagePortServiceConnection } from "@marid/client";
-import { InternalChannels } from "@marid/shared";
-import { registerSourceSettingsServices } from "@marid/ui";
+import { createMessagePortServiceConnection } from "@qodex/client";
+import { InternalChannels } from "@qodex/shared";
+import { registerSourceSettingsServices } from "@qodex/ui";
 
 export function handleSourceSettingsServicePortMessage(event: MessageEvent): boolean {
   if (

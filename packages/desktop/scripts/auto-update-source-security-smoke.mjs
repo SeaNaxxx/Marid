@@ -39,12 +39,12 @@ import pkg from 'electron-updater';
 import { initAutoUpdater, resolveUpdateFeedSourceFromStartupConfig } from './src/main/autoUpdater.ts';
 import { setSecuritySmokeOrigin } from 'security-smoke-origin';
 import { extractDeepLinkUrlFromArgs } from './src/main/desktopDeepLinkUrl.ts';
-const scenario = JSON.parse(process.env.MARID_SECURITY_SCENARIO);
-const root = process.env.MARID_SECURITY_ROOT;
+const scenario = JSON.parse(process.env.QODEX_SECURITY_SCENARIO);
+const root = process.env.QODEX_SECURITY_ROOT;
 app.setPath('userData', root);
 Object.defineProperty(app, 'isPackaged', { value: scenario.packaged });
-process.env.MARID_AUTO_UPDATE_DEV = '1';
-process.env.MARID_AUTO_UPDATE_DEV_VERSION = '3.17.0';
+process.env.QODEX_AUTO_UPDATE_DEV = '1';
+process.env.QODEX_AUTO_UPDATE_DEV_VERSION = '3.17.0';
 const { autoUpdater } = pkg;
 // 普通 Linux Electron 没有 APPIMAGE，打包态模拟不会经过产品的开发态激活逻辑。
 // 只激活隔离夹具的更新器，保留 scenario.packaged 作为更新源安全边界的被测输入。
@@ -71,9 +71,9 @@ async function listen(label) {
   setSecuritySmokeOrigin(trusted.url);
   const argv = ['app'];
   const env = {};
-  if (scenario.input === 'argv') argv.push('--marid-update-feed-url=' + override.url);
-  if (scenario.input === 'env') env.MARID_UPDATE_FEED_URL = override.url;
-  if (scenario.input === 'deep-link') argv.push('--', 'marid://x', '--marid-update-feed-url=' + override.url);
+  if (scenario.input === 'argv') argv.push('--qodex-update-feed-url=' + override.url);
+  if (scenario.input === 'env') env.QODEX_UPDATE_FEED_URL = override.url;
+  if (scenario.input === 'deep-link') argv.push('--', 'qodex://x', '--qodex-update-feed-url=' + override.url);
   const updateFeedSource = scenario.input === 'direct' ? { url: override.url } : resolveUpdateFeedSourceFromStartupConfig({ argv, env });
   const configPath = resolve(root, 'app-update.yml');
   await writeFile(configPath, 'provider: generic\\nurl: ' + trusted.url + '\\nupdaterCacheDirName: security-smoke\\n');
@@ -88,7 +88,7 @@ async function listen(label) {
   const installOrder = [];
   let loginToken = null;
   let failCredentialRead = false;
-  await initAutoUpdater({ onBeforeQuitAndInstall: async () => { installOrder.push('prepare'); }, updateFeedSource, deviceMid: '00000000-0000-4000-8000-000000000000', resolveMaridJwtToken: async () => {
+  await initAutoUpdater({ onBeforeQuitAndInstall: async () => { installOrder.push('prepare'); }, updateFeedSource, deviceMid: '00000000-0000-4000-8000-000000000000', resolveQodexJwtToken: async () => {
     if (failCredentialRead) throw new Error('sensitive-fixture-credential-error');
     return loginToken;
   }, resolveEndpointOrigin: () => scenario.input === "backend" ? override.url : trusted.url });
@@ -117,7 +117,7 @@ async function listen(label) {
     childProcess.execFile = (...args) => {
       installOrder.push('verify');
       const command = Buffer.from(args[1].at(-1), 'base64').toString('utf16le');
-      const output = command.match(/\\$maridSignatureOutput='((?:[^'‘’‚‛]|(['‘’‚‛])\\2)*)';/)?.[1]?.replace(/(['‘’‚‛])\\1/g, '$1');
+      const output = command.match(/\\$qodexSignatureOutput='((?:[^'‘’‚‛]|(['‘’‚‛])\\2)*)';/)?.[1]?.replace(/(['‘’‚‛])\\1/g, '$1');
       if (!output) throw new Error('signature output path missing');
       void writeFile(output, '\\uFEFF' + JSON.stringify(signature), 'utf8').then(
         () => args.at(-1)(null, '', ''),
@@ -138,7 +138,7 @@ async function listen(label) {
         Object.defineProperty(autoUpdater, 'installerPath', {get: () => 'C:/cached/update.exe'});
         autoUpdater.checkForUpdates = async () => null;
         autoUpdater.quitAndInstall = () => installOrder.push('install');
-        const install = handlers.get('marid:quit-and-install-update');
+        const install = handlers.get('qodex:quit-and-install-update');
         try {
           installOrder.length = 0;
           autoUpdater.emit('update-downloaded', {version: '99.0.0'});
@@ -153,7 +153,7 @@ async function listen(label) {
       }
     } finally { childProcess.execFile = original; }
   }
-  const callbacks = ['marid://oauth/callback?state=example&code=test', 'marid://payment/callback?provider=example&channel=web&status=success', 'marid://workspace/open?path=%2Ftmp%2Fexample', 'marid://share/import?code=example'];
+  const callbacks = ['qodex://oauth/callback?state=example&code=test', 'qodex://payment/callback?provider=example&channel=web&status=success', 'qodex://workspace/open?path=%2Ftmp%2Fexample', 'qodex://share/import?code=example'];
   const result = { cachedInstallChecks, signatureChecks, scenario: scenario.name, updaterType: autoUpdater.constructor.name, requests, autoDownload: autoUpdater.autoDownload, autoInstallOnAppQuit: autoUpdater.autoInstallOnAppQuit, callbacks: callbacks.map(url => extractDeepLinkUrlFromArgs(['app', '--', url]) === url) };
   await writeFile(resolve(root, 'result.json'), JSON.stringify(result, null, 2));
   console.log('UPDATE_SECURITY_RESULT=' + JSON.stringify(result));
@@ -178,7 +178,7 @@ async function listen(label) {
           contents:
             "export let origin; export function setSecuritySmokeOrigin(value) { origin = value; }",
         }));
-        api.onResolve({ filter: /^@marid\/shared$/ }, () => ({
+        api.onResolve({ filter: /^@qodex\/shared$/ }, () => ({
           path: "shared",
           namespace: "security-shared",
         }));
@@ -186,7 +186,7 @@ async function listen(label) {
           contents:
             "export * from " +
             JSON.stringify(resolve(repoRoot, "packages/shared/src/index.ts")) +
-            '; export { origin as DEFAULT_MARID_ENDPOINT_ORIGIN } from "security-smoke-origin";',
+            '; export { origin as DEFAULT_QODEX_ENDPOINT_ORIGIN } from "security-smoke-origin";',
           resolveDir: desktopDir,
         }));
       },
@@ -234,8 +234,8 @@ for (const scenario of cases) {
   await mkdir(root);
   const env = {
     ...process.env,
-    MARID_SECURITY_SCENARIO: JSON.stringify(scenario),
-    MARID_SECURITY_ROOT: root,
+    QODEX_SECURITY_SCENARIO: JSON.stringify(scenario),
+    QODEX_SECURITY_ROOT: root,
     NODE_PATH: resolve(repoRoot, "node_modules"),
   };
   delete env.ELECTRON_RUN_AS_NODE;

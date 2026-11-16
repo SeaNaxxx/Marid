@@ -1,4 +1,4 @@
-import { getMediaPreviewFormat, ServiceChannels, type MediaPreviewKind } from "@marid/shared";
+import { getMediaPreviewFormat, ServiceChannels, type MediaPreviewKind } from "@qodex/shared";
 import type { IFileService } from "../file/file.js";
 import { createServiceDescriptor } from "../descriptors.js";
 

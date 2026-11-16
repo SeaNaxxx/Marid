@@ -1,8 +1,8 @@
 /* 闲时任务编辑页顶栏动作菜单：Save 右侧「⋯」→ 按状态给 暂停/继续 + 删除。
    与列表卡片菜单同义，供编辑页内直接操作；queued→暂停、paused→继续，终态只留删除。
    样式与定时任务编辑页顶栏菜单同源。 */
-import { type MaridOffPeakTask } from "@marid/shared";
-import { TID_OFFPEAK_CARD_MENU } from "@marid/shared/test-ids";
+import { type QodexOffPeakTask } from "@qodex/shared";
+import { TID_OFFPEAK_CARD_MENU } from "@qodex/shared/test-ids";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +16,7 @@ import {
   AutomationPauseActionIcon,
   AutomationTrashIcon,
 } from "@/settings/AutomationDesignPrimitives.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 export function OffPeakEditActionsMenu({
   task,
@@ -24,12 +24,12 @@ export function OffPeakEditActionsMenu({
   onContinue,
   onDelete,
 }: {
-  task: MaridOffPeakTask;
-  onPause?: (task: MaridOffPeakTask) => void;
-  onContinue?: (task: MaridOffPeakTask) => void;
-  onDelete?: (task: MaridOffPeakTask) => void;
+  task: QodexOffPeakTask;
+  onPause?: (task: QodexOffPeakTask) => void;
+  onContinue?: (task: QodexOffPeakTask) => void;
+  onDelete?: (task: QodexOffPeakTask) => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

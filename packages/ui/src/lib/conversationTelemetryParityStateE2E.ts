@@ -1,4 +1,4 @@
-import { BUILTIN_MODEL_PROVIDER_IDS } from "@marid/shared";
+import { BUILTIN_MODEL_PROVIDER_IDS } from "@qodex/shared";
 import {
   buildSessionQuotaBannerDismissKey,
   buildSessionQuotaBannerState,

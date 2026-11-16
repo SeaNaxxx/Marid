@@ -1,15 +1,15 @@
-import type { MaridSessionFile, MaridTaskMeta } from "@marid/shared";
-import { maridSessionFileSchema, maridTaskMetaSchema, maridTaskModeSchema } from "@marid/shared";
+import type { QodexSessionFile, QodexTaskMeta } from "@qodex/shared";
+import { qodexSessionFileSchema, qodexTaskMetaSchema, qodexTaskModeSchema } from "@qodex/shared";
 
-export type LegacyTaskSessionFile = Omit<MaridSessionFile, "meta"> & {
-  meta: Omit<MaridTaskMeta, "mode"> & { mode?: MaridTaskMeta["mode"] };
+export type LegacyTaskSessionFile = Omit<QodexSessionFile, "meta"> & {
+  meta: Omit<QodexTaskMeta, "mode"> & { mode?: QodexTaskMeta["mode"] };
 };
 
-const legacyTaskSessionFileSchema = maridSessionFileSchema.extend({
+const legacyTaskSessionFileSchema = qodexSessionFileSchema.extend({
   // Claude 原生迁移会按清洗路径删除 meta.mode。
   // legacy snapshot 读取/写入仍要校验其它必需字段，但不能再强制把被过滤字段补回文件。
-  meta: maridTaskMetaSchema.extend({
-    mode: maridTaskModeSchema.optional(),
+  meta: qodexTaskMetaSchema.extend({
+    mode: qodexTaskModeSchema.optional(),
   }),
 });
 

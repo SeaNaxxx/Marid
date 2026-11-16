@@ -1,27 +1,27 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { MARID_VERSION } from "@marid/shared";
-import type { IRemoteBackend } from "@marid/server/remote/backend.js";
-import type { RemoteEnvironment } from "@marid/server/remote/backend.js";
+import { QODEX_VERSION } from "@qodex/shared";
+import type { IRemoteBackend } from "@qodex/server/remote/backend.js";
+import type { RemoteEnvironment } from "@qodex/server/remote/backend.js";
 import {
   REMOTE_BASE,
   type DeployLoggers,
   waitForClose,
-} from "@marid/server/remote/deployShared.js";
+} from "@qodex/server/remote/deployShared.js";
 import {
   buildWriteLiteralFileCommand,
   quotePosixPathArg,
-} from "@marid/server/remote/posixShell.js";
+} from "@qodex/server/remote/posixShell.js";
 import {
   fetchRemoteAssetManifestRefFromCdn,
   type RemoteAssetManifest,
   type RemoteAssetManifestRef,
-} from "@marid/server/remote/remoteAssetCache.js";
+} from "@qodex/server/remote/remoteAssetCache.js";
 import {
   buildReleaseBaseCandidates,
   resolveRemoteCdnBaseUrls,
-} from "@marid/server/remote/remoteAssetCdn.js";
-import type { RemoteAssetNetworkPort } from "@marid/server/remote/remoteAssetNetwork.js";
+} from "@qodex/server/remote/remoteAssetCdn.js";
+import type { RemoteAssetNetworkPort } from "@qodex/server/remote/remoteAssetNetwork.js";
 
 const REMOTE_ASSET_COMPONENT_META_DIR = `${REMOTE_BASE}/.asset-components`;
 
@@ -205,14 +205,14 @@ async function resolveFreshComponentManifest(
   if (options.mockCdnDir) {
     try {
       const content = await readFile(
-        join(options.mockCdnDir, "releases", MARID_VERSION, `manifest-${platformArch}.json`),
+        join(options.mockCdnDir, "releases", QODEX_VERSION, `manifest-${platformArch}.json`),
         "utf8",
       );
       return {
         manifest: JSON.parse(content) as RemoteAssetManifest,
         releaseBaseCandidatesForComponents: buildReleaseBaseCandidates(
           resolveRemoteCdnBaseUrls(options),
-          MARID_VERSION,
+          QODEX_VERSION,
         ),
       };
     } catch (error) {
@@ -229,7 +229,7 @@ async function resolveFreshComponentManifest(
         remoteCdnBaseUrl: options.remoteCdnBaseUrl,
         remoteCdnBaseUrls: options.remoteCdnBaseUrls,
         remoteCacheDir: options.remoteCacheDir,
-        version: MARID_VERSION,
+        version: QODEX_VERSION,
         platformArch,
         manifestRequestTimeoutMs: options.manifestRequestTimeoutMs,
         remoteAssetNetwork: options.remoteAssetNetwork,

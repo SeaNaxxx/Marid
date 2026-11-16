@@ -7,7 +7,7 @@ describe("task title marquee fixture storage isolation", () => {
     const homeDir = join("tmp", "task-title-marquee");
 
     expect(resolveTaskTitleMarqueeDatabasePath(homeDir)).toBe(
-      join(homeDir, ".marid", "v2", "tasks-index.sqlite"),
+      join(homeDir, ".qodex", "v2", "tasks-index.sqlite"),
     );
   });
 });

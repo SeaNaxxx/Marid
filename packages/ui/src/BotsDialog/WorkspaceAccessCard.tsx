@@ -1,6 +1,6 @@
 import { Check, LoaderCircle } from "lucide-react";
-import type { BotConfig, BotWorkspaceRef } from "@marid/shared";
-import { ALL_BOT_WORKSPACES } from "@marid/shared";
+import type { BotConfig, BotWorkspaceRef } from "@qodex/shared";
+import { ALL_BOT_WORKSPACES } from "@qodex/shared";
 import {
   Select,
   SelectContent,
@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { SettingsRow } from "@/settings/SettingsPageParts.js";
 import { cn } from "@/components/lib/utils.js";
 import { isAllWorkspacesAllowed } from "./shared.js";
@@ -26,7 +26,7 @@ export function WorkspaceAccessCard({
   onPatchAllowedWorkspaces: (allowedWorkspaces: string[]) => Promise<void>;
   onToggleWorkspaceAccess: (workspaceId: string, checked: boolean) => Promise<void>;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const allAllowed = isAllWorkspacesAllowed(bot.allowedWorkspaces);
   const allowedCount = allAllowed
     ? workspaceRefs.length

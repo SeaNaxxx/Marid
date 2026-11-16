@@ -1,13 +1,13 @@
-import type { RendererTelemetryEventPayload } from "@marid/shared";
+import type { RendererTelemetryEventPayload } from "@qodex/shared";
 /* eslint-disable max-lines -- Web 远程控制 manager 承担外部 relay app payload 路由与 workspace bridge 编排。 */
 import type { MessagePortMain, UtilityProcess as ElectronUtilityProcess } from "electron";
 import { randomUUID } from "node:crypto";
-import { MessagePortProtocol, type MessagePortLike, type MessagePortPayload } from "@marid/rpc";
+import { MessagePortProtocol, type MessagePortLike, type MessagePortPayload } from "@qodex/rpc";
 import {
   createAcknowledgedWebRemoteControlRelayProtocol,
   type AcknowledgedWebRemoteControlRelayProtocolAdapter,
   type WebRemoteControlPayloadSendResult,
-} from "@marid/client";
+} from "@qodex/client";
 import {
   buildWebRemoteControlExternalQrUrl,
   buildWebRemoteControlBridgeResultTelemetry,
@@ -15,7 +15,7 @@ import {
   classifyRemoteUsageError,
   parseRemoteWorkspaceIdentity,
   WEB_REMOTE_CONTROL_OUTBOUND_PAYLOAD_BUFFER_TIMEOUT_MS,
-  type MaridEndpointUrls,
+  type QodexEndpointUrls,
   type HostPreparedProjectWorkspace,
   type HostProjectWorkspaceNavigationInput,
   resolveUnrecognizedWebRemoteControlRequest,
@@ -45,8 +45,8 @@ import {
   type RemoteUsageRemoteKind,
   type TelemetryEventPayload,
   measureWebRemoteControlRpcRelayEnvelopeBytes,
-} from "@marid/shared";
-import { WebRemoteControlV2ConnectionError } from "@marid/shared/web-remote-relay";
+} from "@qodex/shared";
+import { WebRemoteControlV2ConnectionError } from "@qodex/shared/web-remote-relay";
 import {
   WebRemoteControlDeviceTransport,
   MobilePushConnection,
@@ -164,7 +164,7 @@ interface WindowControlRuntime {
   };
   pendingBridgeInvalidation?: Extract<
     WebRemoteControlAppPayload,
-    { marid_type: "bridge-degraded" }
+    { qodex_type: "bridge-degraded" }
   >;
   pendingOutboundPayloads: WebRemoteControlAppPayload[];
   pendingOutboundPayloadTimer?: ReturnType<typeof setTimeout>;
@@ -172,9 +172,9 @@ interface WindowControlRuntime {
 }
 
 interface WebRemoteControlManagerDependencies {
-  /** 当前界面语言（Main 的 currentApplicationLocale），用于 Marid endpoint 请求的 X-Client-Language。 */
+  /** 当前界面语言（Main 的 currentApplicationLocale），用于 Qodex endpoint 请求的 X-Client-Language。 */
   getClientLanguage?: () => string | undefined;
-  getEndpointUrls?: () => Promise<MaridEndpointUrls> | MaridEndpointUrls;
+  getEndpointUrls?: () => Promise<QodexEndpointUrls> | QodexEndpointUrls;
   relayWsUrl: string;
   mobileRemoteControlUrl: string;
   deviceMid: string;
@@ -626,7 +626,7 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
     const bridge = runtime.currentBridge;
     if (bridge) {
       runtime.pendingBridgeInvalidation = {
-        marid_type: "bridge-degraded",
+        qodex_type: "bridge-degraded",
         bridgeSessionId: bridge.bridgeSessionId,
         bridgeGeneration: bridge.bridgeGeneration,
         recoveryId: bridge.recoveryId,
@@ -675,7 +675,7 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
       reasonCode,
     });
     runtime.pendingBridgeInvalidation = {
-      marid_type: "bridge-degraded",
+      qodex_type: "bridge-degraded",
       bridgeSessionId: bridge.bridgeSessionId,
       ...(bridge.bridgeGeneration === undefined
         ? {}
@@ -741,7 +741,7 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
   function requestMobileTaskView(runtime: WindowControlRuntime): void {
     if (runtime.transportState !== "paired" || !runtime.mobileTaskViewEpoch) return;
     sendAppPayload(runtime, {
-      marid_type: "mobile-task-view-request",
+      qodex_type: "mobile-task-view-request",
       epoch: runtime.mobileTaskViewEpoch,
     });
   }
@@ -840,7 +840,7 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
       if (result.kind === "oversize") {
         // Bugfix：永久 oversize 不能伪装成临时不可发送后反复进入 50 项 buffer。
         dependencies.logger.warn("[web-remote-control] dropped oversize app payload", {
-          maridType: payload.marid_type,
+          qodexType: payload.qodex_type,
           bytes: result.bytes,
           maxBytes: result.maxBytes,
         });
@@ -865,7 +865,7 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
     }
     if (result.kind === "oversize") {
       dependencies.logger.warn("[web-remote-control] rejected oversize app payload", {
-        maridType: payload.marid_type,
+        qodexType: payload.qodex_type,
         bytes: result.bytes,
         maxBytes: result.maxBytes,
       });
@@ -887,7 +887,7 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
     }
 
     sendAppPayload(runtime, {
-      marid_type: "app-error",
+      qodex_type: "app-error",
       reason: failure.reason,
       error: failure.message ?? failure.reason,
     });
@@ -919,7 +919,7 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
     }
 
     sendAppPayload(runtime, {
-      marid_type: "app-error",
+      qodex_type: "app-error",
       reason: "desktop-disconnected",
       error: "Desktop disconnected this Web remote control session.",
     });
@@ -1099,7 +1099,7 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
 
     pushedWorkspaceListSignaturesByWindowId.set(runtime.windowId, signature);
     sendAppPayload(runtime, {
-      marid_type: "workspace-list-updated",
+      qodex_type: "workspace-list-updated",
       result,
     });
   }
@@ -1113,7 +1113,7 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
     try {
       const result = await dependencies.platformHandlers[request.method](request.args as never);
       response = {
-        marid_type: "platform-response",
+        qodex_type: "platform-response",
         requestId: request.requestId,
         method: request.method,
         success: true,
@@ -1125,7 +1125,7 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
         `[web-remote-control] platform request failed window=${runtime.windowId} session=${runtime.deviceSid} method=${request.method} error=${message}`,
       );
       response = {
-        marid_type: "platform-response",
+        qodex_type: "platform-response",
         requestId: request.requestId,
         method: request.method,
         success: false,
@@ -1399,7 +1399,7 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
     try {
       const bridge = await createWorkspaceBridge(runtime, request);
       sendAppPayload(runtime, {
-        marid_type: "workspace-bridge-ready",
+        qodex_type: "workspace-bridge-ready",
         requestId: request.requestId,
         bridgeSessionId: request.bridgeSessionId,
         ...(request.bridgeGeneration !== undefined
@@ -1423,7 +1423,7 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
         `[web-remote-control] workspace bridge failed window=${runtime.windowId} session=${runtime.deviceSid} workspaceKey=${request.workspaceKey} error=${message}`,
       );
       sendAppPayload(runtime, {
-        marid_type: "workspace-bridge-error",
+        qodex_type: "workspace-bridge-error",
         requestId: request.requestId,
         bridgeSessionId: request.bridgeSessionId,
         ...(request.bridgeGeneration !== undefined
@@ -1438,19 +1438,19 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
 
   async function respondToWorkspaceReconnectRequest(
     runtime: WindowControlRuntime,
-    request: Extract<WebRemoteControlAppPayload, { marid_type: "workspace-reconnect-request" }>,
+    request: Extract<WebRemoteControlAppPayload, { qodex_type: "workspace-reconnect-request" }>,
   ): Promise<void> {
     try {
       await dependencies.reconnectWorkspace(runtime.windowId, request.workspaceKey);
       sendAppPayload(runtime, {
-        marid_type: "workspace-reconnect-response",
+        qodex_type: "workspace-reconnect-response",
         requestId: request.requestId,
         workspaceKey: request.workspaceKey,
         success: true,
       });
     } catch (error) {
       sendAppPayload(runtime, {
-        marid_type: "workspace-reconnect-response",
+        qodex_type: "workspace-reconnect-response",
         requestId: request.requestId,
         workspaceKey: request.workspaceKey,
         success: false,
@@ -1470,7 +1470,7 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
     );
     if (runtimes.get(runtime.windowId) !== runtime) return;
     sendAppPayload(runtime, response);
-    if (response.marid_type === "workspace-create-response" && response.success) {
+    if (response.qodex_type === "workspace-create-response" && response.success) {
       pushWorkspaceListUpdated(runtime, true);
     }
   }
@@ -1480,10 +1480,10 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
     const request = resolveUnrecognizedWebRemoteControlRequest(value);
     if (!request) return;
     sendAppPayload(runtime, {
-      marid_type: "app-error",
+      qodex_type: "app-error",
       requestId: request.requestId,
       reason: "unsupported-action",
-      error: `Desktop does not recognize app payload type: ${request.maridType}`,
+      error: `Desktop does not recognize app payload type: ${request.qodexType}`,
     });
   }
 
@@ -1553,7 +1553,7 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
 
   function logMobileDiagnostic(
     runtime: WindowControlRuntime,
-    payload: Extract<WebRemoteControlAppPayload, { marid_type: "mobile-diagnostic" }>,
+    payload: Extract<WebRemoteControlAppPayload, { qodex_type: "mobile-diagnostic" }>,
   ): void {
     dependencies.logger.info("[web-remote-control] mobile diagnostic", {
       window: runtime.windowId,
@@ -1576,11 +1576,11 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
   }
 
   function routePayload(runtime: WindowControlRuntime, payload: WebRemoteControlAppPayload): void {
-    switch (payload.marid_type) {
+    switch (payload.qodex_type) {
       case "bootstrap-request":
         ensureTerminalOwner(runtime, payload.terminalClientSessionId);
         sendAppPayload(runtime, {
-          marid_type: "bootstrap-response",
+          qodex_type: "bootstrap-response",
           requestId: payload.requestId,
           success: true,
           result: buildBootstrapResult(runtime),
@@ -1588,7 +1588,7 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
         break;
       case "workspace-list-request":
         sendAppPayload(runtime, {
-          marid_type: "workspace-list-response",
+          qodex_type: "workspace-list-response",
           requestId: payload.requestId,
           success: true,
           result: buildWorkspaceListResult(runtime),
@@ -2298,7 +2298,7 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
         // 静默丢弃。这里只发非终态 degraded，由 Web 已有恢复流程以新 identity 主动重建。
         bridge.degraded = true;
         runtime.pendingBridgeInvalidation = {
-          marid_type: "bridge-degraded",
+          qodex_type: "bridge-degraded",
           bridgeSessionId: bridge.bridgeSessionId,
           ...(bridge.bridgeGeneration === undefined
             ? {}
@@ -2340,7 +2340,7 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
         if (bridgeUsesRemoteSession) {
           disposeRuntimeBridgeResources(runtime);
           sendAppPayload(runtime, {
-            marid_type: "workspace-bridge-error",
+            qodex_type: "workspace-bridge-error",
             bridgeSessionId: bridge.bridgeSessionId,
             ...(bridge.bridgeGeneration !== undefined
               ? { bridgeGeneration: bridge.bridgeGeneration }

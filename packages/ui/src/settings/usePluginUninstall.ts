@@ -1,20 +1,20 @@
 import { useCallback, useMemo, useState } from "react";
-import type { MaridInstalledPluginSummary, MaridPluginInfo } from "@marid/shared";
-import type { IPluginManagementService } from "@marid/services";
+import type { QodexInstalledPluginSummary, QodexPluginInfo } from "@qodex/shared";
+import type { IPluginManagementService } from "@qodex/services";
 import { usePluginManagementStore } from "@/store/pluginManagementStore.js";
 
 interface UsePluginUninstallInput {
   store?: typeof usePluginManagementStore;
   pluginService: IPluginManagementService;
-  installedPlugins: MaridInstalledPluginSummary[];
-  plugins: MaridPluginInfo[];
+  installedPlugins: QodexInstalledPluginSummary[];
+  plugins: QodexPluginInfo[];
   activeOperations: ReadonlyArray<{ id: string }>;
   // 卸载会让插件提供的技能/命令失效，调用方传入统一的「能力变更后刷新」收尾逻辑。
   onAfterUninstall: () => Promise<void>;
 }
 
 export interface PluginUninstallController {
-  pendingPlugin: MaridPluginInfo | MaridInstalledPluginSummary | null;
+  pendingPlugin: QodexPluginInfo | QodexInstalledPluginSummary | null;
   uninstalling: boolean;
   requestUninstall: (pluginId: string) => void;
   cancelUninstall: () => void;

@@ -4,17 +4,17 @@ import {
   PERSONAL_PROVIDER_CONFIG_FILE_NAME,
   type PersonalProviderConfigRecoveryEvent,
   type NodeProviderConfigRuntimeOptions,
-} from "@marid/provider-node";
+} from "@qodex/provider-node";
 import type { ModelProviderConfig } from "./legacyModelProviderSerialized.js";
 import { getAppConfigDir } from "../paths.js";
 import { importLegacyPersonalProviderConfig } from "./legacyPersonalProviderConfigImporter.js";
 
 export interface ProviderConfigRuntimeOptions {
-  readonly maridBuiltinFilePath: string;
-  readonly maridBuiltinActiveFilePath?: string;
-  readonly maridBuiltinRemote?: NodeProviderConfigRuntimeOptions["maridBuiltinRemote"];
-  readonly maridBuiltinEnvironment?: NodeProviderConfigRuntimeOptions["maridBuiltinEnvironment"];
-  readonly onMaridBuiltinRefreshError?: (error: unknown) => void;
+  readonly qodexBuiltinFilePath: string;
+  readonly qodexBuiltinActiveFilePath?: string;
+  readonly qodexBuiltinRemote?: NodeProviderConfigRuntimeOptions["qodexBuiltinRemote"];
+  readonly qodexBuiltinEnvironment?: NodeProviderConfigRuntimeOptions["qodexBuiltinEnvironment"];
+  readonly onQodexBuiltinRefreshError?: (error: unknown) => void;
   readonly onPersonalConfigRecovery?: (event: PersonalProviderConfigRecoveryEvent) => void;
   readonly onPersonalConfigPollingError?: (error: unknown) => void;
   readonly personalFilePath?: string;
@@ -25,7 +25,7 @@ export interface ProviderConfigRuntimeOptions {
 
 /**
  * Services 装配层：提供 App 配置目录和已发布旧配置的一次性迁移入口。
- * 配置迁移保留 Marid 用户的供应商数据，文件运行时由 @marid/provider-node 唯一实现。
+ * 配置迁移保留 Qodex 用户的供应商数据，文件运行时由 @qodex/provider-node 唯一实现。
  */
 export class ProviderConfigRuntime {
   readonly configService: NodeProviderConfigRuntime["configService"];
@@ -33,11 +33,11 @@ export class ProviderConfigRuntime {
 
   constructor(options: ProviderConfigRuntimeOptions) {
     const runtimeOptions: NodeProviderConfigRuntimeOptions = {
-      maridBuiltinFilePath: options.maridBuiltinFilePath,
-      maridBuiltinActiveFilePath: options.maridBuiltinActiveFilePath,
-      maridBuiltinRemote: options.maridBuiltinRemote,
-      maridBuiltinEnvironment: options.maridBuiltinEnvironment,
-      onMaridBuiltinRefreshError: options.onMaridBuiltinRefreshError,
+      qodexBuiltinFilePath: options.qodexBuiltinFilePath,
+      qodexBuiltinActiveFilePath: options.qodexBuiltinActiveFilePath,
+      qodexBuiltinRemote: options.qodexBuiltinRemote,
+      qodexBuiltinEnvironment: options.qodexBuiltinEnvironment,
+      onQodexBuiltinRefreshError: options.onQodexBuiltinRefreshError,
       onPersonalConfigRecovery: options.onPersonalConfigRecovery,
       onPersonalConfigPollingError: options.onPersonalConfigPollingError,
       personalFilePath:
@@ -65,16 +65,16 @@ export class ProviderConfigRuntime {
     return this.#runtime.personalRepository;
   }
 
-  resolveMaridBuiltinActiveFilePath(): Promise<string> {
-    return this.#runtime.resolveMaridBuiltinActiveFilePath();
+  resolveQodexBuiltinActiveFilePath(): Promise<string> {
+    return this.#runtime.resolveQodexBuiltinActiveFilePath();
   }
 
-  refreshMaridBuiltin(options?: { readonly force?: boolean }) {
-    return this.#runtime.refreshMaridBuiltin(options);
+  refreshQodexBuiltin(options?: { readonly force?: boolean }) {
+    return this.#runtime.refreshQodexBuiltin(options);
   }
 
-  onDidCheckMaridBuiltin(listener: () => Promise<void>): () => void {
-    return this.#runtime.onDidCheckMaridBuiltin(listener);
+  onDidCheckQodexBuiltin(listener: () => Promise<void>): () => void {
+    return this.#runtime.onDidCheckQodexBuiltin(listener);
   }
 
   dispose(): void {

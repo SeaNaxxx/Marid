@@ -1,4 +1,4 @@
-import { resolveWorkspaceKey, type RemoteTarget, type WorkspacePurpose } from "@marid/shared";
+import { resolveWorkspaceKey, type RemoteTarget, type WorkspacePurpose } from "@qodex/shared";
 
 export interface AutomationWorkspaceOption {
   projectId?: string | null;

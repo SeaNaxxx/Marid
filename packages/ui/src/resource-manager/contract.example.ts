@@ -1,4 +1,4 @@
-import type { ResourceUsageSnapshot } from "@marid/shared";
+import type { ResourceUsageSnapshot } from "@qodex/shared";
 import type { ResourceManagerAppProps } from "@/resource-manager/contract.js";
 
 /** Desktop preload 注入既有快照查询与采样启停，不在 UI 重新归属进程。 */

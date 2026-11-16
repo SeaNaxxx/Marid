@@ -1,9 +1,9 @@
 import type {
   PluginScope,
   PluginsOverviewResult,
-  MaridPluginsMarketplaceMutationResult,
-} from "@marid/shared";
-import { ServiceChannels } from "@marid/shared";
+  QodexPluginsMarketplaceMutationResult,
+} from "@qodex/shared";
+import { ServiceChannels } from "@qodex/shared";
 import { createServiceDescriptor } from "../descriptors.js";
 
 export interface IPluginsService {
@@ -25,7 +25,7 @@ export interface IPluginsService {
     workspacePath: string;
     workspaceIdentity?: string;
     marketplace?: string;
-  }): Promise<MaridPluginsMarketplaceMutationResult | void>;
+  }): Promise<QodexPluginsMarketplaceMutationResult | void>;
   installPlugin(params: {
     workspacePath: string;
     workspaceIdentity?: string;

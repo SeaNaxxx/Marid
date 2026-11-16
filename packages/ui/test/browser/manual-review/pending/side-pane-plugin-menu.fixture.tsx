@@ -1,13 +1,13 @@
 import { PlatformProvider } from "@/hooks/usePlatform.js";
-import { parseClientConfigSnapshot, type IPlatformService } from "@marid/shared";
+import { parseClientConfigSnapshot, type IPlatformService } from "@qodex/shared";
 import { useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import type { IServiceAccessor } from "@marid/services";
+import type { IServiceAccessor } from "@qodex/services";
 import { AnimatedSidePanePanel } from "@/app-shell/AnimatedSidePanePanel.js";
 import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable.js";
 import { TooltipProvider } from "@/components/ui/tooltip.js";
 import { ServiceProvider } from "@/hooks/useServices.js";
-import { MaridIntlProvider } from "@/i18n/IntlProvider.js";
+import { QodexIntlProvider } from "@/i18n/IntlProvider.js";
 import { PluginUiWorkspaceProvider, openPluginUiSidePane } from "@/plugin-ui/index.js";
 import type { OpenPluginUiSideTabRequest } from "@/plugin-ui/contract.js";
 import {
@@ -210,10 +210,10 @@ function Fixture() {
 
 createRoot(document.getElementById("root")!).render(
   <ServiceProvider services={services}>
-    <MaridIntlProvider initialLocale={params.get("locale") === "zh-CN" ? "zh-CN" : "en-US"}>
+    <QodexIntlProvider initialLocale={params.get("locale") === "zh-CN" ? "zh-CN" : "en-US"}>
       <TooltipProvider>
         <Fixture />
       </TooltipProvider>
-    </MaridIntlProvider>
+    </QodexIntlProvider>
   </ServiceProvider>,
 );

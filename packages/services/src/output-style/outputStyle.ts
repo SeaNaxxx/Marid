@@ -1,5 +1,5 @@
-import type { OutputStyle, OutputStyleConfig } from "@marid/shared";
-import { ServiceChannels } from "@marid/shared";
+import type { OutputStyle, OutputStyleConfig } from "@qodex/shared";
+import { ServiceChannels } from "@qodex/shared";
 import { createServiceDescriptor } from "../descriptors.js";
 
 export interface IOutputStyleService {

@@ -1,6 +1,6 @@
 import type { ModelSelectionGhostReason } from "./model-selection-types.js";
 import { decodeCustomModelValue } from "./custom-model-value.js";
-import type { MaridProvider } from "./marid-task-types-core.js";
+import type { QodexProvider } from "./qodex-task-types-core.js";
 
 export const NATIVE_SUPPLIER_KEY_PREFIX = "native:";
 export const CUSTOM_SUPPLIER_KEY_PREFIX = "custom:";
@@ -29,8 +29,8 @@ export function normalizeSupplierBaseUrl(baseUrl: string): string {
   return baseUrl.trim().replace(TRAILING_SLASHES_RE, "");
 }
 
-export function buildNativeSupplierKey(maridProvider: MaridProvider): string {
-  return `${NATIVE_SUPPLIER_KEY_PREFIX}${maridProvider}`;
+export function buildNativeSupplierKey(qodexProvider: QodexProvider): string {
+  return `${NATIVE_SUPPLIER_KEY_PREFIX}${qodexProvider}`;
 }
 
 export function buildCustomSupplierKey(providerId: string): string {
@@ -49,13 +49,13 @@ export function buildGhostSupplierIdentity(rawIdentity: string): string {
 }
 
 export function buildGhostSupplierKey(
-  maridProvider: MaridProvider,
+  qodexProvider: QodexProvider,
   reason: ModelSelectionGhostReason,
   rawIdentity: string,
 ): string {
   return [
     GHOST_SUPPLIER_KEY_PREFIX,
-    maridProvider,
+    qodexProvider,
     ":",
     reason,
     ":",
@@ -64,7 +64,7 @@ export function buildGhostSupplierKey(
 }
 
 export function resolveSupplierKeyFromModelDisplayValue(
-  maridProvider: MaridProvider,
+  qodexProvider: QodexProvider,
   value: string | boolean | undefined,
 ): string {
   const customModel = decodeCustomModelValue(String(value ?? ""));
@@ -72,5 +72,5 @@ export function resolveSupplierKeyFromModelDisplayValue(
     return buildCustomSupplierKey(customModel.providerId);
   }
 
-  return buildNativeSupplierKey(maridProvider);
+  return buildNativeSupplierKey(qodexProvider);
 }

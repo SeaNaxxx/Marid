@@ -1,10 +1,10 @@
 import { join } from "node:path";
 import { access } from "node:fs/promises";
-import type { StdioStream } from "@marid/server/remote/backend.js";
-import { quotePosixPathArg } from "@marid/server/remote/posixShell.js";
-import type { RemoteAssetNetworkPort } from "@marid/server/remote/remoteAssetNetwork.js";
+import type { StdioStream } from "@qodex/server/remote/backend.js";
+import { quotePosixPathArg } from "@qodex/server/remote/posixShell.js";
+import type { RemoteAssetNetworkPort } from "@qodex/server/remote/remoteAssetNetwork.js";
 
-export const REMOTE_BASE = "~/.marid/server";
+export const REMOTE_BASE = "~/.qodex/server";
 
 export interface RemoteAssetDeployOptions {
   /** 取消当前连接初始化；共享 cache 仍可独立完成，但不得继续写入远端 staging。 */

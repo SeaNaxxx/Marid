@@ -5,11 +5,11 @@ import type {
   OAuthProviderId,
   OAuthSessionCallbackResult,
   UserInfo,
-} from "@marid/shared";
-import { MARID_JWT_INVALID_BROADCAST_CHANNEL } from "@marid/shared";
-import type { IServiceAccessor } from "@marid/services";
+} from "@qodex/shared";
+import { QODEX_JWT_INVALID_BROADCAST_CHANNEL } from "@qodex/shared";
+import type { IServiceAccessor } from "@qodex/services";
 import { useAlertDialog } from "@/hooks/useAlertDialog.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { reportAppTelemetryEvent, resolveProviderTelemetryLabel } from "@/lib/appTelemetry.js";
 import { logger } from "@/logger.js";
 import type { ModelProviderFamilyConnectionSelection } from "@/lib/modelProviderFamilyConnectionSelection.js";
@@ -101,7 +101,7 @@ export function useRootOAuthEffects({
 }) {
   useAccountConnectionLossNotification(services, accountIntentKey, refreshAppSettings);
   const requestAlert = useAlertDialog();
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const oauthLoginSucceededRef = useRef(false);
   const oauthLoginSuccessInFlightRef = useRef(false);
   const oauthLoginSuccessOwnerRef = useRef<"polling" | "deep-link" | null>(null);
@@ -193,7 +193,7 @@ export function useRootOAuthEffects({
     let disposed = false;
     let promptPending = false;
     const disposable = services.broadcastService.onMessage((message) => {
-      if (message.channel !== MARID_JWT_INVALID_BROADCAST_CHANNEL || disposed || promptPending) {
+      if (message.channel !== QODEX_JWT_INVALID_BROADCAST_CHANNEL || disposed || promptPending) {
         return;
       }
       promptPending = true;

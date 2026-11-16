@@ -6,7 +6,7 @@ import type {
   DataSyncImportResultItem,
   DataSyncListItem,
   SkillDataSyncPayload,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { pathExists, updateJsonObjectFile } from "#src/fs/atomicFileUtils.js";
 import { createServiceLogger } from "#src/logger/serviceLogger.js";
 import { checkRemoteSyncDirectoriesWriteAccess } from "#src/remote-sync/remoteSyncWriteAccess.js";
@@ -18,7 +18,7 @@ import { createSkillSyncSizeLimitError } from "#src/skill-sync/skillSyncErrors.j
 import { resolveSkillSyncPathWithin } from "#src/skill-sync/skillSyncPath.js";
 import {
   collectUserSkillCandidates,
-  getUserMaridSkillRoot,
+  getUserQodexSkillRoot,
   normalizeSkillNameKey,
   parseSkillMetadata,
   readSkillFileOrNull,
@@ -46,28 +46,28 @@ interface ResolvedUserSkill {
   /** 技能目录（可能是软链路径）。 */
   directoryPath: string;
   skillFilePath: string;
-  location: "marid" | "agents";
+  location: "qodex" | "agents";
   /** 技能目录或其位于技能根以内的上级目录是软链。 */
   isSymlink: boolean;
 }
 
 function getCliConfigPath(): string {
-  return join(resolveUserHomeDir(), ".marid", "cli", "config.json");
+  return join(resolveUserHomeDir(), ".qodex", "cli", "config.json");
 }
 
 function normalizeSkillConfigPath(path: string): string {
   return path.replaceAll("\\", "/");
 }
 
-/** 按归一化 name 对齐的用户级技能；同名时保留候选排序中的第一项（`.marid` 优先）。 */
+/** 按归一化 name 对齐的用户级技能；同名时保留候选排序中的第一项（`.qodex` 优先）。 */
 async function resolveUserSkills(): Promise<Map<string, ResolvedUserSkill>> {
-  const maridRoot = getUserMaridSkillRoot();
+  const qodexRoot = getUserQodexSkillRoot();
   const result = new Map<string, ResolvedUserSkill>();
   for (const candidate of await collectUserSkillCandidates()) {
     const key = normalizeSkillNameKey(candidate.name);
     if (result.has(key)) continue;
     const directoryPath = dirname(candidate.path);
-    const location = isPathWithin(maridRoot, directoryPath) ? "marid" : "agents";
+    const location = isPathWithin(qodexRoot, directoryPath) ? "qodex" : "agents";
     result.set(key, {
       key,
       name: candidate.name,
@@ -76,7 +76,7 @@ async function resolveUserSkills(): Promise<Map<string, ResolvedUserSkill>> {
       directoryPath,
       skillFilePath: candidate.path,
       location,
-      isSymlink: location === "marid" ? await hasSymlinkWithin(maridRoot, directoryPath) : false,
+      isSymlink: location === "qodex" ? await hasSymlinkWithin(qodexRoot, directoryPath) : false,
     });
   }
   return result;
@@ -271,7 +271,7 @@ export function createSkillDataSyncMethods(options: {
     }
 
     if (!existing) return { key: item.key, status: "conflict" };
-    if (existing.location !== "marid" || existing.isSymlink) {
+    if (existing.location !== "qodex" || existing.isSymlink) {
       return failed(`target cannot be overwritten: ${existing.directoryPath}`);
     }
     // 修复：覆盖是整目录替换，原来不检查目标端嵌套在该目录里的其他技能（例如 parent/child），
@@ -350,7 +350,7 @@ export function createSkillDataSyncMethods(options: {
 
     async checkSyncWriteAccess() {
       return await checkRemoteSyncDirectoriesWriteAccess([
-        getUserMaridSkillRoot(),
+        getUserQodexSkillRoot(),
         dirname(getCliConfigPath()),
       ]);
     },
@@ -415,7 +415,7 @@ export function createSkillDataSyncMethods(options: {
           phase: "archive",
         });
       }
-      const targetRoot = getUserMaridSkillRoot();
+      const targetRoot = getUserQodexSkillRoot();
       await mkdir(targetRoot, { recursive: true });
       // 临时目录放在技能根内，保证与目标同盘，rename 是原子替换。点目录不会被技能扫描读到。
       const tempRoot = join(targetRoot, `.sync-tmp-${randomUUID()}`);

@@ -1,4 +1,4 @@
-import { DesktopCommandIds, type UpdateStatePayload } from "@marid/shared";
+import { DesktopCommandIds, type UpdateStatePayload } from "@qodex/shared";
 import { useEffect, useState } from "react";
 import { usePlatform } from "@/hooks/usePlatform.js";
 import {

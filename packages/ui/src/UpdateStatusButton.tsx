@@ -1,7 +1,7 @@
-import type { IPlatformService, UpdateStatePayload } from "@marid/shared";
+import type { IPlatformService, UpdateStatePayload } from "@qodex/shared";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { Button } from "@/components/ui/button.js";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
 import { UpdateStatusDialogController } from "@/UpdateStatusDialogController.js";
@@ -26,7 +26,7 @@ export function UpdateStatusButton({
   isWindowsDesktop?: boolean;
   className?: string;
 }) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const [dialogOpen, setDialogOpen] = useState(false);
   const releaseNotesCacheRef = useRef(
     new Map<

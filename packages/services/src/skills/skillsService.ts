@@ -6,7 +6,7 @@ import { homedir } from "node:os";
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { parse as parseYaml } from "yaml";
 import type {
-  MaridProvider,
+  QodexProvider,
   SkillDiagnostic,
   SkillMetadata,
   SkillScope,
@@ -14,8 +14,8 @@ import type {
   SkillsPromptContext,
   SkillsListResult,
   SkillsCapability,
-} from "@marid/shared";
-import { DEFAULT_ENABLED_OFFICIAL_PLUGIN_IDS } from "@marid/shared";
+} from "@qodex/shared";
+import { DEFAULT_ENABLED_OFFICIAL_PLUGIN_IDS } from "@qodex/shared";
 import type { ISkillsService } from "./skills.js";
 import { SKILL_FILE_NAME, walkSkillMarkdownPaths } from "./skillDiscoveryWalk.js";
 import { readInstalledPluginRoots } from "#src/plugins/installedPluginRoots.js";
@@ -38,18 +38,18 @@ interface ParsedFrontmatter {
 }
 
 const SKILL_META_FILE_NAME = "_meta.json";
-const SKILL_SETTINGS_DIR = join(resolveUserHomeDir(), ".marid", "v2");
-const SKILL_CLI_SETTINGS_DIR = join(resolveUserHomeDir(), ".marid", "cli");
+const SKILL_SETTINGS_DIR = join(resolveUserHomeDir(), ".qodex", "v2");
+const SKILL_CLI_SETTINGS_DIR = join(resolveUserHomeDir(), ".qodex", "cli");
 const SKILL_CLI_CONFIG_FILE = join(SKILL_CLI_SETTINGS_DIR, "config.json");
 const GIT_MARKER = ".git";
 const HOME_PREFIX = "~/";
-const MARID_OFFICIAL_PLUGIN_MARKETPLACE = "marid-plugins-official";
-const MARID_INLINE_PLUGIN_MARKETPLACE = "inline";
-const MARID_PLUGIN_MANIFEST_PATH = join(".marid-plugin", "plugin.json");
+const QODEX_OFFICIAL_PLUGIN_MARKETPLACE = "qodex-plugins-official";
+const QODEX_INLINE_PLUGIN_MARKETPLACE = "inline";
+const QODEX_PLUGIN_MANIFEST_PATH = join(".qodex-plugin", "plugin.json");
 const CLAUDE_PLUGIN_MANIFEST_PATH = join(".claude-plugin", "plugin.json");
 const CODEX_PLUGIN_MANIFEST_PATH = join(".codex-plugin", "plugin.json");
 
-/** 对齐 apps/marid-cli/packages/adapters/src/skills/index.ts:19 */
+/** 对齐 apps/qodex-cli/packages/adapters/src/skills/index.ts:19 */
 const MAX_DESCRIPTION_LENGTH = 1024;
 function resolveUserHomeDir() {
   const envHome = process.env.HOME?.trim() || process.env.USERPROFILE?.trim();
@@ -60,19 +60,19 @@ interface SkillsServiceOptions {
   isDesktopRuntime?: boolean;
 }
 
-/** Marid Agent 工作区级技能目录。 */
-function getWorkspaceMaridSkillRoot(workspacePath: string): string {
-  return join(workspacePath, ".marid", "skills");
+/** Qodex Agent 工作区级技能目录。 */
+function getWorkspaceQodexSkillRoot(workspacePath: string): string {
+  return join(workspacePath, ".qodex", "skills");
 }
 
-/** 兼容目录: workspace 级 `.agents/skills`, 仅在同层 `.marid/skills` 没读到技能时 fallback。 */
+/** 兼容目录: workspace 级 `.agents/skills`, 仅在同层 `.qodex/skills` 没读到技能时 fallback。 */
 function getWorkspaceAgentsSkillRoot(workspacePath: string): string {
   return join(workspacePath, ".agents", "skills");
 }
 
-/** Marid Agent 用户级技能目录。 */
-function getUserMaridSkillRoot(): string {
-  return join(resolveUserHomeDir(), ".marid", "skills");
+/** Qodex Agent 用户级技能目录。 */
+function getUserQodexSkillRoot(): string {
+  return join(resolveUserHomeDir(), ".qodex", "skills");
 }
 
 /** 兼容目录: 用户级 `~/.agents/skills`。 */
@@ -107,25 +107,25 @@ async function collectSkillNameKeysInRoot(rootPath: string): Promise<Set<string>
   return nameKeys;
 }
 
-async function isUserAgentsSkillCoveredByMarid(params: {
+async function isUserAgentsSkillCoveredByQodex(params: {
   skillPath: string;
   rootPath: string;
-  userMaridSkillNameKeys: Set<string>;
+  userQodexSkillNameKeys: Set<string>;
 }): Promise<boolean> {
-  const { skillPath, rootPath, userMaridSkillNameKeys } = params;
+  const { skillPath, rootPath, userQodexSkillNameKeys } = params;
   if (rootPath !== getUserAgentsSkillRoot()) {
     return false;
   }
-  if (await exists(join(getUserMaridSkillRoot(), basename(dirname(skillPath)), SKILL_FILE_NAME))) {
+  if (await exists(join(getUserQodexSkillRoot(), basename(dirname(skillPath)), SKILL_FILE_NAME))) {
     return true;
   }
-  return userMaridSkillNameKeys.has(await readSkillNameKey(skillPath));
+  return userQodexSkillNameKeys.has(await readSkillNameKey(skillPath));
 }
 
 /**
  * 从 workspacePath 向上走到 worktree 根（含 .git 标记），把每一层的
- * `.marid/skills` 与 `.agents/skills` 都收集起来。
- * 对齐 apps/marid-cli/packages/adapters/src/skills/roots.ts:60-72。
+ * `.qodex/skills` 与 `.agents/skills` 都收集起来。
+ * 对齐 apps/qodex-cli/packages/adapters/src/skills/roots.ts:60-72。
  * 找不到 .git 时退回 workspacePath 自身。
  */
 async function resolveAncestorWorkspaceRoots(workspacePath: string): Promise<string[]> {
@@ -146,9 +146,9 @@ async function resolveAncestorWorkspaceRoots(workspacePath: string): Promise<str
   const roots: string[] = [];
   for (const dir of baseDirectories) {
     // Agent runtime 会合并扫描两个 workspace skill 根。UI 之前把 `.agents`
-    // 当成 `.marid` 的 fallback，导致同层 `.marid` 只要有一个技能，`/`、`$` 和设置页
+    // 当成 `.qodex` 的 fallback，导致同层 `.qodex` 只要有一个技能，`/`、`$` 和设置页
     // 就会整根漏掉 `.agents` 技能，形成“模型可执行但 UI 无法引用”的发现语义分裂。
-    roots.push(getWorkspaceMaridSkillRoot(dir));
+    roots.push(getWorkspaceQodexSkillRoot(dir));
     roots.push(getWorkspaceAgentsSkillRoot(dir));
   }
   return roots;
@@ -225,7 +225,7 @@ function hashStableIdPart(value: string): string {
 }
 
 function buildSkillId(params: {
-  provider: MaridProvider;
+  provider: QodexProvider;
   scope: SkillScope;
   name: string;
   path: string;
@@ -641,7 +641,7 @@ function readStorageDirFromConfig(config: Record<string, unknown>): string {
   const storage = isObjectRecord(config.storage) ? config.storage : {};
   return typeof storage.dir === "string" && storage.dir.trim().length > 0
     ? storage.dir
-    : "~/.marid";
+    : "~/.qodex";
 }
 
 function resolveConfigPath(path: string): string {
@@ -683,7 +683,7 @@ function resolveInside(rootPath: string, rawPath: string): string | null {
 }
 
 async function scanOfficialPluginCacheRoots(pluginStorageRoot: string): Promise<string[]> {
-  const cacheRoot = join(pluginStorageRoot, "cache", MARID_OFFICIAL_PLUGIN_MARKETPLACE);
+  const cacheRoot = join(pluginStorageRoot, "cache", QODEX_OFFICIAL_PLUGIN_MARKETPLACE);
   let pluginEntries: Dirent[] = [];
   try {
     pluginEntries = await readdir(cacheRoot, { withFileTypes: true });
@@ -740,7 +740,7 @@ async function readPluginManifest(rootPath: string): Promise<PluginManifestSumma
 
 async function findPluginManifestPath(rootPath: string): Promise<string | null> {
   for (const manifestPath of [
-    join(rootPath, MARID_PLUGIN_MANIFEST_PATH),
+    join(rootPath, QODEX_PLUGIN_MANIFEST_PATH),
     join(rootPath, CLAUDE_PLUGIN_MANIFEST_PATH),
     join(rootPath, CODEX_PLUGIN_MANIFEST_PATH),
   ]) {
@@ -783,12 +783,12 @@ async function resolvePluginSkillRootDescriptors(): Promise<SkillRootDescriptor[
   const candidates: PluginRootCandidate[] = [
     ...config.dirs.map((dir) => ({
       defaultEnabled: true,
-      marketplace: MARID_INLINE_PLUGIN_MARKETPLACE,
+      marketplace: QODEX_INLINE_PLUGIN_MARKETPLACE,
       rootPath: resolveConfigPath(dir),
     })),
     ...officialCacheRoots.map((rootPath) => ({
       defaultEnabled: false,
-      marketplace: MARID_OFFICIAL_PLUGIN_MARKETPLACE,
+      marketplace: QODEX_OFFICIAL_PLUGIN_MARKETPLACE,
       rootPath,
     })),
     ...installedRoots,
@@ -806,7 +806,7 @@ async function resolvePluginSkillRootDescriptors(): Promise<SkillRootDescriptor[
     // 官方 cache 时不经过 CLI resolve 的过滤，需要在这里同样跳过，否则被卸载的内置插件
     // 仍会从 cache 贡献技能。
     if (
-      candidate.marketplace === MARID_OFFICIAL_PLUGIN_MARKETPLACE &&
+      candidate.marketplace === QODEX_OFFICIAL_PLUGIN_MARKETPLACE &&
       config.suppressedBuiltins.includes(pluginId)
     ) {
       continue;
@@ -841,7 +841,7 @@ async function discoverSkills(params: {
   workspacePath: string;
   workspaceIdentity?: string;
   includeUserSkills: boolean;
-  provider: MaridProvider;
+  provider: QodexProvider;
 }): Promise<DiscoverResult> {
   const workspaceRoots = dedupeRoots(await resolveAncestorWorkspaceRoots(params.workspacePath));
   const roots: SkillRootDescriptor[] = workspaceRoots.map((rootPath) => ({
@@ -849,11 +849,11 @@ async function discoverSkills(params: {
     rootPath,
   }));
   if (params.includeUserSkills) {
-    // 用户级技能是全局资源，`.marid/skills` 里只要存在一个技能就截断
+    // 用户级技能是全局资源，`.qodex/skills` 里只要存在一个技能就截断
     // `.agents/skills` 会导致外部 Agent 的全局技能在导入后从设置页消失。
     roots.push({
       scope: "user" as const,
-      rootPath: getUserMaridSkillRoot(),
+      rootPath: getUserQodexSkillRoot(),
     });
     roots.push({
       scope: "user" as const,
@@ -865,8 +865,8 @@ async function discoverSkills(params: {
   const diagnostics: SkillDiagnostic[] = [];
   const skills: SkillSummary[] = [];
   const seenSkillPaths = new Set<string>();
-  const userMaridSkillNameKeys = params.includeUserSkills
-    ? await collectSkillNameKeysInRoot(getUserMaridSkillRoot())
+  const userQodexSkillNameKeys = params.includeUserSkills
+    ? await collectSkillNameKeysInRoot(getUserQodexSkillRoot())
     : new Set<string>();
   // 插件的父、子声明都是独立入口，不能按递归覆盖关系裁掉父入口。
   const standaloneRoots = await filterNestedScanRoots(
@@ -894,10 +894,10 @@ async function discoverSkills(params: {
     );
     for (const skillPath of skillPaths) {
       if (
-        await isUserAgentsSkillCoveredByMarid({
+        await isUserAgentsSkillCoveredByQodex({
           skillPath,
           rootPath: root.rootPath,
-          userMaridSkillNameKeys,
+          userQodexSkillNameKeys,
         })
       ) {
         continue;
@@ -952,7 +952,7 @@ async function discoverSkills(params: {
       }
 
       // frontmatter 扩展字段通常来自不同 skill 生态的元信息。
-      // 这些字段不影响 Marid 读取 name/description，继续报 warning 只会制造无操作价值的噪音。
+      // 这些字段不影响 Qodex 读取 name/description，继续报 warning 只会制造无操作价值的噪音。
 
       const body = parsed.body.trim();
       const metadata = await readSkillMetadata(skillPath);
@@ -1018,7 +1018,7 @@ async function collectSkillMarkdownPaths(
 }
 
 function resolveCapabilities(options?: SkillsServiceOptions): SkillsCapability {
-  const isDesktopRuntime = options?.isDesktopRuntime ?? Boolean(process.env.MARID_PROCESS_LABEL);
+  const isDesktopRuntime = options?.isDesktopRuntime ?? Boolean(process.env.QODEX_PROCESS_LABEL);
   if (isDesktopRuntime) {
     return { userScopeAvailable: true };
   }
@@ -1042,7 +1042,7 @@ export function createSkillsService(options?: SkillsServiceOptions): ISkillsServ
     async list(params: {
       workspacePath: string;
       workspaceIdentity?: string;
-      provider?: MaridProvider;
+      provider?: QodexProvider;
     }): Promise<SkillsListResult> {
       const capability = resolveCapabilities(options);
       const provider = "glm";
@@ -1063,7 +1063,7 @@ export function createSkillsService(options?: SkillsServiceOptions): ISkillsServ
     async setEnabled(params: {
       workspacePath: string;
       workspaceIdentity?: string;
-      provider?: MaridProvider;
+      provider?: QodexProvider;
       scope?: SkillScope;
       skillId: string;
       enabled: boolean;
@@ -1094,7 +1094,7 @@ export function createSkillsService(options?: SkillsServiceOptions): ISkillsServ
     async buildPromptContext(params: {
       workspacePath: string;
       workspaceIdentity?: string;
-      provider?: MaridProvider;
+      provider?: QodexProvider;
       prompt: string;
     }): Promise<SkillsPromptContext> {
       const mentionedSkillNames = collectMentionedSkillNames(params.prompt);
@@ -1146,8 +1146,8 @@ export function createSkillsService(options?: SkillsServiceOptions): ISkillsServ
       // 通用目录根据 skill 原 scope 确定 user 还是 workspace 级
       const commonRoot =
         skill.scope === "workspace"
-          ? getWorkspaceMaridSkillRoot(params.workspacePath)
-          : getUserMaridSkillRoot();
+          ? getWorkspaceQodexSkillRoot(params.workspacePath)
+          : getUserQodexSkillRoot();
       const targetDir = join(commonRoot, basename(sourceDir));
       // 不覆盖已有目录
       if (await exists(targetDir)) {
@@ -1172,8 +1172,8 @@ export function createSkillsService(options?: SkillsServiceOptions): ISkillsServ
         throw new Error(`Skill not found: ${params.skillId}`);
       }
       const normalizedPath = skill.path.replaceAll("\\", "/").toLowerCase();
-      const userCommonRoot = getUserMaridSkillRoot().replaceAll("\\", "/").toLowerCase();
-      const workspaceCommonRoot = getWorkspaceMaridSkillRoot(params.workspacePath)
+      const userCommonRoot = getUserQodexSkillRoot().replaceAll("\\", "/").toLowerCase();
+      const workspaceCommonRoot = getWorkspaceQodexSkillRoot(params.workspacePath)
         .replaceAll("\\", "/")
         .toLowerCase();
       const inUserCommon = normalizedPath.includes(`${userCommonRoot}/`);
@@ -1204,7 +1204,7 @@ export function createSkillsService(options?: SkillsServiceOptions): ISkillsServ
 
       // 用发现阶段命中的原始路径（sourcePath，未 realpath）定位技能目录项。
       // 软链导入的技能 skill.path 是 realpath 后的目标文件，dirname 会指向目标目录；
-      // sourcePath 才指向 `~/.marid/skills/<name>` 下的目录项本身。
+      // sourcePath 才指向 `~/.qodex/skills/<name>` 下的目录项本身。
       const skillDir = dirname(skill.sourcePath ?? skill.path);
       const skillLeafName = basename(skillDir);
       // 只解析父目录，不解析叶子本身：
@@ -1217,9 +1217,9 @@ export function createSkillsService(options?: SkillsServiceOptions): ISkillsServ
       }
 
       // 安全护栏：删除是 `rm -rf` 目录的破坏性操作，仅允许命中受控技能根。
-      // 收集工作区各层级（沿 worktree 向上）的 .marid/skills 与 .agents/skills，外加用户级两根。
+      // 收集工作区各层级（沿 worktree 向上）的 .qodex/skills 与 .agents/skills，外加用户级两根。
       const allowedRootCandidates = await resolveAncestorWorkspaceRoots(params.workspacePath);
-      allowedRootCandidates.push(getUserMaridSkillRoot());
+      allowedRootCandidates.push(getUserQodexSkillRoot());
       allowedRootCandidates.push(getUserAgentsSkillRoot());
 
       // 用 realpath 后的父目录与 realpath 后的根比较：父目录必须落在（或等于）某个受控根内。

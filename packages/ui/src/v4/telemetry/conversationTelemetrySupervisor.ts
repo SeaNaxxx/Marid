@@ -2,8 +2,8 @@ import {
   ConversationTelemetryEngine,
   type TelemetryPlatform,
   type ConversationTelemetryObservation,
-} from "@marid/shared/conversation-telemetry";
-export * from "@marid/shared/conversation-telemetry";
+} from "@qodex/shared/conversation-telemetry";
+export * from "@qodex/shared/conversation-telemetry";
 import { reportAppTelemetryEvent } from "@/lib/appTelemetry.js";
 import {
   reportChatErrorBannerTelemetry,
@@ -27,7 +27,7 @@ import {
   reportUiToolCallDetail,
   reportUiTurnBreakdown,
 } from "@/lib/uiPerfArmsTelemetry.js";
-import type { MaridUiError } from "@/lib/maridUiError.js";
+import type { QodexUiError } from "@/lib/qodexUiError.js";
 
 const observers = {
   reportSendFunnelInputFocus: (args: readonly unknown[]) =>
@@ -81,7 +81,7 @@ export class ConversationTelemetrySupervisor extends ConversationTelemetryEngine
     surface?: ChatErrorBannerSurface;
     errorKey?: string | null;
     displayMessage: string;
-    error: MaridUiError;
+    error: QodexUiError;
   }): void {
     if (this.uiDisposed) return;
     void reportChatErrorBannerTelemetry(this.uiPlatform, {

@@ -1,4 +1,4 @@
-import { CRON_DEFAULT_GROUP_ID, OFF_PEAK_DEFAULT_GROUP_ID } from "@marid/shared";
+import { CRON_DEFAULT_GROUP_ID, OFF_PEAK_DEFAULT_GROUP_ID } from "@qodex/shared";
 import type {
   GroupTaskRef,
   ProjectTask,

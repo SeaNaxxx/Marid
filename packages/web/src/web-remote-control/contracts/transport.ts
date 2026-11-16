@@ -1,4 +1,4 @@
-import type { WebRemoteControlAppPayload, WebRemoteControlFailure } from "@marid/shared";
+import type { WebRemoteControlAppPayload, WebRemoteControlFailure } from "@qodex/shared";
 
 export type WebRemoteControlTerminalTransportState =
   | "idle"

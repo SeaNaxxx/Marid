@@ -1,5 +1,5 @@
 export type SettingsSyncAgent =
-  | "marid"
+  | "qodex"
   | "claudeCode"
   | "codexCli"
   | "openCode"

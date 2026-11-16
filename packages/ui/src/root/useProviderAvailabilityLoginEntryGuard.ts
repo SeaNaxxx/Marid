@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { UserInfo } from "@marid/shared";
-import type { ModelSelectionView } from "@marid/services";
+import type { UserInfo } from "@qodex/shared";
+import type { ModelSelectionView } from "@qodex/services";
 import { resolveProviderAvailabilityState } from "@/lib/modelProviderAvailability.js";
 import { logger } from "@/logger.js";
 

@@ -1,4 +1,4 @@
-import { parseRemoteWorkspaceIdentity } from "@marid/shared";
+import { parseRemoteWorkspaceIdentity } from "@qodex/shared";
 
 export interface TaskSourceAttributionInput {
   workspacePath: string;

@@ -5,8 +5,8 @@
  * 目录内容变更时自动 refresh，无需手动刷新。
  */
 import { useState, useEffect, useCallback } from "react";
-import type { FileEntry } from "@marid/shared";
-import type { IDisposable } from "@marid/rpc";
+import type { FileEntry } from "@qodex/shared";
+import type { IDisposable } from "@qodex/rpc";
 import { useServices } from "./useServices.js";
 import { logger } from "@/logger.js";
 

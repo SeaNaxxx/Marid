@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import type { WireConversationRow } from "@marid/shared/marid-protocol-v4";
+import type { WireConversationRow } from "@qodex/shared/qodex-protocol-v4";
 
 import { ConversationShareServiceError } from "#src/conversation-share/conversationShare.js";
 
@@ -44,8 +44,8 @@ export function formatSharedContextV1(
       case "userInput":
         {
           const attachmentLines = (row.attachments ?? []).flatMap((attachment) => {
-            const artifactId = attachment.ref.startsWith("marid-artifact://share/")
-              ? attachment.ref.slice("marid-artifact://share/".length)
+            const artifactId = attachment.ref.startsWith("qodex-artifact://share/")
+              ? attachment.ref.slice("qodex-artifact://share/".length)
               : "";
             const installed = paths.get(artifactId);
             return installed

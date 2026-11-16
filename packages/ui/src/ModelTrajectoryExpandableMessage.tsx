@@ -1,4 +1,4 @@
-import type { MaridModelTrajectoryMessage } from "@marid/services";
+import type { QodexModelTrajectoryMessage } from "@qodex/services";
 import { ArrowRightIcon, ChevronRightIcon, CircleAlertIcon, CopyIcon } from "lucide-react";
 import { useContext, useState } from "react";
 import { Badge } from "@/components/ui/badge.js";
@@ -9,7 +9,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible.js";
-import type { useMaridIntl } from "@/i18n/IntlProvider.js";
+import type { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 import {
   TrajectoryExpansionCommandContext,
@@ -25,7 +25,7 @@ import {
   trajectoryToolPayloadErrorText,
 } from "@/ModelTrajectoryToolPayload.js";
 
-type IntlShape = ReturnType<typeof useMaridIntl>["intl"];
+type IntlShape = ReturnType<typeof useQodexIntl>["intl"];
 
 export function ExpandableTrajectoryMessage({
   message,
@@ -39,7 +39,7 @@ export function ExpandableTrajectoryMessage({
   intl,
   expansionKey,
 }: {
-  message: MaridModelTrajectoryMessage;
+  message: QodexModelTrajectoryMessage;
   role: "system" | "user" | "assistant" | "tool";
   visualRole?: TrajectoryVisualRole;
   roleLabel: string;
@@ -271,7 +271,7 @@ export function ExpandableTrajectoryMessage({
 }
 
 function messagePreview(
-  message: MaridModelTrajectoryMessage,
+  message: QodexModelTrajectoryMessage,
   role: "system" | "user" | "assistant" | "tool",
 ): string {
   if (role === "tool" && message.parts.some((part) => part.kind === "tool-result")) {
@@ -289,7 +289,7 @@ function messagePreview(
   return firstLinePreview(message);
 }
 
-function compactTextPreview(message: MaridModelTrajectoryMessage): string {
+function compactTextPreview(message: QodexModelTrajectoryMessage): string {
   const text = message.parts
     .flatMap((part) => ("text" in part && typeof part.text === "string" ? [part.text] : []))
     .join(" ")
@@ -310,7 +310,7 @@ function compactPreviewValue(value: unknown): string {
   }
 }
 
-function firstLinePreview(message: MaridModelTrajectoryMessage): string {
+function firstLinePreview(message: QodexModelTrajectoryMessage): string {
   for (const part of message.parts) {
     if ("text" in part && typeof part.text === "string") {
       const firstLine = part.text
@@ -323,7 +323,7 @@ function firstLinePreview(message: MaridModelTrajectoryMessage): string {
   return "—";
 }
 
-function messageClipboardText(message: MaridModelTrajectoryMessage): string {
+function messageClipboardText(message: QodexModelTrajectoryMessage): string {
   if (message.role === "tool") return trajectoryToolOutputs(message).join("\n\n");
   return message.parts
     .map((part) => {

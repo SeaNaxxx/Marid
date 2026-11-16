@@ -1,5 +1,5 @@
-import { BufferReader, BufferWriter, deserialize, serialize, VSBuffer } from "@marid/rpc";
-import { ISourceServerManagementService } from "@marid/services";
+import { BufferReader, BufferWriter, deserialize, serialize, VSBuffer } from "@qodex/rpc";
+import { ISourceServerManagementService } from "@qodex/services";
 
 interface SnapshotFault {
   requests: number[][];

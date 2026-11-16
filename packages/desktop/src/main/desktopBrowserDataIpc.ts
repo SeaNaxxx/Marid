@@ -3,7 +3,7 @@ import {
   PlatformChannels,
   type ChromeBrowserDataImportOptions,
   type EmbeddedBrowserSitePermissionUpdateRequest,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   clearEmbeddedBrowserData,
   importChromeBrowserData,

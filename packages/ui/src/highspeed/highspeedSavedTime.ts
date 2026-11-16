@@ -1,5 +1,5 @@
-import type { CodingPlanRegularTpsRequest } from "@marid/shared";
-import type { IUsageStatsService } from "@marid/services";
+import type { CodingPlanRegularTpsRequest } from "@qodex/shared";
+import type { IUsageStatsService } from "@qodex/services";
 
 export interface HighspeedTimingMetricsForSavedTime {
   outputTokens: number;

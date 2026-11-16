@@ -42,15 +42,15 @@ import type {
   EnterpriseCodingPlanPricingRequest,
   EnterpriseCodingPlanPricingResponse,
   StartPlanPreviewConfig,
-  MaridModelContextBudgetStrategy,
+  QodexModelContextBudgetStrategy,
   ForceUpdateConfig,
   ManualClaimPlanPreviewSnapshot,
   ManualClaimPlanClaimRequest,
   ManualClaimPlanClaimResult,
   DynamicWorkflowClientConfig,
-} from "@marid/shared";
-import type { ModelSelectionView } from "@marid/provider";
-import { ServiceChannels } from "@marid/shared";
+} from "@qodex/shared";
+import type { ModelSelectionView } from "@qodex/provider";
+import { ServiceChannels } from "@qodex/shared";
 import { createServiceDescriptor } from "../descriptors.js";
 
 export interface OffPeakClientConfig {
@@ -77,7 +77,7 @@ export interface ICodingPlanSubscriptionService {
     forceRefresh?: boolean;
   }): Promise<DynamicWorkflowClientConfig>;
   /** 兼容接口：固定返回 preflight-v1，不读取远端配置或缓存。 */
-  getModelContextBudgetStrategy(): Promise<MaridModelContextBudgetStrategy>;
+  getModelContextBudgetStrategy(): Promise<QodexModelContextBudgetStrategy>;
   getBillingDiscount(): Promise<CodingPlanBillingDiscountConfig | undefined>;
   getRequestVerificationConfig(): Promise<RequestVerificationConfig | null>;
   getForceUpdateConfig(): Promise<ForceUpdateConfig | null>;

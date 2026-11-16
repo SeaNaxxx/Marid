@@ -1,5 +1,5 @@
-import type { Event } from "@marid/rpc";
-import { ServiceChannels } from "@marid/shared";
+import type { Event } from "@qodex/rpc";
+import { ServiceChannels } from "@qodex/shared";
 import type {
   ContributionMessage,
   ExecuteCommandInput,
@@ -12,7 +12,7 @@ import type {
   MentionItemsResult,
   ProvideMentionItemsInput,
   WorkbenchReport,
-} from "@marid/shared/extension-host";
+} from "@qodex/shared/extension-host";
 import { createServiceDescriptor } from "#src/descriptors.js";
 
 /**

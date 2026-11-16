@@ -12,7 +12,7 @@ import {
   type StorageRootSpec,
   type StorageRootUsage,
   type StorageVolume,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export interface StorageScanEntry {
   relativePath: string;

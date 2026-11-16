@@ -9,7 +9,7 @@ import {
   waitUntilPluginOverview,
 } from "#e2e/helpers/plugin-management-lifecycle";
 
-const DOCUMENTS_ID = "documents@marid-plugins-official";
+const DOCUMENTS_ID = "documents@qodex-plugins-official";
 
 describe("PLM-BUILTIN-UI-UNINSTALL 内置 UI 插件卸载后的分组", () => {
   after(async () => {

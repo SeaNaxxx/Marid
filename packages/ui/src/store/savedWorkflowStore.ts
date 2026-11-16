@@ -4,12 +4,12 @@
 import { create } from "zustand";
 import {
   resolveWorkspaceKey,
-  type MaridSavedWorkflowEntry,
-  type MaridSavedWorkflowInvalidEntry,
-  type MaridSavedWorkflowRun,
-  type MaridWorkflowsListResult,
-} from "@marid/shared";
-import type { IMaridAgentService, MaridAgentSavedWorkflowTarget } from "@marid/services";
+  type QodexSavedWorkflowEntry,
+  type QodexSavedWorkflowInvalidEntry,
+  type QodexSavedWorkflowRun,
+  type QodexWorkflowsListResult,
+} from "@qodex/shared";
+import type { IQodexAgentService, QodexAgentSavedWorkflowTarget } from "@qodex/services";
 import { logger } from "@/logger.js";
 import { useWorkflowRunSavedStore } from "@/store/workflowRunSavedStore.js";
 
@@ -22,9 +22,9 @@ const SAVED_WORKFLOW_RUNS_PAGE = 50;
  * @public
  */
 export interface SavedWorkflowWorkspaceState {
-  entries: MaridSavedWorkflowEntry[];
-  invalid: MaridSavedWorkflowInvalidEntry[];
-  runs: MaridSavedWorkflowRun[];
+  entries: QodexSavedWorkflowEntry[];
+  invalid: QodexSavedWorkflowInvalidEntry[];
+  runs: QodexSavedWorkflowRun[];
   /** 扫过的目录（本地绝对路径），全局组据此 watch；未加载或列表未回时为 null。 */
   dir: string | null;
   loading: boolean;
@@ -48,8 +48,8 @@ const EMPTY_SAVED_WORKFLOW_STATE: SavedWorkflowWorkspaceState = {
 interface SavedWorkflowStoreState {
   byWorkspaceKey: Record<string, SavedWorkflowWorkspaceState>;
   load: (
-    target: MaridAgentSavedWorkflowTarget,
-    agentService: IMaridAgentService,
+    target: QodexAgentSavedWorkflowTarget,
+    agentService: IQodexAgentService,
     options?: { bypassCache?: boolean },
   ) => Promise<void>;
 }
@@ -61,7 +61,7 @@ const inFlight = new Map<string, Promise<void>>();
  * 用固定键 `"global"`——它跨项目、由 services 自选载体，不该与任何项目的 workspaceKey 混淆；
  * 项目档仍按 `resolveWorkspaceKey` 分片。
  */
-function savedWorkflowStoreKey(target: MaridAgentSavedWorkflowTarget): string {
+function savedWorkflowStoreKey(target: QodexAgentSavedWorkflowTarget): string {
   if (target.scope === "global" && !target.workspacePath) return "global";
   return resolveWorkspaceKey({
     workspacePath: target.workspacePath ?? "",
@@ -76,9 +76,9 @@ function extractErrorCode(error: unknown): number | null {
 }
 
 async function fetchWorkspace(
-  target: MaridAgentSavedWorkflowTarget,
-  agentService: IMaridAgentService,
-): Promise<{ list: MaridWorkflowsListResult; runs: MaridSavedWorkflowRun[] }> {
+  target: QodexAgentSavedWorkflowTarget,
+  agentService: IQodexAgentService,
+): Promise<{ list: QodexWorkflowsListResult; runs: QodexSavedWorkflowRun[] }> {
   // 列表与运行历史并行；运行历史失败不拖垮列表（journal 缺席时中枢照常能看、能管）。
   const [list, runs] = await Promise.all([
     agentService.listSavedWorkflows(target),
@@ -89,7 +89,7 @@ async function fetchWorkspace(
         logger.warn("[savedWorkflowStore] 拉取运行历史失败，按无记录处理", {
           error: error instanceof Error ? error.message : String(error),
         });
-        return [] as MaridSavedWorkflowRun[];
+        return [] as QodexSavedWorkflowRun[];
       }),
   ]);
   return { list, runs };
@@ -157,7 +157,7 @@ export const useSavedWorkflowStore = create<SavedWorkflowStoreState>((set) => ({
 
 export function selectSavedWorkflowState(
   state: SavedWorkflowStoreState,
-  target: MaridAgentSavedWorkflowTarget | null,
+  target: QodexAgentSavedWorkflowTarget | null,
 ): SavedWorkflowWorkspaceState {
   if (!target) return EMPTY_SAVED_WORKFLOW_STATE;
   return state.byWorkspaceKey[savedWorkflowStoreKey(target)] ?? EMPTY_SAVED_WORKFLOW_STATE;

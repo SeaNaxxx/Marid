@@ -1,15 +1,15 @@
-import type { MaridInteractionRequestOrigin } from "@marid/shared";
+import type { QodexInteractionRequestOrigin } from "@qodex/shared";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 export function InteractionRequestOriginBadge({
   className,
   origin,
 }: {
   className?: string;
-  origin?: MaridInteractionRequestOrigin;
+  origin?: QodexInteractionRequestOrigin;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   if (origin?.kind !== "subagent") {
     return null;
   }

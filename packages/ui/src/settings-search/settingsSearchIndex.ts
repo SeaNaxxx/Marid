@@ -145,9 +145,9 @@ export const SETTINGS_SEARCH_ITEMS = [
     visibility: "all",
   },
   {
-    id: "settings.maridInteractionBehavior",
+    id: "settings.qodexInteractionBehavior",
     section: "agentBehavior",
-    description: "settings.maridInteractionBehaviorDescription",
+    description: "settings.qodexInteractionBehaviorDescription",
     visibility: "all",
   },
   {

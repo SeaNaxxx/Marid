@@ -8,14 +8,14 @@ import {
   type PluginOptionSyncValue,
   type IPlatformService,
   type RemoteTarget,
-  type MaridPluginsInstallResult,
-} from "@marid/shared";
+  type QodexPluginsInstallResult,
+} from "@qodex/shared";
 import {
   withPluginTelemetry,
   type IDataSyncCategoryService,
   type IPluginManagementService,
   type IServiceAccessor,
-} from "@marid/services";
+} from "@qodex/services";
 import { reportAppTelemetryEvent } from "@/lib/appTelemetry.js";
 import { logger } from "@/logger.js";
 import {
@@ -137,7 +137,7 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-function formatInstallError(result: MaridPluginsInstallResult, pluginId: string): string | null {
+function formatInstallError(result: QodexPluginsInstallResult, pluginId: string): string | null {
   const errors = result.diagnostics.filter((diagnostic) => diagnostic.severity !== "warning");
   if (errors.length === 0) return null;
   return errors
@@ -261,7 +261,7 @@ export function createMarketplacePluginDataSyncService(
       return { hashes: {} };
     },
 
-    // marketplace 镜像写入 ~/.marid/plugins，安装与配置写入 ~/.marid/cli，与 inline 插件的预检目录相同。
+    // marketplace 镜像写入 ~/.qodex/plugins，安装与配置写入 ~/.qodex/cli，与 inline 插件的预检目录相同。
     checkSyncWriteAccess: () => services.pluginSyncService.checkSyncWriteAccess(),
 
     async exportSyncItems({ keys }) {

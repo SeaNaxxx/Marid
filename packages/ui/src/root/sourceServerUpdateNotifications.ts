@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef } from "react";
-import type { ISourceServerManagementService } from "@marid/services";
-import type { RemoteTarget, SourceServerManagementSnapshot } from "@marid/shared";
+import type { ISourceServerManagementService } from "@qodex/services";
+import type { RemoteTarget, SourceServerManagementSnapshot } from "@qodex/shared";
 import { dismissToast, toast, type ToastOptions } from "@/components/ui/toast.js";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { findSourceServerUpgradeProfileId } from "@/lib/remoteConnectionWizard.js";
 import {
   getSourceServerForceUpdateDescription,
@@ -280,7 +280,7 @@ export function useSourceServerUpdateNotifications(options: {
     connectionTargetRef.current = target;
     controllerRef.current?.refresh();
   }, []);
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const confirmDialog = useConfirmDialog();
   const openSettingsTab = useTabStore((state) => state.openSettingsTab);
   useEffect(() => {

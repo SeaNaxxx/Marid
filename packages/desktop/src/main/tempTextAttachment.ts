@@ -1,11 +1,11 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
-import { getMaridDataRootDir } from "@marid/services/node";
+import { getQodexDataRootDir } from "@qodex/services/node";
 import type {
   CreateTempTextAttachmentRequest,
   CreateTempTextAttachmentResult,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 const TEMP_TEXT_ATTACHMENT_DIR = "paste-attachments";
 const MIME_TYPE = "text/plain" as const;
@@ -19,7 +19,7 @@ export async function createTempTextAttachment(
 
   const now = new Date();
   const dateDir = [now.getFullYear(), pad(now.getMonth() + 1), pad(now.getDate())].join("-");
-  const rootDir = join(getMaridDataRootDir(), "tmp", TEMP_TEXT_ATTACHMENT_DIR, dateDir);
+  const rootDir = join(getQodexDataRootDir(), "tmp", TEMP_TEXT_ATTACHMENT_DIR, dateDir);
   await mkdir(rootDir, { recursive: true });
 
   const filename = buildTempTextAttachmentFilename(payload.filename);

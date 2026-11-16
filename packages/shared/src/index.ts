@@ -21,7 +21,7 @@ export type {
   IntegratedTerminalShellSelection,
   Locale,
   LocalePreference,
-  MaridInteractionBehavior,
+  QodexInteractionBehavior,
   TabId,
   TabState,
   ResourceUsageCategory,
@@ -52,9 +52,9 @@ export type {
   LegacyPersistedLocalePreference,
   PersistedSettingsLocaleFields,
 } from "./locale.js";
-export { MARID_VERSION, MARID_COMMIT, MARID_BUILD_TIME } from "./version.js";
+export { QODEX_VERSION, QODEX_COMMIT, QODEX_BUILD_TIME } from "./version.js";
 export type { HelloMessage, HelloAckMessage } from "./handshake.js";
-export type { ArmsRumEnv, MaridEnv, MaridProductFlavor } from "./env.js";
+export type { ArmsRumEnv, QodexEnv, QodexProductFlavor } from "./env.js";
 export type { RemoteAssetInstallMode } from "./remoteAssetInstallMode.js";
 export type {
   RemoteResourcePackageId,
@@ -85,18 +85,18 @@ export {
   serializeShortcutBinding,
 } from "./shortcutCommands.js";
 export {
-  MARID_ENV,
-  MARID_PRODUCT_FLAVOR,
-  MARID_APP_VERSION_ENV,
-  MARID_BUILD_COMMIT_ID_ENV,
-  MARID_CLIENT_LANGUAGE_ENV,
-  RUNTIME_MARID_DEBUG,
-  MARID_ARMS_RUM_ENDPOINT,
-  MARID_TELEMETRY_REPORT_ENDPOINT,
-  MARID_AUTO_UPDATE_ENABLED,
-  mapMaridEnvToArmsRumEnv,
-  normalizeMaridEnv,
-  normalizeMaridProductFlavor,
+  QODEX_ENV,
+  QODEX_PRODUCT_FLAVOR,
+  QODEX_APP_VERSION_ENV,
+  QODEX_BUILD_COMMIT_ID_ENV,
+  QODEX_CLIENT_LANGUAGE_ENV,
+  RUNTIME_QODEX_DEBUG,
+  QODEX_ARMS_RUM_ENDPOINT,
+  QODEX_TELEMETRY_REPORT_ENDPOINT,
+  QODEX_AUTO_UPDATE_ENABLED,
+  mapQodexEnvToArmsRumEnv,
+  normalizeQodexEnv,
+  normalizeQodexProductFlavor,
 } from "./env.js";
 export * from "./errors.js";
 export {
@@ -106,33 +106,33 @@ export {
 export * from "./rendererActionTrace.js";
 export * from "./validation.js";
 export * from "./api.js";
-export * from "./marid-protocol/index.js";
+export * from "./qodex-protocol/index.js";
 export * from "./account-provider-state.js";
 // re-home：旧协议承重面的幸存文件（消费者继续走 barrel，零感知）
-export * from "./marid-protocol-legacy-types.js";
-export * from "./marid-task-types-core.js";
+export * from "./qodex-protocol-legacy-types.js";
+export * from "./qodex-task-types-core.js";
 export * from "./task-realtime-core.js";
 export * from "./remote-workspace-identity.js";
-export * from "./marid-api-retry-status.js";
-export * from "./marid-network-debug-status.js";
-export * from "./marid-session-visible-content.js";
+export * from "./qodex-api-retry-status.js";
+export * from "./qodex-network-debug-status.js";
+export * from "./qodex-session-visible-content.js";
 export * from "./official-mcp-auth.js";
 export * from "./official-mcp-tool-error.js";
 export * from "./conversation-message-projection-policy.js";
 export * from "./conversation-share.js";
 export * from "./conversation-share-content.js";
 export * from "./conversation-preview-artifacts.js";
-export * from "./marid-session-task-status.js";
-export * from "./marid-session-content-profile.js";
-export * from "./marid-tool-projection-memory.js";
-export * from "./marid-slash-command-help.js";
-export * from "./maridEndpoint.js";
-export * from "./marid-source-headers.js";
-export * from "./marid-agent-policy.js";
-export * from "./marid-media-policy.js";
+export * from "./qodex-session-task-status.js";
+export * from "./qodex-session-content-profile.js";
+export * from "./qodex-tool-projection-memory.js";
+export * from "./qodex-slash-command-help.js";
+export * from "./qodexEndpoint.js";
+export * from "./qodex-source-headers.js";
+export * from "./qodex-agent-policy.js";
+export * from "./qodex-media-policy.js";
 export * from "./media-preview.js";
 export * from "./plugin-display-name.js";
-export * from "./marid-agent-runtime.js";
+export * from "./qodex-agent-runtime.js";
 export * from "./runtimeEnv.js";
 export * from "./dynamic-workflow-feature.js";
 export * from "./markdown-artifact-images.js";
@@ -291,7 +291,7 @@ export type {
   UpdateStatePayload,
   WSLDistro,
   WindowControlsOverlayReadyPayload,
-  MaridStdioTapDevState,
+  QodexStdioTapDevState,
 } from "./platform.js";
 export type {
   CuaAccessibilitySettingsResult,
@@ -299,15 +299,15 @@ export type {
   OpenCuaPermissionOnboardingOptions,
   PrepareCuaHelperPermissionDragResult,
 } from "./cuaAccessibilitySettings.js";
-export type { MaridTaskCreateResult } from "./marid-task-types.js";
-export * from "./marid-task-types.js";
+export type { QodexTaskCreateResult } from "./qodex-task-types.js";
+export * from "./qodex-task-types.js";
 export * from "./automation-types.js";
 export * from "./off-peak-types.js";
 export * from "./background-task-control-merge.js";
 export * from "./background-task-controls.js";
 export * from "./background-task-notifications.js";
 export * from "./background-bash-jobs.js";
-export * from "./marid-agent-model-state.js";
+export * from "./qodex-agent-model-state.js";
 export * from "./task-realtime.js";
 export { formatTimestamp, formatLogPrefix } from "./log-format.js";
 export * from "./model-provider-types.js";
@@ -339,7 +339,7 @@ export * from "./runtime-tool-runtime.js";
 export * from "./git.js";
 export * from "./bots.js";
 export * from "./assistant-message-parts.js";
-export * from "./maridPersistedMessageMerge.js";
+export * from "./qodexPersistedMessageMerge.js";
 export * from "./assistant-presentation.js";
 export * from "./tool-call-summary.js";
 export * from "./tool-identity.js";

@@ -1,9 +1,9 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { chromium, type Browser } from "playwright-core";
-import { BufferReader, BufferWriter, deserialize, serialize, VSBuffer } from "@marid/rpc";
-import { ServiceChannels } from "@marid/shared";
-import { TID_TASK_ITEM, TID_V4_SESSION_PANE, testId } from "@marid/shared/test-ids";
+import { BufferReader, BufferWriter, deserialize, serialize, VSBuffer } from "@qodex/rpc";
+import { ServiceChannels } from "@qodex/shared";
+import { TID_TASK_ITEM, TID_V4_SESSION_PANE, testId } from "@qodex/shared/test-ids";
 import { clearAppData, DEFAULT_WORKSPACE } from "#e2e/helpers/desktop-app";
 import {
   buildReadonlyToolPrompt,
@@ -30,7 +30,7 @@ import {
 } from "#e2e/helpers/v4-conversation";
 
 const CASE = "E2E_SCT03";
-const artifacts = process.env.MARID_E2E_ARTIFACT_DIR!;
+const artifacts = process.env.QODEX_E2E_ARTIFACT_DIR!;
 const tools: AppControlToolEvidence = {};
 interface NavigationHistorySnapshot {
   entries: Array<{
@@ -52,9 +52,9 @@ async function captureNavigationHistory(phase: string) {
   const history = await browser.execute(() => {
     const bridge = (
       window as Window & {
-        __maridSessionStoreE2E?: { getState(): { taskNavHistory: NavigationHistorySnapshot } };
+        __qodexSessionStoreE2E?: { getState(): { taskNavHistory: NavigationHistorySnapshot } };
       }
-    ).__maridSessionStoreE2E;
+    ).__qodexSessionStoreE2E;
     if (!bridge) throw new Error("SCT03 session store E2E bridge is unavailable");
     return bridge.getState().taskNavHistory;
   });
@@ -174,7 +174,7 @@ async function holdTaskMeta(taskId: string) {
       };
       window.__sct03TaskMetaProbe = probe;
     },
-    ServiceChannels.MaridTask,
+    ServiceChannels.QodexTask,
     taskId,
   );
 }
@@ -191,7 +191,7 @@ async function waitForRealTaskMeta(taskId: string, phase: string) {
   const reader = new BufferReader(VSBuffer.wrap(Uint8Array.from(request)));
   const header = deserialize(reader) as [number, number, string, string];
   const args = deserialize(reader);
-  expect(header).toEqual([100, expect.any(Number), ServiceChannels.MaridTask, "getTaskMeta"]);
+  expect(header).toEqual([100, expect.any(Number), ServiceChannels.QodexTask, "getTaskMeta"]);
   expect(args).toEqual([expect.objectContaining({ workspacePath: DEFAULT_WORKSPACE, taskId })]);
   const probeId = -9400 - header[1];
   const wireRequest = new BufferWriter();
@@ -270,8 +270,8 @@ describe(`${CASE}: explicit App session navigation`, () => {
 
     const pairUrl = await obtainUnreadPairingUrl();
     mobile = await chromium.launch({
-      ...(process.env.MARID_E2E_MOBILE_BROWSER_EXECUTABLE
-        ? { executablePath: process.env.MARID_E2E_MOBILE_BROWSER_EXECUTABLE }
+      ...(process.env.QODEX_E2E_MOBILE_BROWSER_EXECUTABLE
+        ? { executablePath: process.env.QODEX_E2E_MOBILE_BROWSER_EXECUTABLE }
         : { channel: "chrome" }),
       headless: true,
     });

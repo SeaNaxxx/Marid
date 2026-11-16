@@ -1,8 +1,0 @@
-{
-  "name": "@marid/visualize-plugin",
-  "version": "0.1.0-marid",
-  "private": true,
-  "description": "Marid Gen UI authoring skill and examples",
-  "license": "Apache-2.0",
-  "type": "module"
-}

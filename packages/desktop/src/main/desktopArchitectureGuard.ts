@@ -1,9 +1,9 @@
 import type { BrowserWindow, NativeImage } from "electron";
 import {
-  DEFAULT_MARID_ENDPOINT_ORIGIN,
-  buildMaridEndpointUrls,
+  DEFAULT_QODEX_ENDPOINT_ORIGIN,
+  buildQodexEndpointUrls,
   type Locale,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export interface ArchitectureMismatch {
   /** 当前运行的二进制架构，例如 x64。 */
@@ -50,10 +50,10 @@ export function detectArchitectureMismatch(
 
 export function resolveArchitectureDownloadUrl(
   locale: Locale,
-  endpointOrigin = DEFAULT_MARID_ENDPOINT_ORIGIN,
+  endpointOrigin = DEFAULT_QODEX_ENDPOINT_ORIGIN,
 ): string {
   // 与 changelog 等外链保持一致，按应用语言分流到官网下载页。
-  const origin = buildMaridEndpointUrls(endpointOrigin).origin;
+  const origin = buildQodexEndpointUrls(endpointOrigin).origin;
   return locale === "zh-CN" ? `${origin}/cn` : `${origin}/en`;
 }
 

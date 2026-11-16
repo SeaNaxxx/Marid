@@ -23,8 +23,8 @@ export async function prepareAccessToken401Fixture(options: {
   let rejected = false;
   let rejectionStatus = 401;
   let emptyRejection = false;
-  const preserveSession = process.env.MARID_E2E_AUTH_VALIDATION_HEADER === "1";
-  const ordinaryStatus = process.env.MARID_E2E_AUTH_EXPIRY_HTTP_STATUS === "200" ? 200 : 403;
+  const preserveSession = process.env.QODEX_E2E_AUTH_VALIDATION_HEADER === "1";
+  const ordinaryStatus = process.env.QODEX_E2E_AUTH_EXPIRY_HTTP_STATUS === "200" ? 200 : 403;
   let ordinaryBusinessRequestCount = 0;
   let rawIdentityRequestCount = 0;
   let rejectedIdentityHeaderCount = 0;
@@ -37,7 +37,7 @@ export async function prepareAccessToken401Fixture(options: {
   let loginCompletions = 0;
   let locationUnavailable = false;
   const provider =
-    sharedJwt || preserveSession || process.env.MARID_E2E_AUTH_EXPIRY_PROVIDER === "zai"
+    sharedJwt || preserveSession || process.env.QODEX_E2E_AUTH_EXPIRY_PROVIDER === "zai"
       ? "zai"
       : "bigmodel";
   const rejectResponse = (response: ServerResponse) => {
@@ -105,7 +105,7 @@ export async function prepareAccessToken401Fixture(options: {
         loginCompletions++;
         data = {
           status: "ready",
-          token: "e2e-distinct-marid-jwt",
+          token: "e2e-distinct-qodex-jwt",
           user: { user_id: "e2e-user", name: "Fixture User" },
           bigmodel: { access_token: "e2e-business-access-token" },
         };
@@ -127,7 +127,7 @@ export async function prepareAccessToken401Fixture(options: {
         };
       } else if (path.endsWith("/api_keys")) {
         if (request.method === "POST") keyCreateRequests++;
-        data = [{ apiKey: "key-e2e", name: "marid-api-key" }];
+        data = [{ apiKey: "key-e2e", name: "qodex-api-key" }];
       } else if (path.endsWith("/access_tokens")) {
         tokenRequests++;
         if (tokenRetryMode) {
@@ -166,7 +166,7 @@ export async function prepareAccessToken401Fixture(options: {
             },
           ],
         };
-      else if (path === "/api/v1/marid-plan/billing/balance") data = { plans: [], balances: [] };
+      else if (path === "/api/v1/qodex-plan/billing/balance") data = { plans: [], balances: [] };
       if (data !== undefined) {
         response.end(JSON.stringify({ code: 0, data }));
         return;
@@ -201,13 +201,13 @@ export async function prepareAccessToken401Fixture(options: {
       return;
     }
     if (
-      (sharedJwt && path === "/api/v1/marid-plan/billing/balance") ||
+      (sharedJwt && path === "/api/v1/qodex-plan/billing/balance") ||
       (!sharedJwt && path === "/api/biz/customer/getCustomerInfo")
     ) {
       // 只记录是否匹配合成登录凭据，避免 token 原文进入测试产物。
       if (
         request.headers.authorization?.replace(/^Bearer\s+/i, "") ===
-        (sharedJwt ? "e2e-distinct-marid-jwt" : "e2e-business-access-token")
+        (sharedJwt ? "e2e-distinct-qodex-jwt" : "e2e-business-access-token")
       )
         businessRequestCount++;
       if (rejected) {
@@ -238,7 +238,7 @@ export async function prepareAccessToken401Fixture(options: {
   const address = server.address();
   if (!address || typeof address === "string") throw new Error("OAuth fixture 缺少监听端口");
   const baseUrl = `http://127.0.0.1:${address.port}`;
-  // 用独立 origin 模拟业务域与 Marid API，避免来源头和端点改写影响业务核验回归。
+  // 用独立 origin 模拟业务域与 Qodex API，避免来源头和端点改写影响业务核验回归。
   const controlServer = preserveSession
     ? createServer((_request, response) => {
         response.setHeader("content-type", "application/json");
@@ -260,14 +260,14 @@ export async function prepareAccessToken401Fixture(options: {
     controlBaseUrl = `http://127.0.0.1:${controlAddress.port}`;
   }
   const envPatch = {
-    MARID_E2E_ACCESS_TOKEN_401_URL: baseUrl,
+    QODEX_E2E_ACCESS_TOKEN_401_URL: baseUrl,
     BIGMODEL_API_BASE_URL: baseUrl,
     BIGMODEL_OAUTH_USERINFO_URL: `${baseUrl}/api/biz/customer/getCustomerInfo`,
     ZAI_BUSINESS_BASE_URL: baseUrl,
     ZAI_OAUTH_USERINFO_URL: `${baseUrl}${preserveSession ? "/api/oauth/userinfo" : "/api/biz/customer/getCustomerInfo"}`,
-    MARID_BASE_URL: controlBaseUrl,
-    MARID_TEST_BASE_URL: controlBaseUrl,
-    MARID_ENDPOINT_ORIGIN: controlBaseUrl,
+    QODEX_BASE_URL: controlBaseUrl,
+    QODEX_TEST_BASE_URL: controlBaseUrl,
+    QODEX_ENDPOINT_ORIGIN: controlBaseUrl,
   };
   const previous = Object.fromEntries(Object.keys(envPatch).map((key) => [key, process.env[key]]));
   Object.assign(process.env, envPatch);
@@ -284,10 +284,10 @@ export async function prepareAccessToken401Fixture(options: {
               id: "e2e-user",
               username: "Fixture User",
               displayName: "Fixture User",
-              ...(projectRecovery ? { rawProfile: { maridProfileSchemaVersion: 2 } } : {}),
+              ...(projectRecovery ? { rawProfile: { qodexProfileSchemaVersion: 2 } } : {}),
             },
       ),
-      maridjwttoken: "e2e-distinct-marid-jwt",
+      qodexjwttoken: "e2e-distinct-qodex-jwt",
       "bot:e2e:credential": "e2e-independent-bot-token",
       ...(projectRecovery
         ? {

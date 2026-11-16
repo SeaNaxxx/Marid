@@ -1,4 +1,4 @@
-import type { GitChangeSourceId, GitDiffResult } from "@marid/shared";
+import type { GitChangeSourceId, GitDiffResult } from "@qodex/shared";
 import { getFiletypeFromFileName } from "@pierre/diffs";
 import {
   getPatchPreviewLineContent,

@@ -1,6 +1,6 @@
 import { PenIcon } from "lucide-react";
-import type { ToolCallCreateWorkflowCausalityGraph } from "@marid/shared/marid-protocol-v4";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import type { ToolCallCreateWorkflowCausalityGraph } from "@qodex/shared/qodex-protocol-v4";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 /**
  * 确认窗的留白行（docs/dynamic-workflow/presentation.md「Holes on the timeline」的「The hole station」）：
@@ -13,7 +13,7 @@ export function WorkflowPermissionHoles({
 }: {
   holes: NonNullable<ToolCallCreateWorkflowCausalityGraph["holes"]> | undefined;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   if (holes === undefined || holes.length === 0) return null;
   return (
     <div

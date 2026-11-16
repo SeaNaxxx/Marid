@@ -1,12 +1,12 @@
-import { PERMISSION_FULL_ACCESS_OPTION_ID } from "@marid/shared/marid-protocol-v4";
-import type { MaridPermissionOption } from "@marid/shared";
+import { PERMISSION_FULL_ACCESS_OPTION_ID } from "@qodex/shared/qodex-protocol-v4";
+import type { QodexPermissionOption } from "@qodex/shared";
 
 export {
   getPermissionRequestPreview,
   type PermissionRequestFileChange,
   type PermissionRequestPreview,
   type PermissionRequestScope,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 type PermissionOptionDisplayKind =
   | "allowOnce"
@@ -53,7 +53,7 @@ export function getPermissionOptionDisplayKind(kind: string): PermissionOptionDi
 }
 
 export function shouldPreferPermissionOptionName(
-  option: Pick<MaridPermissionOption, "kind" | "name">,
+  option: Pick<QodexPermissionOption, "kind" | "name">,
 ): boolean {
   const normalizedName = normalizeInlineText(option.name).toLowerCase();
   if (normalizedName.length === 0) {
@@ -84,8 +84,8 @@ function getPermissionOptionSortPriority(kind: string): number {
 }
 
 export function sortPermissionOptions(
-  options: readonly MaridPermissionOption[],
-): MaridPermissionOption[] {
+  options: readonly QodexPermissionOption[],
+): QodexPermissionOption[] {
   return options
     .map((option, index) => ({ option, index }))
     .sort((left, right) => {

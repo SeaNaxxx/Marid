@@ -1,13 +1,13 @@
 import { createHash } from "node:crypto";
-import { PROTOCOL_V4_LIMITS } from "@marid/shared/marid-protocol-v4";
-import type { BotTopicHistoryBatch, MaridPromptFileAttachment } from "@marid/shared";
+import { PROTOCOL_V4_LIMITS } from "@qodex/shared/qodex-protocol-v4";
+import type { BotTopicHistoryBatch, QodexPromptFileAttachment } from "@qodex/shared";
 
 /** 历史正文只写一份附件；服务端归档用于权限和检查点，不再生成模型隐藏消息。 */
 export function createTopicHistoryAttachment(
   batch: BotTopicHistoryBatch,
   inputId: string,
   title: string,
-): MaridPromptFileAttachment | undefined {
+): QodexPromptFileAttachment | undefined {
   if (!batch.messages.length && !batch.hasGap) return undefined;
   const identity = createHash("sha256").update(inputId).digest("hex").slice(0, 16);
   const date = (time: number) => new Date(time).toISOString();

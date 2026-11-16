@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { remoteHostIdFromWorkspaceIdentity } from "@marid/shared";
+import { remoteHostIdFromWorkspaceIdentity } from "@qodex/shared";
 import type { DatabaseSync } from "node:sqlite";
 import type { GroupTaskFact, GroupTaskRef, ITaskGroupService } from "#src/task-groups/contract.js";
 import { TaskGroupRepository, groupTaskKey } from "#src/task-groups/repository.js";

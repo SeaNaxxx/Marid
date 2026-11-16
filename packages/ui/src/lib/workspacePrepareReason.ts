@@ -1,4 +1,4 @@
-import type { MaridProvider } from "@marid/shared";
+import type { QodexProvider } from "@qodex/shared";
 
 type DraftWorkspacePrepareReason = "mount" | "select-provider";
 type WorkspacePrepareReason =
@@ -7,9 +7,9 @@ type WorkspacePrepareReason =
   | "first-send";
 
 interface ResolveDraftWorkspacePrepareReasonOptions {
-  previousDraftProvider: MaridProvider | null;
-  previousTaskProvider: MaridProvider | null;
-  selectedProvider: MaridProvider;
+  previousDraftProvider: QodexProvider | null;
+  previousTaskProvider: QodexProvider | null;
+  selectedProvider: QodexProvider;
   returningFromTask: boolean;
 }
 

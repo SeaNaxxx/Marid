@@ -7,9 +7,9 @@ import { FeatureRequestDialog } from "@/feedback/FeatureRequestDialog.js";
 import { TicketsView } from "@/feedback/TicketsView.js";
 import { FeedbackBackgroundUploadIndicator } from "@/feedback/FeedbackBackgroundUploadIndicator.js";
 import { ArrowLeftIcon, XIcon } from "lucide-react";
-import type { IFeedbackService } from "@marid/services";
-import type { IPlatformService } from "@marid/shared";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import type { IFeedbackService } from "@qodex/services";
+import type { IPlatformService } from "@qodex/shared";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { memo } from "react";
 
 export const FeedbackCenter = memo(function FeedbackCenterComponent({
@@ -27,7 +27,7 @@ export const FeedbackCenter = memo(function FeedbackCenterComponent({
   const setTab = useFeedbackStore((state) => state.setTab);
   const close = useFeedbackStore((state) => state.close);
   const openTickets = useFeedbackStore((state) => state.openTickets);
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const titleId =
     tab === "tickets" ? "feedback.center.ticketsTitle" : "feedback.center.submitTitle";
 

@@ -1,4 +1,4 @@
-import type { InputRouting } from "@marid/shared/marid-protocol-v4";
+import type { InputRouting } from "@qodex/shared/qodex-protocol-v4";
 import type { ConversationComposerSendOptions } from "@/v4/ConversationComposer.js";
 
 export interface PromptScrollFocusPolicyInput {

@@ -1,5 +1,5 @@
-import type { Event } from "@marid/rpc";
-import { ServiceChannels } from "@marid/shared";
+import type { Event } from "@qodex/rpc";
+import { ServiceChannels } from "@qodex/shared";
 import { createServiceDescriptor } from "../descriptors.js";
 
 /**

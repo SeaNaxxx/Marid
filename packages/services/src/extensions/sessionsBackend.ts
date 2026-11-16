@@ -5,13 +5,13 @@ import {
   type ExtensionAuditEntry,
   type ExtensionErrorCode,
   type ExtensionGrant,
-} from "@marid/shared/extension-host";
+} from "@qodex/shared/extension-host";
 import {
   SessionControlError,
   type AppSessionControl,
   type AppTrustedContext,
   type SessionControlErrorCode,
-} from "@marid/session-control/contracts";
+} from "@qodex/session-control/contracts";
 import type {
   AppControlClientBinding,
   AppControlServiceHandle,

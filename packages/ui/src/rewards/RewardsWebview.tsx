@@ -6,13 +6,13 @@ import {
   REWARDS_PARTITION,
   resolveRewardsOrigin,
   toZhOrEnLocale,
-  MARID_ENV,
+  QODEX_ENV,
   type RewardsContext,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { useServices } from "@/hooks/useServices.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
-import { useMaridStore } from "@/store/StoreProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
+import { useQodexStore } from "@/store/StoreProvider.js";
 import { resolveTheme } from "@/useTheme.js";
 import { logger } from "@/logger.js";
 import { Button } from "@/components/ui/button.js";
@@ -21,11 +21,11 @@ import { EmbeddedWebsiteHeader } from "@/components/EmbeddedWebsiteHeader.js";
 export function RewardsWebview({ onClose }: { onClose: () => void }) {
   const { oauthService } = useServices();
   const platform = usePlatform();
-  const { intl, locale: uiLocale } = useMaridIntl();
+  const { intl, locale: uiLocale } = useQodexIntl();
   // 奖励页是外部网页，只有中英两套；非中文界面语言打开英文页。
   const locale = toZhOrEnLocale(uiLocale);
-  const themePreference = useMaridStore((s) => s.theme);
-  const userId = useMaridStore((s) => s.user?.id ?? null);
+  const themePreference = useQodexStore((s) => s.theme);
+  const userId = useQodexStore((s) => s.user?.id ?? null);
   const [systemDark, setSystemDark] = useState(
     () => matchMedia("(prefers-color-scheme: dark)").matches,
   );
@@ -41,12 +41,12 @@ export function RewardsWebview({ onClose }: { onClose: () => void }) {
     ? "zai-dark"
     : "zai-light";
   const env = import.meta.env;
-  const policy = { dev: env.DEV, e2e: env.VITE_MARID_E2E_STORE_BRIDGE === "1" };
+  const policy = { dev: env.DEV, e2e: env.VITE_QODEX_E2E_STORE_BRIDGE === "1" };
   const [url] = useState(() =>
     buildRewardsUrl(
       resolveRewardsOrigin({
         ...policy,
-        env: MARID_ENV,
+        env: QODEX_ENV,
         override:
           typeof env.VITE_REWARDS_WEBVIEW_ORIGIN === "string"
             ? env.VITE_REWARDS_WEBVIEW_ORIGIN
@@ -105,7 +105,7 @@ export function RewardsWebview({ onClose }: { onClose: () => void }) {
               ? "bigmodel"
               : null;
       const oauth = session?.legacyOAuthToken ?? null;
-      const jwt = session?.maridJwtToken ?? null;
+      const jwt = session?.qodexJwtToken ?? null;
       const current = await oauthService.getAccountAvailability();
       if (
         view.current !== element ||

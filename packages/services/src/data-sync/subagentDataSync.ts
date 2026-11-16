@@ -13,8 +13,8 @@ import {
   type DataSyncModelOverrideSummary,
   type ModelSelection,
   type SubagentDataSyncPayload,
-} from "@marid/shared";
-import { migrateSubagentStateFile, migrateUserSubagentMarkdown } from "@marid/shared/node";
+} from "@qodex/shared";
+import { migrateSubagentStateFile, migrateUserSubagentMarkdown } from "@qodex/shared/node";
 import {
   pathExists,
   readJsonObjectFileForUpdate,

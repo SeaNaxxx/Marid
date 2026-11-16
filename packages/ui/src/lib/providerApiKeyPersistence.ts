@@ -1,5 +1,5 @@
-import type { IProviderSettingsService, ProviderSettingsView } from "@marid/services";
-import { isApiKeyAccess } from "@marid/provider";
+import type { IProviderSettingsService, ProviderSettingsView } from "@qodex/services";
+import { isApiKeyAccess } from "@qodex/provider";
 
 type ProviderSettingsApiKeyService = Pick<
   IProviderSettingsService,

@@ -1,6 +1,6 @@
-import { BufferReader, BufferWriter, deserialize, serialize, VSBuffer } from "@marid/rpc";
-import { ISourceServerManagementService } from "@marid/services";
-import type { RemoteTarget } from "@marid/shared";
+import { BufferReader, BufferWriter, deserialize, serialize, VSBuffer } from "@qodex/rpc";
+import { ISourceServerManagementService } from "@qodex/services";
+import type { RemoteTarget } from "@qodex/shared";
 
 const OPERATION_LOGS_REQUEST = -8311;
 
@@ -56,9 +56,9 @@ export async function connectDuringNextSourceUpdate(input: {
         probe.updatingSeen = true;
         const bridge = (
           window as unknown as {
-            marid: { connectRemote(target: unknown, requestId: string): Promise<unknown> };
+            qodex: { connectRemote(target: unknown, requestId: string): Promise<unknown> };
           }
-        ).marid;
+        ).qodex;
         void bridge.connectRemote(target, `e2e-update-inflight-${Date.now()}`).then(
           (result) => {
             probe.connectResult = result;

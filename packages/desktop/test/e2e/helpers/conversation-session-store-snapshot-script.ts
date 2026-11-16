@@ -94,7 +94,7 @@ export function readTaskStoreSnapshotInBrowser(
     const result: Record<string, string | null> = {};
     try {
       for (const [key, value] of Object.entries(window.localStorage)) {
-        if (key.startsWith("marid-model-selection-recent-v1:")) {
+        if (key.startsWith("qodex-model-selection-recent-v1:")) {
           result[key] = value;
         }
       }
@@ -128,13 +128,13 @@ export function readTaskStoreSnapshotInBrowser(
   };
   const bridge = (
     window as typeof window & {
-      __maridSessionStoreE2E?: {
+      __qodexSessionStoreE2E?: {
         getState?: () => {
           workspaces?: Record<string, BrowserWorkspaceState>;
         };
       };
     }
-  ).__maridSessionStoreE2E;
+  ).__qodexSessionStoreE2E;
   const bridgeMissing = typeof bridge?.getState !== "function";
   const state = bridge?.getState?.();
   const workspaces = state?.workspaces ?? {};

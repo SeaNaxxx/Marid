@@ -6,9 +6,9 @@ import type {
   FeedbackListQuery,
   FeedbackListResult,
   FeedbackTicketDetail,
-} from "@marid/shared";
-import { ServiceChannels } from "@marid/shared";
-import type { Event } from "@marid/rpc";
+} from "@qodex/shared";
+import { ServiceChannels } from "@qodex/shared";
+import type { Event } from "@qodex/rpc";
 import { createServiceDescriptor } from "../descriptors.js";
 
 export interface FeedbackUploadProgress {
@@ -55,7 +55,7 @@ export interface IFeedbackService {
     },
   ): Promise<FeedbackAttachment>;
   attachLogsFromExport(id: string, options?: { full?: boolean }): Promise<FeedbackAttachment>;
-  getDeviceSnapshot(): Promise<import("@marid/shared").FeedbackDeviceInfo>;
+  getDeviceSnapshot(): Promise<import("@qodex/shared").FeedbackDeviceInfo>;
   prepareCompactLogArchive(options?: { full?: boolean; progressId?: string }): Promise<{
     path: string;
     size: number;

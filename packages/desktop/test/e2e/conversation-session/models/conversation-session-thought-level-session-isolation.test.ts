@@ -1,4 +1,4 @@
-import { TID_V4_COMPOSER_INPUT } from "@marid/shared/test-ids";
+import { TID_V4_COMPOSER_INPUT } from "@qodex/shared/test-ids";
 import { clearAppData, setInputValueByTestIdDom } from "#e2e/helpers/desktop-app";
 import {
   assertUpstreamRequestCapture,

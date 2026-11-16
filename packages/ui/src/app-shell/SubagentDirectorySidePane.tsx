@@ -1,6 +1,6 @@
 import { memo, useEffect, useMemo, useState } from "react";
-import type { MaridSessionEndedSubagent } from "@marid/shared";
-import type { RunningSubagentSummary } from "@marid/shared/marid-protocol-v4";
+import type { QodexSessionEndedSubagent } from "@qodex/shared";
+import type { RunningSubagentSummary } from "@qodex/shared/qodex-protocol-v4";
 import {
   BanIcon,
   CheckCircle2Icon,
@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button.js";
 import { useSessionSubagents } from "@/hooks/useSessionSubagents.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import type {
   OpenScopedSubagentSideTabRequest,
   SubagentDirectorySidePaneTab,
@@ -22,7 +22,7 @@ import type { SessionLease } from "@/v4/sessionDataLayer.js";
 import { V4PaneConversationProvider, useV4Conversation } from "@/v4/V4ConversationContext.js";
 import { useConversationProjection } from "@/v4/useConversationProjection.js";
 
-type DirectoryItem = RunningSubagentSummary | MaridSessionEndedSubagent;
+type DirectoryItem = RunningSubagentSummary | QodexSessionEndedSubagent;
 
 const EMPTY_RUNNING: readonly RunningSubagentSummary[] = [];
 
@@ -68,7 +68,7 @@ const DirectoryRow = memo(function DirectoryRow({
   item: DirectoryItem;
   onOpen: (item: DirectoryItem) => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const timestamp = "endedAt" in item ? item.endedAt : item.startedAt;
   return (
     <button
@@ -130,7 +130,7 @@ const SubagentDirectoryContents = memo(function SubagentDirectoryContents({
   tab: SubagentDirectorySidePaneTab;
   onOpenSubagentSession: (request: OpenScopedSubagentSideTabRequest) => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const { layer } = useV4Conversation();
   const [lease, setLease] = useState<SessionLease | null>(null);
   const projection = useConversationProjection(lease);

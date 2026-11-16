@@ -5,7 +5,7 @@ import {
   TID_GIT_PANE,
   TID_TASK_ITEM,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import type { ChainablePromiseElement } from "webdriverio";
 import {
   DEFAULT_WORKSPACE,
@@ -54,7 +54,7 @@ describe("SP13：status panel Git Changes 打开变更审阅", () => {
     await selectV4TaskById(PROVIDER_READINESS_HISTORY_SESSION_ID);
     await waitForExpandedStatusPanel();
     // 通过真实文件 watcher 刷新；无需打开 Git pane，也不创建会话或调用模型。
-    const caseRoot = join(DEFAULT_WORKSPACE, ".marid-e2e/conversation-session-git-review-entry");
+    const caseRoot = join(DEFAULT_WORKSPACE, ".qodex-e2e/conversation-session-git-review-entry");
     const largeText = "large-untracked.txt";
     await browser.electron.execute((electron) => {
       const state = globalThis as typeof globalThis & {
@@ -63,7 +63,7 @@ describe("SP13：status panel Git Changes 打开变更审阅", () => {
       const readHostKb = () =>
         electron.app
           .getAppMetrics()
-          .filter((metric) => metric.name?.startsWith("marid-host"))
+          .filter((metric) => metric.name?.startsWith("qodex-host"))
           .reduce((total, metric) => total + metric.memory.workingSetSize, 0);
       const baseline = readHostKb();
       if (!baseline) throw new Error("没有找到待采样的真实 Host 进程");
@@ -231,15 +231,15 @@ async function waitForGitReview() {
     const navigation = await browser.execute(() => {
       const bridge = window as Window & {
         __gitReviewClickTrace?: string[];
-        __maridTabStoreE2E?: {
+        __qodexTabStoreE2E?: {
           getState(): { tabs: unknown[]; activeWorkspacePath: string | null };
         };
       };
       return {
         clickTrace: bridge.__gitReviewClickTrace,
-        navigation: bridge.__maridTabStoreE2E?.getState().tabs,
-        activePath: bridge.__maridTabStoreE2E?.getState().activeWorkspacePath,
-        interfaceMode: localStorage.getItem("marid-interface-mode"),
+        navigation: bridge.__qodexTabStoreE2E?.getState().tabs,
+        activePath: bridge.__qodexTabStoreE2E?.getState().activeWorkspacePath,
+        interfaceMode: localStorage.getItem("qodex-interface-mode"),
         sidePaneTabs: [...document.querySelectorAll("[data-side-pane-tab-id]")].map((el) => ({
           id: el.getAttribute("data-side-pane-tab-id"),
           state: el.getAttribute("data-state"),

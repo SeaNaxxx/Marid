@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { MARID_AGENT_PROVIDER } from "@marid/shared";
+import { QODEX_AGENT_PROVIDER } from "@qodex/shared";
 import type { CreateTaskRequest } from "@/app-shell/types.js";
 import { useWorkspaceServicesResolution } from "@/hooks/useWorkspaceServices.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { toast } from "@/components/ui/toast.js";
 import { logger } from "@/logger.js";
 import { loadPluginCreatorPrefill } from "@/settings/pluginCreatorPrefill.js";
@@ -16,7 +16,7 @@ export function usePluginCreator(
   onCreateTask: ((request?: CreateTaskRequest) => void) | undefined,
   isWebRemoteControl = false,
 ) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const tabStore = useTabStoreApi();
   const activeWorkspacePath = useTabStore((state) => state.activeWorkspacePath);
   const activeWorkspaceIdentity = useTabStore((state) => state.activeWorkspaceIdentity);
@@ -80,7 +80,7 @@ export function usePluginCreator(
           resolution.services.skillsService.list({
             workspacePath: target.workspacePath,
             workspaceIdentity: target.workspaceIdentity,
-            provider: MARID_AGENT_PROVIDER,
+            provider: QODEX_AGENT_PROVIDER,
           }),
         isCurrent,
       );

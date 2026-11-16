@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
-import type { ICodingPlanSubscriptionService, IMaridAgentService } from "@marid/services";
-import type { DynamicWorkflowMode } from "@marid/shared";
+import type { ICodingPlanSubscriptionService, IQodexAgentService } from "@qodex/services";
+import type { DynamicWorkflowMode } from "@qodex/shared";
 import { logger } from "@/logger.js";
 import {
   useDynamicWorkflowAvailabilityStore,
@@ -45,10 +45,10 @@ export function useDynamicWorkflowAvailabilityLoader(
 export function useDynamicWorkflowUserModeSync(params: {
   settingsLoaded: boolean;
   userMode: DynamicWorkflowMode | undefined;
-  maridAgentService: Pick<IMaridAgentService, "syncDynamicWorkflowUserMode">;
+  qodexAgentService: Pick<IQodexAgentService, "syncDynamicWorkflowUserMode">;
   codingPlanSubscriptionService: ICodingPlanSubscriptionService;
 }): void {
-  const { settingsLoaded, userMode, maridAgentService, codingPlanSubscriptionService } = params;
+  const { settingsLoaded, userMode, qodexAgentService, codingPlanSubscriptionService } = params;
   const reload = useDynamicWorkflowAvailabilityStore((state) => state.reload);
   const observedRef = useRef<{ userMode: DynamicWorkflowMode | undefined } | null>(null);
   const chainRef = useRef<Promise<void>>(Promise.resolve());
@@ -59,7 +59,7 @@ export function useDynamicWorkflowUserModeSync(params: {
     if (observed === null || observed.userMode === userMode) return;
     chainRef.current = chainRef.current.then(async () => {
       try {
-        await maridAgentService.syncDynamicWorkflowUserMode(userMode ? { mode: userMode } : {});
+        await qodexAgentService.syncDynamicWorkflowUserMode(userMode ? { mode: userMode } : {});
       } catch (error) {
         logger.warn("[dynamic-workflow] 用户选择同步到 Host 失败", {
           error: error instanceof Error ? error.message : String(error),
@@ -67,5 +67,5 @@ export function useDynamicWorkflowUserModeSync(params: {
       }
       await reload(codingPlanSubscriptionService);
     });
-  }, [codingPlanSubscriptionService, reload, settingsLoaded, userMode, maridAgentService]);
+  }, [codingPlanSubscriptionService, reload, settingsLoaded, userMode, qodexAgentService]);
 }

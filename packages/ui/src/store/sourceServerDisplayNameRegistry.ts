@@ -1,4 +1,4 @@
-import type { ISourceServerManagementService } from "@marid/services";
+import type { ISourceServerManagementService } from "@qodex/services";
 import { logger } from "@/logger.js";
 
 export interface SourceServerDisplayNameRegistry {

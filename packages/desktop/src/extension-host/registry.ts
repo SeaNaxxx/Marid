@@ -20,7 +20,7 @@ import {
   type SlotValue,
   type ViewDefinition,
   type ViewServerFactory,
-} from "@marid/shared/extension-host";
+} from "@qodex/shared/extension-host";
 import type { CapabilityClient } from "#src/extension-host/capabilityClient.js";
 import type { ViewHost } from "#src/extension-host/viewHost.js";
 import {
@@ -88,7 +88,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promi
  * 声明里没有它说明 plugins/list 来自不报告 dataPath 的旧 CLI。错误只带错误码：路径在用户目录下。
  */
 async function ensureDataPath(dataPath: string | undefined): Promise<void> {
-  if (!dataPath) throw new Error("the agent did not report the plugin data path; update Marid");
+  if (!dataPath) throw new Error("the agent did not report the plugin data path; update Qodex");
   try {
     await mkdir(dataPath, { recursive: true });
   } catch (error) {

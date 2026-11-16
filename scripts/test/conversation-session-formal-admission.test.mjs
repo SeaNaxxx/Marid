@@ -22,7 +22,7 @@ async function inspect(root) {
 }
 
 async function makeRoot() {
-  const root = await mkdtemp(join(tmpdir(), "marid-formal-admission-"));
+  const root = await mkdtemp(join(tmpdir(), "qodex-formal-admission-"));
   temporaryRoots.push(root);
   return root;
 }

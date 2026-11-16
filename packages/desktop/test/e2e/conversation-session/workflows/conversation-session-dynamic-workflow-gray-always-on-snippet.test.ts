@@ -1,6 +1,6 @@
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import { TID_CHAT_WORKFLOW_RUN_DIGEST } from "@marid/shared";
+import { TID_CHAT_WORKFLOW_RUN_DIGEST } from "@qodex/shared";
 import { clearAppData, pinE2ELocale } from "#e2e/helpers/desktop-app";
 import { readDynamicWorkflowGrayMockStatus } from "#e2e/helpers/dynamic-workflow-gray";
 import { resolveE2ERuntimePath } from "#e2e/helpers/e2e-runtime-paths";

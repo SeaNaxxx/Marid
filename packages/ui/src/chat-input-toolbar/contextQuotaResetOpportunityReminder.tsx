@@ -1,5 +1,5 @@
 import { AlarmClock, GiftIcon, XIcon } from "lucide-react";
-import type { useMaridIntl } from "@/i18n/IntlProvider.js";
+import type { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { formatCodingPlanQuotaResetCountdown } from "@/components/coding-plan-quota-reset/CodingPlanQuotaResetDialog.js";
 import { Button } from "@/components/ui/button.js";
 
@@ -130,7 +130,7 @@ export function ContextQuotaResetOpportunityReminderContent({
   remainingSeconds,
 }: {
   count: number;
-  intl: ReturnType<typeof useMaridIntl>["intl"];
+  intl: ReturnType<typeof useQodexIntl>["intl"];
   onDismiss: () => void;
   phase: ContextQuotaResetOpportunityReminderPhase;
   remainingSeconds: number;
@@ -160,7 +160,7 @@ export function ContextQuotaResetOpportunityReminderContent({
     >
       <span className="inline-flex items-center gap-1.5" data-context-reset-reminder-copy>
         <span
-          className="inline-flex shrink-0 origin-bottom animate-marid-alarm-ring text-warning motion-reduce:animate-none"
+          className="inline-flex shrink-0 origin-bottom animate-qodex-alarm-ring text-warning motion-reduce:animate-none"
           aria-hidden="true"
         >
           <AlarmClock className="size-3.5" />
@@ -181,7 +181,7 @@ function ContextQuotaResetOpportunityDismissButton({
   intl,
   onDismiss,
 }: {
-  intl: ReturnType<typeof useMaridIntl>["intl"];
+  intl: ReturnType<typeof useQodexIntl>["intl"];
   onDismiss: () => void;
 }) {
   return (

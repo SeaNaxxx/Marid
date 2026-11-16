@@ -1,5 +1,5 @@
-import type { ModelSelectionView } from "@marid/provider";
-import type { SessionConfigState } from "@marid/shared/marid-protocol-v4";
+import type { ModelSelectionView } from "@qodex/provider";
+import type { SessionConfigState } from "@qodex/shared/qodex-protocol-v4";
 import { createComposerSubmissionConfig } from "@/v4/composer/composerSubmissionConfig.js";
 
 /** 副屏继承父 runtime 的生效模型；不能把主 Composer 未提交的草稿带进新 child。 */

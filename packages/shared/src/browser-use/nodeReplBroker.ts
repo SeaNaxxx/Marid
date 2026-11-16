@@ -3,8 +3,8 @@ import { browserBackendDescriptorSchema } from "./backend.js";
 import { browserCommandSchema } from "./commands.js";
 import { browserCommandResultSchema } from "./result.js";
 
-export const NODE_REPL_BROWSER_BROKER_SOCKET_ENV = "MARID_NODE_REPL_BROWSER_BROKER_SOCKET";
-export const NODE_REPL_BROWSER_BROKER_TOKEN_ENV = "MARID_NODE_REPL_BROWSER_BROKER_TOKEN";
+export const NODE_REPL_BROWSER_BROKER_SOCKET_ENV = "QODEX_NODE_REPL_BROWSER_BROKER_SOCKET";
+export const NODE_REPL_BROWSER_BROKER_TOKEN_ENV = "QODEX_NODE_REPL_BROWSER_BROKER_TOKEN";
 
 const requestBase = z.object({
   id: z.string().uuid(),

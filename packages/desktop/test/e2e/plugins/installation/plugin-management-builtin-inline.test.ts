@@ -23,7 +23,7 @@ import {
   waitUntilPluginOverview,
 } from "#e2e/helpers/plugin-management-lifecycle";
 
-const BUILTIN_ID = "skill-creator@marid-plugins-official";
+const BUILTIN_ID = "skill-creator@qodex-plugins-official";
 const BUILTIN_TIMEOUT_MS = 240000;
 
 describe("PLM-LC-006/009 Builtin 抑制恢复与 inline smoke E2E", () => {
@@ -109,7 +109,7 @@ describe("PLM-LC-006/009 Builtin 抑制恢复与 inline smoke E2E", () => {
 
 async function seedBuiltinUserState(): Promise<void> {
   const { homeDir } = getE2EAppDataPaths();
-  const configPath = join(homeDir, ".marid", "cli", "config.json");
+  const configPath = join(homeDir, ".qodex", "cli", "config.json");
   const config = await readOptionalConfig(configPath);
   const plugins = isRecord(config.plugins) ? config.plugins : {};
   const options = isRecord(plugins.options) ? plugins.options : {};
@@ -121,7 +121,7 @@ async function seedBuiltinUserState(): Promise<void> {
 }
 
 async function builtinOptionsExist(): Promise<boolean> {
-  const configPath = join(getE2EAppDataPaths().homeDir, ".marid", "cli", "config.json");
+  const configPath = join(getE2EAppDataPaths().homeDir, ".qodex", "cli", "config.json");
   const config = await readOptionalConfig(configPath);
   const plugins = isRecord(config.plugins) ? config.plugins : {};
   const options = isRecord(plugins.options) ? plugins.options : {};

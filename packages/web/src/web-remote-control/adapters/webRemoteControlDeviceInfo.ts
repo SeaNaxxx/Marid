@@ -1,4 +1,4 @@
-import type { WebRemoteControlMobileDeviceInfo } from "@marid/shared";
+import type { WebRemoteControlMobileDeviceInfo } from "@qodex/shared";
 
 interface NavigatorLike {
   userAgent?: string;

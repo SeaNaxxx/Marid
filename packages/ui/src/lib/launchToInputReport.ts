@@ -1,4 +1,4 @@
-import type { LaunchMarks } from "@marid/shared";
+import type { LaunchMarks } from "@qodex/shared";
 
 export function shouldReportLaunchToInput(state: {
   isStartupRenderBlocked: boolean;
@@ -15,14 +15,14 @@ export function readRendererLaunchTimings(): {
   reactCommit: number;
 } | null {
   const w = window as Window & {
-    __MARID_LAUNCH_MARKS__?: LaunchMarks | null;
-    __MARID_RENDERER_START__?: number;
-    __MARID_REACT_COMMIT_AT__?: number;
+    __QODEX_LAUNCH_MARKS__?: LaunchMarks | null;
+    __QODEX_RENDERER_START__?: number;
+    __QODEX_REACT_COMMIT_AT__?: number;
   };
-  const rendererStart = w.__MARID_RENDERER_START__;
-  const reactCommit = w.__MARID_REACT_COMMIT_AT__;
+  const rendererStart = w.__QODEX_RENDERER_START__;
+  const reactCommit = w.__QODEX_REACT_COMMIT_AT__;
   if (typeof rendererStart !== "number" || typeof reactCommit !== "number") {
     return null;
   }
-  return { marks: w.__MARID_LAUNCH_MARKS__ ?? null, rendererStart, reactCommit };
+  return { marks: w.__QODEX_LAUNCH_MARKS__ ?? null, rendererStart, reactCommit };
 }

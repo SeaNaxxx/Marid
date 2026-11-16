@@ -1,6 +1,6 @@
-import type { McpServerConfig, MaridMcpServer } from "@marid/shared";
+import type { McpServerConfig, QodexMcpServer } from "@qodex/shared";
 
-export const MCP_SECTIONS = ["maridagentmcp"] as const;
+export const MCP_SECTIONS = ["qodexagentmcp"] as const;
 
 export type ServerScope = (typeof MCP_SECTIONS)[number];
 
@@ -8,9 +8,9 @@ export const SOURCE_META: Record<
   ServerScope,
   { label: string; section: string; badgeClass: string }
 > = {
-  maridagentmcp: {
-    label: "Marid Agent",
-    section: "Marid Agent",
+  qodexagentmcp: {
+    label: "Qodex Agent",
+    section: "Qodex Agent",
     badgeClass: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400",
   },
 };
@@ -34,7 +34,7 @@ export interface FormState {
 
 export const EMPTY_FORM: FormState = {
   name: "",
-  scope: "maridagentmcp",
+  scope: "qodexagentmcp",
   storageLevel: "user",
   type: "stdio",
   command: "",
@@ -51,7 +51,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-export function serverToForm(server: MaridMcpServer): FormState {
+export function serverToForm(server: QodexMcpServer): FormState {
   const cfg = server.config;
   let type: FormState["type"];
   if (cfg.type === "sse") {
@@ -65,7 +65,7 @@ export function serverToForm(server: MaridMcpServer): FormState {
   }
   return {
     name: server.name,
-    scope: "maridagentmcp",
+    scope: "qodexagentmcp",
     storageLevel: server.scope === "workspace" ? "workspace" : "user",
     type,
     command: cfg.command ?? "",
@@ -221,7 +221,7 @@ export function jsonDraftToForm(jsonText: string, fallback: FormState): FormStat
   };
 }
 
-// 与 shared 层 convertToMaridAgentMcpServer 的 isMcpProtocolVersion 守卫保持同一语义：
+// 与 shared 层 convertToQodexAgentMcpServer 的 isMcpProtocolVersion 守卫保持同一语义：
 // 非法枚举值在 UI 读取侧就归一为未设置（等价 auto），不留给连接阶段。
 function isMcpProtocolVersion(value: unknown): value is "legacy" | "auto" | "2026-07-28" {
   return value === "legacy" || value === "auto" || value === "2026-07-28";

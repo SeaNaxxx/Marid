@@ -1,9 +1,9 @@
 import type { TaskChatMessage as ChatMessage } from "@/lib/taskChatMessageTypes.js";
 import { shouldExposeE2EStoreBridge } from "@/lib/e2eStoreBridge.js";
-import type { IBotsService, IMaridAgentService, IMaridTaskService } from "@marid/services";
+import type { IBotsService, IQodexAgentService, IQodexTaskService } from "@qodex/services";
 import type { TaskListE2EActions } from "@/lib/taskListE2EActions.js";
 import { useEffect } from "react";
-import type { Locale } from "@marid/shared";
+import type { Locale } from "@qodex/shared";
 
 // Vite 注入的 import.meta.env 类型声明
 declare global {
@@ -20,7 +20,7 @@ export interface TestActions extends TaskListE2EActions {
   /** 受控 E2E 输入走真实 Host Bot 服务与 CLI admission，不伪造队列投影。 */
   sendBotMessage: IBotsService["handleInboundMessage"];
   /** 受控材料夹具走真实任务服务、上传与 CLI 队列，不注入 UI row。 */
-  submitBotGroupInput: NonNullable<IMaridTaskService["submitBotGroupInput"]>;
+  submitBotGroupInput: NonNullable<IQodexTaskService["submitBotGroupInput"]>;
   /** 获取当前主题 */
   getTheme: () => string;
   /** 设置主题 */
@@ -33,18 +33,18 @@ export interface TestActions extends TaskListE2EActions {
   setChatMessages: (messages: ChatMessage[]) => void;
   /** 获取当前 mock 消息数量 */
   getChatMessageCount: () => number;
-  /** E2E 通过真实 maridAgentService 拉取插件 overview */
-  getPluginsOverview: IMaridAgentService["getPluginsOverview"];
-  /** E2E 通过真实 maridAgentService 添加 marketplace */
-  addPluginMarketplace: IMaridAgentService["addPluginMarketplace"];
-  /** E2E 通过真实 maridAgentService 刷新 marketplace */
-  updatePluginMarketplace: IMaridAgentService["updatePluginMarketplace"];
-  /** E2E 通过真实 maridAgentService 安装 marketplace plugin */
-  installPlugin: IMaridAgentService["installPlugin"];
-  /** E2E 通过真实 maridAgentService 触发插件 discover */
-  listPlugins: IMaridAgentService["listPlugins"];
-  /** E2E 通过真实 maridAgentService 查询 Workspace/Session Plugin catalog */
-  getPluginReferenceCatalog: IMaridAgentService["getPluginReferenceCatalog"];
+  /** E2E 通过真实 qodexAgentService 拉取插件 overview */
+  getPluginsOverview: IQodexAgentService["getPluginsOverview"];
+  /** E2E 通过真实 qodexAgentService 添加 marketplace */
+  addPluginMarketplace: IQodexAgentService["addPluginMarketplace"];
+  /** E2E 通过真实 qodexAgentService 刷新 marketplace */
+  updatePluginMarketplace: IQodexAgentService["updatePluginMarketplace"];
+  /** E2E 通过真实 qodexAgentService 安装 marketplace plugin */
+  installPlugin: IQodexAgentService["installPlugin"];
+  /** E2E 通过真实 qodexAgentService 触发插件 discover */
+  listPlugins: IQodexAgentService["listPlugins"];
+  /** E2E 通过真实 qodexAgentService 查询 Workspace/Session Plugin catalog */
+  getPluginReferenceCatalog: IQodexAgentService["getPluginReferenceCatalog"];
 }
 
 declare global {

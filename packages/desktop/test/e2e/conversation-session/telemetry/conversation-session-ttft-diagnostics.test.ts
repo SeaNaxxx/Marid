@@ -8,7 +8,7 @@ import {
   TID_SETTINGS_SECTION_NAV,
   TID_SETTINGS_BACK_BUTTON,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   DEFAULT_WORKSPACE,
   clickTestIdByDom,
@@ -86,7 +86,7 @@ async function focus() {
 }
 
 async function setInteractionBehavior(behavior: "queue" | "guide") {
-  if ((await readSettings()).maridInteractionBehavior === behavior) return;
+  if ((await readSettings()).qodexInteractionBehavior === behavior) return;
   await clickTestIdByDom(TID_TASK_SETTINGS_BUTTON);
   await clickTestIdByDom(testId(TID_SETTINGS_SECTION_NAV, "agentBehavior"));
   await browser.waitUntil(
@@ -119,7 +119,7 @@ async function setInteractionBehavior(behavior: "queue" | "guide") {
     { timeout: 15000 },
   );
   await browser.waitUntil(
-    async () => (await readSettings()).maridInteractionBehavior === behavior,
+    async () => (await readSettings()).qodexInteractionBehavior === behavior,
     { timeout: 15000 },
   );
   await clickTestIdByDom(TID_SETTINGS_BACK_BUTTON);
@@ -127,7 +127,7 @@ async function setInteractionBehavior(behavior: "queue" | "guide") {
 }
 
 describe("TTFT02 真实发送诊断到最终 OTLP", () => {
-  const configPath = join(dirname(DEFAULT_WORKSPACE), ".marid", "cli", "config.json");
+  const configPath = join(dirname(DEFAULT_WORKSPACE), ".qodex", "cli", "config.json");
   let originalConfig: string | undefined;
   const runtimeEvidence: unknown[] = [];
   beforeEach(async () => {
@@ -169,7 +169,7 @@ describe("TTFT02 真实发送诊断到最终 OTLP", () => {
     });
     const processes = await browser.electron.execute((electron) => electron.app.getAppMetrics());
     runtimeEvidence.push({ renderer, processes });
-    const artifactDir = process.env.MARID_E2E_ARTIFACT_DIR;
+    const artifactDir = process.env.QODEX_E2E_ARTIFACT_DIR;
     if (artifactDir)
       await writeFile(
         join(artifactDir, "ttft-diagnostics-performance.json"),
@@ -231,11 +231,11 @@ describe("TTFT02 真实发送诊断到最终 OTLP", () => {
           .flatMap((record) => record.data.resourceMetrics ?? [])
           .flatMap((resource) => resource.scopeMetrics)
           .flatMap((scope) => scope.metrics)
-          .filter((metric) => metric.name.startsWith("marid.local_ttft."));
+          .filter((metric) => metric.name.startsWith("qodex.local_ttft."));
       };
       const count = async () =>
         (await metrics())
-          .filter((metric) => metric.name === "marid.local_ttft.duration")
+          .filter((metric) => metric.name === "qodex.local_ttft.duration")
           .flatMap((metric) => metric.histogram?.dataPoints ?? [])
           .reduce((sum, point) => sum + Number(point.count ?? 0), 0);
       await browser.waitUntil(async () => (await count()) >= roots.length, {
@@ -265,7 +265,7 @@ describe("TTFT02 真实发送诊断到最终 OTLP", () => {
           .flatMap((point) => point.attributes ?? [])
           .some((attribute) => forbidden.has(attribute.key)),
       ).toBe(false);
-      const artifactDir = process.env.MARID_E2E_ARTIFACT_DIR;
+      const artifactDir = process.env.QODEX_E2E_ARTIFACT_DIR;
       if (artifactDir)
         await writeFile(
           join(artifactDir, "ttft-diagnostics-otlp.json"),
@@ -415,7 +415,7 @@ describe("TTFT02 真实发送诊断到最终 OTLP", () => {
     await focus();
     const before = (await spans()).filter((span) => span.name === "local_ttft").length;
     await sendV4Prompt(
-      "E2E_TTFT_DIAG_GUIDE_PARENT: Read .marid-e2e/ttft-diagnostics/input.txt then reply ttft-diag-guide-ok.",
+      "E2E_TTFT_DIAG_GUIDE_PARENT: Read .qodex-e2e/ttft-diagnostics/input.txt then reply ttft-diag-guide-ok.",
     );
     await waitForV4ConversationState((state) => state.state === "streaming", "引导主轮未启动");
     await sendV4Prompt("E2E_TTFT_DIAG_GUIDE_INPUT: Keep the requested final answer.");

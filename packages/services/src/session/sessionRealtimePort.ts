@@ -10,7 +10,7 @@ import type {
   TaskRunLeaseTarget,
   TaskStreamMirrorPublishOp,
   TaskStreamMirrorTarget,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 export interface SessionRealtimePort {
   readonly hostId: string;

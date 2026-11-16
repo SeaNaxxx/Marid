@@ -1,4 +1,4 @@
-import type { GitRepositorySummary, MaridTaskChangeSummary } from "@marid/shared";
+import type { GitRepositorySummary, QodexTaskChangeSummary } from "@qodex/shared";
 import type { GitBranchCommitPreviewFile } from "@/git-branch-switcher/display.js";
 
 function normalizeCommitScopePath(path: string): string {
@@ -55,7 +55,7 @@ function addScopePath(scope: Set<string>, path: string | null): void {
 }
 
 function buildCurrentSessionFileScope(options: {
-  summary: MaridTaskChangeSummary | null;
+  summary: QodexTaskChangeSummary | null;
   gitSummary: GitRepositorySummary;
   workspacePath: string;
 }): Set<string> | null {
@@ -95,7 +95,7 @@ function isPreviewFileInScope(
 }
 
 export function getCurrentSessionFilePaths(
-  summary: MaridTaskChangeSummary | null,
+  summary: QodexTaskChangeSummary | null,
 ): string[] | undefined {
   const paths = Array.from(
     new Set(
@@ -107,7 +107,7 @@ export function getCurrentSessionFilePaths(
 
 export function filterCommitPreviewFilesByCurrentSession(options: {
   files: readonly GitBranchCommitPreviewFile[];
-  summary: MaridTaskChangeSummary | null;
+  summary: QodexTaskChangeSummary | null;
   gitSummary: GitRepositorySummary;
   workspacePath: string;
 }): GitBranchCommitPreviewFile[] {

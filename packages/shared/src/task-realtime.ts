@@ -5,20 +5,20 @@
 // shared channels.ts（旧 host 通道表）。
 // 运行时 zod schema 与 resolveWorkspaceKey 已迁 task-realtime-core.ts（幸存面）；
 // 基础传输类型（TaskRealtimeReason/TaskStreamMirrorOp/TaskStreamWatermark 等）已迁
-// marid-task-types-core.ts。本文件与旧 realtime 总线组同生命周期。
+// qodex-task-types-core.ts。本文件与旧 realtime 总线组同生命周期。
 import type {
-  MaridTaskClientMode,
-  MaridTaskRuntimeCommand,
-  MaridTaskMeta,
+  QodexTaskClientMode,
+  QodexTaskRuntimeCommand,
+  QodexTaskMeta,
   TraceId,
   TaskRealtimeReason,
   TaskStreamWatermark,
   TaskStreamMirrorUserMessageOp,
   TaskStreamMirrorStreamEventOp,
   TaskStreamMirrorOp,
-} from "./marid-task-types-core.js";
-import type { MaridPermissionResponse } from "./marid-protocol-legacy-types.js";
-import type { WorkspaceHookReviewDecision } from "./marid-protocol-v4/workspace-hook-review.js";
+} from "./qodex-task-types-core.js";
+import type { QodexPermissionResponse } from "./qodex-protocol-legacy-types.js";
+import type { WorkspaceHookReviewDecision } from "./qodex-protocol-v4/workspace-hook-review.js";
 
 export interface TaskRealtimeEnvelope {
   eventId: string;
@@ -42,7 +42,7 @@ export interface TaskSnapshotInvalidatedEvent extends TaskRealtimeInvalidationBa
 export interface WorkspaceTaskListInvalidatedEvent extends TaskRealtimeInvalidationBaseEvent {
   type: "workspace_task_list_invalidated";
   taskId?: string;
-  taskMeta?: MaridTaskMeta;
+  taskMeta?: QodexTaskMeta;
 }
 
 export interface TaskStreamMirrorTarget {
@@ -112,7 +112,7 @@ export type TaskOwnerCommandRequest =
       runId: string;
       permissionRequestId: string;
       optionId: string;
-      response: MaridPermissionResponse;
+      response: QodexPermissionResponse;
     }
   | {
       commandRequestId: string;
@@ -150,7 +150,7 @@ export type TaskOwnerCommandRequest =
       workspaceKey: string;
       taskId: string;
       runId: string;
-      taskCommand: Extract<MaridTaskRuntimeCommand, { type: "send_prompt" }>;
+      taskCommand: Extract<QodexTaskRuntimeCommand, { type: "send_prompt" }>;
     }
   | {
       commandRequestId: string;
@@ -161,7 +161,7 @@ export type TaskOwnerCommandRequest =
       taskId: string;
       runId: string;
       commandId: string;
-      clientMode: Extract<MaridTaskClientMode, "web-remote-replayable">;
+      clientMode: Extract<QodexTaskClientMode, "web-remote-replayable">;
     }
   | {
       commandRequestId: string;
@@ -172,7 +172,7 @@ export type TaskOwnerCommandRequest =
       taskId: string;
       runId: string;
       commandId: string;
-      clientMode: Extract<MaridTaskClientMode, "web-remote-replayable">;
+      clientMode: Extract<QodexTaskClientMode, "web-remote-replayable">;
     };
 
 export type TaskOwnerCommandDelivery = TaskOwnerCommandRequest & {
@@ -185,7 +185,7 @@ export type TaskOwnerCommandErrorCode =
   | "OWNER_COMMAND_FAILED";
 
 export type TaskOwnerCommandResult =
-  | { commandRequestId: string; success: true; taskCommand?: MaridTaskRuntimeCommand }
+  | { commandRequestId: string; success: true; taskCommand?: QodexTaskRuntimeCommand }
   | {
       commandRequestId: string;
       success: false;

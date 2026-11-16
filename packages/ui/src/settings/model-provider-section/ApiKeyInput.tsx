@@ -1,8 +1,8 @@
 import { EyeIcon, EyeOffIcon } from "lucide-react";
-import { TID_MODEL_PROVIDER_API_KEY_INPUT } from "@marid/shared/test-ids";
+import { TID_MODEL_PROVIDER_API_KEY_INPUT } from "@qodex/shared/test-ids";
 import { Button } from "@/components/ui/button.js";
 import { Input } from "@/components/ui/input.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { TECHNICAL_INPUT_ATTRIBUTES } from "@/lib/technicalInputAttributes.js";
 
 export function ApiKeyInput({
@@ -26,7 +26,7 @@ export function ApiKeyInput({
   onCompositionEnd?: () => void;
   onToggleVisibility: () => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
 
   return (
     <div className="relative">

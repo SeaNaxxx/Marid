@@ -1,8 +1,8 @@
-import type { MaridEnv } from "@marid/shared";
+import type { QodexEnv } from "@qodex/shared";
 
 export function resolveMarketingTouchPollIntervalMs(
   isProductionBuild: boolean,
-  env: MaridEnv,
+  env: QodexEnv,
 ): number {
   return isProductionBuild && env === "production" ? 10 * 60_000 : 30_000;
 }

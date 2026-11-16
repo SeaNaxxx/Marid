@@ -3,7 +3,7 @@ import {
   defaultCuaHelperVerifierDependencies,
   type CuaHelperInstaller,
   type CuaHelperInstallerOptions,
-} from "@marid/marid-cua/broker/server";
+} from "@qodex/qodex-cua/broker/server";
 
 type CuaHelperInstallerFactory = (options: CuaHelperInstallerOptions) => CuaHelperInstaller;
 

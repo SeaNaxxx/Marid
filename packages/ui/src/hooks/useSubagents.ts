@@ -1,4 +1,4 @@
-import type { MaridProvider } from "@marid/shared";
+import type { QodexProvider } from "@qodex/shared";
 import { useCallback, useEffect, useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useServices } from "./useServices.js";
@@ -11,7 +11,7 @@ import { useSubagentsStore } from "@/store/subagentsStore.js";
 
 export function useSubagents(
   workspacePath: string | null,
-  provider: MaridProvider,
+  provider: QodexProvider,
   explicitWorkspaceIdentity?: string,
 ) {
   const { subagentsService } = useServices();

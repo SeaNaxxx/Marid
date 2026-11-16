@@ -1,23 +1,23 @@
 /**
- * MCP (Model Context Protocol) types for Marid
+ * MCP (Model Context Protocol) types for Qodex
  * Based on the original Tauri implementation
  */
 
 import type { SettingsDirectoryLocation } from "./settings-source.js";
-import type { McpServerFailureKind, WorkspaceMcpTrustReview } from "./marid-protocol/index.js";
+import type { McpServerFailureKind, WorkspaceMcpTrustReview } from "./qodex-protocol/index.js";
 
 // CUA official plugin 身份常量（port 自 feat；UI 设置面板 + bootstrap 复用以避免字面量漂移）。
-export const MARID_CUA_OFFICIAL_PLUGIN_ID = "computer-use@marid-plugins-official";
-// CUA server 身份串（port 自 feat mcp.ts）：server key = 模型可见工具前缀段（刻意不带 marid-）；
+export const QODEX_CUA_OFFICIAL_PLUGIN_ID = "computer-use@qodex-plugins-official";
+// CUA server 身份串（port 自 feat mcp.ts）：server key = 模型可见工具前缀段（刻意不带 qodex-）；
 // namespace name = official plugin 运行时命名空间 plugin:<pluginId>:<serverKey>。
-export const MARID_CUA_OFFICIAL_MCP_NAMESPACE_NAME = "plugin:computer-use:computer-use";
+export const QODEX_CUA_OFFICIAL_MCP_NAMESPACE_NAME = "plugin:computer-use:computer-use";
 // 插件身份 env key：resolver（adapters/src/plugins/mcp.ts）权威写入 loaded.id，manifest/user env 不可覆盖。
-// bootstrap + cli/plugin-host-command.ts 复用此常量识别 official marid-cua plugin server，避免字面量漂移。
-export const MARID_PLUGIN_ID_ENV_KEY = "MARID_PLUGIN_ID";
+// bootstrap + cli/plugin-host-command.ts 复用此常量识别 official qodex-cua plugin server，避免字面量漂移。
+export const QODEX_PLUGIN_ID_ENV_KEY = "QODEX_PLUGIN_ID";
 
 export type McpSource =
   | "mcp"
-  | "maridagentmcp"
+  | "qodexagentmcp"
   | "claudeclimcp"
   | "geminiclimcp"
   | "codexclimcp"
@@ -120,14 +120,14 @@ export interface McpConfig {
   mcp: {
     mcpServers: Record<string, McpServerConfig>;
   };
-  maridagentmcp: CliMcpConfig;
+  qodexagentmcp: CliMcpConfig;
   claudeclimcp: CliMcpConfig;
   geminiclimcp: CliMcpConfig;
   codexclimcp: CliMcpConfig;
   opencodemcp: CliMcpConfig;
 }
 
-export interface MaridMcpServer {
+export interface QodexMcpServer {
   id: string;
   name: string;
   config: McpServerConfig;
@@ -181,7 +181,7 @@ export interface McpTestResult {
   response_time?: number;
 }
 
-export type MaridAgentMcpServer = { scope?: "user" | "workspace" } & (
+export type QodexAgentMcpServer = { scope?: "user" | "workspace" } & (
   | {
       name: string;
       command: string;
@@ -231,12 +231,12 @@ export function getMcpServerRequestHeaders(
   return config.headers ?? config.http_headers;
 }
 
-// marid-cua MCP server 识别的单一事实源。desktop 产品 broker resolver（@marid/services 的
-// mcpBrokerInjection）与 CLI bootstrap（apps/marid-cli 的 mcp-config）两条注入入口必须用
+// qodex-cua MCP server 识别的单一事实源。desktop 产品 broker resolver（@qodex/services 的
+// mcpBrokerInjection）与 CLI bootstrap（apps/qodex-cli 的 mcp-config）两条注入入口必须用
 // 完全一致的判定；否则同一 MCP 配置在不同入口行为不同，可能漏注入 product broker，让
 // Python/uvx 自己持有 macOS TCC 权限（违反 fail-closed 边界）。改这里即同时改两条链路。
-function maridCuaArgLeaf(value: string): string {
-  // 先去掉结尾的路径分隔符再取叶子：`.../marid-cua/` 直接 split 会得到空串叶子 → 漏判 → fail-open。
+function qodexCuaArgLeaf(value: string): string {
+  // 先去掉结尾的路径分隔符再取叶子：`.../qodex-cua/` 直接 split 会得到空串叶子 → 漏判 → fail-open。
   return (
     value
       .replace(/[\\/]+$/, "")
@@ -245,38 +245,38 @@ function maridCuaArgLeaf(value: string): string {
   );
 }
 
-// 单个候选串是否为 marid-cua 的包规格。PyPI 视 `_`/`-` 等价，故先把下划线归一成短横（marid_cua →
-// marid-cua）；覆盖 uv/npm 的 `@version`、pip 的 `==version`、extras `[...]`、git 的 `.git`/`.git@`，
-// 以及 `python -m marid_cua.server` 这种点号子模块（`marid-cua.<submodule>`）。fail-closed 边界宁可
-// 过判也不漏判；仍不会误判 `marid-cua-proxy`（短横续接，不以 `.`/`@`/`[`/`==` 边界续接）。
-function matchesMaridCuaSpec(candidate: string): boolean {
+// 单个候选串是否为 qodex-cua 的包规格。PyPI 视 `_`/`-` 等价，故先把下划线归一成短横（qodex_cua →
+// qodex-cua）；覆盖 uv/npm 的 `@version`、pip 的 `==version`、extras `[...]`、git 的 `.git`/`.git@`，
+// 以及 `python -m qodex_cua.server` 这种点号子模块（`qodex-cua.<submodule>`）。fail-closed 边界宁可
+// 过判也不漏判；仍不会误判 `qodex-cua-proxy`（短横续接，不以 `.`/`@`/`[`/`==` 边界续接）。
+function matchesQodexCuaSpec(candidate: string): boolean {
   const c = candidate.replace(/_/g, "-");
   return (
-    c === "marid-cua" ||
-    c.startsWith("marid-cua[") ||
-    c.startsWith("marid-cua@") ||
-    c.startsWith("marid-cua==") ||
-    // `.` 分支同时覆盖 `marid-cua.git` / `marid-cua.git@v1` 与 `marid-cua.server` 等 python 子模块。
-    c.startsWith("marid-cua.")
+    c === "qodex-cua" ||
+    c.startsWith("qodex-cua[") ||
+    c.startsWith("qodex-cua@") ||
+    c.startsWith("qodex-cua==") ||
+    // `.` 分支同时覆盖 `qodex-cua.git` / `qodex-cua.git@v1` 与 `qodex-cua.server` 等 python 子模块。
+    c.startsWith("qodex-cua.")
   );
 }
 
 /**
- * MCP server 的 command 是否指向 marid-cua。用与 args 相同的包规格判定（并比对路径叶子），
- * 覆盖 `command: "marid-cua"`、`/opt/bin/marid-cua`，以及把包规格直接当 command 的写法
- * （`marid-cua@1.2.3` 等）。对 fail-closed 边界宁可过判也不漏判。
+ * MCP server 的 command 是否指向 qodex-cua。用与 args 相同的包规格判定（并比对路径叶子），
+ * 覆盖 `command: "qodex-cua"`、`/opt/bin/qodex-cua`，以及把包规格直接当 command 的写法
+ * （`qodex-cua@1.2.3` 等）。对 fail-closed 边界宁可过判也不漏判。
  */
-export function isMaridCuaMcpCommand(command: string): boolean {
-  return matchesMaridCuaSpec(command) || matchesMaridCuaSpec(maridCuaArgLeaf(command));
+export function isQodexCuaMcpCommand(command: string): boolean {
+  return matchesQodexCuaSpec(command) || matchesQodexCuaSpec(qodexCuaArgLeaf(command));
 }
 
 /**
- * 单个 arg 是否为 marid-cua 的包规格。覆盖 `marid-cua`、`marid-cua[macos]`、`marid-cua@1.2.3`、
- * `marid-cua==1.2.3`、`marid_cua`，以及 git / 本地路径形态（`.../marid-cua`、`marid-cua.git`、
- * `git+https://.../marid-cua.git@v1`）。同时比对原始值与路径叶子，覆盖 `--from <path>`、`--from <git-url>`。
+ * 单个 arg 是否为 qodex-cua 的包规格。覆盖 `qodex-cua`、`qodex-cua[macos]`、`qodex-cua@1.2.3`、
+ * `qodex-cua==1.2.3`、`qodex_cua`，以及 git / 本地路径形态（`.../qodex-cua`、`qodex-cua.git`、
+ * `git+https://.../qodex-cua.git@v1`）。同时比对原始值与路径叶子，覆盖 `--from <path>`、`--from <git-url>`。
  */
-export function isMaridCuaMcpPackageArg(value: string): boolean {
-  return matchesMaridCuaSpec(value) || matchesMaridCuaSpec(maridCuaArgLeaf(value));
+export function isQodexCuaMcpPackageArg(value: string): boolean {
+  return matchesQodexCuaSpec(value) || matchesQodexCuaSpec(qodexCuaArgLeaf(value));
 }
 
 /** 审核摘要与 Host DTO 共用 Windows 命令归一化，避免批准 cmd /c 后执行 npx 被误拒绝。 */
@@ -297,11 +297,11 @@ export function normalizeMcpStdioCommand(command: string, args: string[] = []) {
   return { command, args };
 }
 
-export function convertToMaridAgentMcpServer(
+export function convertToQodexAgentMcpServer(
   name: string,
   config: McpServerConfig,
   scope?: "user" | "workspace",
-): MaridAgentMcpServer | null {
+): QodexAgentMcpServer | null {
   let inferredType = config.type;
   if (!inferredType) {
     if (config.command) inferredType = "stdio";

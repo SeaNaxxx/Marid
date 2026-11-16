@@ -3,8 +3,8 @@ import {
   buildServerRemoteWorkspaceIdentity,
   parseRemoteWorkspaceIdentity,
   type RemoteTarget,
-} from "@marid/shared";
-import type { BotRemoteWorkspaceResolver } from "@marid/services";
+} from "@qodex/shared";
+import type { BotRemoteWorkspaceResolver } from "@qodex/services";
 import type { SourceServerDirectory } from "./sourceServerDirectory.js";
 import type { WindowRemoteLogicalSessionSnapshot } from "./windowRemoteConnectionRegistry.js";
 

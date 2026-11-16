@@ -1,6 +1,6 @@
 import { rm, stat } from "node:fs/promises";
 import { join } from "node:path";
-import type { BrowserRecordingArtifact, BrowserViewportSize } from "@marid/shared";
+import type { BrowserRecordingArtifact, BrowserViewportSize } from "@qodex/shared";
 
 export interface BrowserWebmRecorderFactoryInput {
   outputPath: string;

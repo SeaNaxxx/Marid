@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { WorkspaceFileEntry } from "@marid/shared";
+import type { WorkspaceFileEntry } from "@qodex/shared";
 import {
   createWorkerWorkspaceFileSearchFilterBackend,
   type WorkspaceFileSearchFilterBackend,

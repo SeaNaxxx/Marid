@@ -1,5 +1,5 @@
-import { isAuxiliarySessionKind } from "@marid/shared";
-import { resolveWorkspaceKey } from "@marid/shared";
+import { isAuxiliarySessionKind } from "@qodex/shared";
+import { resolveWorkspaceKey } from "@qodex/shared";
 import type { SubagentIndexRepair } from "#src/task-facts/contract.js";
 
 const IDENTITY_QUERY_BATCH_SIZE = 64;

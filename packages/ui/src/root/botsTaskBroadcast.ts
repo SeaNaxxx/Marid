@@ -1,9 +1,9 @@
 import {
   BOT_TASK_BROADCAST_CHANNEL,
-  type MaridTaskRuntimeStatus,
+  type QodexTaskRuntimeStatus,
   type BotTaskBroadcastPayload,
-} from "@marid/shared";
-import type { BroadcastMessage } from "@marid/services";
+} from "@qodex/shared";
+import type { BroadcastMessage } from "@qodex/services";
 import { buildTaskWorkspaceKey } from "@/lib/taskQueryCache.js";
 import type { WindowTabState } from "@/store/tabStore.js";
 import { isWorkspaceTab } from "@/store/tabStore.js";
@@ -83,7 +83,7 @@ export function resolveBotTaskBroadcastRefresh(
 
 export function resolveBotTaskBroadcastRuntimeStatus(
   event: BotTaskBroadcastPayload["event"],
-): MaridTaskRuntimeStatus {
+): QodexTaskRuntimeStatus {
   switch (event) {
     case "created":
       return "creating";

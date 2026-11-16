@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { MaridProvider } from "@marid/shared";
+import type { QodexProvider } from "@qodex/shared";
 import { logger } from "@/logger.js";
 import { shouldEnableWorkspaceRpc } from "@/lib/workspaceRpcAvailability.js";
-import { useMaridTaskService } from "@/hooks/useMaridTaskService.js";
+import { useQodexTaskService } from "@/hooks/useQodexTaskService.js";
 import { useRemoteWorkspaceSessionStore } from "@/store/remoteWorkspaceSessionStore.js";
 import { useResolvedRemoteWorkspaceSessionId } from "@/hooks/useResolvedRemoteWorkspaceSessionId.js";
-import type { IMaridTaskService } from "@marid/services";
+import type { IQodexTaskService } from "@qodex/services";
 
 interface WorkspaceProviderConfigFileState {
   path: string | null;
@@ -38,38 +38,38 @@ const INITIAL_STATE: WorkspaceProviderConfigFileState = {
 
 type WorkspaceProviderConfigServiceScope = "workspace" | "base";
 
-export function resolveWorkspaceProviderConfigMaridService(params: {
+export function resolveWorkspaceProviderConfigQodexService(params: {
   configuredServiceScope: WorkspaceProviderConfigServiceScope;
-  workspaceMaridService: IMaridTaskService;
-  baseMaridService: IMaridTaskService | null;
+  workspaceQodexService: IQodexTaskService;
+  baseQodexService: IQodexTaskService | null;
   remoteSessionId: string | null;
-}): IMaridTaskService | null {
+}): IQodexTaskService | null {
   if (params.configuredServiceScope === "workspace") {
-    return params.workspaceMaridService;
+    return params.workspaceQodexService;
   }
 
-  if (params.baseMaridService) {
-    return params.baseMaridService;
+  if (params.baseQodexService) {
+    return params.baseQodexService;
   }
 
-  // Bugfix: 远程 workspace 下如果误回退到 workspaceMaridService，
+  // Bugfix: 远程 workspace 下如果误回退到 workspaceQodexService，
   // “前往配置”会读到远端绝对路径（如 /root/...），本机无法正确打开。
-  // 这里在远程会话里严格要求 baseMaridService，就绪前先等待，不再冒险走错误 fallback。
+  // 这里在远程会话里严格要求 baseQodexService，就绪前先等待，不再冒险走错误 fallback。
   if (params.remoteSessionId) {
     return null;
   }
 
-  return params.workspaceMaridService;
+  return params.workspaceQodexService;
 }
 
 /**
  * 读取当前 workspace + provider 的主配置文件路径。
  *
- * 统一通过 maridTaskService 获取路径规则，避免 UI 层拼接 provider 配置路径。
+ * 统一通过 qodexTaskService 获取路径规则，避免 UI 层拼接 provider 配置路径。
  */
 export function useWorkspaceProviderConfigFile(
   workspacePath: string,
-  provider: MaridProvider,
+  provider: QodexProvider,
   preferredRemoteSessionId?: string | null,
   workspaceIdentity?: string,
   options?: {
@@ -77,7 +77,7 @@ export function useWorkspaceProviderConfigFile(
     enabled?: boolean;
   },
 ) {
-  const workspaceMaridService = useMaridTaskService(
+  const workspaceQodexService = useQodexTaskService(
     workspacePath,
     preferredRemoteSessionId,
     workspaceIdentity,
@@ -89,23 +89,23 @@ export function useWorkspaceProviderConfigFile(
     preferredRemoteSessionId,
     workspaceIdentity,
   );
-  const baseMaridService = useRemoteWorkspaceSessionStore(
-    (state) => state.baseServices?.maridTaskService ?? null,
+  const baseQodexService = useRemoteWorkspaceSessionStore(
+    (state) => state.baseServices?.qodexTaskService ?? null,
   );
   const workspaceRpcEnabled = shouldEnableWorkspaceRpc({
     workspaceIdentity,
     remoteSessionId,
   });
-  const maridTaskService = resolveWorkspaceProviderConfigMaridService({
+  const qodexTaskService = resolveWorkspaceProviderConfigQodexService({
     configuredServiceScope,
-    workspaceMaridService,
-    baseMaridService,
+    workspaceQodexService,
+    baseQodexService,
     remoteSessionId,
   });
-  const maridServiceScope =
+  const qodexServiceScope =
     configuredServiceScope === "base"
       ? "base"
-      : remoteSessionId && workspaceMaridService !== baseMaridService
+      : remoteSessionId && workspaceQodexService !== baseQodexService
         ? "remote"
         : "base";
   const [state, setState] =
@@ -123,7 +123,7 @@ export function useWorkspaceProviderConfigFile(
     if (!workspacePath || !enabled || !workspaceRpcEnabled) {
       requestVersionRef.current += 1;
       // Bugfix: 恢复断连远端 workspace 时，provider 配置路径读取不能抢在 remote session
-      // 绑定前访问断连代理，否则会把 MARID_REMOTE_WORKSPACE_DISCONNECTED 记录成配置读取失败。
+      // 绑定前访问断连代理，否则会把 QODEX_REMOTE_WORKSPACE_DISCONNECTED 记录成配置读取失败。
       setState({
         path: null,
         exists: false,
@@ -135,7 +135,7 @@ export function useWorkspaceProviderConfigFile(
       };
     }
 
-    if (!maridTaskService) {
+    if (!qodexTaskService) {
       requestVersionRef.current += 1;
       setState({
         path: null,
@@ -161,10 +161,10 @@ export function useWorkspaceProviderConfigFile(
     });
 
     logger.info(
-      `[useWorkspaceProviderConfigFile] 开始读取 provider 配置路径 workspace=${workspacePath} provider=${provider} scope=${maridServiceScope} session=${remoteSessionId ?? "none"}`,
+      `[useWorkspaceProviderConfigFile] 开始读取 provider 配置路径 workspace=${workspacePath} provider=${provider} scope=${qodexServiceScope} session=${remoteSessionId ?? "none"}`,
     );
 
-    void maridTaskService
+    void qodexTaskService
       .getWorkspaceProviderConfigFile({
         workspacePath,
         ...(workspaceIdentity ? { workspaceIdentity } : {}),
@@ -176,7 +176,7 @@ export function useWorkspaceProviderConfigFile(
         }
 
         logger.info(
-          `[useWorkspaceProviderConfigFile] 读取 provider 配置路径成功 workspace=${workspacePath} provider=${provider} scope=${maridServiceScope} session=${remoteSessionId ?? "none"} exists=${result.exists} path=${result.path}`,
+          `[useWorkspaceProviderConfigFile] 读取 provider 配置路径成功 workspace=${workspacePath} provider=${provider} scope=${qodexServiceScope} session=${remoteSessionId ?? "none"} exists=${result.exists} path=${result.path}`,
         );
 
         setState({
@@ -195,7 +195,7 @@ export function useWorkspaceProviderConfigFile(
         logger.warn("[useWorkspaceProviderConfigFile] 读取 provider 配置路径失败", {
           workspacePath,
           provider,
-          scope: maridServiceScope,
+          scope: qodexServiceScope,
           remoteSessionId,
           error: message,
         });
@@ -211,8 +211,8 @@ export function useWorkspaceProviderConfigFile(
       disposed = true;
     };
   }, [
-    maridTaskService,
-    maridServiceScope,
+    qodexTaskService,
+    qodexServiceScope,
     enabled,
     provider,
     refreshVersion,

@@ -1,13 +1,13 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { marketingDeliverySchema } from "@marid/shared";
+import { marketingDeliverySchema } from "@qodex/shared";
 import {
   TID_LOGIN_TRIGGER,
   TID_LOGOUT_BUTTON,
   TID_CONFIRM_DIALOG_CONFIRM,
   TID_LOGIN_USE_API_KEY_BUTTON,
   TID_LOGIN_API_KEY_SKIP_BUTTON,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   waitForDefaultWorkspaceReady,
   seedCredentials,
@@ -46,7 +46,7 @@ async function assertAppReportHeaders(authenticated: boolean) {
   await browser.execute(async (elementName) => {
     const api = (
       window as typeof window & {
-        marid: {
+        qodex: {
           reportTelemetryEvent: (payload: {
             context: { clientLanguage: string; clientTimezone: string; screenResolution: string };
             elementName: string;
@@ -56,7 +56,7 @@ async function assertAppReportHeaders(authenticated: boolean) {
           }) => Promise<void>;
         };
       }
-    ).marid;
+    ).qodex;
     await api.reportTelemetryEvent({
       context: {
         clientLanguage: "zh-CN",
@@ -69,7 +69,7 @@ async function assertAppReportHeaders(authenticated: boolean) {
       eventExtraDetail: {},
     });
   }, marker);
-  const origin = process.env.MARID_CODING_PLAN_UPGRADE_MOCK_BASE_URL;
+  const origin = process.env.QODEX_CODING_PLAN_UPGRADE_MOCK_BASE_URL;
   const reports = (await (await fetch(`${origin}/__e2e/marketing/telemetry`)).json()) as Array<
     Record<string, unknown>
   >;
@@ -91,7 +91,7 @@ async function assertAppReportHeaders(authenticated: boolean) {
 
 describe("Rewards website embedded integration", () => {
   it("REF-11: Banner 和独立弹窗 navigate rewards 打开邀请页并各上报一次", async () => {
-    const origin = process.env.MARID_CODING_PLAN_UPGRADE_MOCK_BASE_URL;
+    const origin = process.env.QODEX_CODING_PLAN_UPGRADE_MOCK_BASE_URL;
     if (!origin) throw new Error("Missing isolated App fixture");
     const assets = (await (await fetch(`${origin}/__e2e/marketing/assets`)).json()) as Record<
       string,
@@ -159,7 +159,7 @@ describe("Rewards website embedded integration", () => {
     }
   });
   it("REF-02/03/04: 菜单打开隔离网页，主题不重载、语言路由切换、关闭", async () => {
-    const origin = process.env.MARID_CODING_PLAN_UPGRADE_MOCK_BASE_URL;
+    const origin = process.env.QODEX_CODING_PLAN_UPGRADE_MOCK_BASE_URL;
     if (!origin) throw new Error("Missing isolated App fixture");
     await fetch(`${origin}/__e2e/marketing/reset`, {
       method: "POST",
@@ -174,7 +174,7 @@ describe("Rewards website embedded integration", () => {
       const target = globalThis as typeof globalThis & { rewardsHeaderProbe?: unknown[] };
       target.rewardsHeaderProbe = [];
       electron.session
-        .fromPartition("persist:marid-rewards")
+        .fromPartition("persist:qodex-rewards")
         .webRequest.onSendHeaders((details) => {
           if (details.resourceType !== "mainFrame") return;
           const headers = Object.fromEntries(
@@ -187,7 +187,7 @@ describe("Rewards website embedded integration", () => {
             path: new URL(details.url).pathname,
             authenticated: Boolean(headers.authorization),
             device: Boolean(headers["x-device-mid"]),
-            version: Boolean(headers["x-marid-app-version"]),
+            version: Boolean(headers["x-qodex-app-version"]),
             platform: Boolean(headers["x-platform"]),
             timezone: Boolean(headers["x-client-timezone"]),
             language: Boolean(headers["x-client-language"]),
@@ -201,9 +201,9 @@ describe("Rewards website embedded integration", () => {
     expect(await entry.getText()).toMatch(/^(邀请好友\s*奖励|Refer a friend\s*Rewards)$/);
     expect(await entry.$('[data-testid="rewards-reward-badge"]').isExisting()).toBe(true);
     // 截图只写入运行器提供的产物目录，避免系统临时目录破坏跨平台隔离。
-    if (process.env.MARID_E2E_ARTIFACT_DIR)
+    if (process.env.QODEX_E2E_ARTIFACT_DIR)
       await browser.saveScreenshot(
-        join(process.env.MARID_E2E_ARTIFACT_DIR, "rewards-reward-menu.png"),
+        join(process.env.QODEX_E2E_ARTIFACT_DIR, "rewards-reward-menu.png"),
       );
     const order = await browser.execute(() => {
       const entry = document.querySelector('[data-testid="rewards-menu-item"]');
@@ -216,12 +216,12 @@ describe("Rewards website embedded integration", () => {
     await browser.waitUntil(
       async () =>
         guestValue(
-          `Boolean(window.maridBridge?.getTheme() && document.querySelector('[data-app-auth]'))`,
+          `Boolean(window.qodexBridge?.getTheme() && document.querySelector('[data-app-auth]'))`,
         ) as Promise<boolean>,
       { timeout: 60000 },
     );
-    expect(await guestValue(`typeof window.maridBridge.notifyPurchaseComplete`)).toBe("undefined");
-    expect(await guestValue(`window.maridBridge.getAuthState().status`)).toBe("ready");
+    expect(await guestValue(`typeof window.qodexBridge.notifyPurchaseComplete`)).toBe("undefined");
+    expect(await guestValue(`window.qodexBridge.getAuthState().status`)).toBe("ready");
     const firstHeaders = await browser.electron.execute(
       () =>
         (globalThis as typeof globalThis & { rewardsHeaderProbe: unknown[] }).rewardsHeaderProbe[0],
@@ -235,17 +235,17 @@ describe("Rewards website embedded integration", () => {
       language: false,
     });
     expect(await $('[data-testid="rewards-webview"]').getAttribute("partition")).toBe(
-      "persist:marid-rewards",
+      "persist:qodex-rewards",
     );
     expect(await guestValue(`location.pathname`)).toMatch(/^\/(cn|en)\/rewards$/);
     expect(
       await guestValue(
-        `(() => { const before = JSON.stringify(window.maridBridge.getAuthState()); window.dispatchEvent(new CustomEvent('marid-referrals-context', { detail: { theme: 'zai-dark', locale: 'en-US', auth: {status:'anonymous',provider:null,revision:99999} } })); return JSON.stringify(window.maridBridge.getAuthState()) === before; })()`,
+        `(() => { const before = JSON.stringify(window.qodexBridge.getAuthState()); window.dispatchEvent(new CustomEvent('qodex-referrals-context', { detail: { theme: 'zai-dark', locale: 'en-US', auth: {status:'anonymous',provider:null,revision:99999} } })); return JSON.stringify(window.qodexBridge.getAuthState()) === before; })()`,
       ),
     ).toBe(true);
     expect(
       await guestValue(
-        `(() => { const provider = window.maridBridge.getAuthState().provider; return { oauth: Boolean(localStorage.getItem('oauth:' + provider + ':access_token')), jwt: Boolean(localStorage.getItem('maridjwttoken')), other: localStorage.getItem('oauth:' + (provider === 'zai' ? 'bigmodel' : 'zai') + ':access_token') === null }; })()`,
+        `(() => { const provider = window.qodexBridge.getAuthState().provider; return { oauth: Boolean(localStorage.getItem('oauth:' + provider + ':access_token')), jwt: Boolean(localStorage.getItem('qodexjwttoken')), other: localStorage.getItem('oauth:' + (provider === 'zai' ? 'bigmodel' : 'zai') + ':access_token') === null }; })()`,
       ),
     ).toEqual({ oauth: true, jwt: true, other: true });
     await guestValue(`window.__rewardsNoReload = "same-document"`);
@@ -285,14 +285,14 @@ describe("Rewards website embedded integration", () => {
               .getBoundingClientRect().top,
         ),
       ).toBe(before.headerTop);
-      if (process.env.MARID_E2E_ARTIFACT_DIR)
+      if (process.env.QODEX_E2E_ARTIFACT_DIR)
         await browser.saveScreenshot(
-          join(process.env.MARID_E2E_ARTIFACT_DIR, `rewards-scroll-${theme}.png`),
+          join(process.env.QODEX_E2E_ARTIFACT_DIR, `rewards-scroll-${theme}.png`),
         );
       await guestValue(`window.scrollTo(0, 0)`);
-      if (theme === "zai-light" && process.env.MARID_E2E_ARTIFACT_DIR)
+      if (theme === "zai-light" && process.env.QODEX_E2E_ARTIFACT_DIR)
         await browser.saveScreenshot(
-          join(process.env.MARID_E2E_ARTIFACT_DIR, "rewards-embedded-light.png"),
+          join(process.env.QODEX_E2E_ARTIFACT_DIR, "rewards-embedded-light.png"),
         );
     }
     for (const locale of ["zh-CN", "en-US"]) {
@@ -310,14 +310,14 @@ describe("Rewards website embedded integration", () => {
         { timeout: 30000 },
       );
     }
-    const directory = process.env.MARID_E2E_ARTIFACT_DIR;
+    const directory = process.env.QODEX_E2E_ARTIFACT_DIR;
     if (!directory) throw new Error("Missing artifact directory");
     await browser.saveScreenshot(join(directory, "rewards-embedded-dark.png"));
     await $('[data-testid="rewards-surface"]')
       .$('button[aria-label="Refresh"],button[aria-label="刷新"]')
       .click();
     await browser.waitUntil(
-      async () => (await guestValue(`window.maridBridge?.getAuthState()?.status`)) === "ready",
+      async () => (await guestValue(`window.qodexBridge?.getAuthState()?.status`)) === "ready",
     );
     expect(await guestValue(`document.querySelector('[data-embedded]').dataset.theme`)).toBe(
       "dark",
@@ -337,7 +337,7 @@ describe("Rewards website embedded integration", () => {
         language: false,
       });
     await browser.electron.execute((electron) => {
-      electron.session.fromPartition("persist:marid-rewards").webRequest.onSendHeaders(null);
+      electron.session.fromPartition("persist:qodex-rewards").webRequest.onSendHeaders(null);
       delete (globalThis as typeof globalThis & { rewardsHeaderProbe?: unknown[] })
         .rewardsHeaderProbe;
     });
@@ -348,7 +348,7 @@ describe("Rewards website embedded integration", () => {
     await $(`[data-testid="${TID_LOGIN_TRIGGER}"]`).click();
     await $('[data-testid="rewards-menu-item"]').click();
     await browser.waitUntil(
-      async () => (await guestValue(`window.maridBridge?.getAuthState()?.status`)) === "ready",
+      async () => (await guestValue(`window.qodexBridge?.getAuthState()?.status`)) === "ready",
     );
     await $('[data-testid="rewards-surface"]')
       .$('button[aria-label="Close"],button[aria-label="关闭"]')
@@ -356,7 +356,7 @@ describe("Rewards website embedded integration", () => {
     await $('[data-testid="rewards-surface"]').waitForExist({ reverse: true });
   });
   it("REF-12: 匿名营销导航打开登录，取消后不打开邀请页并保留 confirm 上报", async () => {
-    const origin = process.env.MARID_CODING_PLAN_UPGRADE_MOCK_BASE_URL;
+    const origin = process.env.QODEX_CODING_PLAN_UPGRADE_MOCK_BASE_URL;
     if (!origin) throw new Error("Missing isolated App fixture");
     const byId = (id: string) => $(`[data-testid="${id}"]`);
     // 复用匿名营销用例的真实退出流程，只阻止测试进程退出，不伪造登录状态。
@@ -462,10 +462,10 @@ describe("Rewards website embedded integration", () => {
         customerId: "e2e-user",
         accessToken: "e2e-linked-bigmodel-jwt",
       }),
-      maridjwttoken: "e2e-cn-marid-jwt",
+      qodexjwttoken: "e2e-cn-qodex-jwt",
     });
     await writeFile(credentialsFile, JSON.stringify(saved), "utf8");
-    const origin = process.env.MARID_CODING_PLAN_UPGRADE_MOCK_BASE_URL;
+    const origin = process.env.QODEX_CODING_PLAN_UPGRADE_MOCK_BASE_URL;
     await fetch(`${origin}/__e2e/marketing/reset`, {
       method: "POST",
       body: JSON.stringify({ popup: false, banner: false }),
@@ -476,12 +476,12 @@ describe("Rewards website embedded integration", () => {
     await $('[data-testid="rewards-menu-item"]').click();
     await $('[data-testid="rewards-webview"]').waitForDisplayed();
     await browser.waitUntil(
-      async () => (await guestValue(`window.maridBridge?.getAuthState()?.provider`)) === "zai_cn",
+      async () => (await guestValue(`window.qodexBridge?.getAuthState()?.provider`)) === "zai_cn",
       { timeout: 15000 },
     );
     expect(
       await guestValue(
-        `({ status: window.maridBridge.getAuthState().status, jwt: localStorage.getItem("maridjwttoken") === "e2e-cn-marid-jwt", noUpstream: !localStorage.getItem("oauth:zai_cn:access_token"), noLinked: !localStorage.getItem("oauth:bigmodel:access_token") })`,
+        `({ status: window.qodexBridge.getAuthState().status, jwt: localStorage.getItem("qodexjwttoken") === "e2e-cn-qodex-jwt", noUpstream: !localStorage.getItem("oauth:zai_cn:access_token"), noLinked: !localStorage.getItem("oauth:bigmodel:access_token") })`,
       ),
     ).toEqual({ status: "ready", jwt: true, noUpstream: true, noLinked: true });
     await $('[data-testid="rewards-surface"]')

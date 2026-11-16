@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import type { ProjectTree } from "@marid/services";
-import type { MaridProvider, MaridTaskMeta } from "@marid/shared";
+import type { ProjectTree } from "@qodex/services";
+import type { QodexProvider, QodexTaskMeta } from "@qodex/shared";
 import { buildSessionMentionMarkdown } from "@/mentions/mentionMarkdown.js";
 import { filterMentionItemsWithOptions } from "@/mentions/mentionSearch.js";
 import type { MentionCategoryResult, MentionItem } from "@/mentions/mentionTypes.js";
@@ -14,8 +14,8 @@ interface SessionMentionItem extends MentionItem {
 }
 
 function compareSessionTasks(
-  left: MaridTaskMeta,
-  right: MaridTaskMeta,
+  left: QodexTaskMeta,
+  right: QodexTaskMeta,
   currentWorkspaceKey?: string,
 ) {
   if (currentWorkspaceKey) {
@@ -30,17 +30,17 @@ function compareSessionTasks(
   return left.title.localeCompare(right.title);
 }
 
-function getSessionLabel(task: MaridTaskMeta): string {
+function getSessionLabel(task: QodexTaskMeta): string {
   const title = task.title.replace(/^#(?:sess|session)_[a-zA-Z0-9._-]+\s*/, "").trim();
   return title || "Untitled session";
 }
 
-function getWorkspaceLabel(task: MaridTaskMeta): string {
+function getWorkspaceLabel(task: QodexTaskMeta): string {
   const raw = task.workspacePath.trim() || task.workspaceIdentity?.trim() || "";
   return raw.split(/[\\/]/).filter(Boolean).at(-1) ?? raw;
 }
 
-function mapTaskToMentionItem(task: MaridTaskMeta, provider: MaridProvider): SessionMentionItem {
+function mapTaskToMentionItem(task: QodexTaskMeta, provider: QodexProvider): SessionMentionItem {
   const sessionId = task.taskId;
   const itemProvider = task.provider ?? provider;
   return {
@@ -63,8 +63,8 @@ function mapTaskToMentionItem(task: MaridTaskMeta, provider: MaridProvider): Ses
 }
 
 export function collectSessionMentionItems(
-  tasks: MaridTaskMeta[],
-  provider: MaridProvider,
+  tasks: QodexTaskMeta[],
+  provider: QodexProvider,
   options: {
     workspacePath?: string;
     workspaceIdentity?: string;
@@ -73,7 +73,7 @@ export function collectSessionMentionItems(
   const currentWorkspaceKey = options.workspacePath
     ? buildTaskWorkspaceKey(options.workspacePath, options.workspaceIdentity)
     : undefined;
-  const taskBySessionId = new Map<string, MaridTaskMeta>();
+  const taskBySessionId = new Map<string, QodexTaskMeta>();
   for (const task of tasks) {
     if (task.migrationSource) {
       continue;
@@ -91,7 +91,7 @@ export function collectSessionMentionItems(
 }
 
 export function useSessionsMentionProvider(
-  provider: MaridProvider,
+  provider: QodexProvider,
   workspacePath: string,
   workspaceIdentity: string | undefined,
   query: string,
@@ -152,7 +152,7 @@ export function useSessionsMentionProvider(
         workspaceScope !== "current-workspace" ||
         buildTaskWorkspaceKey(task.workspacePath, task.workspaceIdentity) === currentKey,
     );
-    const buckets = new Map<string, { id: string; title: string; tasks: MaridTaskMeta[] }>();
+    const buckets = new Map<string, { id: string; title: string; tasks: QodexTaskMeta[] }>();
     for (const task of visibleTasks) {
       const id =
         workspaceScope === "current-workspace"

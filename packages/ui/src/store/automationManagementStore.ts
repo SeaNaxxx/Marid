@@ -4,21 +4,21 @@ import {
   AUTOMATION_CREATE_LIMIT,
   AUTOMATION_CREATE_LIMIT_ERROR_CODE,
   isAutomationCreateLimitError,
-  type MaridAutomation,
-  type MaridAutomationRun,
-  type MaridAutomationScheduleRule,
+  type QodexAutomation,
+  type QodexAutomationRun,
+  type QodexAutomationScheduleRule,
   type ModelSelection,
-} from "@marid/shared";
-import type { IMaridAgentService } from "@marid/services";
+} from "@qodex/shared";
+import type { IQodexAgentService } from "@qodex/services";
 import { logger } from "@/logger.js";
 
-// 定时任务(automation)管理 store：走 marid-agent RPC（列表 / 创建 / 编辑 / 启停 / 重跑 / 删除 + 运行历史）。
+// 定时任务(automation)管理 store：走 qodex-agent RPC（列表 / 创建 / 编辑 / 启停 / 重跑 / 删除 + 运行历史）。
 // 与 pluginManagementStore 同一范式：按 workspace 缓存，切换时后台刷新避免闪烁。
 
 /** 单条 automation 的运行历史缓存（按 automationId 记 loading/data/error）。 */
 export interface AutomationRunsEntry {
   status: "loading" | "loaded" | "error";
-  runs?: MaridAutomationRun[];
+  runs?: QodexAutomationRun[];
   error?: string;
 }
 
@@ -34,7 +34,7 @@ export interface CreateAutomationInput {
   recurring?: boolean;
   maxRuns?: number;
   endAt?: number;
-  scheduleRule?: MaridAutomationScheduleRule;
+  scheduleRule?: QodexAutomationScheduleRule;
   // 目标项目;缺省用 store 当前列表所在项目。创建整页可在项目下拉里改。
   workspacePath?: string;
   workspaceIdentity?: string;
@@ -49,14 +49,14 @@ export interface UpdateAutomationInput {
   recurring?: boolean;
   maxRuns?: number | null;
   endAt?: number | null;
-  scheduleRule?: MaridAutomationScheduleRule | null;
+  scheduleRule?: QodexAutomationScheduleRule | null;
   scheduleEditedByUser?: boolean;
 }
 
 export interface AutomationManagementState {
   workspacePath: string | null;
   workspaceIdentity: string | null;
-  automations: MaridAutomation[];
+  automations: QodexAutomation[];
   loading: boolean;
   error: string | null;
   // 正在进行的写操作标记，用于禁用对应按钮（如 `automation:delete:<id>`）。
@@ -65,39 +65,39 @@ export interface AutomationManagementState {
   initialize: (params: {
     workspacePath: string;
     workspaceIdentity?: string;
-    agentService: IMaridAgentService;
+    agentService: IQodexAgentService;
   }) => Promise<void>;
-  refresh: (agentService: IMaridAgentService) => Promise<void>;
+  refresh: (agentService: IQodexAgentService) => Promise<void>;
   createAutomation: (
     input: CreateAutomationInput,
-    agentService: IMaridAgentService,
-  ) => Promise<MaridAutomation | null>;
+    agentService: IQodexAgentService,
+  ) => Promise<QodexAutomation | null>;
   updateAutomation: (
     automationId: string,
     input: UpdateAutomationInput,
-    agentService: IMaridAgentService,
+    agentService: IQodexAgentService,
   ) => Promise<boolean>;
-  deleteAutomation: (automationId: string, agentService: IMaridAgentService) => Promise<void>;
+  deleteAutomation: (automationId: string, agentService: IQodexAgentService) => Promise<void>;
   setEnabled: (
     automationId: string,
     enabled: boolean,
-    agentService: IMaridAgentService,
+    agentService: IQodexAgentService,
   ) => Promise<void>;
-  restartAutomation: (automationId: string, agentService: IMaridAgentService) => Promise<void>;
+  restartAutomation: (automationId: string, agentService: IQodexAgentService) => Promise<void>;
   /** 立即运行一次；queued / duplicate / failed 均由调用方 toast。 */
   runAutomationNow: (
     automationId: string,
-    agentService: IMaridAgentService,
+    agentService: IQodexAgentService,
   ) => Promise<AutomationRunNowResult>;
   loadRuns: (
     automationId: string,
-    agentService: IMaridAgentService,
+    agentService: IQodexAgentService,
     force?: boolean,
   ) => Promise<void>;
   deleteRun: (
     automationId: string,
     runId: string,
-    agentService: IMaridAgentService,
+    agentService: IQodexAgentService,
   ) => Promise<void>;
 }
 
@@ -135,7 +135,7 @@ async function loadInto(
   params: {
     workspacePath: string;
     workspaceIdentity: string | null;
-    agentService: IMaridAgentService;
+    agentService: IQodexAgentService;
     requestId: number;
   },
 ): Promise<void> {

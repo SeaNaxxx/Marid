@@ -3,7 +3,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { registerImageComposerTarget } from "@/image-preview-editor/index.js";
 import { toast } from "@/components/ui/toast.js";
 import { nanoid } from "nanoid";
-import type { AttachmentRef } from "@marid/shared/marid-protocol-v4";
+import type { AttachmentRef } from "@qodex/shared/qodex-protocol-v4";
 import { WORKSPACE_FILE_DRAG_MIME } from "@/lib/workspaceFileDrag.js";
 import {
   MAX_CHAT_ATTACHMENTS,
@@ -29,10 +29,10 @@ import {
 } from "@/lib/whiteboard.js";
 import { useWhiteboardStore } from "@/store/whiteboardStore.js";
 import type { ChatComposerPasteEvent } from "@/LexicalChatInput.js";
-import type { IPromptAttachmentTransferService } from "@marid/services";
+import type { IPromptAttachmentTransferService } from "@qodex/services";
 import { usePlatform } from "@/hooks/usePlatform.js";
 import { useServices } from "@/hooks/useServices.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 import {
   exposeComposerAttachmentScopeKeyForE2E,
@@ -271,7 +271,7 @@ export function useComposerAttachments(
   } = options;
   const platform = usePlatform();
   const { promptAttachmentTransferService } = useServices();
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const scopeKey = buildScopeKey(workspacePath, workspaceIdentity, scopeId);
   exposeComposerAttachmentScopeKeyForE2E(scopeKey);
 

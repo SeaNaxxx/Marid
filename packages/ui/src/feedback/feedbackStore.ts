@@ -3,7 +3,7 @@ import type {
   FeedbackTicketModule,
   FeedbackTicketSeverity,
   FeedbackTicketType,
-} from "@marid/shared";
+} from "@qodex/shared";
 
 type FeedbackTab = "submit" | "tickets";
 

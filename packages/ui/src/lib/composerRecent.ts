@@ -1,12 +1,12 @@
-import { isHighspeedProviderId } from "@marid/shared";
-import { modelSelectionSchema, type ModelSelection } from "@marid/shared/model-selection";
-import { submissionModeSchema, type SubmissionMode } from "@marid/shared/marid-protocol-v4";
-import type { ModelSelectionView } from "@marid/services";
+import { isHighspeedProviderId } from "@qodex/shared";
+import { modelSelectionSchema, type ModelSelection } from "@qodex/shared/model-selection";
+import { submissionModeSchema, type SubmissionMode } from "@qodex/shared/qodex-protocol-v4";
+import type { ModelSelectionView } from "@qodex/services";
 import { logger } from "@/logger.js";
 import { composerScopeKey, type ComposerScope } from "@/v4/composer/composerDraftStore.js";
 
 // 沿用旧 key，读取时兼容只保存 ModelSelection 的历史记录。
-const COMPOSER_RECENT_KEY_PREFIX = "marid-model-selection-recent-v1";
+const COMPOSER_RECENT_KEY_PREFIX = "qodex-model-selection-recent-v1";
 
 interface StorageLike {
   getItem(key: string): string | null;
@@ -97,7 +97,7 @@ function resolveComposerRecentKey(
   workspaceIdentity?: string,
   scope?: ComposerScope,
 ): string {
-  if (scope) return `marid-composer-recent:v2:${composerScopeKey(scope)}`;
+  if (scope) return `qodex-composer-recent:v2:${composerScopeKey(scope)}`;
   const workspaceKey = workspaceIdentity?.trim() || workspacePath;
   return `${COMPOSER_RECENT_KEY_PREFIX}:${workspaceKey}`;
 }

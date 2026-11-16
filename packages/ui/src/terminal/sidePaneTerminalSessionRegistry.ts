@@ -15,8 +15,8 @@
 
 import type { FitAddon } from "@xterm/addon-fit";
 import type { ITheme, Terminal as XTerm } from "@xterm/xterm";
-import type { ITerminalService } from "@marid/services";
-import type { IDisposable } from "@marid/rpc";
+import type { ITerminalService } from "@qodex/services";
+import type { IDisposable } from "@qodex/rpc";
 import { uiMemoryDiagnosticsRegistry } from "@/lib/memoryDiagnostics.js";
 
 /** 同一 PTY 的连接绑定随保活条目常驻，代理换代不重新创建终端。 */

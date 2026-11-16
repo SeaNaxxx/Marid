@@ -58,7 +58,7 @@ function artifactPaths(plan, depsRoot) {
 export function canPublishNativeSearchDeps(env = process.env) {
   return (
     env.CI_COMMIT_REF_PROTECTED?.trim().toLowerCase() === "true" ||
-    env.MARID_NATIVE_SEARCH_ALLOW_PUBLISH?.trim() === "1"
+    env.QODEX_NATIVE_SEARCH_ALLOW_PUBLISH?.trim() === "1"
   );
 }
 
@@ -96,18 +96,18 @@ export function publishNativeSearchArchive({ sourcePath, destinationPath, expect
 }
 
 export async function ensureNativeSearchDeps({
-  platform = process.env.MARID_TARGET_OS || process.platform,
-  arch = process.env.MARID_TARGET_ARCH || process.arch,
-  depsRoot = process.env.MARID_NATIVE_SEARCH_DEPS_ROOT,
+  platform = process.env.QODEX_TARGET_OS || process.platform,
+  arch = process.env.QODEX_TARGET_ARCH || process.arch,
+  depsRoot = process.env.QODEX_NATIVE_SEARCH_DEPS_ROOT,
   env = process.env,
   allowPublish = canPublishNativeSearchDeps(env),
-  tempBaseDir = env.MARID_CI_TMPDIR || tmpdir(),
+  tempBaseDir = env.QODEX_CI_TMPDIR || tmpdir(),
   packageTools = packageNativeSearchTools,
   log = console.log,
   prebuiltPlan,
 } = {}) {
   if (!depsRoot?.trim()) {
-    throw new Error("MARID_NATIVE_SEARCH_DEPS_ROOT is required");
+    throw new Error("QODEX_NATIVE_SEARCH_DEPS_ROOT is required");
   }
 
   const resolvedDepsRoot = resolve(depsRoot);
@@ -148,13 +148,13 @@ export async function ensureNativeSearchDeps({
         .map(({ artifact }) => artifact.releaseFileName)
         .join(
           ", ",
-        )}. Run a protected pipeline or set MARID_NATIVE_SEARCH_ALLOW_PUBLISH=1 in a trusted pipeline`,
+        )}. Run a protected pipeline or set QODEX_NATIVE_SEARCH_ALLOW_PUBLISH=1 in a trusted pipeline`,
     );
   }
 
   mkdirSync(resolve(tempBaseDir), { recursive: true });
   const workDir = mkdtempSync(
-    join(resolve(tempBaseDir), `marid-native-search-deps-${plan.platformKey}-`),
+    join(resolve(tempBaseDir), `qodex-native-search-deps-${plan.platformKey}-`),
   );
   const stagingDepsRoot = join(workDir, "deps");
   const buildOutputDir = join(workDir, "binaries");
@@ -217,9 +217,9 @@ function readOption(name) {
 
 async function main() {
   await ensureNativeSearchDeps({
-    platform: readOption("platform") ?? process.env.MARID_TARGET_OS ?? process.platform,
-    arch: readOption("arch") ?? process.env.MARID_TARGET_ARCH ?? process.arch,
-    depsRoot: readOption("deps-root") ?? process.env.MARID_NATIVE_SEARCH_DEPS_ROOT,
+    platform: readOption("platform") ?? process.env.QODEX_TARGET_OS ?? process.platform,
+    arch: readOption("arch") ?? process.env.QODEX_TARGET_ARCH ?? process.arch,
+    depsRoot: readOption("deps-root") ?? process.env.QODEX_NATIVE_SEARCH_DEPS_ROOT,
   });
 }
 

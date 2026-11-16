@@ -3,7 +3,7 @@ import type {
   AssistantTextRow,
   ConversationRowTarget,
   V4ConversationFileChangesResult,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 import {
   buildAssistantPreviewCardsFromReferences,
   extractAssistantFileReferences,

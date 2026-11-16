@@ -2,31 +2,31 @@
 
 set -euo pipefail
 
-APP_PATH="${1:-${MARID_MACOS_RELEASE_APP_PATH:-/Applications/Marid.app}}"
-MARID_HOME_DIR="${MARID_HOME:-${HOME:+$HOME/.marid}}"
-CUA_HELPER_INSTALL_VARIANT="${MARID_CUA_HELPER_INSTALL_VARIANT:-}"
-# 安装包身份与后端环境分轴：MARID_PREVIEW_IDENTITY=1 让生产后端的构建仍是 Marid Preview。
-# 只认 "1"，与 CI workflow / release 门的精确比较同一套语义（其它拼写由 resolve_marid_env 拒绝）。
+APP_PATH="${1:-${QODEX_MACOS_RELEASE_APP_PATH:-/Applications/Qodex.app}}"
+QODEX_HOME_DIR="${QODEX_HOME:-${HOME:+$HOME/.qodex}}"
+CUA_HELPER_INSTALL_VARIANT="${QODEX_CUA_HELPER_INSTALL_VARIANT:-}"
+# 安装包身份与后端环境分轴：QODEX_PREVIEW_IDENTITY=1 让生产后端的构建仍是 Qodex Preview。
+# 只认 "1"，与 CI workflow / release 门的精确比较同一套语义（其它拼写由 resolve_qodex_env 拒绝）。
 is_preview_identity_requested() {
-  [[ "${MARID_PREVIEW_IDENTITY:-}" = "1" ]]
+  [[ "${QODEX_PREVIEW_IDENTITY:-}" = "1" ]]
 }
-if [ -z "$CUA_HELPER_INSTALL_VARIANT" ] && { [ "${MARID_ENV:-production}" = "test" ] || is_preview_identity_requested; }; then
+if [ -z "$CUA_HELPER_INSTALL_VARIANT" ] && { [ "${QODEX_ENV:-production}" = "test" ] || is_preview_identity_requested; }; then
   CUA_HELPER_INSTALL_VARIANT="preview"
 fi
 if [ -n "$CUA_HELPER_INSTALL_VARIANT" ] && [[ ! "$CUA_HELPER_INSTALL_VARIANT" =~ ^[A-Za-z0-9_-]+$ ]]; then
-  echo "[macos-release-doctor] invalid MARID_CUA_HELPER_INSTALL_VARIANT: $CUA_HELPER_INSTALL_VARIANT" >&2
+  echo "[macos-release-doctor] invalid QODEX_CUA_HELPER_INSTALL_VARIANT: $CUA_HELPER_INSTALL_VARIANT" >&2
   exit 1
 fi
 CUA_HELPER_INSTALL_SUBDIR="${CUA_HELPER_INSTALL_VARIANT:+$CUA_HELPER_INSTALL_VARIANT/}"
 # Shell cannot import producer TS constants. macosReleaseAppDoctor.test.ts locks these literals to
-# @marid/marid-cua/broker/helperConstants so a future producer rename fails loudly.
-MARID_HOME_HELPER_APP_PATH="${MARID_HOME_DIR:+$MARID_HOME_DIR/computer-use/${CUA_HELPER_INSTALL_SUBDIR}Marid Computer Use.app}"
-HELPER_APP_PATH="${MARID_CUA_HELPER_APP_PATH:-$MARID_HOME_HELPER_APP_PATH}"
+# @qodex/qodex-cua/broker/helperConstants so a future producer rename fails loudly.
+QODEX_HOME_HELPER_APP_PATH="${QODEX_HOME_DIR:+$QODEX_HOME_DIR/computer-use/${CUA_HELPER_INSTALL_SUBDIR}Qodex Computer Use.app}"
+HELPER_APP_PATH="${QODEX_CUA_HELPER_APP_PATH:-$QODEX_HOME_HELPER_APP_PATH}"
 APP_BUNDLE_NAME="$(basename "$APP_PATH")"
 APP_DISPLAY_NAME="${APP_BUNDLE_NAME%.app}"
-APP_EXECUTABLE_NAME="${MARID_APP_EXECUTABLE_NAME:-$APP_DISPLAY_NAME}"
-HELPER_EXECUTABLE_NAME="${MARID_CUA_HELPER_EXECUTABLE_NAME:-Marid Computer Use}"
-REQUIRE_CUA_HELPER="${MARID_CUA_REQUIRE_HELPER:-0}"
+APP_EXECUTABLE_NAME="${QODEX_APP_EXECUTABLE_NAME:-$APP_DISPLAY_NAME}"
+HELPER_EXECUTABLE_NAME="${QODEX_CUA_HELPER_EXECUTABLE_NAME:-Qodex Computer Use}"
+REQUIRE_CUA_HELPER="${QODEX_CUA_REQUIRE_HELPER:-0}"
 REQUIRE_CUA_HELPER_STAPLE=0
 if [[ "$REQUIRE_CUA_HELPER" =~ ^(1|true|on)$ ]]; then
   REQUIRE_CUA_HELPER_STAPLE=1
@@ -35,25 +35,25 @@ fi
 if [ "${APP_PATH:-}" = "--help" ] || [ "${APP_PATH:-}" = "-h" ]; then
   cat <<'USAGE'
 Usage:
-  bash scripts/doctor-macos-release-app.sh /Applications/Marid.app
-  MARID_CUA_REQUIRE_HELPER=1 bash scripts/doctor-macos-release-app.sh /Applications/Marid.app
-  MARID_CUA_HELPER_APP_PATH=/path/to/Marid\ Computer\ Use.app MARID_CUA_REQUIRE_HELPER=1 bash scripts/doctor-macos-release-app.sh /Applications/Marid.app
-  MARID_MACOS_RELEASE_APP_PATH=/Applications/Marid.app pnpm run doctor:macos-release
+  bash scripts/doctor-macos-release-app.sh /Applications/Qodex.app
+  QODEX_CUA_REQUIRE_HELPER=1 bash scripts/doctor-macos-release-app.sh /Applications/Qodex.app
+  QODEX_CUA_HELPER_APP_PATH=/path/to/Qodex\ Computer\ Use.app QODEX_CUA_REQUIRE_HELPER=1 bash scripts/doctor-macos-release-app.sh /Applications/Qodex.app
+  QODEX_MACOS_RELEASE_APP_PATH=/Applications/Qodex.app pnpm run doctor:macos-release
 
 Always validates the installed macOS release app with:
   codesign --verify --deep --strict <app>
   spctl -a -vv -t exec <app>
 
-Set MARID_CUA_REQUIRE_HELPER=1 for CUA/Helper release gates. In that mode this
+Set QODEX_CUA_REQUIRE_HELPER=1 for CUA/Helper release gates. In that mode this
 also validates the independently signed Helper bundle selected below with the
 same codesign/spctl checks and a local notarization staple check.
 
 Helper lookup order:
-  1. MARID_CUA_HELPER_APP_PATH (CI passes the Helper bundled inside Marid.app)
-  2. ${MARID_HOME:-$HOME/.marid}/computer-use/<optional variant>/Marid Computer Use.app
+  1. QODEX_CUA_HELPER_APP_PATH (CI passes the Helper bundled inside Qodex.app)
+  2. ${QODEX_HOME:-$HOME/.qodex}/computer-use/<optional variant>/Qodex Computer Use.app
 
 CI release acceptance validates the copy actually shipped at
-Marid.app/Contents/Resources/cua-helper/Marid Computer Use.app. Post-install checks
+Qodex.app/Contents/Resources/cua-helper/Qodex Computer Use.app. Post-install checks
 may omit the override to validate the user-level installed copy. A missing selected
 Helper.app fails closed.
 USAGE
@@ -72,7 +72,7 @@ assert_bundle_dir() {
   local label="$1"
   local bundle_path="$2"
   if [ -z "$bundle_path" ]; then
-    echo "[macos-release-doctor] ${label} missing: <no product helper path; set MARID_HOME or HOME>" >&2
+    echo "[macos-release-doctor] ${label} missing: <no product helper path; set QODEX_HOME or HOME>" >&2
     exit 1
   fi
   if [ ! -d "$bundle_path" ]; then
@@ -108,7 +108,7 @@ run_quiet_validation() {
   local label="$1"
   shift
   local output_file
-  output_file="$(mktemp "${TMPDIR:-/tmp}/marid-macos-release-doctor.XXXXXX")"
+  output_file="$(mktemp "${TMPDIR:-/tmp}/qodex-macos-release-doctor.XXXXXX")"
   if "$@" >"$output_file" 2>&1; then
     rm -f "$output_file"
     return 0
@@ -143,7 +143,7 @@ require_command spctl
 # Bugfix: 过去 release/notarization 成功只说明 DMG 通过了 gate，不能证明安装后的主 app
 # 和 Computer Use Helper.app 都能被 Gatekeeper 以 exec 类型放行。这里先 fail-closed 检查 bundle
 # 结构，再分别跑 codesign/spctl，避免 helper 缺失或未独立签名时误报发布成功。
-# CI 显式传入最终 Marid.app 内的 Helper；安装后验收则默认检查用户级复制品。
+# CI 显式传入最终 Qodex.app 内的 Helper；安装后验收则默认检查用户级复制品。
 assert_bundle_dir "$APP_BUNDLE_NAME" "$APP_PATH"
 assert_executable "$APP_BUNDLE_NAME" "$APP_PATH/Contents/MacOS/$APP_EXECUTABLE_NAME"
 validate_release_bundle "$APP_BUNDLE_NAME" "$APP_PATH"
@@ -152,7 +152,7 @@ if [ "$REQUIRE_CUA_HELPER" != "1" ] && [ "$REQUIRE_CUA_HELPER" != "true" ] && [ 
   if [ -d "$HELPER_APP_PATH" ]; then
     echo "[macos-release-doctor] standalone Computer Use Helper.app present; validating optional helper: $HELPER_APP_PATH"
   else
-    echo "[macos-release-doctor] standalone Computer Use Helper.app not required; set MARID_CUA_REQUIRE_HELPER=1 for CUA release gates"
+    echo "[macos-release-doctor] standalone Computer Use Helper.app not required; set QODEX_CUA_REQUIRE_HELPER=1 for CUA release gates"
     echo "[macos-release-doctor] done"
     exit 0
   fi

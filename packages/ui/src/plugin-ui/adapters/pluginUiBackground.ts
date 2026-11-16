@@ -1,5 +1,5 @@
-import type { IServiceAccessor } from "@marid/services";
-import { isRemoteWorkspaceIdentity, type IPlatformService } from "@marid/shared";
+import type { IServiceAccessor } from "@qodex/services";
+import { isRemoteWorkspaceIdentity, type IPlatformService } from "@qodex/shared";
 import { logger } from "@/logger.js";
 import { buildPluginUiSurfaceKey } from "@/plugin-ui/contract.js";
 import { resolvePluginUiLogicalScope } from "@/plugin-ui/domain/pluginUiLogicalScope.js";
@@ -16,7 +16,7 @@ export function attachPluginUiToolResults(
 ): () => void {
   if (!platform.pluginSandbox || !services.pluginUiBridgeService) return () => {};
   let disposed = false;
-  const subscription = services.maridAgentService.onDynamicPluginUiToolResult()((result) => {
+  const subscription = services.qodexAgentService.onDynamicPluginUiToolResult()((result) => {
     if (disposed || isRemoteWorkspaceIdentity(result.workspaceIdentity ?? "")) return;
     const presentation = { ...result.ui, serverName: result.serverName };
     const scope = {
@@ -34,7 +34,7 @@ export function attachPluginUiToolResults(
       scope,
       displayMode: "inline",
       width: 0,
-      hostVersion: "marid",
+      hostVersion: "qodex",
       toolCallId: result.toolCallId,
       toolInput: result.input,
       toolResult: buildPluginUiToolResult(

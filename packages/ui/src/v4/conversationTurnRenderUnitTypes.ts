@@ -1,5 +1,5 @@
 import type { PluginUiRowPinResolver } from "@/plugin-ui/index.js";
-import type { BotTopicPreparation } from "@marid/shared";
+import type { BotTopicPreparation } from "@qodex/shared";
 import type {
   AssistantTextRow,
   ConversationRow,
@@ -9,7 +9,7 @@ import type {
   TurnHeaderRow,
   UserInputRow,
   WorkflowLaunchMeta,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 import type { AssistantWorkRow, ConversationTurnFlowItem } from "@/v4/conversationTurnFlowItems.js";
 import type {
   ConversationTurnWorkSegment,

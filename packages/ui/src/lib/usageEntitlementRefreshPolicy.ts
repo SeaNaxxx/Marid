@@ -1,16 +1,16 @@
-import { isStartPlanModelProviderId } from "@marid/shared";
-import type { IUsageStatsService } from "@marid/services";
+import { isStartPlanModelProviderId } from "@qodex/shared";
+import type { IUsageStatsService } from "@qodex/services";
 import type {
   UsageEntitlementSnapshot,
-  MaridAccountAccess,
-  MaridProviderAccountAccess,
-} from "@marid/shared";
+  QodexAccountAccess,
+  QodexProviderAccountAccess,
+} from "@qodex/shared";
 
 export interface UsageEntitlementRequestOptions {
   invalidateBalanceCache?: boolean;
   includeSubscription: boolean;
   preferredProviderId?: string;
-  accountAccess?: MaridProviderAccountAccess | MaridAccountAccess;
+  accountAccess?: QodexProviderAccountAccess | QodexAccountAccess;
   allowDisabledPreferredProvider: boolean;
   requirePreferredProvider: boolean;
   allowEnvApiKey?: boolean;

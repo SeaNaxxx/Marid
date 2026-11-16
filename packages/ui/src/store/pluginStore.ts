@@ -6,8 +6,8 @@ import type {
   PluginMarketplaceSummary,
   PluginScope,
   PluginsCapability,
-} from "@marid/shared";
-import type { IPluginsService } from "@marid/services";
+} from "@qodex/shared";
+import type { IPluginsService } from "@qodex/services";
 import { logger } from "@/logger.js";
 
 function buildPluginOperationId(

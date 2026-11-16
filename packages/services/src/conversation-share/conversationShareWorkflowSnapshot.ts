@@ -7,19 +7,19 @@ import {
   type ShareWorkflowPayload,
   type ShareWorkflowArtifact,
   type ConversationShareCapabilities,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   reduceWorkflowRunsState,
   type WireConversationRow,
   type ArtifactRow,
   type WorkflowRunsState,
   type ToolCallCreateWorkflowCausalityGraph,
-} from "@marid/shared/marid-protocol-v4";
-import type { IMaridAgentService } from "../marid-agent/maridAgent.js";
+} from "@qodex/shared/qodex-protocol-v4";
+import type { IQodexAgentService } from "../qodex-agent/qodexAgent.js";
 import type { PublishTextConversationInput } from "./conversationShare.js";
 
 export type ShareWorkflowReader = Pick<
-  IMaridAgentService,
+  IQodexAgentService,
   | "conversationWorkflowRunsV4"
   | "conversationWorkflowRunEventsV4"
   | "conversationWorkflowRunArtifactsV4"

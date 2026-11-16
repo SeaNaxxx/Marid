@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { parseMaridBuiltinModelConfigRules } from "@marid/provider";
-import type { IServiceAccessor, ProviderSettingsView } from "@marid/services";
-import { MaridIntlProvider } from "@/i18n/IntlProvider.js";
+import { parseQodexBuiltinModelConfigRules } from "@qodex/provider";
+import type { IServiceAccessor, ProviderSettingsView } from "@qodex/services";
+import { QodexIntlProvider } from "@/i18n/IntlProvider.js";
 import { ServiceProvider } from "@/hooks/useServices.js";
 import { TooltipProvider } from "@/components/ui/tooltip.js";
 import { ProviderTemplatePicker } from "@/settings/model-provider-section/ProviderTemplatePicker.js";
@@ -22,7 +22,7 @@ import {
   getProviderFormApiKeyManagementUrl,
   type ProviderSettingsFormProvider,
 } from "@/lib/providerSettingsFormTypes.js";
-import release from "../../../../../../config/provider/marid-builtin.json";
+import release from "../../../../../../config/provider/qodex-builtin.json";
 import { ProviderModelEditorFixture } from "./provider-model-editor.fixture.js";
 import { OffPeakEligibilityFixture } from "./offpeak-eligibility.fixture.js";
 import { OffPeakTeamEntryFixture } from "./offpeak-team-entry.fixture.js";
@@ -32,7 +32,7 @@ import { Checkbox } from "@/components/ui/checkbox.js";
 const params = new URLSearchParams(location.search);
 document.documentElement.className =
   params.get("theme") === "light" ? "light theme-zai-light" : "dark theme-zai-dark";
-const rules = parseMaridBuiltinModelConfigRules(release.config.modelConfigRules);
+const rules = parseQodexBuiltinModelConfigRules(release.config.modelConfigRules);
 const templates = release.config.providerConfigRules
   .templateRules as ProviderSettingsView["providerTemplates"];
 function createProvider(templateId: string): ProviderSettingsFormProvider {
@@ -262,7 +262,7 @@ createRoot(document.getElementById("root")!).render(
     }
   >
     <TooltipProvider>
-      <MaridIntlProvider initialLocale={params.get("locale") === "zh-CN" ? "zh-CN" : "en-US"}>
+      <QodexIntlProvider initialLocale={params.get("locale") === "zh-CN" ? "zh-CN" : "en-US"}>
         {params.has("teamEntry") ? (
           <OffPeakTeamEntryFixture />
         ) : params.has("offpeak") ? (
@@ -272,7 +272,7 @@ createRoot(document.getElementById("root")!).render(
         ) : (
           <Fixture />
         )}
-      </MaridIntlProvider>
+      </QodexIntlProvider>
     </TooltipProvider>
   </ServiceProvider>,
 );

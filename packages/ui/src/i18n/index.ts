@@ -1,3 +1,3 @@
-export { MaridIntlProvider, useMaridIntl } from "./IntlProvider.js";
+export { QodexIntlProvider, useQodexIntl } from "./IntlProvider.js";
 export type { IntlInstance } from "./IntlProvider.js";
 export { LocaleSwitcher } from "./LocaleSwitcher.js";

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import type { AppSettings } from "@marid/shared";
+import type { AppSettings } from "@qodex/shared";
 import { useServices } from "@/hooks/useServices.js";
 import { useOffPeakTaskStore } from "@/store/offPeakTaskStore.js";
 

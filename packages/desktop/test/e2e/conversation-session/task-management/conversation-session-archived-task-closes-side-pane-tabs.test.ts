@@ -5,7 +5,7 @@ import {
   TID_TASK_ARCHIVE,
   TID_TASK_ITEM,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { DEFAULT_WORKSPACE, clearAppData, clickTestIdByDom } from "#e2e/helpers/desktop-app";
 import { ensureProjectExpanded } from "#e2e/helpers/project-sidebar";
 import { openFirstBrowserTab } from "#e2e/helpers/browser-side-pane";

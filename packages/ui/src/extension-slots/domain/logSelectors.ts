@@ -2,7 +2,7 @@ import {
   EXTENSION_LOG_BUFFER_LIMIT,
   type ExtensionLogEntry,
   type ExtensionLogLevel,
-} from "@marid/shared/extension-host";
+} from "@qodex/shared/extension-host";
 import type {
   ExtensionLogLevelFilter,
   ExtensionLogSourceFilter,

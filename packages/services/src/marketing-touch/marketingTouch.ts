@@ -1,4 +1,4 @@
-import { ServiceChannels, type Locale, type MarketingTouchSnapshot } from "@marid/shared";
+import { ServiceChannels, type Locale, type MarketingTouchSnapshot } from "@qodex/shared";
 import { createServiceDescriptor } from "#src/descriptors.js";
 
 export interface IMarketingTouchService {

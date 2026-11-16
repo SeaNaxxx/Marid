@@ -1,28 +1,28 @@
 /* eslint-disable max-lines -- Controller source 聚合、路由、订阅与生命周期属于同一个 Host 边界。 */
-import { Emitter, Event } from "@marid/rpc";
-import type { MaridTaskMeta } from "@marid/shared";
+import { Emitter, Event } from "@qodex/rpc";
+import type { QodexTaskMeta } from "@qodex/shared";
 import type {
   ControllerSubscribeParams,
   WindowHostControllerTaskRow,
   WindowHostTaskAddress,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 import {
   CONTROLLER_TASKS_INDEX_TOPIC,
   matchesTaskListMembershipKind,
   windowHostTaskAddressSchema,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 import type {
   IWindowControllerService,
-  IMaridAgentService,
-  IMaridTaskService,
+  IQodexAgentService,
+  IQodexTaskService,
   WindowHostControllerFrame,
   WindowHostControllerTaskListItem,
   WindowHostControllerTaskListResult,
   WindowHostTaskUnreadSignal,
   WindowHostTasksRemovedSignal,
-  MaridTaskListQuery,
-  MaridTaskListWorkspaceScope,
-} from "@marid/services";
+  QodexTaskListQuery,
+  QodexTaskListWorkspaceScope,
+} from "@qodex/services";
 import {
   createWindowHostControllerProjection,
   type WindowHostControllerMutation,
@@ -37,8 +37,8 @@ import {
 
 export interface ResolvedWindowHostControllerSource {
   scope: WindowHostControllerSourceScope;
-  taskService?: IMaridTaskService;
-  agentService?: IMaridAgentService;
+  taskService?: IQodexTaskService;
+  agentService?: IQodexAgentService;
   sourceAvailability: "online" | "offline";
 }
 
@@ -46,14 +46,14 @@ function sourceKey(scope: WindowHostControllerSourceScope): string {
   return `${scope.kind}\0${scope.kind === "remote" ? (scope.sourceServerId ?? scope.remoteSessionId) : "local"}\0${scope.workspaceIdentity?.trim() || scope.workspacePath}`;
 }
 
-function taskKey(task: Pick<MaridTaskMeta, "taskId" | "workspacePath" | "workspaceIdentity">) {
+function taskKey(task: Pick<QodexTaskMeta, "taskId" | "workspacePath" | "workspaceIdentity">) {
   return `${task.workspaceIdentity?.trim() || task.workspacePath}\0${task.taskId}`;
 }
 
 function normalizeTaskMeta(
-  meta: MaridTaskMeta,
+  meta: QodexTaskMeta,
   scope: WindowHostControllerSourceScope,
-): MaridTaskMeta {
+): QodexTaskMeta {
   return {
     ...meta,
     workspacePath: scope.workspacePath,
@@ -66,7 +66,7 @@ function normalizeTaskMeta(
 function compareItems(
   left: WindowHostControllerTaskListItem,
   right: WindowHostControllerTaskListItem,
-  sortBy: MaridTaskListQuery["sortBy"],
+  sortBy: QodexTaskListQuery["sortBy"],
 ): number {
   const leftAt = sortBy === "created" ? left.createdAt : left.updatedAt;
   const rightAt = sortBy === "created" ? right.createdAt : right.updatedAt;
@@ -82,7 +82,7 @@ function mutationParams(address: WindowHostTaskAddress) {
 }
 
 function sessionOverlay(
-  summary: import("@marid/shared/marid-protocol-v4").SessionSummary,
+  summary: import("@qodex/shared/qodex-protocol-v4").SessionSummary,
 ): WindowHostControllerSessionOverlay {
   const liveStatus: WindowHostControllerSessionOverlay["liveStatus"] =
     summary.pendingInteraction ||
@@ -130,7 +130,7 @@ function sessionOverlay(
   };
 }
 
-function liveStatusFromMeta(meta: MaridTaskMeta): WindowHostControllerTaskRow["liveStatus"] {
+function liveStatusFromMeta(meta: QodexTaskMeta): WindowHostControllerTaskRow["liveStatus"] {
   if (meta.status === "completed") return "completed";
   if (meta.status === "error") return "error";
   return "idle";
@@ -141,11 +141,11 @@ function liveStatusFromMeta(meta: MaridTaskMeta): WindowHostControllerTaskRow["l
  * 对应 source 的 tasks-index 重建投影，断连时只冻结最后一次成功的内存快照。
  */
 export function createWindowHostControllerRuntime(options: {
-  onRunStarted?: (run: import("@marid/shared/web-remote-relay").MobilePushRun) => void;
-  onNotification?: (event: import("@marid/shared/web-remote-relay").MobilePushEvent) => void;
+  onRunStarted?: (run: import("@qodex/shared/web-remote-relay").MobilePushRun) => void;
+  onNotification?: (event: import("@qodex/shared/web-remote-relay").MobilePushEvent) => void;
   createId: () => string;
-  readHostTaskList: IMaridTaskService["listTaskList"];
-  resolveSource: (scope: MaridTaskListWorkspaceScope) => ResolvedWindowHostControllerSource | null;
+  readHostTaskList: IQodexTaskService["listTaskList"];
+  resolveSource: (scope: QodexTaskListWorkspaceScope) => ResolvedWindowHostControllerSource | null;
   onSourceError?: (
     scope: WindowHostControllerSourceScope,
     operation: "refresh" | "search",
@@ -158,18 +158,18 @@ export function createWindowHostControllerRuntime(options: {
   const tasksRemovedSignals = new Emitter<WindowHostTasksRemovedSignal>();
   const registeredScopes = new Map<string, WindowHostControllerSourceScope>();
   const sourceAvailability = new Map<string, "online" | "offline">();
-  const sourceTaskServices = new Map<string, IMaridTaskService>();
-  const sourceSnapshotTaskServices = new Map<string, IMaridTaskService>();
+  const sourceTaskServices = new Map<string, IQodexTaskService>();
+  const sourceSnapshotTaskServices = new Map<string, IQodexTaskService>();
   const sourceEventSubscriptions = new Map<string, { dispose(): void }>();
   const sourceRefreshFlights = new Map<
     string,
-    { taskService: IMaridTaskService; promise: Promise<void> }
+    { taskService: IQodexTaskService; promise: Promise<void> }
   >();
   const sourceRefreshGenerations = new Map<string, number>();
   const sourceLiveOverlays = new Map<string, WindowHostControllerSessionOverlay[]>();
   const sourceSessionObservers = new Map<
     string,
-    { agentService: IMaridAgentService; observer: WindowHostSessionsIndexObserver }
+    { agentService: IQodexAgentService; observer: WindowHostSessionsIndexObserver }
   >();
   const pendingReplacementByNextSourceKey = new Map<string, WindowHostControllerSourceScope>();
 
@@ -466,7 +466,7 @@ export function createWindowHostControllerRuntime(options: {
     const membershipByTaskKey = new Map<
       string,
       {
-        meta: MaridTaskMeta;
+        meta: QodexTaskMeta;
         membership: { pinned: boolean; archived: boolean; active: boolean };
       }
     >();
@@ -621,7 +621,7 @@ export function createWindowHostControllerRuntime(options: {
   }
 
   function resolveQuerySources(
-    scopes: MaridTaskListWorkspaceScope[],
+    scopes: QodexTaskListWorkspaceScope[],
   ): ResolvedWindowHostControllerSource[] {
     const resolved = new Map<string, ResolvedWindowHostControllerSource>();
     for (const scope of scopes) {
@@ -635,7 +635,7 @@ export function createWindowHostControllerRuntime(options: {
   }
 
   async function listTaskList(
-    query: MaridTaskListQuery,
+    query: QodexTaskListQuery,
   ): Promise<WindowHostControllerTaskListResult> {
     if (query.workspaceScopes === "host") {
       // 已注册 source 也只覆盖打开过的工作区；全局历史必须直接交给持久化 owner。
@@ -1098,7 +1098,7 @@ export function createWindowHostControllerRuntime(options: {
       taskId: string;
       workspacePath: string;
       workspaceIdentity?: string;
-      attachmentScope?: import("@marid/shared").WindowHostAttachmentScope;
+      attachmentScope?: import("@qodex/shared").WindowHostAttachmentScope;
       allowMissingTask?: boolean;
     }): Promise<WindowHostTaskAddress> {
       const remoteAttachmentScope =

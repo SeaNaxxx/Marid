@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { SourceServerManagementSnapshot } from "@marid/shared";
-import type { ISourceServerManagementService } from "@marid/services";
+import type { SourceServerManagementSnapshot } from "@qodex/shared";
+import type { ISourceServerManagementService } from "@qodex/services";
 
 export function useSourceServerManagementSnapshot(
   management: ISourceServerManagementService | undefined,

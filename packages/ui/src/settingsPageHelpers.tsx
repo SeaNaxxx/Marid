@@ -4,27 +4,27 @@ import type {
   IntegratedTerminalShellOption,
   IntegratedTerminalShellSelection,
   LocalePreference,
-  MaridInteractionBehavior,
-} from "@marid/shared";
+  QodexInteractionBehavior,
+} from "@qodex/shared";
 import {
   appToolSearchModeSchema,
   DEFAULT_APP_TOOL_SEARCH_MODE,
   LOCALE_NATIVE_NAMES,
   SUPPORTED_LOCALES,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
   TID_SETTINGS_ASK_USER_QUESTION_AUTO_RESOLUTION_SWITCH,
   TID_SETTINGS_NATIVE_SEARCH_SWITCH,
   TID_SETTINGS_TOOL_SEARCH_SELECT,
   TID_SETTINGS_TOOL_SEARCH_OPTION,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { useState, useCallback, useEffect } from "react";
-import type { IPlatformService } from "@marid/shared";
+import type { IPlatformService } from "@qodex/shared";
 import {
   TID_SETTINGS_LOCALE_SELECT_ITEM,
   TID_SETTINGS_LOCALE_SELECT_TRIGGER,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   Select,
   SelectContent,
@@ -37,7 +37,7 @@ import { Input } from "@/components/ui/input.js";
 import { Button } from "@/components/ui/button.js";
 import { SettingsGroupCard, SettingsRow } from "@/settings/SettingsPageParts.js";
 import { DataBaseDirControl } from "@/settings/DataBaseDirControl.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { useOptionalServices } from "@/hooks/useServices.js";
 import { ProactiveSuggestionsSetting } from "@/settings/ProactiveSuggestionsSetting.js";
 import { PluginAutoRecommendationSetting } from "@/settings/PluginAutoRecommendationSetting.js";
@@ -52,14 +52,14 @@ import {
   type SettingsSectionId,
 } from "@/settings/settingsPageConfig.js";
 
-export type { Locale, LocalePreference } from "@marid/shared";
+export type { Locale, LocalePreference } from "@qodex/shared";
 export { type SettingsSectionId };
 export { createSettingsPageConfig, resolveSettingsSectionForPlatform };
 export { SETTINGS_SECTION_GROUPS, SETTINGS_SECTIONS };
 export { isSettingsSectionAvailable };
 
 const TASK_AUTO_ARCHIVE_DAY_OPTIONS = [3, 7, 14, 30] as const;
-const MARID_INTERACTION_BEHAVIOR_OPTIONS: readonly MaridInteractionBehavior[] = ["queue", "guide"];
+const QODEX_INTERACTION_BEHAVIOR_OPTIONS: readonly QodexInteractionBehavior[] = ["queue", "guide"];
 
 /**
  * 归档偏好与归档列表集中展示，设置值和保存动作继续由 SettingsPage 持有。
@@ -76,7 +76,7 @@ export function TaskAutoArchiveSettings({
   onTaskAutoArchiveEnabledChange: (enabled: boolean) => Promise<void>;
   onTaskAutoArchiveOlderThanDaysChange: (days: number) => Promise<void>;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   return (
     <SettingsGroupCard>
       <SettingsRow
@@ -235,7 +235,7 @@ export function GeneralSectionContent({
   onAutoDownloadAndInstallUpdatesChange: (enabled: boolean) => Promise<void>;
   onOpenOnboardingDialog: () => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const hasServices = Boolean(useOptionalServices());
   // 部分 SSR 单测会用精简 props 直接渲染本组件，新增终端设置项后旧 helper 未必同步传值。
   // 这里把运行时缺省值兜到“继承系统 profile”，避免 undefined.trim() 把无关测试打断。
@@ -795,13 +795,13 @@ export function AgentBehaviorSectionContent({
   nativeSearchEnhancementsEnabled,
   messageStreamShowReasoning,
   messageStreamShowTodos,
-  maridInteractionBehavior,
+  qodexInteractionBehavior,
   askUserQuestionAutoResolutionEnabled = true,
   modelIoFullRetentionEnabled = false,
   onNativeSearchEnhancementsEnabledChange,
   onMessageStreamShowReasoningChange,
   onMessageStreamShowTodosChange,
-  onMaridInteractionBehaviorChange,
+  onQodexInteractionBehaviorChange,
   onAskUserQuestionAutoResolutionEnabledChange = async () => {},
   onModelIoFullRetentionEnabledChange = async () => {},
 }: {
@@ -810,17 +810,17 @@ export function AgentBehaviorSectionContent({
   nativeSearchEnhancementsEnabled: boolean;
   messageStreamShowReasoning: boolean;
   messageStreamShowTodos: boolean;
-  maridInteractionBehavior: MaridInteractionBehavior;
+  qodexInteractionBehavior: QodexInteractionBehavior;
   askUserQuestionAutoResolutionEnabled?: boolean;
   modelIoFullRetentionEnabled?: boolean;
   onNativeSearchEnhancementsEnabledChange: (enabled: boolean) => Promise<void>;
   onMessageStreamShowReasoningChange: (enabled: boolean) => Promise<void>;
   onMessageStreamShowTodosChange: (enabled: boolean) => Promise<void>;
-  onMaridInteractionBehaviorChange: (behavior: MaridInteractionBehavior) => Promise<void>;
+  onQodexInteractionBehaviorChange: (behavior: QodexInteractionBehavior) => Promise<void>;
   onAskUserQuestionAutoResolutionEnabledChange?: (enabled: boolean) => Promise<void>;
   onModelIoFullRetentionEnabledChange?: (enabled: boolean) => Promise<void>;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const hasServices = Boolean(useOptionalServices());
 
   return (
@@ -888,26 +888,26 @@ export function AgentBehaviorSectionContent({
 
       <SettingsGroupCard>
         <SettingsRow
-          searchId="settings.maridInteractionBehavior"
-          label={intl.formatMessage({ id: "settings.maridInteractionBehavior" })}
+          searchId="settings.qodexInteractionBehavior"
+          label={intl.formatMessage({ id: "settings.qodexInteractionBehavior" })}
           description={intl.formatMessage({
-            id: "settings.maridInteractionBehaviorDescription",
+            id: "settings.qodexInteractionBehaviorDescription",
           })}
           control={
             <Select
-              value={maridInteractionBehavior}
+              value={qodexInteractionBehavior}
               onValueChange={(value) => {
-                void onMaridInteractionBehaviorChange(value as MaridInteractionBehavior);
+                void onQodexInteractionBehaviorChange(value as QodexInteractionBehavior);
               }}
             >
               <SelectTrigger size="lg" className="w-[260px] min-w-0 justify-between">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {MARID_INTERACTION_BEHAVIOR_OPTIONS.map((behavior) => (
+                {QODEX_INTERACTION_BEHAVIOR_OPTIONS.map((behavior) => (
                   <SelectItem key={behavior} value={behavior}>
                     {intl.formatMessage({
-                      id: `settings.maridInteractionBehavior.option.${behavior}`,
+                      id: `settings.qodexInteractionBehavior.option.${behavior}`,
                     })}
                   </SelectItem>
                 ))}

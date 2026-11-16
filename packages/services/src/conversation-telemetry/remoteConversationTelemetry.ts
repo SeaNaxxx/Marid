@@ -1,11 +1,11 @@
 import {
-  MARID_AGENT_PROVIDER,
+  QODEX_AGENT_PROVIDER,
   sanitizeTelemetryEventDetail,
   type TelemetryEventPayload,
-} from "@marid/shared";
-import { ConversationTelemetryEngine } from "@marid/shared/conversation-telemetry";
-import { buildPromptTelemetryExtraDetail } from "@marid/shared/conversation-telemetry/messageTelemetry";
-import type { ConversationTelemetryFact } from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared";
+import { ConversationTelemetryEngine } from "@qodex/shared/conversation-telemetry";
+import { buildPromptTelemetryExtraDetail } from "@qodex/shared/conversation-telemetry/messageTelemetry";
+import type { ConversationTelemetryFact } from "@qodex/shared/qodex-protocol-v4";
 
 /** 只消费执行服务的 live facts，不依赖手机 attachment 或桌面 pane 的寿命。 */
 export class RemoteConversationTelemetry {
@@ -74,7 +74,7 @@ export class RemoteConversationTelemetry {
             memoryEnabled: fact.memoryEnabled,
             extraDetail: {
               ...buildPromptTelemetryExtraDetail({
-                provider: MARID_AGENT_PROVIDER,
+                provider: QODEX_AGENT_PROVIDER,
                 modelName: fact.modelName,
               }),
               ...(fact.modelProvider ? { model_provider: fact.modelProvider } : {}),

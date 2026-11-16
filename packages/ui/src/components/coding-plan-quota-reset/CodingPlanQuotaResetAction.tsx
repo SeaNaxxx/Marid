@@ -1,9 +1,9 @@
 import { CheckIcon, LoaderCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { CodingPlanResetType } from "@marid/shared";
+import type { CodingPlanResetType } from "@qodex/shared";
 import { Button } from "@/components/ui/button.js";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { burstCodingPlanQuotaResetConfetti } from "@/lib/codingPlanQuotaResetConfetti.js";
 
 const MANUAL_RESET_SUCCESS_DISPLAY_MS = 600;
@@ -29,7 +29,7 @@ export function LocalizedCodingPlanQuotaResetAction({
   /** 五小时与周额度共用同一按钮组件，仅无障碍/处理中文案按类型区分。 */
   resetType?: CodingPlanResetType;
 } & CodingPlanQuotaResetActionBehavior) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const completedTime = completedAt
     ? new Intl.DateTimeFormat(locale, {
         hour: "2-digit",

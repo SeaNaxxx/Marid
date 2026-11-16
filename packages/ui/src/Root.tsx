@@ -6,8 +6,8 @@ import {
   buildRemoteWorkspaceIdentity,
   buildServerRemoteWorkspaceIdentity,
   remoteHostIdFromWorkspaceIdentity,
-} from "@marid/shared";
-import type { RemoteProjectHost } from "@marid/services";
+} from "@qodex/shared";
+import type { RemoteProjectHost } from "@qodex/services";
 import { useRemoteWorkspaceSessionStore } from "@/store/remoteWorkspaceSessionStore.js";
 import { RemoteConnectionProgressProvider } from "@/remote-connection-flow/ui/RemoteConnectionProgress.js";
 /* eslint-disable max-lines -- Root 当前集中编排启动、workspace shell wiring 和 Web 远控同步，先保持入口收口避免跨层状态拆散。 */
@@ -23,7 +23,7 @@ import {
   APP_RUNTIME_PREFERENCES_CHANGED_BROADCAST_CHANNEL,
   DesktopCommandIds,
   appRuntimePreferencesChangedBroadcastPayloadSchema,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { TooltipProvider } from "@/components/ui/tooltip.js";
 import { Button } from "@/components/ui/button.js";
 import { PlatformProvider } from "@/hooks/usePlatform.js";
@@ -47,7 +47,7 @@ import {
 import { useTabPersistence, type WorkspacePersistenceGate } from "@/hooks/useTabPersistence.js";
 import { useTokenRefresh } from "@/hooks/useTokenRefresh.js";
 import { useWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { SSHDialog } from "@/SSHDialog.js";
 import { SettingsPage } from "@/SettingsPage.js";
 import { setPendingSettingsSectionIntent } from "@/lib/settingsNavigation.js";
@@ -70,9 +70,9 @@ import {
   shouldShowRootStartupLoading,
   shouldOpenFallbackWorkspaceAfterCreate,
 } from "@/lib/rootStartupGate.js";
-import { StoreProvider, useMaridStore } from "@/store/StoreProvider.js";
+import { StoreProvider, useQodexStore } from "@/store/StoreProvider.js";
 import { setMcpStorePlatform } from "@/store/mcpStore.js";
-import { useMaridSessionStore } from "@/store/maridSessionStore.js";
+import { useQodexSessionStore } from "@/store/qodexSessionStore.js";
 import { TabStoreProvider, useTabStore, useTabStoreApi } from "@/store/TabStoreProvider.js";
 import { isSettingsTab, isWorkspaceTab, type WorkspaceTabState } from "@/store/tabStore.js";
 import { logger } from "@/logger.js";
@@ -90,7 +90,7 @@ import { useModelSelectionServiceView } from "@/hooks/useModelSelectionView.js";
 import { useRootProviderSettingsSnapshot } from "@/root/useRootProviderSettingsSnapshot.js";
 import { useWebRemoteControlAuthSync } from "@/web-remote-control/app/useWebRemoteControlAuthSync.js";
 import { useRootOAuthEffects } from "@/root/useRootOAuthEffects.js";
-import { consumeMaridJwtInvalidRestartMarker } from "@/root/maridJwtInvalidRestartMarker.js";
+import { consumeQodexJwtInvalidRestartMarker } from "@/root/qodexJwtInvalidRestartMarker.js";
 import { useDesktopNativeThemeSync } from "@/root/useDesktopNativeThemeSync.js";
 import { useRootPlatformEffects } from "@/root/useRootPlatformEffects.js";
 import { useRootWorkspaceActions } from "@/root/useRootWorkspaceActions.js";
@@ -269,21 +269,21 @@ function RootInner({
   // 工作区级 ServiceProvider 内（远程 Host 的 accessor），由它们取数会拿到另一台 Host 的答案。
   useDynamicWorkflowAvailabilityLoader(services.codingPlanSubscriptionService);
 
-  const { intl, locale, localeResolved } = useMaridIntl();
+  const { intl, locale, localeResolved } = useQodexIntl();
   const handleRemoteConnectionTargetChange = useSourceServerUpdateNotifications({
     enabled: isDesktop === true,
     management: services.sourceServerManagementService,
   });
-  const theme = useMaridStore((state) => state.theme);
-  const user = useMaridStore((state) => state.user);
-  const isRestoringOAuthSession = useMaridStore((state) => state.isRestoringOAuthSession);
+  const theme = useQodexStore((state) => state.theme);
+  const user = useQodexStore((state) => state.user);
+  const isRestoringOAuthSession = useQodexStore((state) => state.isRestoringOAuthSession);
   useWebRemoteControlAuthSync(platform, services.oauthService, user?.id, isRestoringOAuthSession);
-  const setUser = useMaridStore((state) => state.setUser);
-  const setIsRestoringOAuthSession = useMaridStore((state) => state.setIsRestoringOAuthSession);
-  const setOAuthError = useMaridStore((state) => state.setOAuthError);
-  const oauthPollingActive = useMaridStore((state) => state.oauthPollingActive);
-  const setOAuthPollingActive = useMaridStore((state) => state.setOAuthPollingActive);
-  const markOAuthSuccess = useMaridStore((state) => state.markOAuthSuccess);
+  const setUser = useQodexStore((state) => state.setUser);
+  const setIsRestoringOAuthSession = useQodexStore((state) => state.setIsRestoringOAuthSession);
+  const setOAuthError = useQodexStore((state) => state.setOAuthError);
+  const oauthPollingActive = useQodexStore((state) => state.oauthPollingActive);
+  const setOAuthPollingActive = useQodexStore((state) => state.setOAuthPollingActive);
+  const markOAuthSuccess = useQodexStore((state) => state.markOAuthSuccess);
   const {
     settings: appSettings,
     refresh: refreshAppSettings,
@@ -294,16 +294,16 @@ function RootInner({
   useDynamicWorkflowUserModeSync({
     settingsLoaded: Boolean(appSettings),
     userMode: appSettings?.dynamicWorkflowMode,
-    maridAgentService: services.maridAgentService,
+    qodexAgentService: services.qodexAgentService,
     codingPlanSubscriptionService: services.codingPlanSubscriptionService,
   });
   const [welcomeScreenOpenReason, setWelcomeScreenOpenReason] =
     useState<WelcomeScreenOpenReason | null>(() =>
-      consumeMaridJwtInvalidRestartMarker() ? "session-expired" : null,
+      consumeQodexJwtInvalidRestartMarker() ? "session-expired" : null,
     );
   const [providerFamilyDomainMigrationComplete, setProviderFamilyDomainMigrationComplete] =
     useState(false);
-  const loginEntryRequest = useMaridStore((state) => state.loginEntryRequest);
+  const loginEntryRequest = useQodexStore((state) => state.loginEntryRequest);
   const rootModelSelectionRead = useModelSelectionServiceView(services.modelSelectionService);
   const rootModelSelectionView =
     rootModelSelectionRead.state.status === "ready" ? rootModelSelectionRead.state.view : null;
@@ -361,7 +361,7 @@ function RootInner({
           return;
         }
         void refreshAppSettings();
-        void services.maridAgentService.syncAppRuntimePreferences(parsed.data).catch((error) => {
+        void services.qodexAgentService.syncAppRuntimePreferences(parsed.data).catch((error) => {
           logger.warn("[settings] 同步跨窗口运行时偏好失败", error);
         });
         void services.botsService.syncAppRuntimePreferences(parsed.data).catch((error) => {
@@ -402,14 +402,14 @@ function RootInner({
     refreshAppSettings,
     services.botsService,
     services.broadcastService,
-    services.maridAgentService,
+    services.qodexAgentService,
   ]);
 
   useEffect(() => {
     if (!appSettings) {
       return;
     }
-    void services.maridAgentService
+    void services.qodexAgentService
       .syncAppRuntimePreferences({
         askUserQuestionAutoResolutionEnabled:
           appSettings.askUserQuestionAutoResolutionEnabled !== false,
@@ -434,7 +434,7 @@ function RootInner({
     appSettings?.modelIoFullRetentionEnabled,
     appSettings?.pluginAutoRecommendationEnabled,
     services.botsService,
-    services.maridAgentService,
+    services.qodexAgentService,
   ]);
 
   const tabs = useTabStore((state) => state.tabs);
@@ -633,7 +633,7 @@ function RootInner({
   });
   const isStartupProviderLoginEntryOpen = welcomeScreenOpenReason === "startup-provider-required";
   // 首次安装时 provider 登录入口判定晚于 workspace 注入，ChatView 会先 mount 并触发草稿预热。
-  // 这里把 provider 启动检查纳入 workspace 恢复门禁，避免未连接账号前启动 Marid session。
+  // 这里把 provider 启动检查纳入 workspace 恢复门禁，避免未连接账号前启动 Qodex session。
   const canRestoreWorkspaceSession =
     !isResolvingStartupAuthState &&
     !isResolvingProviderStartupState &&
@@ -753,7 +753,7 @@ function RootInner({
       projectId?: string | null;
     }) => {
       // 桌面重连只恢复连接，不得把已选会话覆盖成草稿；手机仍沿用 replayable 入口。
-      const selectedTask = useMaridSessionStore
+      const selectedTask = useQodexSessionStore
         .getState()
         .getWorkspaceState(workspacePath, workspaceIdentity).activeTaskId;
       if (!isDesktop || !restoreSelection || !selectedTask) {
@@ -908,7 +908,7 @@ function RootInner({
         // 再打开首屏门禁，避免 Composer 按未归类范围读取并预热同目录的项目草稿。
         for (const tab of tabStoreApi.getState().tabs) {
           if (!isWorkspaceTab(tab)) continue;
-          const workspace = useMaridSessionStore
+          const workspace = useQodexSessionStore
             .getState()
             .getWorkspaceState(tab.workspacePath, tab.workspaceIdentity);
           if (workspace.activeTaskId || workspace.draftProjectId !== undefined) continue;
@@ -924,7 +924,7 @@ function RootInner({
             V4_DRAFT_SCOPE_ROOT,
             scope,
           );
-          useMaridSessionStore
+          useQodexSessionStore
             .getState()
             .startDraft(tab.workspacePath, undefined, tab.workspaceIdentity, {
               projectId: scope.projectId,
@@ -1537,7 +1537,7 @@ function RootInner({
         {requestSecurityBridgeNode}
         {remoteConnectionDialog}
         {directoryBrowserDialog}
-        {/* 修复原因：HTML 启动壳已经展示 Marid SVG，但 React 接管 root 后旧壳会被整棵替换。
+        {/* 修复原因：HTML 启动壳已经展示 Qodex SVG，但 React 接管 root 后旧壳会被整棵替换。
             之前阻塞恢复 tab / 初始 workspace 注入时重新渲染纯文字“加载中...”，所以启动被拆成两套 loading。
             这里复用同一套 SVG 启动画面，只把文案保留到 aria-label，保证视觉始终连续且不牺牲可访问性。 */}
         <RootStartupLoading label={loadingLabel} />

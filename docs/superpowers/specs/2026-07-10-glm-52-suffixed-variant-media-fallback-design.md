@@ -83,10 +83,10 @@ Leaving the capability unknown prevents only the capability projection from stri
 
 Implementation is limited to:
 
-- The provider-aware media fallback matcher in `apps/marid-cli/packages/bootstrap/src/app/model-input-capabilities.ts`.
-- Focused capability-resolution tests in `apps/marid-cli/packages/bootstrap/tests/model-selection.test.ts`.
-- Active-session provider registry refresh patch construction in `apps/marid-cli/packages/bootstrap/src/marid-protocol/workspace-model-catalog.ts`.
-- A protocol integration regression test in `apps/marid-cli/packages/bootstrap/tests/marid-protocol.test.ts`.
+- The provider-aware media fallback matcher in `apps/qodex-cli/packages/bootstrap/src/app/model-input-capabilities.ts`.
+- Focused capability-resolution tests in `apps/qodex-cli/packages/bootstrap/tests/model-selection.test.ts`.
+- Active-session provider registry refresh patch construction in `apps/qodex-cli/packages/bootstrap/src/qodex-protocol/workspace-model-catalog.ts`.
+- A protocol integration regression test in `apps/qodex-cli/packages/bootstrap/tests/qodex-protocol.test.ts`.
 - The accepted conversation-session case description and coverage row so they no longer claim that every GLM-family variant is fail-closed.
 
 No protocol schema, provider registry shape, persistent provider configuration, model reasoning policy, context-window policy, adapter request format, desktop/mobile delivery boundary, or remote-control ownership behavior changes.

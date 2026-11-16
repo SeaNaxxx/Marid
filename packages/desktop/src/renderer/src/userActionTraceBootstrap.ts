@@ -1,12 +1,12 @@
 import {
   DISABLED_RENDERER_ACTION_TRACE_CONFIG,
   RENDERER_ACTION_TRACE_SERVICE_NAME,
-  MARID_ENV,
-  MARID_VERSION,
+  QODEX_ENV,
+  QODEX_VERSION,
   type IPlatformService,
   type RendererActionTraceConfigV1,
-} from "@marid/shared";
-import { RendererUserActionTelemetry, setUserActionTelemetry } from "@marid/ui";
+} from "@qodex/shared";
+import { RendererUserActionTelemetry, setUserActionTelemetry } from "@qodex/ui";
 
 export function initializeDesktopUserActionTrace(options: {
   platform: IPlatformService;
@@ -24,8 +24,8 @@ export function initializeDesktopUserActionTrace(options: {
     config: DISABLED_RENDERER_ACTION_TRACE_CONFIG,
     resource: {
       serviceName: RENDERER_ACTION_TRACE_SERVICE_NAME,
-      serviceVersion: MARID_VERSION || "unknown",
-      deploymentEnvironment: options.isLocalDevelopmentRuntime ? "development" : MARID_ENV,
+      serviceVersion: QODEX_VERSION || "unknown",
+      deploymentEnvironment: options.isLocalDevelopmentRuntime ? "development" : QODEX_ENV,
       rendererInstanceId,
     },
     sendBatch: (batch) => sendBatch(batch),

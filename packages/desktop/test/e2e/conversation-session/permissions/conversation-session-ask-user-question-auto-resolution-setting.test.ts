@@ -1,4 +1,4 @@
-import { ASK_USER_QUESTION_E2E_CLOCK_SCALE_ENV } from "@marid/shared";
+import { ASK_USER_QUESTION_E2E_CLOCK_SCALE_ENV } from "@qodex/shared";
 import {
   TID_SETTINGS_ASK_USER_QUESTION_AUTO_RESOLUTION_SWITCH,
   TID_SETTINGS_BACK_BUTTON,
@@ -6,7 +6,7 @@ import {
   TID_SETTINGS_SECTION_NAV,
   TID_TASK_SETTINGS_BUTTON,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { clearAppData, clickTestIdByDom, readSettings } from "#e2e/helpers/desktop-app";
 import {
   prepareV4ConversationE2E,

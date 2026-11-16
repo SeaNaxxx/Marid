@@ -1,7 +1,7 @@
 /* eslint-disable max-lines -- 投影状态、V4 帧与离线替换属于同一个一致性边界。 */
 import { isDeepStrictEqual } from "node:util";
-import type { MaridTaskMeta } from "@marid/shared";
-import type { MaridArchivedTaskDeletionResult } from "@marid/services";
+import type { QodexTaskMeta } from "@qodex/shared";
+import type { QodexArchivedTaskDeletionResult } from "@qodex/services";
 import {
   CONTROLLER_TASKS_INDEX_TOPIC,
   CONTROLLER_WORKSPACES_TOPIC,
@@ -14,7 +14,7 @@ import {
   type WindowHostControllerWorkspaceFact,
   type WindowHostControllerWorkspaceFrame,
   type WindowHostTaskAddress,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 
 export type WindowHostControllerSourceScope =
   | {
@@ -32,7 +32,7 @@ export type WindowHostControllerSourceScope =
     };
 
 export interface WindowHostControllerTaskMembership {
-  meta: MaridTaskMeta;
+  meta: QodexTaskMeta;
   membership: {
     pinned: boolean;
     archived: boolean;
@@ -47,7 +47,7 @@ export interface WindowHostControllerSessionOverlay {
   title?: string;
   titleSource?: "default" | "generated" | "custom";
   updatedAt?: number;
-  pendingInteraction?: MaridTaskMeta["pendingInteraction"];
+  pendingInteraction?: QodexTaskMeta["pendingInteraction"];
   activity?: NonNullable<WindowHostControllerTaskRow["activity"]>;
 }
 
@@ -66,8 +66,8 @@ export type WindowHostControllerMutation =
 export type WindowHostControllerMutationResult =
   | void
   | boolean
-  | MaridArchivedTaskDeletionResult
-  | MaridTaskMeta;
+  | QodexArchivedTaskDeletionResult
+  | QodexTaskMeta;
 
 interface ControllerSource {
   scope: WindowHostControllerSourceScope;
@@ -118,7 +118,7 @@ function taskKey(address: WindowHostTaskAddress): string {
   return `${address.sourceServerId ?? address.remoteSessionId ?? "local"}\0${address.workspaceIdentity?.trim() || address.workspacePath}\0${address.taskId}`;
 }
 
-function defaultLiveStatus(meta: MaridTaskMeta): WindowHostControllerTaskRow["liveStatus"] {
+function defaultLiveStatus(meta: QodexTaskMeta): WindowHostControllerTaskRow["liveStatus"] {
   // live overlay 缺失表示当前没有可证明的 runtime；SQLite 里的 running/interaction
   // 可能来自上次进程退出，不能重新解释成当前运行或等待事实。
   switch (meta.status) {
@@ -133,7 +133,7 @@ function defaultLiveStatus(meta: MaridTaskMeta): WindowHostControllerTaskRow["li
 
 function statusFromActivity(
   activity: NonNullable<WindowHostControllerSessionOverlay["activity"]>,
-): MaridTaskMeta["status"] {
+): QodexTaskMeta["status"] {
   switch (activity.phase) {
     case "prewarming":
     case "running":

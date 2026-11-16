@@ -1,5 +1,5 @@
-import type { IDisposable } from "@marid/rpc";
-import { resolveWorkspaceKey } from "@marid/shared";
+import type { IDisposable } from "@qodex/rpc";
+import { resolveWorkspaceKey } from "@qodex/shared";
 
 export interface HostRemoteTaskMeta {
   taskId: string;

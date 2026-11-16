@@ -1,6 +1,6 @@
 import { BrowserWindow, MessageChannelMain } from "electron";
 import type { MessagePortMain, UtilityProcess as ElectronUtilityProcess } from "electron";
-import { HostMessageTypes, type RemoteUsageRemoteKind } from "@marid/shared";
+import { HostMessageTypes, type RemoteUsageRemoteKind } from "@qodex/shared";
 
 type WebRemoteControlSharedHostKind = "local" | "remote";
 

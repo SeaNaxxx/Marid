@@ -24,9 +24,9 @@ import {
   SquareTerminalIcon,
   TerminalIcon,
 } from "lucide-react";
-import type { WorkflowRunState } from "@marid/shared/marid-protocol-v4";
+import type { WorkflowRunState } from "@qodex/shared/qodex-protocol-v4";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import type { CodeViewerSource } from "@/lib/codeViewer.js";
 import { resolveFileDisplayDescriptor } from "@/lib/fileDisplay.js";
 import { ReadFileChip, type ReadSummary } from "@/ToolCallBlocks/renderers/read.js";
@@ -118,7 +118,7 @@ export const WorkflowWorkspaceCard = memo(function WorkflowWorkspaceCard({
   sessionId,
   workspacePath,
 }: WorkflowWorkspaceCardProps) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const format = intl.formatMessage.bind(intl);
   const { node, kind } = card;
   const { status, replayed } = workspaceCardStatus(node, run);

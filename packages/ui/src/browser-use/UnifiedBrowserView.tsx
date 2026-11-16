@@ -3,13 +3,13 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } fro
 import type {
   BrowserViewScreenshotSurfacePreparePayload,
   EmbeddedBrowserViewportPreference,
-} from "@marid/shared";
-import { browserPreviewSourceUrl, EmbeddedBrowserWebviewChannels } from "@marid/shared";
+} from "@qodex/shared";
+import { browserPreviewSourceUrl, EmbeddedBrowserWebviewChannels } from "@qodex/shared";
 import { cn } from "@/components/lib/utils.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
 import { useWebElementPicker } from "@/hooks/useWebElementPicker.js";
 import type { WebElementRect } from "@/lib/webElementContext.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 import { BrowserSiteSettingsEntry } from "@/browser-use/BrowserSiteSettingsEntry.js";
 import { BrowserToolbar } from "@/EmbeddedBrowserPaneParts.js";
@@ -145,7 +145,7 @@ export function UnifiedBrowserView({
   ) => void;
 }): React.JSX.Element {
   const platform = usePlatform();
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const desktopZoomFactor = useDesktopZoomFactor();
   const effectiveWorkspaceKey = workspaceKey ?? (workspaceIdentity?.trim() || workspacePath);
   const recentVisitsScopeKey = getBrowserVisitScopeKey({

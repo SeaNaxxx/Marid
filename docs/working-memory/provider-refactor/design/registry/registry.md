@@ -8,7 +8,7 @@ Provider Registry 回答两个问题：当前 Environment 有哪些完整 Provid
 ModelSelection 时能否定位并校验对应的完整配置。Model 的创建由 ModelFactory 负责。
 
 ```text
-Marid Built-in Provider Templates + Account Providers
+Qodex Built-in Provider Templates + Account Providers
               |
               v
 Account Built-in Provider Config + Personal Provider Config
@@ -16,7 +16,7 @@ Account Built-in Provider Config + Personal Provider Config
               v
     Effective Provider Config ------------------+
                                                   |
-Marid Built-in Model Config Rules                |
+Qodex Built-in Model Config Rules                |
               +                                  |
 Personal Model Config Rules                      |
               |                                  |
@@ -42,21 +42,21 @@ Registry 管理静态、可重建的 Provider/Model View。Token、Ticket、一�
 
 ## 输入来源
 
-### Marid Built-in Provider Config
+### Qodex Built-in Provider Config
 
-Marid 随产品提供的 Provider Template 与账号 Provider 声明。领域、代码和物理命名统一使用
-`maridBuiltin*` / `marid-builtin`；发布文件为 `config/provider/marid-builtin.json`。`official` 不作为这条
+Qodex 随产品提供的 Provider Template 与账号 Provider 声明。领域、代码和物理命名统一使用
+`qodexBuiltin*` / `qodex-builtin`；发布文件为 `config/provider/qodex-builtin.json`。`official` 不作为这条
 Provider Config 链的别名，也不保留兼容入口。实施切换见
-[`../../steps/todo-10-marid-builtin-provider-config-naming-cutover.md`](../../steps/todo-10-marid-builtin-provider-config-naming-cutover.md)。
+[`../../steps/todo-10-qodex-builtin-provider-config-naming-cutover.md`](../../steps/todo-10-qodex-builtin-provider-config-naming-cutover.md)。
 
 ### Account Built-in Provider Config
 
-AccountProviderService 只读取 Marid Built-in 中 `access.type = "zhipu-account"` 的 Provider，根据
-当前账号、套餐和团队连接投影 Account Built-in Provider Config。它在 Marid Built-in 之后、Personal 之前
+AccountProviderService 只读取 Qodex Built-in 中 `access.type = "zhipu-account"` 的 Provider，根据
+当前账号、套餐和团队连接投影 Account Built-in Provider Config。它在 Qodex Built-in 之后、Personal 之前
 参与 Overlay：
 
-Provider Config Snapshot 必须分别携带 `maridBuiltinRevision` 与 `personalRevision`；Account Snapshot 必须
-携带 `basedOnMaridBuiltinRevision`。Registry 只有在二者相等时才能解析和发布：
+Provider Config Snapshot 必须分别携带 `qodexBuiltinRevision` 与 `personalRevision`；Account Snapshot 必须
+携带 `basedOnQodexBuiltinRevision`。Registry 只有在二者相等时才能解析和发布：
 
 ```text
 B0 + A0
@@ -71,12 +71,12 @@ B1 + A1  -- 原子发布
 ```
 
 这个 revision 只证明客户端 Account Overlay 的派生来源，不要求 Account 服务端与 Built-in 发布接口共享
-版本。Personal-only 更新不改变 `maridBuiltinRevision`，因此继续立即解析并发布。首次启动在正式 Account
+版本。Personal-only 更新不改变 `qodexBuiltinRevision`，因此继续立即解析并发布。首次启动在正式 Account
 Snapshot 到达前，进程可以基于当前 Built-in 生成同 revision、账号 Provider 全部 `access.entitled=false` 的初始
 Overlay，以 fail-closed 方式完成 Registry ready；禁止 wildcard revision。
 
 ```text
-Marid Built-in account Provider
+Qodex Built-in account Provider
         +
 current account connection
         +
@@ -100,7 +100,7 @@ API Provider 可以在这里保存 API Key。Personal 共享字段级 Overlay �
 
 ### Model Config Rules
 
-Marid Built-in 和 Personal Model Config Rules 按数组顺序拼接，Personal 在后。Rules 只解析 Effective
+Qodex Built-in 和 Personal Model Config Rules 按数组顺序拼接，Personal 在后。Rules 只解析 Effective
 Provider source-aware Inventory 中的成员，不会把模型加入或移出 Provider。跨集合重名时只保留 Built-in
 身份；相同 `providerId/modelId` 的 Personal 专属 Rule仍是用户对该 Built-in Model 的正常 Overlay。
 
@@ -109,9 +109,9 @@ Provider source-aware Inventory 中的成员，不会把模型加入或移出 Pr
 ### 第一轮：Provider
 
 ```ts
-const effectiveBuiltinProviders = maridBuiltinProviders.overlay(accountBuiltinProviders);
+const effectiveBuiltinProviders = qodexBuiltinProviders.overlay(accountBuiltinProviders);
 const effectiveProviders = resolveProviderTemplates(
-  maridBuiltinProviderTemplates,
+  qodexBuiltinProviderTemplates,
   effectiveBuiltinProviders,
   personalProviders,
 );
@@ -121,7 +121,7 @@ Overlay 保留前层已有 key 的位置；后层同 key 逐字段覆盖；后�
 模型成员按所有权组合，不对一个共享列表做 Overlay：
 
 ```text
-Marid Built-in builtinModelIds
+Qodex Built-in builtinModelIds
       |
       v  Account Built-in 提供时整列表覆盖
 Effective Built-in builtinModelIds
@@ -146,7 +146,7 @@ Account Built-in 模型集合是该账号 Provider 当前允许使用的动态�
 
 ```ts
 const effectiveModelRules = new ModelConfigRules([
-  ...maridBuiltinModelRules.rules(),
+  ...qodexBuiltinModelRules.rules(),
   ...personalModelRules.rules(),
 ]);
 
@@ -326,8 +326,8 @@ Provider Store、Workspace Catalog 或 Runtime Snapshot 恢复另一份事实。
 
 ## 不变量
 
-- Provider Overlay 是 Marid Built-in -> Account Built-in -> Personal。
-- Account Built-in 只读取 Marid Built-in account Provider，不读取 Personal。
+- Provider Overlay 是 Qodex Built-in -> Account Built-in -> Personal。
+- Account Built-in 只读取 Qodex Built-in account Provider，不读取 Personal。
 - Model Rules 是 Built-in + Personal，并作用于 Effective Provider。
 - 正常装配中 Built-in/Account Built-in 维护 `builtinModelIds`，Personal 维护 `modelIds`；不建立 Source
   字段权限系统。

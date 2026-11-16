@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { IDisposable } from "@marid/rpc";
-import type { GitRepositorySummary } from "@marid/shared";
+import type { IDisposable } from "@qodex/rpc";
+import type { GitRepositorySummary } from "@qodex/shared";
 import {
   buildGitAutoRefreshWatchPaths,
   parseGitAutoRefreshWatchPaths,

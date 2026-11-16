@@ -11,8 +11,8 @@ import { useRemoteWorkspaceSessionStore } from "@/store/remoteWorkspaceSessionSt
 import { openWebRemoteControlTask } from "@/hooks/useWebRemoteControlTaskOpen.js";
 import { logger } from "@/logger.js";
 import { toast } from "@/components/ui/toast.js";
-import { useMaridSessionStore } from "@/store/maridSessionStore.js";
-import { onTaskNavigationCommitted } from "@/store/maridSessionStoreNavigation.js";
+import { useQodexSessionStore } from "@/store/qodexSessionStore.js";
+import { onTaskNavigationCommitted } from "@/store/qodexSessionStoreNavigation.js";
 import { useTabStore, useTabStoreApi } from "@/store/TabStoreProvider.js";
 import { useRemoteWorkspaceConnectionGate } from "@/project-sidebar/useRemoteWorkspaceConnectionGate.js";
 
@@ -47,7 +47,7 @@ export function useProjectTaskNavigation(
         latest.current;
       const readFocus = () =>
         props.workspacePath
-          ? useMaridSessionStore
+          ? useQodexSessionStore
               .getState()
               .getWorkspaceState(props.workspacePath, activeWorkspaceIdentity ?? undefined)
           : undefined;
@@ -74,7 +74,7 @@ export function useProjectTaskNavigation(
         // 原回调会在模型重建或远端 scope 不可用时拒绝选择；投递事件不能冒充实际打开。
         return (state.activeWorkspaceIdentity || state.activeWorkspacePath) ===
           (identity || path) &&
-          useMaridSessionStore.getState().getWorkspaceState(path, identity).activeTaskId === taskId
+          useQodexSessionStore.getState().getWorkspaceState(path, identity).activeTaskId === taskId
           ? { status: "opened" }
           : { status: "unavailable", reason: "project.navigation-rejected" };
       };

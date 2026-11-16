@@ -4,7 +4,7 @@ import type {
   WorkflowRunArtifactKind,
   WorkflowRunArtifactSummary,
   WorkflowRunArtifactVersion,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 import { orderArtifactsPrimaryFirst } from "@/app-shell/workflow-artifacts/artifactPresentation.js";
 import { logger } from "@/logger.js";
 import { useV4Conversation } from "@/v4/V4ConversationContext.js";

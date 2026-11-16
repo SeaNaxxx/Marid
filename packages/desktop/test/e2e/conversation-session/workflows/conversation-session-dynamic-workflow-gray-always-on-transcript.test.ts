@@ -1,5 +1,5 @@
-import { TID_CHAT_WORKFLOW_RUN_DIGEST } from "@marid/shared";
-import { TID_LOGIN_USE_API_KEY_BUTTON, TID_TASK_ITEM, testId } from "@marid/shared/test-ids";
+import { TID_CHAT_WORKFLOW_RUN_DIGEST } from "@qodex/shared";
+import { TID_LOGIN_USE_API_KEY_BUTTON, TID_TASK_ITEM, testId } from "@qodex/shared/test-ids";
 import { getLatestUpstreamToolResultByToolCallId } from "#e2e/helpers/conversation-session-network";
 import { clearAppData, pinE2ELocale } from "#e2e/helpers/desktop-app";
 import { releaseControlledReplay } from "#e2e/helpers/controlled-replay";

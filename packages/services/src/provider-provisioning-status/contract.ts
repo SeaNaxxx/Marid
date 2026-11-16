@@ -1,5 +1,5 @@
-import type { ProviderProvisioningLaneStatus } from "@marid/shared";
-import { ServiceChannels } from "@marid/shared";
+import type { ProviderProvisioningLaneStatus } from "@qodex/shared";
+import { ServiceChannels } from "@qodex/shared";
 import { createServiceDescriptor } from "../descriptors.js";
 
 /**

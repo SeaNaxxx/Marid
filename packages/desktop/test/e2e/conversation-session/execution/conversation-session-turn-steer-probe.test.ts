@@ -4,7 +4,7 @@ import {
   TID_SETTINGS_SECTION_NAV,
   TID_TASK_SETTINGS_BUTTON,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   DEFAULT_WORKSPACE,
   clearAppData,
@@ -169,7 +169,7 @@ async function waitForToolBlock() {
 }
 
 async function ensureQueueInteractionBehavior() {
-  if ((await readSettings()).maridInteractionBehavior === "queue") {
+  if ((await readSettings()).qodexInteractionBehavior === "queue") {
     return;
   }
 
@@ -189,7 +189,7 @@ async function ensureQueueInteractionBehavior() {
   await clickInteractionBehaviorSelect();
   await clickInteractionBehaviorQueueOption();
 
-  await browser.waitUntil(async () => (await readSettings()).maridInteractionBehavior === "queue", {
+  await browser.waitUntil(async () => (await readSettings()).qodexInteractionBehavior === "queue", {
     timeout: 15000,
     timeoutMsg: "turn steer: 交互行为没有保存为 queue",
   });

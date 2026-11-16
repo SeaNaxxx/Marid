@@ -1,4 +1,4 @@
-import type { OAuthProviderId } from "@marid/shared";
+import type { OAuthProviderId } from "@qodex/shared";
 import { createBigModelProviderRuntimeConfig } from "./providers/bigmodelProviderConfig.js";
 import {
   createZaiProviderRuntimeConfig,

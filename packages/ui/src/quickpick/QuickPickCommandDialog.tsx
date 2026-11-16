@@ -10,7 +10,7 @@ import {
   CommandShortcut,
 } from "@/components/ui/command.js";
 import { toast } from "@/components/ui/toast.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 import {
   QUICK_PICK_SECTION_ORDER,
@@ -35,7 +35,7 @@ export function QuickPickCommandDialog({
   commands: QuickPickCommand[];
   onOpenChange: (open: boolean) => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const groupedCommands = useMemo(
     () =>
       QUICK_PICK_SECTION_ORDER.map((sectionId) => ({

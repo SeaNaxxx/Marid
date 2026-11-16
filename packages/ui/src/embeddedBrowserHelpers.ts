@@ -1,4 +1,4 @@
-import { BROWSER_LOCAL_PREVIEW_SCHEME, browserPreviewSourceUrl } from "@marid/shared";
+import { BROWSER_LOCAL_PREVIEW_SCHEME, browserPreviewSourceUrl } from "@qodex/shared";
 
 export const DEFAULT_BROWSER_URL = "about:blank";
 

@@ -1,8 +1,8 @@
 import { useCallback, type KeyboardEvent } from "react";
-import { TID_AUTOMATIONS_PAGE_TAB } from "@marid/shared";
-import { testId } from "@marid/shared/test-ids";
+import { TID_AUTOMATIONS_PAGE_TAB } from "@qodex/shared";
+import { testId } from "@qodex/shared/test-ids";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 
 /** 自动化页的两个顶级标签。 */
 export type AutomationsPageTab = "automation" | "workflow";
@@ -23,7 +23,7 @@ export function AutomationsPageTitle({
   value: AutomationsPageTab;
   onValueChange: (tab: AutomationsPageTab) => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   if (!workflowTabEnabled) {
     // 字号与切换态同源：30/34 页面标题层级，切换在不在场不该改变标题的视觉层级。
     return (
@@ -47,7 +47,7 @@ export function AutomationsPageTitleSwitch({
   value: AutomationsPageTab;
   onValueChange: (tab: AutomationsPageTab) => void;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;

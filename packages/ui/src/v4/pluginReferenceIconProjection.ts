@@ -1,6 +1,6 @@
 import { resolvePluginIconSource } from "@/lib/pluginIconSource.js";
-import type { MaridPluginReferenceCatalogEntry } from "@marid/shared";
-import type { ConversationRowsPartition } from "@marid/shared/marid-protocol-v4";
+import type { QodexPluginReferenceCatalogEntry } from "@qodex/shared";
+import type { ConversationRowsPartition } from "@qodex/shared/qodex-protocol-v4";
 import { memoizeByRows, type ConversationStoreStatus } from "@/v4/conversationProjectionStore.js";
 
 export function isSessionPluginCatalogReady(
@@ -44,7 +44,7 @@ export function hasPluginReferenceRowsInPartition(partition: ConversationRowsPar
  */
 export function buildSessionPluginIconMap(
   authority: "session" | "workspace" | null,
-  entries: readonly MaridPluginReferenceCatalogEntry[],
+  entries: readonly QodexPluginReferenceCatalogEntry[],
 ): ReadonlyMap<string, string> {
   if (authority !== "session") {
     return new Map();

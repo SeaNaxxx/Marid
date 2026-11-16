@@ -30,7 +30,7 @@ export async function listPdfJsCMapAssets(): Promise<PdfJsCMapAsset[]> {
 
 export function pdfJsCMapsPlugin(): Plugin {
   return {
-    name: "marid:pdfjs-cmaps",
+    name: "qodex:pdfjs-cmaps",
     async buildStart() {
       for (const asset of await listPdfJsCMapAssets()) {
         this.emitFile({

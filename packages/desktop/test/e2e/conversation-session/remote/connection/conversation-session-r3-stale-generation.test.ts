@@ -35,7 +35,7 @@ import {
 
 const CASE_MARKER = "E2E_R3_STALE_GENERATION";
 const artifactDir = resolve(
-  process.env.MARID_E2E_ARTIFACT_DIR ?? ".e2e-artifacts/r3-stale-generation",
+  process.env.QODEX_E2E_ARTIFACT_DIR ?? ".e2e-artifacts/r3-stale-generation",
 );
 
 describe(`${CASE_MARKER}: 旧连接代际的回包/close 迟到不得覆盖新 session`, () => {
@@ -224,7 +224,7 @@ describe(`${CASE_MARKER}: 旧连接代际的回包/close 迟到不得覆盖新 s
     facts.nextTurnAfterRelease = true;
     const remoteStatus = await runSSHCommand(
       direct,
-      'tr -d "\\n " < "$HOME/.marid/server/run/status.json" | cut -c1-120',
+      'tr -d "\\n " < "$HOME/.qodex/server/run/status.json" | cut -c1-120',
     );
     facts.remoteStatus = remoteStatus.stdout.trim();
   });

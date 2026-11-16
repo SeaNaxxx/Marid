@@ -68,8 +68,8 @@ function readJobs() {
 
 function main() {
   const options = {
-    platform: readOption("platform") ?? process.env.MARID_TARGET_OS ?? process.platform,
-    arch: readOption("arch") ?? process.env.MARID_TARGET_ARCH ?? process.arch,
+    platform: readOption("platform") ?? process.env.QODEX_TARGET_OS ?? process.platform,
+    arch: readOption("arch") ?? process.env.QODEX_TARGET_ARCH ?? process.arch,
     outputDir: readOption("output-dir"),
     keepWorkdir: hasFlag("keep-workdir"),
     quiet: hasFlag("quiet"),

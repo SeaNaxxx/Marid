@@ -1,6 +1,6 @@
 import { LoaderCircle } from "lucide-react";
-import type { UsageEntitlementSubscriptionDetail, UsageQuotaLimit } from "@marid/shared";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import type { UsageEntitlementSubscriptionDetail, UsageQuotaLimit } from "@qodex/shared";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { formatStartPlanBucketResetTime } from "@/lib/codingPlanQuotaPresentation.js";
 import { formatStartPlanExpireDate } from "./CodingPlanStatusMeta.js";
 import { formatQuotaModelDisplayName } from "./quotaModelDisplayName.js";
@@ -16,7 +16,7 @@ export function StartPlanBalanceCard({
   expireTime?: string | null;
   embedded?: boolean;
 }) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const visibleLimits = limits.filter((limit) => {
     const total = resolveLimitTotal(limit);
     const remaining = resolveLimitRemaining(limit);
@@ -161,7 +161,7 @@ function formatStartPlanBalanceExpireTimeLabel({
   locale,
 }: {
   expireTime?: string | null;
-  intl: ReturnType<typeof useMaridIntl>["intl"];
+  intl: ReturnType<typeof useQodexIntl>["intl"];
   locale: string;
 }): string | null {
   const normalizedExpireTime = expireTime?.trim();

@@ -32,23 +32,23 @@ export type SettingsUsageTabTarget = "app" | "codingPlan";
 export type SettingsPluginTabTarget = "plugins" | "mcps" | "skills" | "commands";
 export type SettingsPluginNavigationOrigin = "plugin-store";
 
-const SETTINGS_SECTION_INTENT_KEY = "marid-settings-section-intent",
-  SETTINGS_USAGE_TAB_INTENT_KEY = "marid-settings-usage-tab-intent",
-  SETTINGS_PLUGIN_TAB_INTENT_KEY = "marid-settings-plugin-tab-intent",
-  SETTINGS_PLUGIN_ORIGIN_INTENT_KEY = "marid-settings-plugin-origin-intent",
-  SETTINGS_PLUGIN_SCOPE_KEY_INTENT_KEY = "marid-settings-plugin-scope-key-intent";
-const SETTINGS_SOURCE_SERVER_ID_INTENT_KEY = "marid-settings-source-server-id-intent";
-const SETTINGS_SOURCE_SERVER_DETAILS_INTENT_KEY = "marid-settings-source-server-details-intent";
-const SETTINGS_MODEL_PROVIDER_ID_INTENT_KEY = "marid-settings-model-provider-id-intent";
-const SETTINGS_SECTION_INTENT_EVENT = "marid:settings-section-intent",
-  SETTINGS_LAST_SECTION_STORAGE_KEY = "marid-settings-last-section";
+const SETTINGS_SECTION_INTENT_KEY = "qodex-settings-section-intent",
+  SETTINGS_USAGE_TAB_INTENT_KEY = "qodex-settings-usage-tab-intent",
+  SETTINGS_PLUGIN_TAB_INTENT_KEY = "qodex-settings-plugin-tab-intent",
+  SETTINGS_PLUGIN_ORIGIN_INTENT_KEY = "qodex-settings-plugin-origin-intent",
+  SETTINGS_PLUGIN_SCOPE_KEY_INTENT_KEY = "qodex-settings-plugin-scope-key-intent";
+const SETTINGS_SOURCE_SERVER_ID_INTENT_KEY = "qodex-settings-source-server-id-intent";
+const SETTINGS_SOURCE_SERVER_DETAILS_INTENT_KEY = "qodex-settings-source-server-details-intent";
+const SETTINGS_MODEL_PROVIDER_ID_INTENT_KEY = "qodex-settings-model-provider-id-intent";
+const SETTINGS_SECTION_INTENT_EVENT = "qodex:settings-section-intent",
+  SETTINGS_LAST_SECTION_STORAGE_KEY = "qodex-settings-last-section";
 const HIDDEN_SETTINGS_SECTIONS = new Set<SettingsSectionId>([
   // 产品语义：定时任务是 workspace 主视图，不能再作为设置页分区出现。
   // 注意：hooks 已是正式设置页分区，不在此列。
   "automations",
   // 旧插件市场已迁出设置页；保留 id 只用于迁移历史偏好和旧调用。
   "plugins",
-  // 工作区搜索（.maridignore）设置入口先隐藏：规则文件仍生效并可手动编辑，
+  // 工作区搜索（.qodexignore）设置入口先隐藏：规则文件仍生效并可手动编辑，
   // 编辑页代码保留，放开时从这里移除即可。
   "workspaceFileSearch",
 ]);

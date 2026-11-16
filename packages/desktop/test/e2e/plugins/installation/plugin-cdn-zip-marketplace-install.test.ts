@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { MaridPluginInfo } from "@marid/shared";
+import type { QodexPluginInfo } from "@qodex/shared";
 import { clearAppData, getE2EAppDataPaths } from "#e2e/helpers/desktop-app";
 import {
   PLUGIN_CDN_ZIP_ARCHIVE_PATH,
@@ -52,7 +52,7 @@ describe("PLM-LC-007 Desktop official CDN ZIP plugin UI lifecycle", () => {
     await installPluginThroughUi(PLUGIN_CDN_ZIP_ID);
 
     const paths = getE2EAppDataPaths();
-    const pluginStorageRoot = join(paths.homeDir, ".marid", "cli", "plugins");
+    const pluginStorageRoot = join(paths.homeDir, ".qodex", "cli", "plugins");
     const cacheRoot = join(
       pluginStorageRoot,
       "cache",
@@ -104,7 +104,7 @@ function assertInstalledRecord(pluginStorageRoot: string, cacheRoot: string): vo
   expect(record?.source?.sha256 ?? "").toMatch(/^[a-f0-9]{64}$/u);
 }
 
-function componentNames(plugin: MaridPluginInfo | undefined, kind: "command" | "skill"): string[] {
+function componentNames(plugin: QodexPluginInfo | undefined, kind: "command" | "skill"): string[] {
   return (
     plugin?.components?.find((group) => group.kind === kind)?.items.map((item) => item.name) ?? []
   );

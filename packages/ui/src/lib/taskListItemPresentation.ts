@@ -1,4 +1,4 @@
-import type { MaridTaskMeta } from "@marid/shared";
+import type { QodexTaskMeta } from "@qodex/shared";
 import type { TaskListRowActivity } from "@/v4/taskListRowActivity.js";
 
 // 行根同时承载选择、拖拽和菜单；行内按钮、交互胶囊与工作流运行行有自己的点击语义，
@@ -22,7 +22,7 @@ export function isTaskRowRenameBlockedTarget(target: EventTarget | null): boolea
 }
 
 export function deriveTaskLeadingIndicator(
-  task: MaridTaskMeta,
+  task: QodexTaskMeta,
   activity: TaskListRowActivity | null,
 ): "error" | "unread" | "loading" | "none" {
   if (activity?.phase === "error") {

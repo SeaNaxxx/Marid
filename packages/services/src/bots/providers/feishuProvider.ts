@@ -3,7 +3,7 @@ import {
   createGroupMemberDirectory,
   type GroupMemberPage,
 } from "#src/bots/providers/groupMemberDirectory.js";
-import { channelContentPartsSchema, channelContentText, botGroupCardSchema } from "@marid/shared";
+import { channelContentPartsSchema, channelContentText, botGroupCardSchema } from "@qodex/shared";
 import {
   isFeishuBotSender,
   isGroupControlCard,
@@ -13,7 +13,7 @@ import {
   readGroupMentionText,
 } from "#src/bots/providers/feishuGroupMessages.js";
 /* eslint-disable max-lines -- Feishu provider 集中承载鉴权、消息解析、卡片发送和 reaction typing 适配，后续按能力拆分。 */
-import { botTopicMessageSchema } from "@marid/shared";
+import { botTopicMessageSchema } from "@qodex/shared";
 import { readTopicHistory, TopicHistoryPermissionError } from "#src/bots/topicHistory.js";
 import type {
   BotInboundAttachment,
@@ -22,7 +22,7 @@ import type {
   BotOutboundMessage,
   BotProvider,
   SelectionPrompt,
-} from "@marid/shared";
+} from "@qodex/shared";
 import type {
   BotProviderAdapter,
   BotStreamingReplyCardHandle,
@@ -288,7 +288,7 @@ function buildFeishuElicitationForm(
         type: "callback",
         value: {
           command: buildFeishuElicitationFormCommand(selection.token),
-          maridCardText: message.text,
+          qodexCardText: message.text,
         },
       },
     ],
@@ -545,7 +545,7 @@ function getFeishuDomainProvider(bot: Pick<BotConfig, "provider">): "feishu" | "
 }
 
 function readFeishuPayloadProvider(payload: Record<string, unknown>): BotProvider {
-  return readString(payload, "maridProvider") === "lark" ? "lark" : "feishu";
+  return readString(payload, "qodexProvider") === "lark" ? "lark" : "feishu";
 }
 
 function getFeishuBaseUrl(bot: Pick<BotConfig, "provider">): string {
@@ -728,13 +728,13 @@ function readFeishuTextMessage(
   const message = isRecord(event?.message) ? event.message : null;
   const sender = isRecord(event?.sender) ? event.sender : null;
   const senderId = isRecord(sender?.sender_id) ? sender.sender_id : null;
-  const content = isRecord(payload.maridNativeCardContent)
-    ? payload.maridNativeCardContent
+  const content = isRecord(payload.qodexNativeCardContent)
+    ? payload.qodexNativeCardContent
     : parseJsonRecord(message?.content);
   const msgType = readString(message, "message_type") || readString(message, "msg_type");
   // 交互卡及其机器人确认回复属于控制流程，过去提取卡片文字会误触发另一机器人。
   if (
-    payload.maridIgnoreInteractionMessage === true ||
+    payload.qodexIgnoreInteractionMessage === true ||
     (isFeishuBotSender(readString(sender, "sender_type")) &&
       msgType === "interactive" &&
       isGroupControlCard(content))
@@ -742,8 +742,8 @@ function readFeishuTextMessage(
     return null;
   const attachment = readFeishuAttachment(msgType, content);
   const attachments: BotInboundAttachment[] = attachment ? [attachment] : [];
-  if (isRecord(payload.maridReferencedAttachment)) {
-    const ref = payload.maridReferencedAttachment;
+  if (isRecord(payload.qodexReferencedAttachment)) {
+    const ref = payload.qodexReferencedAttachment;
     if (
       (ref.kind === "image" || ref.kind === "file") &&
       typeof ref.providerFileId === "string" &&
@@ -763,8 +763,8 @@ function readFeishuTextMessage(
         });
     }
   }
-  if (Array.isArray(payload.maridReferencedInlineImages)) {
-    for (const image of payload.maridReferencedInlineImages) {
+  if (Array.isArray(payload.qodexReferencedInlineImages)) {
+    for (const image of payload.qodexReferencedInlineImages) {
       if (
         isRecord(image) &&
         typeof image.imageKey === "string" &&
@@ -809,7 +809,7 @@ function readFeishuTextMessage(
     readString(content, "text") ||
     readFeishuPostText(
       content,
-      readString(payload, "maridBotOpenId") || undefined,
+      readString(payload, "qodexBotOpenId") || undefined,
       message?.mentions,
     ) ||
     readString(event, "text_without_at_bot") ||
@@ -821,7 +821,7 @@ function readFeishuTextMessage(
       ? readGroupMessage(
           rawText,
           message?.mentions,
-          readString(payload, "maridBotOpenId"),
+          readString(payload, "qodexBotOpenId"),
           readString(sender, "sender_type"),
           readString(senderId, "open_id"),
         )
@@ -865,7 +865,7 @@ function readFeishuTextMessage(
           ...(isFeishuBotSender(readString(sender, "sender_type"))
             ? { senderType: "app" as const }
             : {}),
-          botOpenId: readString(payload, "maridBotOpenId") || undefined,
+          botOpenId: readString(payload, "qodexBotOpenId") || undefined,
           mentionedBot: groupMessage.mentionedBot,
           commandText: groupMessage.commandText,
           ...(groupMessage.contentParts
@@ -881,17 +881,17 @@ function readFeishuTextMessage(
                 ),
               }
             : {}),
-          topicRootIsCurrentBot: payload.maridTopicRootIsCurrentBot === true,
+          topicRootIsCurrentBot: payload.qodexTopicRootIsCurrentBot === true,
         }
       : {}),
-    ...(isRecord(payload.maridReferencedMessage) &&
-    typeof payload.maridReferencedMessage.messageId === "string" &&
-    typeof payload.maridReferencedMessage.text === "string"
+    ...(isRecord(payload.qodexReferencedMessage) &&
+    typeof payload.qodexReferencedMessage.messageId === "string" &&
+    typeof payload.qodexReferencedMessage.text === "string"
       ? {
           referencedMessage: {
-            ...payload.maridReferencedMessage,
-            messageId: payload.maridReferencedMessage.messageId,
-            text: payload.maridReferencedMessage.text,
+            ...payload.qodexReferencedMessage,
+            messageId: payload.qodexReferencedMessage.messageId,
+            text: payload.qodexReferencedMessage.text,
           },
         }
       : {}),
@@ -966,7 +966,7 @@ function readFeishuCardAction(
   }
   // Bugfix: 飞书卡片回调的 context.open_chat_id 在私聊按钮里也可能存在。
   // 之前用 chatId 是否存在判断群聊，会把私聊里的卡片按钮误拒成“只支持私聊”。
-  const chatType = readFeishuChatType(readString(payload, "maridChatType") || contextChatType);
+  const chatType = readFeishuChatType(readString(payload, "qodexChatType") || contextChatType);
   const groupCard = botGroupCardSchema.safeParse(value?.groupCard ?? behaviorValue?.groupCard);
   return {
     botId,
@@ -1038,9 +1038,9 @@ function readFeishuCardOriginalText(payload: unknown): string | null {
   const behavior = Array.isArray(action?.behaviors) ? action.behaviors.find(isRecord) : null;
   const behaviorValue = isRecord(behavior?.value) ? behavior.value : null;
   return (
-    readString(value, "maridCardText") ||
+    readString(value, "qodexCardText") ||
     readString(value, "cardText") ||
-    readString(behaviorValue, "maridCardText") ||
+    readString(behaviorValue, "qodexCardText") ||
     readString(behaviorValue, "cardText") ||
     null
   );
@@ -1094,7 +1094,7 @@ function buildFeishuButtonElement(params: {
         type: "callback",
         value: {
           command: params.command,
-          maridCardText: params.originalText,
+          qodexCardText: params.originalText,
         },
       },
     ],
@@ -1763,15 +1763,15 @@ export function createFeishuWebSocketEventHandlers(params: {
       await onPayload({
         ...(isRecord(payload) ? payload : { payload }),
         botId: bot.id,
-        maridProvider: bot.provider,
+        qodexProvider: bot.provider,
       });
     },
     "im.chat.member.bot.deleted_v1": async (payload: unknown) => {
       await onPayload({
         ...(isRecord(payload) ? payload : {}),
         botId: bot.id,
-        maridProvider: bot.provider,
-        maridBotRemoved: true,
+        qodexProvider: bot.provider,
+        qodexBotRemoved: true,
       });
     },
     // Bugfix: 我们用 Typing reaction 模拟输入中状态，飞书会把自己创建的 reaction 再推回长连接。
@@ -1781,13 +1781,13 @@ export function createFeishuWebSocketEventHandlers(params: {
       const responseState = { deferred: false };
       const callbackPayload = {
         ...(isRecord(payload) ? payload : { payload }),
-        maridFeishuCardResponseState: responseState,
+        qodexFeishuCardResponseState: responseState,
         botId: bot.id,
-        maridProvider: bot.provider,
-        maridFeishuSynchronousCardAction: true,
+        qodexProvider: bot.provider,
+        qodexFeishuSynchronousCardAction: true,
       };
       // 修复原因：飞书点击后的同步响应才是客户端可靠采用的卡片状态。传输层不能再从
-      // maridCardText 拼简化卡，也不能返回 undefined 后依赖旁路 PATCH；它必须消费业务层
+      // qodexCardText 拼简化卡，也不能返回 undefined 后依赖旁路 PATCH；它必须消费业务层
       // 已推进完成的完整 outbound，并用同一份 elicitation 状态生成下一题卡片。
       // 飞书要求三秒内响应。超时只切换卡片投递方式，业务请求仍执行一次。
       let deadline: ReturnType<typeof setTimeout> | undefined;
@@ -2472,7 +2472,7 @@ export function createFeishuBotProvider(deps: FeishuProviderDeps): BotProviderAd
             readString(isRecord(sender?.sender_id) ? sender.sender_id : null, "open_id") !==
               openId)) &&
         !(
-          payload.maridTopicHasAcceptedInput === true &&
+          payload.qodexTopicHasAcceptedInput === true &&
           parentId === rootId &&
           !isFeishuBotSender(readString(sender, "sender_type"))
         ) &&
@@ -2536,7 +2536,7 @@ export function createFeishuBotProvider(deps: FeishuProviderDeps): BotProviderAd
             isFeishuBotSender(referenced.sender?.sender_type ?? "") &&
             isGroupControlCard(parseJsonRecord(referenced.body?.content))
           )
-            return { ...payload, maridIgnoreInteractionMessage: true };
+            return { ...payload, qodexIgnoreInteractionMessage: true };
           const text = readGroupCardText(parseJsonRecord(referenced.body?.content));
           if (!text) throw new Error("Referenced message has no readable text");
           referencedMessage = { messageId: parentId, text };
@@ -2609,12 +2609,12 @@ export function createFeishuBotProvider(deps: FeishuProviderDeps): BotProviderAd
       }
       return {
         ...payload,
-        maridBotOpenId: openId,
-        ...(nativeCardContent ? { maridNativeCardContent: nativeCardContent } : {}),
-        maridTopicRootIsCurrentBot: topicRootIsCurrentBot,
-        maridReferencedAttachment: referencedAttachment,
-        maridReferencedMessage: referencedMessage,
-        maridReferencedInlineImages: referencedInlineImages,
+        qodexBotOpenId: openId,
+        ...(nativeCardContent ? { qodexNativeCardContent: nativeCardContent } : {}),
+        qodexTopicRootIsCurrentBot: topicRootIsCurrentBot,
+        qodexReferencedAttachment: referencedAttachment,
+        qodexReferencedMessage: referencedMessage,
+        qodexReferencedInlineImages: referencedInlineImages,
       };
     },
     splitStreamingReplyCardStates: splitFeishuStreamingCardStates,

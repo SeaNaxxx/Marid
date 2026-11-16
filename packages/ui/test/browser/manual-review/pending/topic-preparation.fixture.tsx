@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import type { BotTopicPreparation } from "@marid/shared";
-import type { UserInputRow } from "@marid/shared/marid-protocol-v4";
+import type { BotTopicPreparation } from "@qodex/shared";
+import type { UserInputRow } from "@qodex/shared/qodex-protocol-v4";
 import { TooltipProvider } from "@/components/ui/tooltip.js";
-import { MaridIntlProvider } from "@/i18n/IntlProvider.js";
+import { QodexIntlProvider } from "@/i18n/IntlProvider.js";
 import { BotTopicPreparationList } from "@/v4/BotTopicPreparation.js";
 import { ConversationUserInputBubble } from "@/v4/ConversationUserInputBubble.js";
 import "@/styles.css";
@@ -37,7 +37,7 @@ function Fixture() {
     ? ([{ kind: "userInput", botGroupSource: { messageId: "first" } }] as UserInputRow[])
     : [];
   return (
-    <MaridIntlProvider initialLocale={chinese ? "zh-CN" : "en-US"}>
+    <QodexIntlProvider initialLocale={chinese ? "zh-CN" : "en-US"}>
       <TooltipProvider>
         <main className="min-h-screen bg-background p-6 text-foreground @container/conversation">
           <div className="mx-auto flex max-w-3xl flex-col items-end" data-testid="formal">
@@ -64,7 +64,7 @@ function Fixture() {
           </div>
         </main>
       </TooltipProvider>
-    </MaridIntlProvider>
+    </QodexIntlProvider>
   );
 }
 createRoot(document.getElementById("root")!).render(<Fixture />);

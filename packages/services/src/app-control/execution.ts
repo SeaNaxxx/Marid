@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { completeNewModelSelection, validateModelSelectionOptions } from "@marid/provider";
+import { completeNewModelSelection, validateModelSelectionOptions } from "@qodex/provider";
 import {
   SessionControlError,
   type AccessGrant,
@@ -8,18 +8,18 @@ import {
   type AppSessionRef,
   type AppTrustedContext,
   type MutationResult,
-} from "@marid/session-control/contracts";
+} from "@qodex/session-control/contracts";
 import {
   type CommandAck,
   type CommandEnvelope,
   type CommandPayloadMap,
   type ConversationSnapshot,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 import type { ProjectDirectories, ProjectTask } from "#src/project/contract.js";
 import type { AppControlServiceDependencies } from "#src/app-control/contract.js";
 import { getAppControlBinding } from "#src/app-control/context.js";
 import { observeAppConversation } from "#src/app-control/observation.js";
-import { withTrustedMaridAgentV4Connection } from "#src/marid-agent/maridAgentConnectionScope.js";
+import { withTrustedQodexAgentV4Connection } from "#src/qodex-agent/qodexAgentConnectionScope.js";
 
 export function appControlCommandId(context: AppTrustedContext, requestId: string): string {
   return `app-control-${createHash("sha256")
@@ -174,7 +174,7 @@ export function createAppExecutionPorts(
   ) {
     const binding = getAppControlBinding(context);
     return deps.agent.sendConversationCommandV4(
-      withTrustedMaridAgentV4Connection(
+      withTrustedQodexAgentV4Connection(
         { ...target, ...(projectId !== undefined ? { projectId } : {}), envelope },
         { connectionId: binding.connectionId, clientMode: "desktop-continuous" },
       ),

@@ -19,7 +19,7 @@ import {
 
 const CASE_MARKER = "E2E_R3_INSTALL_ENVIRONMENT";
 const artifactDir = resolve(
-  process.env.MARID_E2E_ARTIFACT_DIR ?? ".e2e-artifacts/r3-install-environment",
+  process.env.QODEX_E2E_ARTIFACT_DIR ?? ".e2e-artifacts/r3-install-environment",
 );
 // old-glibc-runtime 需要真实 glibc < 2.28 的远端镜像，不注入 getconf。服务器队列没有该档位，
 // 只能本机运行，构建与运行命令见 harness/remote/README.md「低版本 glibc 目标」。
@@ -43,11 +43,11 @@ async function readRemoteFacts(config: SSHConnectionConfig) {
     config,
     'echo "tmp=$(mount | grep " /tmp " | head -n1)"; echo "tar=$(command -v tar || echo none)"; ' +
       'echo "forwarding=$(grep -iE "^AllowTcpForwarding" /etc/ssh/sshd_config | tail -n1)"; ' +
-      'echo "current=$(test -f "$HOME/.marid/server/current.json" && grep -o \'"archiveSha256": *"[0-9a-f]*"\' "$HOME/.marid/server/current.json" || echo none)"; ' +
-      'echo "staging=$(ls -d "$HOME"/.marid/server/staging* "$HOME"/.marid/server/bootstrap* 2>/dev/null | tr "\\n" ",")"; ' +
-      'echo "serverRoot=$(ls -A "$HOME/.marid/server" 2>/dev/null | tr "\\n" ",")"; ' +
+      'echo "current=$(test -f "$HOME/.qodex/server/current.json" && grep -o \'"archiveSha256": *"[0-9a-f]*"\' "$HOME/.qodex/server/current.json" || echo none)"; ' +
+      'echo "staging=$(ls -d "$HOME"/.qodex/server/staging* "$HOME"/.qodex/server/bootstrap* 2>/dev/null | tr "\\n" ",")"; ' +
+      'echo "serverRoot=$(ls -A "$HOME/.qodex/server" 2>/dev/null | tr "\\n" ",")"; ' +
       'echo "libc=$(getconf GNU_LIBC_VERSION 2>/dev/null || echo none)"; ' +
-      'echo "tmpEntries=$(ls /tmp 2>/dev/null | tr "\\n" ",")"; echo "status=$(cat "$HOME/.marid/server/run/status.json" 2>/dev/null | tr -d "\\n ")"',
+      'echo "tmpEntries=$(ls /tmp 2>/dev/null | tr "\\n" ",")"; echo "status=$(cat "$HOME/.qodex/server/run/status.json" 2>/dev/null | tr -d "\\n ")"',
   );
   return Object.fromEntries(
     facts.stdout
@@ -114,15 +114,15 @@ describe(`${CASE_MARKER}: 受限远端环境下的安装与连接（${SUBCASE}�
     await browser.execute(() => {
       const state = window as Window & {
         __installEnvironmentLogs?: Array<{ message: string; level: string }>;
-        marid?: {
+        qodex?: {
           onRemoteConnectionLog: (
             callback: (entry: { message: string; level: string }) => void,
           ) => () => void;
         };
       };
       state.__installEnvironmentLogs = [];
-      if (!state.marid) throw new Error("Missing desktop platform");
-      state.marid.onRemoteConnectionLog(({ message, level }) =>
+      if (!state.qodex) throw new Error("Missing desktop platform");
+      state.qodex.onRemoteConnectionLog(({ message, level }) =>
         state.__installEnvironmentLogs!.push({ message, level }),
       );
     });
@@ -155,7 +155,7 @@ describe(`${CASE_MARKER}: 受限远端环境下的安装与连接（${SUBCASE}�
         throw new Error(`${CASE_MARKER}: noexec-tmp 安装失败: ${outcome.errorText}`);
       expect(after.current).toMatch(/archiveSha256/u);
       expect(after.status).toContain('"state":"ready"');
-      expect(after.tmpEntries).not.toContain("marid-server");
+      expect(after.tmpEntries).not.toContain("qodex-server");
       return;
     }
     if (SUBCASE === "no-tar") {

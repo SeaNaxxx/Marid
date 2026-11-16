@@ -2,9 +2,9 @@ import type {
   ConversationShareFailureIssue,
   ConversationSharePreflightResult,
   ConversationShareTurnPreflightResult,
-} from "@marid/services";
-import { extractConversationPreviewFileReferences } from "@marid/shared";
-import type { ConversationRow } from "@marid/shared/marid-protocol-v4";
+} from "@qodex/services";
+import { extractConversationPreviewFileReferences } from "@qodex/shared";
+import type { ConversationRow } from "@qodex/shared/qodex-protocol-v4";
 
 function hashString(value: string): string {
   let hash = 2166136261;

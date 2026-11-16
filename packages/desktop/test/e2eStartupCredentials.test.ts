@@ -5,7 +5,7 @@ const restoredOAuthCredentials = {
   "oauth:active_provider": "zai",
   "oauth:zai:access_token": "fake-access-token",
   "oauth:zai:user_info": "{}",
-  maridjwttoken: "fake-marid-jwt",
+  qodexjwttoken: "fake-qodex-jwt",
 };
 
 describe("desktop e2e startup credentials", () => {
@@ -42,7 +42,7 @@ describe("desktop e2e startup credentials", () => {
       "oauth:zai:access_token": "fake-access-token",
       "oauth:zai:user_info": "{}",
     });
-    expect(fixture.maridjwttoken).toBe("fake-marid-jwt");
+    expect(fixture.qodexjwttoken).toBe("fake-qodex-jwt");
   });
 
   it("远程回放优先保持匿名，不采用本地账号 mock", () => {
@@ -115,8 +115,8 @@ describe("desktop e2e startup credentials", () => {
         specs: [spec],
         legacyAuthToken: "fake-auth-token",
         restoredOAuthCredentials,
-      }).maridjwttoken,
-    ).toBe("fake-marid-jwt");
+      }).qodexjwttoken,
+    ).toBe("fake-qodex-jwt");
   });
   it("供应商响应式 spec 保留本地 balance mock 所需的 JWT", () => {
     expect(
@@ -126,8 +126,8 @@ describe("desktop e2e startup credentials", () => {
         ],
         legacyAuthToken: "fake-auth-token",
         restoredOAuthCredentials,
-      }).maridjwttoken,
-    ).toBe("fake-marid-jwt");
+      }).qodexjwttoken,
+    ).toBe("fake-qodex-jwt");
   });
   it("纯 Provider 冷恢复 spec 不播种会访问账号控制面的假登录态", () => {
     expect(
@@ -216,7 +216,7 @@ describe("desktop e2e startup credentials", () => {
     });
   });
 
-  it("Start Plan 手动领取 spec 保留调用 claim API 所需的 marid JWT", () => {
+  it("Start Plan 手动领取 spec 保留调用 claim API 所需的 qodex JWT", () => {
     expect(
       createE2EStartupCredentialSeed({
         specs: [
@@ -238,8 +238,8 @@ describe("desktop e2e startup credentials", () => {
           "./test/e2e/conversation-session/sharing/conversation-session-share-popover.test.ts",
         ],
         legacyAuthToken: "legacy",
-        restoredOAuthCredentials: { maridjwttoken: "local-only" },
-      }).maridjwttoken,
+        restoredOAuthCredentials: { qodexjwttoken: "local-only" },
+      }).qodexjwttoken,
     ).toBe("local-only");
   });
 });

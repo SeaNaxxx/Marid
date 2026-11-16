@@ -3,7 +3,7 @@ import {
   TID_SETTINGS_USAGE_TAB,
   TID_TASK_SETTINGS_BUTTON,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import {
   clearAppData,
   clickTestIdByDom,

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { ConversationRow, SessionPhase } from "@marid/shared/marid-protocol-v4";
+import type { ConversationRow, SessionPhase } from "@qodex/shared/qodex-protocol-v4";
 import {
   applyConversationFindHighlights,
   applySearchResultHighlight,

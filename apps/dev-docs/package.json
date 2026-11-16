@@ -1,5 +1,5 @@
 {
-  "name": "@marid/dev-docs",
+  "name": "@qodex/dev-docs",
   "private": true,
   "type": "module",
   "scripts": {

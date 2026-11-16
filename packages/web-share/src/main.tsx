@@ -46,7 +46,7 @@ const root = {
 const webAuthService = createWebAuthService();
 
 function resolveThemePreference(): Theme {
-  const saved = localStorage.getItem("marid-theme");
+  const saved = localStorage.getItem("qodex-theme");
   return resolveWebRemoteControlInitialTheme({ storedTheme: saved, defaultTheme: "zai-light" });
 }
 
@@ -76,18 +76,18 @@ function renderCallback(): void {
 }
 
 const endpointOrigin =
-  import.meta.env.VITE_MARID_BASE_URL?.trim().replace(/\/+$/u, "") || window.location.origin;
+  import.meta.env.VITE_QODEX_BASE_URL?.trim().replace(/\/+$/u, "") || window.location.origin;
 const mockMode =
   import.meta.env.DEV && import.meta.env.VITE_CONVERSATION_SHARE_PREVIEW_MOCK === "true";
 const getMockToken = () =>
-  mockMode && window.sessionStorage.getItem("marid:share:mock-auth") === "owner"
+  mockMode && window.sessionStorage.getItem("qodex:share:mock-auth") === "owner"
     ? "mock-owner-token"
     : null;
-const getAccessToken = () => getMockToken() ?? webAuthService.getMaridJwtToken();
+const getAccessToken = () => getMockToken() ?? webAuthService.getQodexJwtToken();
 
 function startLogin(provider: WebOAuthProviderId): void {
   if (mockMode) {
-    window.sessionStorage.setItem("marid:share:mock-auth", "owner");
+    window.sessionStorage.setItem("qodex:share:mock-auth", "owner");
     window.location.reload();
     return;
   }
@@ -100,13 +100,13 @@ function startLogin(provider: WebOAuthProviderId): void {
 }
 
 function logout(): void {
-  if (mockMode) window.sessionStorage.removeItem("marid:share:mock-auth");
+  if (mockMode) window.sessionStorage.removeItem("qodex:share:mock-auth");
   void webAuthService.logout();
 }
 
 async function renderManage(locale: "zh-CN" | "en-US"): Promise<void> {
   document.documentElement.lang = locale;
-  document.title = locale === "zh-CN" ? "我的分享 · Marid" : "My shares · Marid";
+  document.title = locale === "zh-CN" ? "我的分享 · Qodex" : "My shares · Qodex";
   const client = mockMode
     ? new (
         await import("../../web/src/share-manage/mockConversationShareManageClient.js")
@@ -127,7 +127,7 @@ async function renderManage(locale: "zh-CN" | "en-US"): Promise<void> {
 async function renderShare(): Promise<void> {
   const locale = resolveConversationShareRouteLocale(window.location.pathname);
   document.documentElement.lang = locale;
-  document.title = locale === "zh-CN" ? "Marid 会话分享" : "Marid Conversation Share";
+  document.title = locale === "zh-CN" ? "Qodex 会话分享" : "Qodex Conversation Share";
 
   const shareCode = resolveConversationShareCodeFromPath(window.location.pathname);
   if (!shareCode) {

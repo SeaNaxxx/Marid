@@ -1,8 +1,8 @@
-import { BIGMODEL_PROVIDER_ID, buildBigModelApiUrl } from "@marid/shared";
+import { BIGMODEL_PROVIDER_ID, buildBigModelApiUrl } from "@qodex/shared";
 import type { OAuthProviderRuntimeConfig } from "../runtimeConfig.js";
 import {
   buildDesktopOAuthRedirectUriFromEnv,
-  buildMaridApiUrlFromEnv,
+  buildQodexApiUrlFromEnv,
   readBoolean,
   readEnv,
 } from "./configUtils.js";
@@ -16,10 +16,10 @@ export const BIGMODEL_OAUTH_PROVIDER_CONFIG: Omit<OAuthProviderRuntimeConfig, "a
   enabled: true,
   order: 0,
   authorizeUrl: "https://bigmodel.cn/login",
-  tokenUrl: "https://marid.z.ai/api/v1/oauth/token",
-  userinfoUrl: buildBigModelApiUrl({ MARID_ENV: "production" }, BIGMODEL_USERINFO_PATH),
-  appId: "marid",
-  redirectUri: "marid://oauth/callback",
+  tokenUrl: "https://qodex.z.ai/api/v1/oauth/token",
+  userinfoUrl: buildBigModelApiUrl({ QODEX_ENV: "production" }, BIGMODEL_USERINFO_PATH),
+  appId: "qodex",
+  redirectUri: "qodex://oauth/callback",
 };
 
 export function createBigModelProviderRuntimeConfig(
@@ -33,12 +33,12 @@ export function createBigModelProviderRuntimeConfig(
       buildBigModelApiUrl(env, BIGMODEL_AUTHORIZE_PATH),
     tokenUrl:
       readEnv(env, "BIGMODEL_OAUTH_TOKEN_URL") ??
-      buildMaridApiUrlFromEnv(env, "/api/v1/oauth/token"),
+      buildQodexApiUrlFromEnv(env, "/api/v1/oauth/token"),
     userinfoUrl: resolveBigModelUserinfoUrl(env),
     appId: readEnv(env, "BIGMODEL_OAUTH_APP_ID") ?? BIGMODEL_OAUTH_PROVIDER_CONFIG.appId,
     redirectUri: buildDesktopOAuthRedirectUriFromEnv(env),
     // 历史 fallback secret 已废弃，不能再把内置密钥打进运行时配置。
-    // 当前 BigModel callback 只消费 marid OAuth token 路由，显式 appSecret 仅保留给
+    // 当前 BigModel callback 只消费 qodex OAuth token 路由，显式 appSecret 仅保留给
     // 旧接口兼容场景，缺失时必须保持 undefined。
     appSecret: readEnv(env, "BIGMODEL_OAUTH_APP_SECRET"),
   };

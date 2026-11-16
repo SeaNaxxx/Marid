@@ -40,9 +40,9 @@ describe.skipIf(isWindows)("cdn-preload.sh", () => {
     writeFileSync(
       cdnUrlsIn,
       [
-        "https://cdn-marid.z.ai/marid/electron/releases/1.3.0/Marid-1.3.0-mac-arm64.dmg\t3145728",
-        "https://cdn-marid.z.ai/marid/electron/releases/update/mac/arm64/latest-mac.yml\t128",
-        "https://cdn-marid.z.ai/marid/electron/releases/1.3.0/Marid-1.3.0-mac-arm64.zip",
+        "https://cdn-qodex.z.ai/qodex/electron/releases/1.3.0/Qodex-1.3.0-mac-arm64.dmg\t3145728",
+        "https://cdn-qodex.z.ai/qodex/electron/releases/update/mac/arm64/latest-mac.yml\t128",
+        "https://cdn-qodex.z.ai/qodex/electron/releases/1.3.0/Qodex-1.3.0-mac-arm64.zip",
         "",
       ].join("\n"),
       "utf-8",
@@ -115,7 +115,7 @@ process.stdout.write("\\n");
     expect(output).toContain("no minimum file size threshold is applied");
     expect(output).toContain("Filtered URLs: 2, Skipped URLs: 1");
     expect(output).toContain(
-      "skip preload (missing/invalid recorded size): https://cdn-marid.z.ai/marid/electron/releases/1.3.0/Marid-1.3.0-mac-arm64.zip",
+      "skip preload (missing/invalid recorded size): https://cdn-qodex.z.ai/qodex/electron/releases/1.3.0/Qodex-1.3.0-mac-arm64.zip",
     );
 
     const aliyunCalls = readFileSync(aliyunLogPath, "utf-8")
@@ -128,7 +128,7 @@ process.stdout.write("\\n");
     const describeCalls = aliyunCalls.filter((line) => line.includes("DescribeRefreshTaskById"));
     expect(pushCalls).toHaveLength(2);
     expect(pushCalls.some((line) => line.includes("latest-mac.yml"))).toBe(true);
-    expect(pushCalls.some((line) => line.includes("Marid-1.3.0-mac-arm64.dmg"))).toBe(true);
+    expect(pushCalls.some((line) => line.includes("Qodex-1.3.0-mac-arm64.dmg"))).toBe(true);
     expect(pushCalls.every((line) => !line.includes("--Area"))).toBe(true);
     expect(output).not.toContain("--Area");
     expect(describeCalls).toHaveLength(2);
@@ -144,8 +144,8 @@ process.stdout.write("\\n");
     writeFileSync(
       cdnUrlsIn,
       [
-        "https://cdn-marid.z.ai/marid/electron/releases/1.3.0/Marid-1.3.0-linux-arm64.AppImage\t3145728",
-        "https://cdn.marid-ai.com/marid/electron/releases/1.3.0/Marid-1.3.0-linux-arm64.AppImage\t3145728",
+        "https://cdn-qodex.z.ai/qodex/electron/releases/1.3.0/Qodex-1.3.0-linux-arm64.AppImage\t3145728",
+        "https://cdn.qodex-ai.com/qodex/electron/releases/1.3.0/Qodex-1.3.0-linux-arm64.AppImage\t3145728",
       ].join("\n"),
       "utf-8",
     );
@@ -168,8 +168,8 @@ done
 if [[ "$2" == "PushObjectCache" ]]; then
   if [[ "$profile" == "z-ai-account" ]]; then
     printf '%s\\n' '{"PushTaskId":"task-z-ai"}'
-  elif [[ "$profile" == "marid-ai-account" ]]; then
-    printf '%s\\n' '{"PushTaskId":"task-marid-ai"}'
+  elif [[ "$profile" == "qodex-ai-account" ]]; then
+    printf '%s\\n' '{"PushTaskId":"task-qodex-ai"}'
   else
     echo "unexpected profile: $profile" >&2
     exit 1
@@ -207,8 +207,8 @@ else process.stdout.write("\\n");
         ...process.env,
         PATH: `${binDir}:${process.env.PATH ?? ""}`,
         CDN_URLS_IN: cdnUrlsIn,
-        CDN_DOMAIN: "cdn-marid.z.ai,cdn.marid-ai.com",
-        CDN_PRELOAD_PROFILE: "z-ai-account,marid-ai-account",
+        CDN_DOMAIN: "cdn-qodex.z.ai,cdn.qodex-ai.com",
+        CDN_PRELOAD_PROFILE: "z-ai-account,qodex-ai-account",
         POLL_INTERVAL: "0",
       },
       timeout: 25_000,
@@ -229,12 +229,12 @@ else process.stdout.write("\\n");
     expect(describeCalls).toHaveLength(2);
     expect(
       pushCalls.some(
-        (line) => line.includes("cdn-marid.z.ai") && line.includes("--profile z-ai-account"),
+        (line) => line.includes("cdn-qodex.z.ai") && line.includes("--profile z-ai-account"),
       ),
     ).toBe(true);
     expect(
       pushCalls.some(
-        (line) => line.includes("cdn.marid-ai.com") && line.includes("--profile marid-ai-account"),
+        (line) => line.includes("cdn.qodex-ai.com") && line.includes("--profile qodex-ai-account"),
       ),
     ).toBe(true);
     expect(pushCalls.every((line) => !line.includes("--region"))).toBe(true);
@@ -246,7 +246,7 @@ else process.stdout.write("\\n");
     ).toBe(true);
     expect(
       describeCalls.some(
-        (line) => line.includes("task-marid-ai") && line.includes("--profile marid-ai-account"),
+        (line) => line.includes("task-qodex-ai") && line.includes("--profile qodex-ai-account"),
       ),
     ).toBe(true);
     expect(describeCalls.every((line) => !line.includes("--region"))).toBe(true);
@@ -262,8 +262,8 @@ else process.stdout.write("\\n");
     writeFileSync(
       cdnUrlsIn,
       [
-        "https://cdn.codegeex.cn/marid/electron/releases/1.3.0/Marid-1.3.0-mac-arm64.dmg\t3145728",
-        "https://cdn.codegeex.cn/marid/electron/releases/update/mac/arm64/latest-mac.yml\t128",
+        "https://cdn.codegeex.cn/qodex/electron/releases/1.3.0/Qodex-1.3.0-mac-arm64.dmg\t3145728",
+        "https://cdn.codegeex.cn/qodex/electron/releases/update/mac/arm64/latest-mac.yml\t128",
       ].join("\n"),
       "utf-8",
     );
@@ -327,7 +327,7 @@ else process.stdout.write("\\n");
 
     expect(aliyunCalls).toHaveLength(2);
     expect(aliyunCalls[0]).toContain("PushObjectCache");
-    expect(aliyunCalls[0]).toContain("Marid-1.3.0-mac-arm64.dmg");
+    expect(aliyunCalls[0]).toContain("Qodex-1.3.0-mac-arm64.dmg");
     expect(aliyunCalls[1]).toContain("DescribeRefreshTaskById");
   }, 30_000);
 
@@ -341,7 +341,7 @@ else process.stdout.write("\\n");
     mkdirSync(binDir, { recursive: true });
     writeFileSync(
       cdnUrlsIn,
-      "https://cdn.codegeex.cn/marid/electron/releases/1.6.0/Marid-1.6.0-mac-arm64.dmg\t3145728\n",
+      "https://cdn.codegeex.cn/qodex/electron/releases/1.6.0/Qodex-1.6.0-mac-arm64.dmg\t3145728\n",
       "utf-8",
     );
 
@@ -422,7 +422,7 @@ else process.stdout.write("\\n");
     mkdirSync(binDir, { recursive: true });
     writeFileSync(
       cdnUrlsIn,
-      "https://cdn.codegeex.cn/marid/electron/releases/1.6.0/Marid-1.6.0-mac-arm64.dmg\t3145728\n",
+      "https://cdn.codegeex.cn/qodex/electron/releases/1.6.0/Qodex-1.6.0-mac-arm64.dmg\t3145728\n",
       "utf-8",
     );
 
@@ -487,7 +487,7 @@ process.stdout.write("\\n");
     mkdirSync(binDir, { recursive: true });
     writeFileSync(
       cdnUrlsIn,
-      "https://cdn.codegeex.cn/marid/electron/releases/1.6.0/Marid-1.6.0-mac-arm64.dmg\t3145728\n",
+      "https://cdn.codegeex.cn/qodex/electron/releases/1.6.0/Qodex-1.6.0-mac-arm64.dmg\t3145728\n",
       "utf-8",
     );
 

@@ -3,7 +3,7 @@ import type { CreateTaskRequest } from "@/app-shell/types.js";
 import { ServiceProvider, useComposerClientNamespace } from "@/hooks/useServices.js";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
 import type { PanelImperativeHandle } from "react-resizable-panels";
-import type { IServiceAccessor } from "@marid/services";
+import type { IServiceAccessor } from "@qodex/services";
 import {
   closestCenter,
   DndContext,
@@ -19,10 +19,10 @@ import {
   isRemoteWorkspaceIdentity,
   type BrowserViewScreenshotSurfacePreparePayload,
   type GitChangeSourceId,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { FileManagerPane } from "@/WorkspaceFileTree.js";
 import type { FileManagerTarget } from "@/lib/workspaceSidePane.js";
-import { useMaridSessionStore } from "@/store/maridSessionStore.js";
+import { useQodexSessionStore } from "@/store/qodexSessionStore.js";
 import { composerScopeKey, resolveComposerScope } from "@/v4/composer/composerDraftStore.js";
 import { SidePaneTerminalPane } from "@/SidePaneTerminalPane.js";
 import { useIsOfficeMode } from "@/hooks/useInterfaceMode.js";
@@ -115,7 +115,7 @@ import {
 import { inferMediaPreview, type CodeViewerSource } from "@/lib/codeViewer.js";
 import type { MessageFileLinkTarget } from "@/components/ai-elements/message.js";
 import { getVisibleSidePaneTabs } from "@/lib/workspaceSidePane.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import {
   BugIcon,
   ChevronRightIcon,
@@ -476,7 +476,7 @@ export function AnimatedSidePanePanel({
   });
   const pluginUiWorkspaceKey =
     pluginUiTarget.workspaceIdentity?.trim() || pluginUiTarget.workspacePath;
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const isOfficeMode = useIsOfficeMode();
   const developerToolsEnabled = useDeveloperToolsVisibility();
   const isMobileTextInputViewport = useIsMobileTextInputViewport();
@@ -484,7 +484,7 @@ export function AnimatedSidePanePanel({
   const isResizeDisabled = !isVisible;
   const workspaceKey = workspaceIdentity?.trim() || workspaceAbsPath;
   const composerClientNamespace = useComposerClientNamespace();
-  const draftProjectId = useMaridSessionStore(
+  const draftProjectId = useQodexSessionStore(
     (state) => state.workspaces[workspaceKey]?.draftProjectId,
   );
   const draftScopeKey = composerScopeKey(

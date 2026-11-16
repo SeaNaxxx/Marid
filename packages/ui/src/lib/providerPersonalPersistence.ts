@@ -1,4 +1,4 @@
-import type { IProviderSettingsService, ProviderSettingsView } from "@marid/services";
+import type { IProviderSettingsService, ProviderSettingsView } from "@qodex/services";
 
 export async function persistPersonalProviderDeletion(params: {
   providerId: string;

@@ -1,4 +1,4 @@
-import type { BotOutboundMessage } from "@marid/shared";
+import type { BotOutboundMessage } from "@qodex/shared";
 
 type ReplyTarget = Pick<BotOutboundMessage, "replyToMessageId" | "threadId" | "rootMessageId">;
 

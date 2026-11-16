@@ -6,11 +6,11 @@ import {
   RefreshCwIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import type { OnboardingAgentsFileMigrationState } from "@/onboarding/useOnboardingAgentsFileMigration.js";
 
 export function OnboardingAgentsFileStep(props: { migration: OnboardingAgentsFileMigrationState }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const status = props.migration.status;
   const supported = status?.supported === true;
   const selected = props.migration.selected && supported;

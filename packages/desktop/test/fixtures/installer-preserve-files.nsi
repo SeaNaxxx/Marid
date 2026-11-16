@@ -1,7 +1,7 @@
 Unicode true
-Name "Marid preserve-files smoke"
+Name "Qodex preserve-files smoke"
 OutFile "${OUTPUT_FILE}"
-InstallDir "$TEMP\marid-preserve-files-smoke"
+InstallDir "$TEMP\qodex-preserve-files-smoke"
 RequestExecutionLevel user
 SilentInstall silent
 
@@ -10,14 +10,14 @@ SilentInstall silent
 !addplugindir /x86-unicode "${NSIS_PLUGIN_DIR}"
 !include "LogicLib.nsh"
 
-!define APP_FILENAME "Marid"
-!define APP_EXECUTABLE_FILENAME "Marid.exe"
-!define APP_ID "dev.marid.preserve-files-smoke"
-!define UNINSTALL_REGISTRY_KEY "Software\\Marid\\InstallerPreserveFilesSmoke"
+!define APP_FILENAME "Qodex"
+!define APP_EXECUTABLE_FILENAME "Qodex.exe"
+!define APP_ID "dev.qodex.preserve-files-smoke"
+!define UNINSTALL_REGISTRY_KEY "Software\\Qodex\\InstallerPreserveFilesSmoke"
 !define isUpdated `1 == 1`
 ; This fixture has no electron-builder uninstaller.nsh section; use a normal function for log smoke coverage.
 !ifdef BUILD_UNINSTALLER
-  !define MARID_UNINSTALLER_FUNCTION_PREFIX ""
+  !define QODEX_UNINSTALLER_FUNCTION_PREFIX ""
 !endif
 
 Var appExe
@@ -26,11 +26,11 @@ Var appExe
   Var installationDir
 !endif
 
-!include "${MARID_INSTALLER_NSH}"
+!include "${QODEX_INSTALLER_NSH}"
 ; 正式构建先加载自定义 include，再由 common.nsh 声明卸载器名称。
 !define UNINSTALL_FILENAME "uninstaller.exe"
 !ifndef BUILD_UNINSTALLER
-  ; customHeader 已包含 MaridDefineCleanupSnapshot 与日志初始化函数；
+  ; customHeader 已包含 QodexDefineCleanupSnapshot 与日志初始化函数；
   ; 单独再展开会导致宏重复定义。
   !insertmacro customHeader
 
@@ -41,24 +41,24 @@ Var appExe
 
 Section
   SetOutPath "$INSTDIR"
-  File /oname=Marid.exe "${FIXTURE_EXE}"
-  StrCpy $appExe "$INSTDIR\Marid.exe"
+  File /oname=Qodex.exe "${FIXTURE_EXE}"
+  StrCpy $appExe "$INSTDIR\Qodex.exe"
   !ifndef OMIT_MANIFEST
-    FileOpen $0 "$INSTDIR\.marid-install-manifest" w
-    FileWrite $0 "Marid.exe$\r$\n"
-    FileWrite $0 "owned-by-marid.txt$\r$\n"
+    FileOpen $0 "$INSTDIR\.qodex-install-manifest" w
+    FileWrite $0 "Qodex.exe$\r$\n"
+    FileWrite $0 "owned-by-qodex.txt$\r$\n"
     !ifdef SELF_MANIFEST
-      FileWrite $0 ".marid-install-manifest$\r$\n"
+      FileWrite $0 ".qodex-install-manifest$\r$\n"
     !endif
     FileWrite $0 "..\user-data.txt$\r$\n"
     FileClose $0
   !endif
   !ifdef FAIL_DELETE
     ; Keep the file handle open so Windows denies the manifest cleanup delete.
-    FileOpen $0 "$INSTDIR\owned-by-marid.txt" w
+    FileOpen $0 "$INSTDIR\owned-by-qodex.txt" w
     FileWrite $0 "old app payload"
   !else
-    FileOpen $0 "$INSTDIR\owned-by-marid.txt" w
+    FileOpen $0 "$INSTDIR\owned-by-qodex.txt" w
     FileWrite $0 "old app payload"
     FileClose $0
   !endif
@@ -66,7 +66,7 @@ Section
   FileWrite $0 "keep me"
   FileClose $0
   !ifdef RECOVERY_TEST
-    FileOpen $0 "$INSTDIR\Marid.exe" w
+    FileOpen $0 "$INSTDIR\Qodex.exe" w
     FileWrite $0 "old application payload"
     FileClose $0
     InitPluginsDir
@@ -74,7 +74,7 @@ Section
     StrCpy $installationDir "$INSTDIR"
     !ifdef BACKUP_FAILURE
       ; 先备份主程序，再用独占句柄阻止下一项复制，验证半份备份不能用于恢复。
-      System::Call 'kernel32::CreateFileW(w "$INSTDIR\owned-by-marid.txt", i 0x80000000, i 0, p 0, i 3, i 0, p 0) p.R8'
+      System::Call 'kernel32::CreateFileW(w "$INSTDIR\owned-by-qodex.txt", i 0x80000000, i 0, p 0, i 3, i 0, p 0) p.R8'
     !endif
     !insertmacro customOldUninstallPrepare
     !ifdef BACKUP_FAILURE
@@ -82,18 +82,18 @@ Section
       System::Call 'kernel32::CloseHandle(p R8)'
     !endif
     FileOpen $8 "$INSTDIR\backup-dir.txt" w
-    FileWrite $8 "$MaridCleanupBackup"
+    FileWrite $8 "$QodexCleanupBackup"
     FileClose $8
     OneMoreAttempt:
     ExecWait '"$PLUGINSDIR\old-cleanup.exe" /S /D=$INSTDIR' $R0
     !ifdef RESTORE_FAILURE
       ; 同名目录阻止恢复主程序，必须保留备份，不能误报恢复成功。
-      CreateDirectory "$INSTDIR\Marid.exe"
+      CreateDirectory "$INSTDIR\Qodex.exe"
     !endif
     !ifdef BACKUP_DELETE_FAILURE
       ; 句柄保持打开，阻止安装器删除备份目录；关闭会让 RMDir 成功，场景失效。
-      CreateDirectory "$MaridCleanupBackup\hold"
-      FileOpen $7 "$MaridCleanupBackup\hold\locked.txt" w
+      CreateDirectory "$QodexCleanupBackup\hold"
+      FileOpen $7 "$QodexCleanupBackup\hold\locked.txt" w
       FileWrite $7 "keep backup"
     !endif
     ${If} $R0 != 0
@@ -105,13 +105,13 @@ Section
   !endif
   ; 成功清理后模拟新版本文件落盘；失败路径必须在此前返回。
   SetOutPath "$INSTDIR"
-  File /oname=Marid.exe "${FIXTURE_EXE}"
-  IfFileExists "$INSTDIR\owned-by-marid.txt" 0 maridOwnedRemoved
+  File /oname=Qodex.exe "${FIXTURE_EXE}"
+  IfFileExists "$INSTDIR\owned-by-qodex.txt" 0 qodexOwnedRemoved
     StrCpy $1 "present"
-    Goto maridWriteMarker
-  maridOwnedRemoved:
+    Goto qodexWriteMarker
+  qodexOwnedRemoved:
     StrCpy $1 "removed"
-  maridWriteMarker:
+  qodexWriteMarker:
   FileOpen $0 "$INSTDIR\remove-result.txt" w
   FileWrite $0 "$1"
   FileClose $0

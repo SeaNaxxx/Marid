@@ -1,13 +1,13 @@
-import type { Event, IDisposable } from "@marid/rpc";
-import type { MaridPluginUserConfigOption } from "@marid/shared";
+import type { Event, IDisposable } from "@qodex/rpc";
+import type { QodexPluginUserConfigOption } from "@qodex/shared";
 import {
   ExtensionError,
   type ExtensionSettings,
   type ExtensionSettingsUpdate,
-} from "@marid/shared/extension-host";
+} from "@qodex/shared/extension-host";
 import type { ServiceLogger } from "#src/logger/serviceLogger.js";
 import type { IPluginManagementService } from "#src/plugins/pluginManagement.js";
-import type { PluginUserOptionsReader } from "#src/marid-agent/pluginHostQueriesClient.js";
+import type { PluginUserOptionsReader } from "#src/qodex-agent/pluginHostQueriesClient.js";
 
 // 插件设置后端（docs/plugins/extension-host.md §16.7、§18.1 H1，① 调现有服务）：
 // 能力 settings.get / settings.onDidChange / settings.update。
@@ -49,7 +49,7 @@ function describe(error: unknown): string {
 
 /** 值的类型按 userConfig 的选项类型：number 要数字，boolean 要布尔，其余（string、directory、file、未写）要字符串。 */
 function matchesOptionType(
-  option: MaridPluginUserConfigOption,
+  option: QodexPluginUserConfigOption,
   value: ExtensionSettings["values"][string],
 ): boolean {
   if (option.type === "number") return typeof value === "number";

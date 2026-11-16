@@ -1,5 +1,5 @@
-import { MessagePortProtocol, ChannelClient } from "@marid/rpc";
-import type { IServiceAccessor } from "@marid/services";
+import { MessagePortProtocol, ChannelClient } from "@qodex/rpc";
+import type { IServiceAccessor } from "@qodex/services";
 import { RemoteServiceAccess } from "./remoteServiceAccess.js";
 import { isRendererProductionBuild } from "./rendererLoggingEnv.js";
 

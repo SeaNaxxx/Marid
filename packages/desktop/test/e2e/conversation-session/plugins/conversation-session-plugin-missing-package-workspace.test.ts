@@ -41,8 +41,8 @@ describe("WPL-006 Workspace Plugin missing package E2E", () => {
     this.timeout(300000);
 
     const { workspace } = getE2EAppDataPaths();
-    const workspaceConfigPath = join(workspace, ".marid", "config.json");
-    await mkdir(join(workspace, ".marid"), { recursive: true });
+    const workspaceConfigPath = join(workspace, ".qodex", "config.json");
+    await mkdir(join(workspace, ".qodex"), { recursive: true });
     await writeFile(
       workspaceConfigPath,
       `${JSON.stringify({ plugins: { enabledPlugins: { [PLUGIN_LIFECYCLE_ID]: true } } }, null, 2)}\n`,

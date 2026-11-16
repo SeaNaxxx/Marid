@@ -1,4 +1,4 @@
-import { isApiKeyAccess, type ProviderApiType } from "@marid/provider";
+import { isApiKeyAccess, type ProviderApiType } from "@qodex/provider";
 import {
   getProviderFormLabel,
   type ProviderSettingsFormProvider,

@@ -3,7 +3,7 @@ import type {
   BrowserViewportSize,
   BrowserViewportZoom,
   EmbeddedBrowserViewportPreference,
-} from "@marid/shared";
+} from "@qodex/shared";
 import { DEFAULT_BROWSER_VIEWPORT_ZOOM } from "@/browser-use/browserViewportZoom.js";
 import { DEFAULT_RESPONSIVE_BROWSER_VIEWPORT_SIZE } from "@/browser-use/ResponsiveBrowserViewport.js";
 import { usePlatform } from "@/hooks/usePlatform.js";

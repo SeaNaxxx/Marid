@@ -1,5 +1,5 @@
-import { NodePersonalProviderConfigRepository } from "@marid/provider-node";
-import { manualModelConfigSchema } from "@marid/provider";
+import { NodePersonalProviderConfigRepository } from "@qodex/provider-node";
+import { manualModelConfigSchema } from "@qodex/provider";
 import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
@@ -8,7 +8,7 @@ import {
   TID_SETTINGS_SECTION_NAV,
   TID_TASK_SETTINGS_BUTTON,
   testId,
-} from "@marid/shared/test-ids";
+} from "@qodex/shared/test-ids";
 import { clearAppData, clickTestIdByDom, getE2EAppDataPaths } from "#e2e/helpers/desktop-app";
 import { restartIntoWorkspace, seedReplayProvider } from "#e2e/helpers/model-provider-restart";
 import { prepareV4ConversationE2E } from "#e2e/helpers/v4-conversation";

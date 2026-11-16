@@ -1,7 +1,7 @@
-const ARTIFACT_IMAGE_RENDER_PREFIX = "/__marid_artifact_image__/";
+const ARTIFACT_IMAGE_RENDER_PREFIX = "/__qodex_artifact_image__/";
 const FENCE_PATTERN = /^( {0,3})(`{3,}|~{3,})(.*)$/u;
 const ARTIFACT_IMAGE_PATTERN =
-  /!\[[^\]\n]*\]\(\s*(?:<)?(marid-artifact:\/\/[^\s)>]+)(?:>)?(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?\s*\)/gu;
+  /!\[[^\]\n]*\]\(\s*(?:<)?(qodex-artifact:\/\/[^\s)>]+)(?:>)?(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?\s*\)/gu;
 
 function mapOutsideMarkdownFences(markdown: string, transform: (line: string) => string): string {
   let activeMarker: "`" | "~" | null = null;
@@ -51,7 +51,7 @@ export function decodeMarkdownArtifactImageSource(source: string): string | null
   if (!source.startsWith(ARTIFACT_IMAGE_RENDER_PREFIX)) return null;
   try {
     const ref = decodeURIComponent(source.slice(ARTIFACT_IMAGE_RENDER_PREFIX.length));
-    return ref.startsWith("marid-artifact://") ? ref : null;
+    return ref.startsWith("qodex-artifact://") ? ref : null;
   } catch {
     return null;
   }

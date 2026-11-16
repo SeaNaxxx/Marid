@@ -1,5 +1,5 @@
-import type { AppSettings, RemoteWorkspaceSessionEntry } from "@marid/shared";
-import { parseRemoteWorkspaceIdentity } from "@marid/shared";
+import type { AppSettings, RemoteWorkspaceSessionEntry } from "@qodex/shared";
+import { parseRemoteWorkspaceIdentity } from "@qodex/shared";
 import {
   buildWorkspaceSessionKey,
   readPersistedWorkspaceSessionEntries,

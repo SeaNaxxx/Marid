@@ -1,6 +1,6 @@
 import { cn } from "@/components/lib/utils.js";
-import { TID_PLUGIN_UI_CARD } from "@marid/shared/test-ids";
-import type { PluginSandboxHandle } from "@marid/shared/mcp-apps";
+import { TID_PLUGIN_UI_CARD } from "@qodex/shared/test-ids";
+import type { PluginSandboxHandle } from "@qodex/shared/mcp-apps";
 import { useLayoutEffect, useRef } from "react";
 import { bindPluginUiPage } from "../adapters/pluginUiPageRegistry.js";
 import type { PluginUiHostPhase } from "../app/pluginUiHostController.js";

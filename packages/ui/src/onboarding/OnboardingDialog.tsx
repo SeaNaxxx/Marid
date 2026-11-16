@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { useClaudeSessionMigration } from "@/hooks/useClaudeSessionMigration.js";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog.js";
 import { useSettingsSync } from "@/hooks/useSettingsSync.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { getPathLeaf } from "@/lib/path.js";
 import { logger } from "@/logger.js";
 import {
@@ -22,7 +22,7 @@ import {
   type OnboardingWorkspaceCandidate,
 } from "@/onboarding/OnboardingFlowParts.js";
 import { OnboardingAgentsFileStep } from "@/onboarding/OnboardingAgentsFileStep.js";
-import { useMaridStore } from "@/store/StoreProvider.js";
+import { useQodexStore } from "@/store/StoreProvider.js";
 import {
   shouldAutoScanOnboardingSessions,
   useOnboardingMigration,
@@ -50,7 +50,7 @@ export function OnboardingDialog(props: {
   workspaceIdentity?: string;
   isDesktop?: boolean;
 }) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const confirmDialog = useConfirmDialog();
   const settingsSync = useSettingsSync({
     workspacePath: props.workspacePath,
@@ -60,8 +60,8 @@ export function OnboardingDialog(props: {
     workspacePath: props.workspacePath ?? null,
     isDesktop: props.isDesktop,
   });
-  const onboardingDialogRequested = useMaridStore((state) => state.onboardingDialogRequested);
-  const clearOnboardingDialogRequest = useMaridStore((state) => state.clearOnboardingDialogRequest);
+  const onboardingDialogRequested = useQodexStore((state) => state.onboardingDialogRequested);
+  const clearOnboardingDialogRequest = useQodexStore((state) => state.clearOnboardingDialogRequest);
   const [wizardStep, setWizardStep] = useState<OnboardingWizardStep>("session");
   const [selectedWorkspacePaths, setSelectedWorkspacePaths] = useState<string[]>([]);
   const initializedWorkspaceSelectionRef = useRef(false);
@@ -312,7 +312,7 @@ export function OnboardingDialog(props: {
           { id: "onboarding.agentsFile.confirmDescription" },
           {
             source: agentsFileMigration.status?.sourcePath ?? "~/.claude/CLAUDE.md",
-            target: agentsFileMigration.status?.targetPath ?? "~/.marid/AGENTS.md",
+            target: agentsFileMigration.status?.targetPath ?? "~/.qodex/AGENTS.md",
           },
         ),
         confirmLabel: intl.formatMessage({ id: "onboarding.agentsFile.confirmAction" }),

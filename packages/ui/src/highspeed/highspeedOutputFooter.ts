@@ -1,4 +1,4 @@
-import type { HighspeedMessageMeta } from "@marid/shared";
+import type { HighspeedMessageMeta } from "@qodex/shared";
 import { calculateHighspeedSavedDurationMs } from "@/highspeed/highspeedSavedTime.js";
 import type { HighspeedShareMetrics } from "@/highspeed/highspeedTurnStore.js";
 

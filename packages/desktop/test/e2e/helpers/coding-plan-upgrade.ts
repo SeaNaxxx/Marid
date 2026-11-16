@@ -1,4 +1,4 @@
-import { TID_LOGIN_TRIGGER } from "@marid/shared/test-ids";
+import { TID_LOGIN_TRIGGER } from "@qodex/shared/test-ids";
 import { DEFAULT_WORKSPACE, waitForDefaultWorkspaceReady } from "./desktop-app.js";
 import { sel } from "./selectors.js";
 
@@ -51,7 +51,7 @@ async function selectCodingPlanRuntime(supplierKey: string) {
     (workspacePath, selectedSupplierKey) => {
       const store = (
         window as Window & {
-          __maridSessionStoreE2E?: {
+          __qodexSessionStoreE2E?: {
             getState: () => {
               setModelSelectionResolution: (
                 workspacePath: string,
@@ -64,7 +64,7 @@ async function selectCodingPlanRuntime(supplierKey: string) {
             };
           };
         }
-      ).__maridSessionStoreE2E;
+      ).__qodexSessionStoreE2E;
       store?.getState().setModelSelectionResolution(workspacePath, {
         selectedSupplierKey,
         isGhostSupplier: false,

@@ -1,4 +1,4 @@
-import type { CodingPlanResetType } from "@marid/shared";
+import type { CodingPlanResetType } from "@qodex/shared";
 import type {
   CodingPlanQuotaResetDialogConfig,
   CodingPlanQuotaResetDialogResetItem,

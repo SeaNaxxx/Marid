@@ -5,8 +5,8 @@ import {
   ZAI_PROVIDER_ID,
   type IPlatformService,
   type UsageEntitlementSnapshot,
-} from "@marid/shared";
-import type { ProviderSettingsView } from "@marid/services";
+} from "@qodex/shared";
+import type { ProviderSettingsView } from "@qodex/services";
 import { logger } from "@/logger.js";
 import { reportAppTelemetryEvent } from "@/lib/appTelemetry.js";
 

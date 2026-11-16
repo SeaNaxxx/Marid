@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import type { IServiceAccessor } from "@marid/services";
+import type { IServiceAccessor } from "@qodex/services";
 
 interface SourceSettingsServicesEntry {
   attachmentId: string;

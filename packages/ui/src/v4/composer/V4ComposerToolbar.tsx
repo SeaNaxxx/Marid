@@ -22,22 +22,22 @@ import {
   BUILTIN_MODEL_PROVIDER_IDS,
   getModelProviderFamilySpec,
   resolveModelProviderFamilySpecByProviderId,
-  MARID_AGENT_PROVIDER,
+  QODEX_AGENT_PROVIDER,
   type ProviderFamilyConnectionSelection,
   type ProviderFamilyConnectionSelectionSettings,
   type ProviderFamilyDomain,
   type UsageEntitlementSnapshot,
-  type MaridAccountAccess,
-  type MaridProviderAccountAccess,
-  type MaridConfigOption,
-  type MaridProvider,
-} from "@marid/shared";
-import { TID_V4_MODEL_CONFIG, TID_V4_COMPOSER_INPUT } from "@marid/shared/test-ids";
+  type QodexAccountAccess,
+  type QodexProviderAccountAccess,
+  type QodexConfigOption,
+  type QodexProvider,
+} from "@qodex/shared";
+import { TID_V4_MODEL_CONFIG, TID_V4_COMPOSER_INPUT } from "@qodex/shared/test-ids";
 import type {
   SessionConfigState,
   SessionPhase,
   SessionUsageState,
-} from "@marid/shared/marid-protocol-v4";
+} from "@qodex/shared/qodex-protocol-v4";
 import { ModelConfigSelect, type ModelSelectGroup } from "@/ModelConfigSelect.js";
 import type { ComposerModelOptions } from "@/chat-input-toolbar/ComposerModelMenu.js";
 import { Button } from "@/components/ui/button.js";
@@ -69,7 +69,7 @@ import {
   setPendingSettingsUsageCodingPlanIntent,
 } from "@/lib/settingsNavigation.js";
 import { useTabStore } from "@/store/TabStoreProvider.js";
-import type { ModelSelectionView } from "@marid/services";
+import type { ModelSelectionView } from "@qodex/services";
 import type {
   ModelSelectionState,
   ModelSelectionRefreshResult,
@@ -82,14 +82,14 @@ import {
   composerConnectionKey,
   chooseConnectionModel,
 } from "@/lib/composerPlanGroups.js";
-import { useMaridStoreWithDefault } from "@/store/StoreProvider.js";
+import { useQodexStoreWithDefault } from "@/store/StoreProvider.js";
 import { useSettings } from "@/hooks/useSettingService.js";
 import {
   useUsageEntitlement,
   type UsageEntitlementRefreshOptions,
 } from "@/hooks/useUsageEntitlement.js";
-import { useToolbarConfigOptions } from "@/hooks/useMaridConfig.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useToolbarConfigOptions } from "@/hooks/useQodexConfig.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import {
   createCodingPlanFunnelContext,
   resolveCodingPlanEntryPlanState,
@@ -98,7 +98,7 @@ import { useShortcutCommandLabel } from "@/shortcuts/useShortcutBindings.js";
 import { logger } from "@/logger.js";
 import { useCodingPlanUpgradeDialog } from "@/settings/CodingPlanUpgradeDialogProvider.js";
 import { useCodingPlanEntitlements } from "@/settings/model-provider-section/useCodingPlanEntitlements.js";
-import { decodeCustomModelValue, encodeCustomModelValue } from "@/lib/maridCustomModelValue.js";
+import { decodeCustomModelValue, encodeCustomModelValue } from "@/lib/qodexCustomModelValue.js";
 import { buildRegistryModelSelectGroups } from "@/lib/modelSelectionGroups.js";
 import {
   buildCodingPlanUsageSources,
@@ -128,7 +128,7 @@ const MODEL_SELECTION_LOADING_STATE: ModelSelectionState = { status: "loading" }
 function noop(): void {}
 
 function HighspeedCountdown({ expiresAt }: { expiresAt: number }) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -279,7 +279,7 @@ function resolveContextTeamUsageSourceFromEntitlementSnapshot({
   accountAccess,
   snapshot,
 }: {
-  accountAccess?: MaridProviderAccountAccess | MaridAccountAccess | null;
+  accountAccess?: QodexProviderAccountAccess | QodexAccountAccess | null;
   snapshot?: UsageEntitlementSnapshot | null;
 }): CodingPlanUsageSource | null {
   if (snapshot?.context?.scope !== "team") {
@@ -336,7 +336,7 @@ function resolveContextTeamUsageSourceFromEntitlementSnapshot({
 }
 
 function resolveContextCodingPlanUsageSource(params: {
-  accountAccess?: MaridProviderAccountAccess | MaridAccountAccess | null;
+  accountAccess?: QodexProviderAccountAccess | QodexAccountAccess | null;
   cachedTeamSources?: readonly CodingPlanUsageSource[];
   entitlementSnapshot?: UsageEntitlementSnapshot | null;
   // 原类型/守卫硬绑 bigmodelCodingPlan，zai team 上下文永远返回 null。
@@ -391,7 +391,7 @@ export interface V4ComposerToolbarProps {
   modelSelectionRefresh?: () => Promise<ModelSelectionRefreshResult>;
   sessionId: string | null;
   phase: SessionPhase | null;
-  provider?: MaridProvider;
+  provider?: QodexProvider;
   /** 当前工具条是否运行在 Web 远控壳中。 */
   isWebRemoteControl?: boolean;
   /** 当前视口是否为手机输入布局。 */
@@ -471,9 +471,9 @@ function V4ComposerModelControlsImpl({
   onSendCompressionCommand,
   onRecoverCustomModelSelection,
 }: V4ComposerToolbarProps) {
-  const { intl, locale } = useMaridIntl();
+  const { intl, locale } = useQodexIntl();
   const { openCodingPlanUpgrade } = useCodingPlanUpgradeDialog();
-  const displayProvider = provider ?? MARID_AGENT_PROVIDER;
+  const displayProvider = provider ?? QODEX_AGENT_PROVIDER;
   // 配置面读取：workspace 缺省目录（taskId=null），不读旧会话态。
   const { error: configOptionsError } = useToolbarConfigOptions(
     workspacePath,
@@ -533,7 +533,7 @@ function V4ComposerModelControlsImpl({
         type: "select",
         currentValue: "",
         options: [],
-      } satisfies MaridConfigOption)
+      } satisfies QodexConfigOption)
     : undefined;
 
   // 空模型/档位曾被 Session 旧值补回，界面显示与实际不可提交状态矛盾。
@@ -635,7 +635,7 @@ function V4ComposerModelControlsImpl({
     resolveModelProviderFamilySpecByProviderId(effectiveConfig?.provider ?? "")?.id ??
     sharedSettings?.providerFamilyDomain ??
     "bigmodel";
-  const user = useMaridStoreWithDefault((state) => state.user, undefined);
+  const user = useQodexStoreWithDefault((state) => state.user, undefined);
   const connectionAuthenticated =
     user !== null &&
     Boolean(
@@ -664,7 +664,7 @@ function V4ComposerModelControlsImpl({
         : undefined) ?? [],
     [connectionAuthenticated, enterpriseProducts.snapshot?.productList],
   );
-  const authSessionSeq = useMaridStoreWithDefault((state) => state.authSessionSeq, 0);
+  const authSessionSeq = useQodexStoreWithDefault((state) => state.authSessionSeq, 0);
   const teamUsageScope = useMemo(
     () => ({}),
     [baseServices, connectionFamily, user?.id, authSessionSeq],
@@ -1098,7 +1098,7 @@ function V4ComposerModelControlsImpl({
   );
 
   // 候选档位只来自目标 Host 的 ModelSelectionView，已选档位只来自 Composer。
-  const thoughtOption = useMemo<MaridConfigOption | null>(() => {
+  const thoughtOption = useMemo<QodexConfigOption | null>(() => {
     if (!effectiveConfig) return null;
     if (!draftModelThoughtOption) return null;
     return {
@@ -1416,4 +1416,4 @@ function V4ComposerModelControlsImpl({
 }
 
 export const V4ComposerModelControls = memo(V4ComposerModelControlsImpl);
-import { isApiKeyAccess } from "@marid/provider";
+import { isApiKeyAccess } from "@qodex/provider";

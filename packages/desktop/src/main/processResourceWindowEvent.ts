@@ -1,7 +1,7 @@
 /** `perf_process_window` 的属性投影（纯函数，属性 key 与白名单一一对应）。 */
 
-import type { ArmsRumEnv } from "@marid/shared";
-import { PROCESS_RESOURCE_EVENT_NAMES } from "@marid/shared";
+import type { ArmsRumEnv } from "@qodex/shared";
+import { PROCESS_RESOURCE_EVENT_NAMES } from "@qodex/shared";
 import type {
   ProcessResourceHardware,
   ProcessRoleWindowReport,

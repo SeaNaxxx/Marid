@@ -6,14 +6,14 @@ import type {
   CreateFeedbackTicketInput,
   FeedbackDeviceInfo,
   FeedbackTicketDetail,
-} from "@marid/shared";
+} from "@qodex/shared";
 import {
-  buildRuntimeMaridApiUrl,
-  MARID_BUILD_TIME,
-  MARID_COMMIT,
-  MARID_VERSION,
-} from "@marid/shared";
-import { Emitter } from "@marid/rpc";
+  buildRuntimeQodexApiUrl,
+  QODEX_BUILD_TIME,
+  QODEX_COMMIT,
+  QODEX_VERSION,
+} from "@qodex/shared";
+import { Emitter } from "@qodex/rpc";
 import { arch, platform, release, type as osType } from "node:os";
 
 import type { LocalCredentialService } from "../credential/credentialService.js";
@@ -27,8 +27,8 @@ import {
 import { cleanupLogArchive, prepareCompactLogArchive } from "./compactLogArchive.js";
 import { getFeedbackAttachmentDir } from "../paths.js";
 
-const MARID_JWT_TOKEN_KEY = "maridjwttoken";
-const FEEDBACK_ACCESS_TOKEN_KEY = "maridfeedbackaccesstoken";
+const QODEX_JWT_TOKEN_KEY = "qodexjwttoken";
+const FEEDBACK_ACCESS_TOKEN_KEY = "qodexfeedbackaccesstoken";
 
 export interface CreateFeedbackServiceOptions {
   credentialService: Pick<LocalCredentialService, "load" | "saveIfAbsent" | "deleteIfEquals">;
@@ -61,16 +61,16 @@ function anonymousRequestAuth(accessToken: string): FeedbackRequestAuth {
 function resolveApiBaseUrl(explicit?: string): string {
   return (
     explicit?.trim() ||
-    process.env.MARID_FEEDBACK_API_BASE?.trim() ||
-    buildRuntimeMaridApiUrl(process.env, "/api/v1")
+    process.env.QODEX_FEEDBACK_API_BASE?.trim() ||
+    buildRuntimeQodexApiUrl(process.env, "/api/v1")
   );
 }
 
 function buildDeviceSnapshot(): FeedbackDeviceInfo {
   return {
-    appVersion: MARID_VERSION,
-    buildCommitId: MARID_COMMIT,
-    buildTime: MARID_BUILD_TIME,
+    appVersion: QODEX_VERSION,
+    buildCommitId: QODEX_COMMIT,
+    buildTime: QODEX_BUILD_TIME,
     nodeVersion: process.version,
     osType: osType(),
     osPlatform: platform(),
@@ -97,7 +97,7 @@ export function createFeedbackService(options: CreateFeedbackServiceOptions): IF
   // 已登录只带 JWT，未登录只带 access token。两者都没有时调用方不能发请求：
   // 服务端会把不带凭证的请求按通参里的 X-Device-Mid 当成旧版身份。
   async function loadRequestAuth(): Promise<FeedbackRequestAuth | undefined> {
-    const jwtToken = await loadCredential(MARID_JWT_TOKEN_KEY);
+    const jwtToken = await loadCredential(QODEX_JWT_TOKEN_KEY);
     if (jwtToken) {
       return userRequestAuth(jwtToken);
     }
@@ -149,7 +149,7 @@ export function createFeedbackService(options: CreateFeedbackServiceOptions): IF
     input: CreateFeedbackTicketInput,
     signal: AbortSignal,
   ): Promise<FeedbackTicketDetail> {
-    const jwtToken = await loadCredential(MARID_JWT_TOKEN_KEY);
+    const jwtToken = await loadCredential(QODEX_JWT_TOKEN_KEY);
     if (jwtToken) {
       return httpClient.create(input, userRequestAuth(jwtToken).headers, { signal });
     }

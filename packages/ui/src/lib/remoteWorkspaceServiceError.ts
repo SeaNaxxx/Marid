@@ -1,5 +1,5 @@
-import { isPublicMaridErrorCode } from "@marid/shared";
-export const REMOTE_WORKSPACE_DISCONNECTED_ERROR_CODE = "MARID_REMOTE_WORKSPACE_DISCONNECTED";
+import { isPublicQodexErrorCode } from "@qodex/shared";
+export const REMOTE_WORKSPACE_DISCONNECTED_ERROR_CODE = "QODEX_REMOTE_WORKSPACE_DISCONNECTED";
 
 export function createRemoteWorkspaceDisconnectedError(): Error & {
   code: typeof REMOTE_WORKSPACE_DISCONNECTED_ERROR_CODE;
@@ -34,5 +34,5 @@ export function getRemoteConnectionFailureCode(error: unknown): string | undefin
   if (isRemoteWorkspaceDisconnectedError(error)) return REMOTE_WORKSPACE_DISCONNECTED_ERROR_CODE;
   if (!error || typeof error !== "object" || !("code" in error) || typeof error.code !== "string")
     return undefined;
-  return isPublicMaridErrorCode(error.code) ? error.code : undefined;
+  return isPublicQodexErrorCode(error.code) ? error.code : undefined;
 }

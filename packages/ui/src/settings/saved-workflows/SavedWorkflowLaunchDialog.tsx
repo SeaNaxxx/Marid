@@ -7,9 +7,9 @@ import {
   TID_WORKFLOW_LAUNCH_FIELDS,
   TID_WORKFLOW_LAUNCH_SUBMIT,
   TID_WORKFLOW_LAUNCH_TARGET,
-  type MaridSavedWorkflowEntry,
-} from "@marid/shared";
-import { testId } from "@marid/shared/test-ids";
+  type QodexSavedWorkflowEntry,
+} from "@qodex/shared";
+import { testId } from "@qodex/shared/test-ids";
 import { Button } from "@/components/ui/button.js";
 import {
   Dialog,
@@ -29,7 +29,7 @@ import {
 import { Spinner } from "@/components/ui/spinner.js";
 import { Switch } from "@/components/ui/switch.js";
 import { cn } from "@/components/lib/utils.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { AutomationRunNowIcon } from "@/settings/AutomationDesignPrimitives.js";
 import { SettingsFormTextarea } from "@/settings/SettingsFormTextarea.js";
 import {
@@ -52,7 +52,7 @@ function workflowArgInputId(name: string): string {
 }
 
 interface SavedWorkflowLaunchDialogProps {
-  entry: MaridSavedWorkflowEntry | null;
+  entry: QodexSavedWorkflowEntry | null;
   /** 作用域徽标与「将立即在 X 的新会话中运行」文案都要它；也决定启动命令的 scope。 */
   scope: "project" | "global";
   /**
@@ -62,7 +62,7 @@ interface SavedWorkflowLaunchDialogProps {
   projectLabel: string;
   onOpenChange: (open: boolean) => void;
   onSubmit: (
-    entry: MaridSavedWorkflowEntry,
+    entry: QodexSavedWorkflowEntry,
     args: Record<string, unknown>,
     target?: AutomationWorkspaceOption,
   ) => void;
@@ -108,7 +108,7 @@ export function SavedWorkflowLaunchDialog({
   pending = false,
   error = null,
 }: SavedWorkflowLaunchDialogProps) {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const [fields, setFields] = useState<SavedWorkflowArgField[]>([]);
   const [errors, setErrors] = useState<Record<string, SavedWorkflowArgFieldError>>({});
   const [targetKey, setTargetKey] = useState<string | null>(null);

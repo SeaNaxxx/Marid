@@ -54,7 +54,7 @@ export interface CliMemoryAllocation {
 }
 
 export interface CliMemoryDiagnostic {
-  format: "marid-cli-memory-v1";
+  format: "qodex-cli-memory-v1";
   timestamp: number;
   instanceId: string;
   pid: number;
@@ -88,7 +88,7 @@ export function sanitizeCliMemoryDiagnostic(value: unknown): CliMemoryDiagnostic
   const token = (candidate: unknown): string =>
     typeof candidate === "string" && /^[a-zA-Z0-9._-]{1,80}$/.test(candidate) ? candidate : "";
   const raw = record(value);
-  if (!raw || raw.format !== "marid-cli-memory-v1" || !Array.isArray(raw.samples)) return null;
+  if (!raw || raw.format !== "qodex-cli-memory-v1" || !Array.isArray(raw.samples)) return null;
   const sampler = record(raw.sampler);
   if (
     !sampler ||
@@ -131,7 +131,7 @@ export function sanitizeCliMemoryDiagnostic(value: unknown): CliMemoryDiagnostic
     }
   }
   return {
-    format: "marid-cli-memory-v1",
+    format: "qodex-cli-memory-v1",
     timestamp: number(raw.timestamp),
     instanceId:
       typeof raw.instanceId === "string" && /^[a-f0-9-]{36}$/.test(raw.instanceId)

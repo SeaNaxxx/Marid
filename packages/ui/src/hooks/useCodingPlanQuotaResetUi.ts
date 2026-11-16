@@ -1,17 +1,17 @@
 /* eslint-disable max-lines -- 额度重置 hook 集中处理 scope 共享请求、轮询、幂等核销与服务端历史对账。 */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { IUsageStatsService } from "@marid/services";
+import type { IUsageStatsService } from "@qodex/services";
 import type {
   CodingPlanResetScopeRequest,
   CodingPlanResetStatusSnapshot,
   CodingPlanResetType,
-  MaridAccountAccess,
-  MaridProviderAccountAccess,
-} from "@marid/shared";
+  QodexAccountAccess,
+  QodexProviderAccountAccess,
+} from "@qodex/shared";
 import { toast } from "@/components/ui/toast.js";
 import { useOptionalBaseWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
 import { useStableAccountAccess } from "@/hooks/useStableAccountAccess.js";
-import { useMaridIntl } from "@/i18n/IntlProvider.js";
+import { useQodexIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 import {
   requestCodingPlanResetOpportunityWhenDue,
@@ -35,7 +35,7 @@ import type {
   CodingPlanQuotaResetAutoPlayReservationAttempt,
   CodingPlanQuotaResetAutoPlayedSlot,
 } from "@/store/codingPlanQuotaResetState.js";
-import { useMaridStoreWithDefault } from "@/store/StoreProvider.js";
+import { useQodexStoreWithDefault } from "@/store/StoreProvider.js";
 
 const STATUS_FRESHNESS_MS = 1_500;
 const USE_STATUS_RETRY_DELAYS_MS = [0, 250, 750, 1_500] as const;
@@ -367,11 +367,11 @@ export function useCodingPlanQuotaResetUi({
 }: {
   sourceKey: string | null | undefined;
   preferredProviderId?: string | null;
-  accountAccess?: MaridProviderAccountAccess | MaridAccountAccess | null;
+  accountAccess?: QodexProviderAccountAccess | QodexAccountAccess | null;
   enabled?: boolean;
   onEntitlementRefresh?: () => void | Promise<void>;
 }): CodingPlanQuotaResetUiController {
-  const { intl } = useMaridIntl();
+  const { intl } = useQodexIntl();
   const services = useOptionalBaseWorkspaceServices();
   const usageStatsService = services?.usageStatsService;
   const stableAccountAccess = useStableAccountAccess(accountAccess);
@@ -386,35 +386,35 @@ export function useCodingPlanQuotaResetUi({
     };
   }, [preferredProviderId, stableAccountAccess]);
   const enabled = Boolean(requestedEnabled && sourceKey?.trim() && usageStatsService && scope);
-  const entriesBySource = useMaridStoreWithDefault(
+  const entriesBySource = useQodexStoreWithDefault(
     (state) => state.codingPlanQuotaResetUiBySource,
     EMPTY_ENTRIES,
   );
-  const setEntry = useMaridStoreWithDefault(
+  const setEntry = useQodexStoreWithDefault(
     (state) => state.setCodingPlanQuotaResetUiEntry,
     NOOP_SET_ENTRY,
   );
-  const reserveAutoPlay = useMaridStoreWithDefault(
+  const reserveAutoPlay = useQodexStoreWithDefault(
     (state) => state.reserveCodingPlanQuotaResetAutoPlay,
     NOOP_RESERVE_AUTO_PLAY,
   );
-  const commitAutoPlay = useMaridStoreWithDefault(
+  const commitAutoPlay = useQodexStoreWithDefault(
     (state) => state.commitCodingPlanQuotaResetAutoPlay,
     NOOP_COMMIT_AUTO_PLAY,
   );
-  const releaseAutoPlay = useMaridStoreWithDefault(
+  const releaseAutoPlay = useQodexStoreWithDefault(
     (state) => state.releaseCodingPlanQuotaResetAutoPlay,
     NOOP_RELEASE_AUTO_PLAY,
   );
-  const observationsBySource = useMaridStoreWithDefault(
+  const observationsBySource = useQodexStoreWithDefault(
     (state) => state.codingPlanQuotaResetAutomaticObservationsBySource,
     EMPTY_AUTOMATIC_OBSERVATIONS,
   );
-  const playedBySource = useMaridStoreWithDefault(
+  const playedBySource = useQodexStoreWithDefault(
     (state) => state.codingPlanQuotaResetAutoPlayedBySource,
     EMPTY_PLAYED,
   );
-  const authSessionSeq = useMaridStoreWithDefault((state) => state.authSessionSeq, 0);
+  const authSessionSeq = useQodexStoreWithDefault((state) => state.authSessionSeq, 0);
   const authSessionSeqRef = useRef(authSessionSeq);
   authSessionSeqRef.current = authSessionSeq;
   const storedEntries = sourceKey ? entriesBySource[sourceKey] : undefined;

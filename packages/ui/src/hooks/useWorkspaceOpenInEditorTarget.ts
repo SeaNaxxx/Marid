@@ -1,4 +1,4 @@
-import { createOpenInEditorRemoteTarget } from "@marid/shared";
+import { createOpenInEditorRemoteTarget } from "@qodex/shared";
 import { useMemo } from "react";
 import { useOptionalTabStore } from "@/store/TabStoreProvider.js";
 import {
