@@ -20,14 +20,18 @@ class AgentKeepAliveService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val manager = getSystemService(NotificationManager::class.java)
-        manager.createNotificationChannel(
-            NotificationChannel(
-                CHANNEL_ID,
-                "Agent runtime",
-                NotificationManager.IMPORTANCE_LOW,
-            ).apply { description = "Shown while the Qodex engine is running" },
-        )
+        // Notification channels exist only on API 26+; minSdk is 24 so the
+        // pre-O path uses NotificationCompat without a channel.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(
+                NotificationChannel(
+                    CHANNEL_ID,
+                    "Agent runtime",
+                    NotificationManager.IMPORTANCE_LOW,
+                ).apply { description = "Shown while the Qodex engine is running" },
+            )
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
