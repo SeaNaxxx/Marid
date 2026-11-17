@@ -1,5 +1,12 @@
 # UI Plugin：能力、开发调试与示例
 
+> **[PHASE 2 — FROZEN REFERENCE — DO NOT IMPLEMENT YET]**
+> UI Plugins are a desktop-parity capability planned for Phase 2. Qodex Phase 1
+> is the native Jetpack Compose agent chat UI + Node 24 engine (see
+> [AGENTS.md](AGENTS.md) and [DESIGN.md](DESIGN.md)); no UI-plugin runtime work
+> belongs to the current phase. Coding agents: treat this guide as frozen
+> reference only.
+
 简体中文 | [English](UI_PLUGIN.en.md)
 
 从 Excalidraw 开始了解 UI Plugin：让 Agent 和用户共同编辑一份可保存的内容。本文覆盖当前源码中的能力、实际可用的 API、安装调试步骤与五个示例，优先按下面的路线阅读。

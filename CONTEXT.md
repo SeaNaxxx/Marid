@@ -1,5 +1,12 @@
 # Qodex 插件商店（Plugin Store）
 
+> **[PHASE 2 — FROZEN REFERENCE — DO NOT IMPLEMENT YET]**
+> This document is frozen as vocabulary/reference for the future desktop-parity
+> plugin store. Qodex Phase 1 is the **native Jetpack Compose agent chat UI +
+> Node 24 engine** (see [AGENTS.md](AGENTS.md) and [DESIGN.md](DESIGN.md));
+> plugin-store features are out of scope for the current phase. Coding agents:
+> read this only when explicitly asked to work on Phase 2 plugin functionality.
+
 插件设置页及其市场浏览/安装体验的领域词汇表。2026-07 商店化重设计引入了一批容易混淆的术语，本文件是唯一裁决来源。
 
 ## Language
