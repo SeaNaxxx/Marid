@@ -43,19 +43,11 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
 
     fun rpcClient(): QodexRpcClient? = rpc
 
-    // User-facing recovery for a dropped RPC socket; the engine keeps running on its port.
+    // User-facing recovery: with stdio there is no socket to re-dial — a fresh
+    // engine process is the only path back to a clean Initialize handshake.
     fun reconnectRpc() {
-        val client = rpc
-        if (client == null) {
-            if (EngineProcess.isRunning) {
-                connectRpc()
-            } else {
-                retry()
-            }
-            return
-        }
         FileLogger.append("RPC", "reconnect requested after disconnect")
-        client.connect()
+        restartEngine("user reconnect")
     }
 
     fun boot(ctx: Context) {
@@ -81,16 +73,8 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
 
     fun startEngine(ctx: Context) {
         scope.launch {
-            // Adopt a healthy survivor from a killed app process — never spawn a duplicate node on a served port.
-            val last = EngineProcess.readLastPort(ctx)
-            if (last > 0 && EngineProcess.adoptIfHealthy(ctx, last)) {
-                AgentKeepAliveService.start(ctx)
-                connectRpc()
-                return@launch
-            }
             try {
                 EngineProcess.start(ctx)
-                EngineProcess.persistPort(ctx, EngineProcess.currentPort())
                 AgentKeepAliveService.start(ctx)
                 connectRpc()
             } catch (t: Throwable) {
@@ -101,15 +85,38 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
     }
 
     private fun connectRpc() {
-        val url = EngineProcess.wsUrl().removeSuffix("/ws")
-        val client = QodexRpcClient(url, RpcEvents({ state ->
-            _rpcState.value = state
-            if (state == RpcConnectionState.CONNECTED) {
-                RuntimeBus.append("RPC connected: ${EngineProcess.wsUrl()}")
-            }
-        }, { line -> RuntimeBus.append(line) }))
+        val streams = EngineProcess.streamsOrNull()
+        if (streams == null) {
+            startEngine(app)
+            return
+        }
+        val client = QodexRpcClient(
+            streams.stdout,
+            streams.stdin,
+            RpcEvents({ state ->
+                _rpcState.value = state
+                if (state == RpcConnectionState.CONNECTED) {
+                    RuntimeBus.append("RPC connected via stdio handshake")
+                }
+            }, { line -> RuntimeBus.append(line) }),
+            onTransportDown = { reason -> restartEngine(reason) },
+        )
         rpc = client
         client.connect()
+    }
+
+    // One ChannelClient per engine process: Initialize is sent once at process
+    // start, so any transport loss ends in a full engine respawn, never a
+    // mid-process client recreation that would hang waiting for a second Initialize.
+    private fun restartEngine(reason: String) {
+        val old = rpc
+        rpc = null
+        old?.shutdown()
+        scope.launch {
+            RuntimeBus.append("engine restart: $reason")
+            EngineProcess.stop()
+            startEngine(app)
+        }
     }
 
     fun retry() {

@@ -35,7 +35,6 @@ object BionicEnv {
         runtimeRoot: File,
         home: File,
         bashBin: File,
-        port: Int,
     ) {
         val usr = File(runtimeRoot, "usr")
         env["PREFIX"] = usr.absolutePath
@@ -70,8 +69,9 @@ object BionicEnv {
             env["SSL_CERT_DIR"] = certsDir.absolutePath
         }
 
-        env["PORT"] = port.toString()
-        env["QODEX_SERVER_HOST"] = "127.0.0.1"
+        // Stdio transport: the RPC channel rides the process pipes; no PORT, no
+        // listener, no loopback TCP — other apps cannot reach the engine at all.
+        env["QODEX_TRANSPORT"] = "stdio"
         // No OS credential store on Android: the file-based cipher secret lives in app-private storage, generated at provision time.
         env["QODEX_CREDENTIAL_SECRET_FILE"] =
             File(runtimeRoot, "credential-secret").absolutePath

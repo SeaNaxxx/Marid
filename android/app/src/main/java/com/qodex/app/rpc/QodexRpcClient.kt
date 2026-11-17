@@ -16,17 +16,14 @@ import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import com.qodex.app.utils.FileLogger
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
-import okhttp3.WebSocket
-import okhttp3.WebSocketListener
-import okio.ByteString
-import okio.ByteString.Companion.toByteString
-import java.util.concurrent.TimeUnit
+import java.io.InputStream
+import java.io.OutputStream
 import java.util.concurrent.atomic.AtomicBoolean
 
-// Speaks the engine's ChannelClient protocol over ws://127.0.0.1:<port>/ws; channel names from packages/shared/src/channels.ts.
+// Speaks the engine's ChannelClient protocol over the engine process's stdio
+// pipes (entry-stdio.ts); channel names from packages/shared/src/channels.ts.
+// No socket, no OkHttp: frames are the same 13-byte SocketProtocol headers the
+// TS side writes directly onto the raw pipe bytes.
 object ServiceChannels {
     const val QODEX_AGENT = "qodex-agent"
     const val QODEX_TASK = "qodex-task"
@@ -51,22 +48,20 @@ data class RpcEvents(
 )
 
 class QodexRpcClient(
-    private val baseUrl: String = "ws://127.0.0.1:3030",
+    private val stdout: InputStream,
+    private val stdin: OutputStream,
     private val events: RpcEvents,
+    // stdio cannot re-dial: transport loss means the engine process must be
+    // respawned by the host before frames can flow again.
+    private val onTransportDown: (reason: String) -> Unit = {},
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val http = OkHttpClient.Builder()
-        .connectTimeout(5, TimeUnit.SECONDS)
-        .readTimeout(0, TimeUnit.MILLISECONDS) // WebSocket: no read timeout
-        .pingInterval(20, TimeUnit.SECONDS)
-        .build()
-
-    private var webSocket: WebSocket? = null
     private var channelClient: ChannelClient? = null
     private val chunkStream = ChunkStream()
     private val reconnectEnabled = AtomicBoolean(true)
     private var reconnectAttempt = 0
     private var reconnectJob: Job? = null
+    private val sendLock = Any()
 
     @Volatile
     var state: RpcConnectionState = RpcConnectionState.DISCONNECTED
@@ -76,40 +71,45 @@ class QodexRpcClient(
         if (state == RpcConnectionState.CONNECTING || state == RpcConnectionState.CONNECTED) return
         reconnectEnabled.set(true)
         events.onState(RpcConnectionState.CONNECTING)
-        openSocket()
+        // Client exists before the first frame so Initialize is never dropped;
+        // CONNECTED flips only when the engine's Initialize handshake arrives.
+        ensureClient()
+        startReadLoop()
     }
 
-    private fun openSocket() {
-        val url = "$baseUrl/ws"
-        val request = Request.Builder().url(url).build()
-        events.onLog("RPC connecting: $url")
-
-        webSocket = http.newWebSocket(
-            request,
-            object : WebSocketListener() {
-                override fun onOpen(webSocket: WebSocket, response: Response) {
-                    events.onLog("RPC socket open (ws handshake ok); waiting for Initialize")
+    private fun startReadLoop() {
+        val client = channelClient ?: return
+        val buffer = ByteArray(64 * 1024)
+        Thread {
+            try {
+                while (true) {
+                    val n = stdout.read(buffer)
+                    if (n < 0) {
+                        transportDown("engine stdout closed")
+                        return@Thread
+                    }
+                    if (n > 0) {
+                        chunkStream.acceptChunk(buffer.copyOf(n))
+                        readFrames(client)
+                    }
                 }
-
-                override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-                    val client = channelClient ?: return
-                    chunkStream.acceptChunk(bytes.toByteArray())
-                    readFrames(client)
+            } catch (t: Exception) {
+                if (reconnectEnabled.get()) {
+                    transportDown("engine stream error: ${t.message}")
                 }
+            }
+        }.apply {
+            isDaemon = true
+            name = "qodex-rpc-read"
+            start()
+        }
+    }
 
-                override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                    events.onLog("RPC failure: ${t.message}")
-                    setState(RpcConnectionState.DISCONNECTED)
-                    scheduleReconnect()
-                }
-
-                override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                    events.onLog("RPC closed: $code $reason")
-                    setState(RpcConnectionState.DISCONNECTED)
-                    scheduleReconnect()
-                }
-            },
-        )
+    private fun transportDown(reason: String) {
+        events.onLog("RPC down: $reason")
+        setState(RpcConnectionState.DISCONNECTED)
+        scheduleReconnect()
+        onTransportDown(reason)
     }
 
     private fun readFrames(client: ChannelClient) {
@@ -120,18 +120,10 @@ class QodexRpcClient(
             if (type == SocketFraming.TYPE_REGULAR) {
                 chunkStream.skip(SocketFraming.HEADER_SIZE)
                 val body = if (bodyLength == 0) ByteArray(0) else chunkStream.read(bodyLength) ?: break
-                if (body.isNotEmpty()) {
-                    try {
-                        client.onMessage(body)
-                    } catch (t: Throwable) {
-                        events.onLog("RPC message error: ${t.message}")
-                    }
-                } else {
-                    try {
-                        client.onMessage(ByteArray(0))
-                    } catch (t: Throwable) {
-                        events.onLog("RPC message error: ${t.message}")
-                    }
+                try {
+                    client.onMessage(body)
+                } catch (t: Throwable) {
+                    events.onLog("RPC message error: ${t.message}")
                 }
             } else {
                 // Ack/KeepAlive/Control frames are not used by the basic SocketProtocol path; drop them.
@@ -154,7 +146,7 @@ class QodexRpcClient(
             reconnectAttempt++
             delay(delayMs)
             if (reconnectEnabled.get() && state == RpcConnectionState.DISCONNECTED) {
-                openSocket()
+                onTransportDown("reconnect requested")
             }
         }
     }
@@ -162,8 +154,6 @@ class QodexRpcClient(
     fun disconnect() {
         reconnectEnabled.set(false)
         reconnectJob?.cancel()
-        webSocket?.close(1000, "client shutdown")
-        webSocket = null
         channelClient?.dispose()
         channelClient = null
         setState(RpcConnectionState.DISCONNECTED)
@@ -174,23 +164,30 @@ class QodexRpcClient(
         scope.cancel()
     }
 
-    // Server creates a fresh ChannelServer per connection, so a fresh client per socket is the matching shape.
+    // One ChannelClient per engine process: the server sends Initialize once at
+    // process start, so recreating the client mid-process would hang on the handshake.
     private fun ensureClient(): ChannelClient {
         if (channelClient == null) {
             val client = ChannelClient(
-                send = { payload ->
-                    webSocket?.send(SocketFraming.frameRegular(payload).toByteString())
-                },
+                send = { payload -> sendFrame(payload) },
                 log = { events.onLog(it) },
                 onReady = {
+                    reconnectAttempt = 0
                     FileLogger.append("RPC", "Handshake complete: Initialize received -> Ready")
                     events.onLog("RPC handshake: Initialize received -> Ready")
+                    setState(RpcConnectionState.CONNECTED)
                 },
             )
             channelClient = client
-            setState(RpcConnectionState.CONNECTED)
         }
         return channelClient!!
+    }
+
+    private fun sendFrame(payload: ByteArray) {
+        synchronized(sendLock) {
+            stdin.write(SocketFraming.frameRegular(payload))
+            stdin.flush()
+        }
     }
 
     suspend fun call(channel: String, command: String, arg: JsonObject? = null): JsonElement? {

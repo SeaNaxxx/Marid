@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Cleartext is needed ONLY for the on-device engine loopback
-  (ws://127.0.0.1:3030). Everything else stays TLS-enforced by the platform
-  default.
+  No cleartext exemption anywhere: the engine talks to the host over process
+  pipes (not sockets) and all outbound provider traffic stays TLS-enforced by
+  the platform default.
 -->
-<network-security-config>
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="false">127.0.0.1</domain>
-        <domain includeSubdomains="false">localhost</domain>
-    </domain-config>
-</network-security-config>
+<network-security-config />

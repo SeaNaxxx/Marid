@@ -10,8 +10,8 @@ sealed interface RuntimePhase {
     data object Idle : RuntimePhase
     data class Provisioning(val step: String) : RuntimePhase
     data object Provisioned : RuntimePhase
-    data class StartingEngine(val port: Int) : RuntimePhase
-    data class EngineReady(val port: Int) : RuntimePhase
+    data object StartingEngine : RuntimePhase
+    data object EngineReady : RuntimePhase
     data class Failed(val stage: String, val message: String) : RuntimePhase
 }
 

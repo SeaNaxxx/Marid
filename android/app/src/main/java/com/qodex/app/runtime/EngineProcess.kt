@@ -4,128 +4,87 @@ import android.content.Context
 import com.qodex.app.utils.FileLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.InetSocketAddress
-import java.net.ServerSocket
-import java.net.URL
+import java.io.InputStream
+import java.io.OutputStream
 
-// Engine lifecycle: adopt (never duplicate) a healthy survivor from a killed app process; explicit stop kills owned + same-uid leftovers via pidof.
+// Engine lifecycle over pure stdio: no TCP port exists anymore. Kotlin owns the
+// spawned process; stdout is the RPC frame channel, stderr is diagnostics, and
+// closing the app process kills the engine via pipe EOF (no adopt logic needed).
 object EngineProcess {
 
+    class Streams(
+        val stdout: InputStream,
+        val stdin: OutputStream,
+        val stderr: InputStream,
+    )
+
     @Volatile private var process: Process? = null
-    @Volatile private var port: Int = -1
+    @Volatile private var streams: Streams? = null
 
     val isRunning: Boolean get() = process?.isAlive == true
-    fun wsUrl(): String = "ws://127.0.0.1:$port/ws"
-    fun httpUrl(): String = "http://127.0.0.1:$port"
-    fun currentPort(): Int = port
 
-    fun pickFreePort(): Int =
-        ServerSocket().use { s ->
-            s.bind(InetSocketAddress("127.0.0.1", 0))
-            s.localPort
-        }
+    fun streamsOrNull(): Streams? = streams?.takeIf { isRunning }
 
-    suspend fun start(ctx: Context): Int = withContext(Dispatchers.IO) {
+    suspend fun start(ctx: Context): Unit = withContext(Dispatchers.IO) {
+        if (isRunning) return@withContext
+        RuntimeBus.setPhase(RuntimePhase.StartingEngine)
+
         val app = ctx.applicationContext
-        if (isRunning) return@withContext port
-        val chosen = pickFreePort()
-        RuntimeBus.setPhase(RuntimePhase.StartingEngine(chosen))
-
         val command = listOf(
             Provisioner.nodeBin(app).absolutePath,
             Provisioner.distEntry(app).absolutePath,
         )
-        RuntimeBus.append("spawning engine on :$chosen — ${command.joinToString(" ")}")
+        RuntimeBus.append("spawning engine (stdio) — ${command.joinToString(" ")}")
         val pb = ProcessBuilder(command)
-        pb.redirectErrorStream(true)
+        // redirectErrorStream stays false: mixing stderr into stdout would corrupt the frame stream.
+        pb.redirectErrorStream(false)
         val env = pb.environment()
         BionicEnv.apply(
             env,
             Provisioner.runtimeRoot(app),
             Provisioner.homeDir(app),
             Provisioner.bashBin(app),
-            chosen,
         )
         val proc = pb.start()
         process = proc
-        port = chosen
-        FileLogger.append("EngineProcess", "engine spawn: node ${command[1]} on port $chosen")
+        streams = Streams(proc.inputStream, proc.outputStream, proc.errorStream)
+        FileLogger.append("EngineProcess", "engine spawn (stdio): node ${command[1]}")
 
         Thread {
             try {
-                proc.inputStream.bufferedReader().use { r: BufferedReader ->
-                    while (true) {
-                        val line = r.readLine() ?: break
-                        // redirectErrorStream(true) merges real stderr into stdout; RuntimeBus mirrors every line to boot.log.
-                        RuntimeBus.append("engine| $line")
-                    }
+                proc.errorStream.bufferedReader().forEachLine { line ->
+                    RuntimeBus.append("engine| $line")
                 }
             } catch (_: Exception) {
             }
+        }.apply { isDaemon = true }.start()
+
+        Thread {
+            val code = runCatching { proc.waitFor() }.getOrDefault(-1)
+            FileLogger.append("EngineProcess", "engine process exited (code=$code)")
+            RuntimeBus.append("engine process exited (code=$code)")
             if (proc === process) {
-                val code = runCatching { proc.exitValue() }.getOrDefault(-1)
-                FileLogger.append("EngineProcess", "engine process exited (code=$code)")
-                RuntimeBus.append("engine process exited (code=$code)")
+                streams = null
+                process = null
             }
         }.apply { isDaemon = true }.start()
 
-        val deadline = System.currentTimeMillis() + 120_000L
-        var healthy = false
+        // Early-death gate only: real readiness is the RPC Initialize handshake,
+        // which the RPC client surfaces as CONNECTED and the boot UI gates on.
+        val deadline = System.currentTimeMillis() + 15_000L
         while (System.currentTimeMillis() < deadline) {
             if (!proc.isAlive) {
-                RuntimeBus.append(
-                    "engine died during startup (exit=${runCatching { proc.exitValue() }.getOrDefault(-1)})",
-                )
-                break
+                val msg = "engine exited during startup (exit=${runCatching { proc.exitValue() }.getOrDefault(-1)}) — see QodexRuntime log"
+                FileLogger.append("EngineProcess", "engine start failed: $msg")
+                RuntimeBus.setPhase(RuntimePhase.Failed("engine", msg))
+                throw IOException(msg)
             }
-            if (httpAnswering(chosen)) {
-                healthy = true
-                break
-            }
-            Thread.sleep(1_500)
+            Thread.sleep(500)
         }
-        if (!healthy) {
-            stop()
-            val msg = if (proc.isAlive) {
-                "engine did not answer within 120s"
-            } else {
-                "engine exited during startup — see QodexRuntime logcat"
-            }
-            FileLogger.append("EngineProcess", "engine start failed: $msg")
-            RuntimeBus.setPhase(RuntimePhase.Failed("engine", msg))
-            throw IOException(msg)
-        }
-        RuntimeBus.append("engine healthy on :$chosen — WS at ${wsUrl()}")
-        FileLogger.append("EngineProcess", "engine healthy on port $chosen")
-        RuntimeBus.setPhase(RuntimePhase.EngineReady(chosen))
-        chosen
-    }
-
-    // Any HTTP answer proves the hono server is alive — without QODEX_WEB_STATIC_ROOT the root path legitimately 404s.
-    private fun httpAnswering(port: Int): Boolean = runCatching {
-        val c = URL("http://127.0.0.1:$port/").openConnection() as HttpURLConnection
-        c.connectTimeout = 1_500
-        c.readTimeout = 1_500
-        val ok = c.responseCode in 200..499
-        c.disconnect()
-        ok
-    }.getOrDefault(false)
-
-    fun adoptIfHealthy(ctx: Context, wantedPort: Int): Boolean {
-        if (process?.isAlive == true) return false
-        if (!httpAnswering(wantedPort)) return false
-        port = wantedPort
-        RuntimeBus.append(
-            "adopt: port $wantedPort already answering — reusing the existing engine " +
-                "(no duplicate node spawned)",
-        )
-        FileLogger.append("EngineProcess", "adopted engine on port $wantedPort")
-        RuntimeBus.setPhase(RuntimePhase.EngineReady(wantedPort))
-        return true
+        RuntimeBus.append("engine alive on stdio — waiting for RPC handshake")
+        RuntimeBus.setPhase(RuntimePhase.EngineReady)
     }
 
     fun stop() {
@@ -133,28 +92,16 @@ object EngineProcess {
         Thread.sleep(150)
         runCatching { process?.destroyForcibly() }
         process = null
-        if (port > 0) {
-            runCatching {
-                val p = ProcessBuilder("sh", "-c", "pidof node").start()
-                val out = p.inputStream.bufferedReader().readText().trim()
-                p.waitFor()
-                out.split(Regex("\\s+")).mapNotNull { it.toIntOrNull() }.forEach { pid ->
-                    runCatching { android.os.Process.killProcess(pid) }
-                }
+        streams = null
+        runCatching {
+            val p = ProcessBuilder("sh", "-c", "pidof node").start()
+            val out = p.inputStream.bufferedReader().readText().trim()
+            p.waitFor()
+            out.split(Regex("\\s+")).mapNotNull { it.toIntOrNull() }.forEach { pid ->
+                runCatching { android.os.Process.killProcess(pid) }
             }
         }
         RuntimeBus.append("engine stopped")
         FileLogger.append("EngineProcess", "engine stopped")
-    }
-
-    fun readLastPort(ctx: Context): Int = runCatching {
-        val marker = File(Provisioner.runtimeRoot(ctx), "engine-port.txt")
-        if (marker.isFile) marker.readText().trim().toInt() else -1
-    }.getOrDefault(-1)
-
-    fun persistPort(ctx: Context, p: Int) {
-        runCatching {
-            File(Provisioner.runtimeRoot(ctx), "engine-port.txt").writeText(p.toString())
-        }
     }
 }

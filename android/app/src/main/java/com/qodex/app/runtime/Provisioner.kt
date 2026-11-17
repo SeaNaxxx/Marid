@@ -37,7 +37,8 @@ object Provisioner {
             distEntry(ctx).isFile
     }.getOrDefault(false)
 
-    fun distEntry(ctx: Context): File = File(distDir(ctx), "entry-http.js")
+    // stdio entry: the RPC channel rides process pipes (no HTTP/WS listener).
+    fun distEntry(ctx: Context): File = File(distDir(ctx), "entry-stdio.js")
 
     suspend fun provision(ctx: Context): Unit = withContext(Dispatchers.IO) {
         val app = ctx.applicationContext

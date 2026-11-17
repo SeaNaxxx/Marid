@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Loopback + (future) remote workspace traffic; cleartext restricted to
-         127.0.0.1/localhost via network_security_config.xml — the on-device
-         engine speaks plain ws://127.0.0.1:3030. -->
+    <!-- Outbound provider traffic from the engine (TLS); the host-engine RPC
+         channel rides process pipes and never touches the network stack. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- Engine keep-alive (Kotlin host duty #1): FGS + partial WakeLock while

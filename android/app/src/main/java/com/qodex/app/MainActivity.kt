@@ -47,7 +47,7 @@ import com.qodex.app.ui.QodexRootScreen
 import com.qodex.app.ui.QodexTokens
 import com.qodex.app.utils.FileLogger
 
-// Boot contract: provision -> engine on a random loopback port -> RPC connect; buttons appear only on failure (no fake progress).
+// Boot contract: provision -> engine subprocess on stdio pipes -> RPC handshake; buttons appear only on failure (no fake progress).
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
