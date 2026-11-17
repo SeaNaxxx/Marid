@@ -10,6 +10,7 @@ import com.qodex.app.rpc.RpcConnectionState
 import com.qodex.app.rpc.asArrayOrNull
 import com.qodex.app.rpc.asObjectOrNull
 import com.qodex.app.rpc.asStringOrNull
+import com.qodex.app.runtime.AgentKeepAliveService
 import com.qodex.app.runtime.EngineProcess
 import com.qodex.app.runtime.Provisioner
 import com.qodex.app.runtime.RuntimeBus
@@ -83,12 +84,14 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
             // Adopt a healthy survivor from a killed app process — never spawn a duplicate node on a served port.
             val last = EngineProcess.readLastPort(ctx)
             if (last > 0 && EngineProcess.adoptIfHealthy(ctx, last)) {
+                AgentKeepAliveService.start(ctx)
                 connectRpc()
                 return@launch
             }
             try {
                 EngineProcess.start(ctx)
                 EngineProcess.persistPort(ctx, EngineProcess.currentPort())
+                AgentKeepAliveService.start(ctx)
                 connectRpc()
             } catch (t: Throwable) {
                 RuntimeBus.append("engine start failed: ${t.message}")
