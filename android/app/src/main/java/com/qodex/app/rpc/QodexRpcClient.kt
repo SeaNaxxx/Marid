@@ -15,6 +15,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import com.qodex.app.utils.FileLogger
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -30,6 +31,7 @@ object ServiceChannels {
     const val QODEX_AGENT = "qodex-agent"
     const val QODEX_TASK = "qodex-task"
     const val MODEL_SELECTION = "model-selection"
+    const val PROVIDER_SETTINGS = "provider-settings"
     const val SETTING = "setting"
     const val TERMINAL = "terminal"
     const val FILE = "file"
@@ -180,6 +182,10 @@ class QodexRpcClient(
                     webSocket?.send(SocketFraming.frameRegular(payload).toByteString())
                 },
                 log = { events.onLog(it) },
+                onReady = {
+                    FileLogger.append("RPC", "Handshake complete: Initialize received -> Ready")
+                    events.onLog("RPC handshake: Initialize received -> Ready")
+                },
             )
             channelClient = client
             setState(RpcConnectionState.CONNECTED)
@@ -188,16 +194,41 @@ class QodexRpcClient(
     }
 
     suspend fun call(channel: String, command: String, arg: JsonObject? = null): JsonElement? {
+        FileLogger.append("RPC", "Sending $channel.$command")
         val client = ensureClient()
-        val response = client.request(
-            channel,
-            command,
-            arg?.let { RpcValue.Obj(it) } ?: RpcValue.Undefined,
-        )
+        val response = try {
+            client.request(
+                channel,
+                command,
+                arg?.let { RpcValue.Obj(it) } ?: RpcValue.Undefined,
+            )
+        } catch (t: Throwable) {
+            FileLogger.append("RPC", "Error on $channel.$command: ${t.message}")
+            throw t
+        }
+        FileLogger.append("RPC", "Received response: $channel.$command")
         return when (response) {
             is RpcValue.Obj -> response.json
             else -> null
         }
+    }
+
+    // Engine service methods take positional args; the TS client proxy packs them as a JSON array (ProxyChannel.fromService spreads it back).
+    suspend fun callPositional(
+        channel: String,
+        command: String,
+        args: List<JsonElement>,
+    ): JsonElement? {
+        FileLogger.append("RPC", "Sending $channel.$command (${args.size} args)")
+        val client = ensureClient()
+        val response = try {
+            client.request(channel, command, RpcValue.Obj(JsonArray(args)))
+        } catch (t: Throwable) {
+            FileLogger.append("RPC", "Error on $channel.$command: ${t.message}")
+            throw t
+        }
+        FileLogger.append("RPC", "Received response: $channel.$command")
+        return (response as? RpcValue.Obj)?.json
     }
 
     suspend fun listen(
@@ -206,13 +237,19 @@ class QodexRpcClient(
         arg: JsonObject? = null,
         onEvent: (JsonElement?) -> Unit,
     ): ChannelClient.EventSubscription {
+        FileLogger.append("RPC", "Subscribing $channel.$event")
         val client = ensureClient()
-        return client.listen(
-            channel,
-            event,
-            arg?.let { RpcValue.Obj(it) } ?: RpcValue.Undefined,
-        ) { value ->
-            onEvent((value as? RpcValue.Obj)?.json)
+        return try {
+            client.listen(
+                channel,
+                event,
+                arg?.let { RpcValue.Obj(it) } ?: RpcValue.Undefined,
+            ) { value ->
+                onEvent((value as? RpcValue.Obj)?.json)
+            }
+        } catch (t: Throwable) {
+            FileLogger.append("RPC", "Error subscribing $channel.$event: ${t.message}")
+            throw t
         }
     }
 
@@ -254,6 +291,9 @@ class QodexRpcClient(
 
     suspend fun modelSelectionView(): JsonElement? =
         call(ServiceChannels.MODEL_SELECTION, "getView")
+
+    suspend fun providerSettingsView(): JsonElement? =
+        call(ServiceChannels.PROVIDER_SETTINGS, "getView")
 
     suspend fun terminalCreate(cols: Int, rows: Int): JsonElement? = call(
         ServiceChannels.TERMINAL,

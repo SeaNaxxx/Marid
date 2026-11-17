@@ -36,6 +36,8 @@ private sealed class PendingReply {
 class ChannelClient(
     private val send: (ByteArray) -> Unit,
     private val log: (String) -> Unit = {},
+    // Fires when the engine's Initialize (200) arrives — the server-side handshake anchor for boot.log.
+    private val onReady: () -> Unit = {},
 ) {
     @Volatile
     private var initialized = false
@@ -101,6 +103,7 @@ class ChannelClient(
     }
 
     private fun onInitialized() {
+        onReady()
         val waiters: List<CompletableDeferred<Unit>>
         synchronized(this) {
             initialized = true

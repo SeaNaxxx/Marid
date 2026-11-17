@@ -6,13 +6,16 @@
  *
  * The Kotlin unit test (RpcGoldenVectorTest) asserts byte-identical output.
  */
-import { serialize } from "/home/z/qodex-repo/packages/rpc/src/serialization.ts";
+import { serialize, BufferWriter } from "../../packages/rpc/src/serialization.ts";
 import {
   writeProtocolMessage,
   ProtocolMessageType,
-} from "/home/z/qodex-repo/packages/rpc/src/protocol.ts";
-import { BufferWriter } from "/home/z/qodex-repo/packages/rpc/src/serialization.ts";
-import { writeFileSync, mkdirSync } from "node:fs";
+} from "../../packages/rpc/src/protocol.ts";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
 function hex(bytes) {
   return Buffer.from(bytes).toString("hex");
@@ -90,9 +93,10 @@ for (const c of vectors.cases.slice(0, 3)) {
   vectors.frames.push(frameCase(`frame-of-${c.name}`, c.hex));
 }
 
-mkdirSync("/home/z/qodex-repo/android/app/src/test/resources", { recursive: true });
+const resourcesDir = resolve(REPO_ROOT, "android/app/src/test/resources");
+mkdirSync(resourcesDir, { recursive: true });
 writeFileSync(
-  "/home/z/qodex-repo/android/app/src/test/resources/rpc-golden-vectors.json",
+  resolve(resourcesDir, "rpc-golden-vectors.json"),
   JSON.stringify(vectors, null, 2),
 );
 console.log(`wrote ${vectors.cases.length} cases + ${vectors.frames.length} frames`);

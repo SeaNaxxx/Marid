@@ -69,6 +69,16 @@ private const val TAG_2D = "QodexModelSettings"
 /** Provider auth surface — API_KEY = editable key form, OAUTH = login-based (not rendered). */
 enum class ProviderAuthKind2d { API_KEY, OAUTH }
 
+// Model rows come from the engine's ProviderSettingsProviderView.models; effectiveConfig feeds the editor defaults.
+data class ModelView2d(
+    val modelId: String,
+    val builtin: Boolean,
+    val enabled: Boolean,
+    val executable: Boolean,
+    val useRecommendedConfig: Boolean,
+    val effectiveConfig: JsonObject?,
+)
+
 data class ProviderEntry2d(
     val providerId: String,
     val name: String,
@@ -81,6 +91,8 @@ data class ProviderEntry2d(
     val apiKeyManagementUrl: String?,
     val apiType: String?,
     val baseUrl: String?,
+    val models: List<ModelView2d>,
+    val personalConfig: JsonObject?,
 )
 
 data class ProviderTemplateEntry2d(
@@ -138,11 +150,6 @@ suspend fun fetchProviders(rpc: QodexRpcClient?): ModelSettingsData2d {
     val locale = templateLocale2d()
 
     val templates = mutableListOf<ProviderTemplateEntry2d>()
-    for (element in obj["providerTemplates"].asObjectOrNull()?.let { emptyList<JsonElement>() }
-            ?: emptyList()) {
-        // placeholder — replaced below (kept structure explicit)
-    }
-    templates.clear()
     val templateArray = (obj["providerTemplates"] as? JsonArray)?.toList() ?: emptyList()
     for (element in templateArray) {
         val t = element.asObjectOrNull() ?: continue
@@ -196,6 +203,8 @@ suspend fun fetchProviders(rpc: QodexRpcClient?): ModelSettingsData2d {
                 apiKeyManagementUrl = access?.get("apiKeyManagementUrl").asStringOrNull(),
                 apiType = api?.get("type").asStringOrNull(),
                 baseUrl = api?.get("baseUrl").asStringOrNull(),
+                models = parseModels2d(p["models"]),
+                personalConfig = p["personalConfig"].asObjectOrNull(),
             ),
         )
     }
@@ -280,39 +289,32 @@ suspend fun createProviderFromTemplate2d(
     return response.asObjectOrNull()?.get("providerId").asStringOrNull()
 }
 
-// Wire arg must be a positional array, which the JsonObject-only public call() can't express; reflects the lazy private client (build is unminified).
+// Wire arg for positional service methods is a JSON array — the engine's ProxyChannel.fromService spreads it across the method signature.
 private suspend fun callPositional2d(
     rpc: QodexRpcClient,
     channel: String,
     command: String,
     args: List<JsonElement>,
-): JsonElement? {
-    return try {
-        val clientField = QodexRpcClient::class.java.getDeclaredField("channelClient")
-        clientField.isAccessible = true
-        var client = clientField.get(rpc)
-        if (client == null) {
-            val ensure = QodexRpcClient::class.java.getDeclaredMethod("ensureClient")
-            ensure.isAccessible = true
-            client = ensure.invoke(rpc)
-        }
-        val request = client.javaClass.getMethod(
-            "request",
-            String::class.java,
-            String::class.java,
-            com.qodex.app.rpc.RpcValue::class.java,
+): JsonElement? = rpc.callPositional(channel, command, args)
+
+private fun parseModels2d(raw: JsonElement?): List<ModelView2d> {
+    val arr = (raw as? JsonArray)?.toList() ?: return emptyList()
+    val models = mutableListOf<ModelView2d>()
+    for (element in arr) {
+        val m = element.asObjectOrNull() ?: continue
+        val id = m["modelId"].asStringOrNull() ?: continue
+        models.add(
+            ModelView2d(
+                modelId = id,
+                builtin = m["builtin"].asBoolOrNull() ?: false,
+                enabled = m["enabled"].asBoolOrNull() ?: true,
+                executable = m["executable"].asBoolOrNull() ?: false,
+                useRecommendedConfig = m["useRecommendedConfig"].asBoolOrNull() ?: true,
+                effectiveConfig = m["effectiveConfig"].asObjectOrNull(),
+            ),
         )
-        val value = request.invoke(
-            client,
-            channel,
-            command,
-            com.qodex.app.rpc.RpcValue.Obj(JsonArray(args)),
-        ) as com.qodex.app.rpc.RpcValue
-        (value as? com.qodex.app.rpc.RpcValue.Obj)?.json
-    } catch (t: Throwable) {
-        Log.w(TAG_2D, "positional RPC $channel/$command failed: ${t.message}")
-        null
     }
+    return models
 }
 
 private sealed interface ModelSettingsUiState2d {
@@ -326,6 +328,7 @@ fun ModelSettingsScreen(rpc: com.qodex.app.rpc.QodexRpcClient?, onBack: () -> Un
     var uiState by remember { mutableStateOf<ModelSettingsUiState2d>(ModelSettingsUiState2d.Loading) }
     var selectedProviderId by rememberSaveable { mutableStateOf<String?>(null) }
     var creating by remember { mutableStateOf(false) }
+    var pickerOpen by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     fun reload() {
@@ -335,6 +338,22 @@ fun ModelSettingsScreen(rpc: com.qodex.app.rpc.QodexRpcClient?, onBack: () -> Un
                 ModelSettingsUiState2d.Ready(fetchProviders(rpc))
             } catch (t: Throwable) {
                 ModelSettingsUiState2d.Error(t.message ?: "RPC error")
+            }
+        }
+    }
+
+    fun launchCreate(templateId: String?, providerName: String?) {
+        scope.launch {
+            creating = true
+            val id = rpc?.let { createProviderFromTemplate2d(it, templateId, providerName) }
+            creating = false
+            if (id != null) {
+                uiState = try {
+                    ModelSettingsUiState2d.Ready(fetchProviders(rpc))
+                } catch (t: Throwable) {
+                    ModelSettingsUiState2d.Error(t.message ?: "RPC error")
+                }
+                selectedProviderId = id
             }
         }
     }
@@ -355,68 +374,42 @@ fun ModelSettingsScreen(rpc: com.qodex.app.rpc.QodexRpcClient?, onBack: () -> Un
             verticalArrangement = Arrangement.spacedBy(32.dp), // flex flex-col gap-8
         ) {
             val state = uiState
-            if (selectedProviderId != null) {
-                val provider = (state as? ModelSettingsUiState2d.Ready)?.data?.providers
-                    ?.firstOrNull { it.providerId == selectedProviderId }
-                if (provider != null) {
-                    ApiKeyFormScreen2d(
-                        provider = provider,
-                        savingLocked = creating,
-                        onBackToList = { selectedProviderId = null },
-                        onSaved = { reload() },
-                        rpc = rpc,
-                    )
-                } else {
-                    ListHeader2d(
-                        state = state,
-                        creating = creating,
-                        onBack = onBack,
-                        onRetry = { reload() },
-                        onAddTemplate = { templateId, providerName ->
-                            scope.launch {
-                                creating = true
-                                val id = rpc?.let {
-                                    createProviderFromTemplate2d(it, templateId, providerName)
-                                }
-                                creating = false
-                                if (id != null) {
-                                    uiState = try {
-                                        ModelSettingsUiState2d.Ready(fetchProviders(rpc))
-                                    } catch (t: Throwable) {
-                                        ModelSettingsUiState2d.Error(t.message ?: "RPC error")
-                                    }
-                                    selectedProviderId = id
-                                }
-                            }
-                        },
-                    )
-                }
+            val selectedProvider = (state as? ModelSettingsUiState2d.Ready)?.data?.providers
+                ?.firstOrNull { it.providerId == selectedProviderId }
+            if (selectedProvider != null) {
+                ApiKeyFormScreen2d(
+                    provider = selectedProvider,
+                    savingLocked = creating,
+                    revision = (state as ModelSettingsUiState2d.Ready).data.revision,
+                    onBackToList = { selectedProviderId = null },
+                    onSaved = { reload() },
+                    onModelChanged = { reload() },
+                    rpc = rpc,
+                )
             } else {
                 ListHeader2d(
                     state = state,
                     creating = creating,
                     onBack = onBack,
                     onRetry = { reload() },
-                    onAddTemplate = { templateId, providerName ->
-                        scope.launch {
-                            creating = true
-                            val id = rpc?.let {
-                                createProviderFromTemplate2d(it, templateId, providerName)
-                            }
-                            creating = false
-                            if (id != null) {
-                                uiState = try {
-                                    ModelSettingsUiState2d.Ready(fetchProviders(rpc))
-                                } catch (t: Throwable) {
-                                    ModelSettingsUiState2d.Error(t.message ?: "RPC error")
-                                }
-                                selectedProviderId = id
-                            }
-                        }
-                    },
+                    onOpenPicker = { pickerOpen = true },
+                    onAddTemplate = ::launchCreate,
+                    onSelectProvider = { selectedProviderId = it.providerId },
                 )
             }
         }
+    }
+
+    if (pickerOpen && uiState is ModelSettingsUiState2d.Ready) {
+        TemplatePickerDialog2d(
+            templates = (uiState as ModelSettingsUiState2d.Ready).data.templates,
+            enabled = !creating,
+            onDismiss = { pickerOpen = false },
+            onPick = { templateId, providerName ->
+                pickerOpen = false
+                launchCreate(templateId, providerName)
+            },
+        )
     }
 }
 
@@ -430,19 +423,21 @@ private fun ListHeader2d(
     creating: Boolean,
     onBack: () -> Unit,
     onRetry: () -> Unit,
+    onOpenPicker: () -> Unit,
     onAddTemplate: (templateId: String?, providerName: String?) -> Unit,
+    onSelectProvider: (ProviderEntry2d) -> Unit,
 ) {
     SectionTitleBackRow2d(title = "Model settings", onBack = onBack)
     when (state) {
         is ModelSettingsUiState2d.Error -> ErrorState2d(state.message, onRetry)
         is ModelSettingsUiState2d.Loading -> {
-            DescriptionRow2d()
+            DescriptionRow2d(onRefresh = onRetry, onAddProvider = onOpenPicker)
             LoadingCard2d("Loading...")
         }
         is ModelSettingsUiState2d.Ready -> {
-            DescriptionRow2d()
+            DescriptionRow2d(onRefresh = onRetry, onAddProvider = onOpenPicker)
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                ProvidersSection2d(state.data.providers)
+                ProvidersSection2d(state.data.providers, onSelectProvider)
                 AddProviderSection2d(state.data.templates, creating, onAddTemplate)
             }
         }
@@ -473,7 +468,7 @@ private fun SectionTitleBackRow2d(title: String, onBack: () -> Unit) {
 }
 
 @Composable
-private fun DescriptionRow2d() {
+private fun DescriptionRow2d(onRefresh: () -> Unit, onAddProvider: () -> Unit) {
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) { // gap-3
         Text(
             text = "Manage custom model providers. Once configured, they can be selected during chat.",
@@ -490,13 +485,13 @@ private fun DescriptionRow2d() {
                 icon = QodexIcons2d.RefreshCcw,
                 size = 28.dp, // icon-md size-7
                 contentSize = 16.dp, // [&_svg]:size-4
-                contentDescription = "Refresh",
+                contentDescription = "Refresh provider list from engine",
                 background = Color.Transparent,
                 border = QodexTokens.Border, // outline variant: border-border
                 rounded = 8.dp, // icon-md rounded-lg
-                onClick = {},
+                onClick = onRefresh,
             )
-            PrimaryButton2d(label = "Add provider", icon = QodexIcons.Plus, onClick = {})
+            PrimaryButton2d(label = "Add provider", icon = QodexIcons.Plus, onClick = onAddProvider)
         }
     }
 }
@@ -556,7 +551,10 @@ private fun ErrorState2d(message: String, onRetry: () -> Unit) {
 }
 
 @Composable
-private fun ProvidersSection2d(providers: List<ProviderEntry2d>) {
+private fun ProvidersSection2d(
+    providers: List<ProviderEntry2d>,
+    onSelectProvider: ((ProviderEntry2d) -> Unit)?,
+) {
     if (providers.isEmpty()) return
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { // group: space-y-2 (gap-2 rows)
         Row(
@@ -574,21 +572,21 @@ private fun ProvidersSection2d(providers: List<ProviderEntry2d>) {
         }
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             for (provider in providers) {
-                ProviderRow2d(provider)
+                ProviderRow2d(provider, onSelectProvider)
             }
         }
     }
 }
 
 @Composable
-private fun ProviderRow2d(provider: ProviderEntry2d) {
+private fun ProviderRow2d(provider: ProviderEntry2d, onSelectProvider: ((ProviderEntry2d) -> Unit)?) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(32.dp) // h-8
             .border(1.dp, Color.Transparent, RoundedCornerShape(8.dp)) // rounded-lg border
             .background(Color.Transparent)
-            .clickable { }
+            .clickable(enabled = onSelectProvider != null) { onSelectProvider?.invoke(provider) }
             .padding(horizontal = 8.dp, vertical = 4.dp), // px-2 py-1
         horizontalArrangement = Arrangement.spacedBy(8.dp), // gap-2
         verticalAlignment = Alignment.CenterVertically,
@@ -722,8 +720,10 @@ private fun TemplateCard2d(label: String, custom: Boolean, enabled: Boolean, onC
 private fun ApiKeyFormScreen2d(
     provider: ProviderEntry2d,
     savingLocked: Boolean,
+    revision: Long,
     onBackToList: () -> Unit,
     onSaved: () -> Unit,
+    onModelChanged: () -> Unit,
     rpc: QodexRpcClient?,
 ) {
     var apiKey by rememberSaveable(provider.providerId) { mutableStateOf<String?>(null) }
@@ -731,6 +731,7 @@ private fun ApiKeyFormScreen2d(
     var saving by remember { mutableStateOf(false) }
     var saveFailed by remember { mutableStateOf(false) }
     var savedFlash by remember { mutableStateOf(false) }
+    var modelEditorTarget by remember { mutableStateOf<ModelEditorTarget2d?>(null) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(savedFlash) {
@@ -864,7 +865,35 @@ private fun ApiKeyFormScreen2d(
                 )
             }
         }
+
+        ModelsSection2d(
+            provider = provider,
+            revision = revision,
+            rpc = rpc,
+            onEditModel = { model -> modelEditorTarget = ModelEditorTarget2d.Edit(model) },
+            onAddModel = { modelEditorTarget = ModelEditorTarget2d.Add },
+        )
     }
+
+    modelEditorTarget?.let { target ->
+        ModelEditorDialog2d(
+            provider = provider,
+            target = target,
+            revision = revision,
+            rpc = rpc,
+            onDismiss = { modelEditorTarget = null },
+            onSaved = {
+                modelEditorTarget = null
+                onModelChanged()
+            },
+        )
+    }
+}
+
+// Add and Edit share one dialog and one RPC contract; only the draft seeding and the engine command differ.
+internal sealed interface ModelEditorTarget2d {
+    data object Add : ModelEditorTarget2d
+    data class Edit(val model: ModelView2d) : ModelEditorTarget2d
 }
 
 @Composable
@@ -999,7 +1028,7 @@ private fun FeedbackBanner2d(message: String, failure: Boolean) {
 }
 
 @Composable
-private fun PrimaryButton2d(
+internal fun PrimaryButton2d(
     label: String,
     icon: ImageVector?,
     enabled: Boolean = true,
@@ -1035,20 +1064,20 @@ private fun PrimaryButton2d(
 }
 
 @Composable
-private fun OutlineButton2d(label: String, onClick: () -> Unit) {
+internal fun OutlineButton2d(label: String, onClick: () -> Unit, enabled: Boolean = true) {
     Row(
         modifier = Modifier
             .heightIn(min = 28.dp)
             .border(1.dp, QodexTokens.Border, RoundedCornerShape(6.dp))
             .background(Color.Transparent)
-            .clickable(onClick = onClick)
+            .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = label,
-            color = QodexTokens.Foreground,
+            color = QodexTokens.Foreground.copy(alpha = if (enabled) 1f else 0.5f),
             fontSize = 14.sp,
             fontWeight = FontWeight.Normal,
         )
@@ -1056,7 +1085,7 @@ private fun OutlineButton2d(label: String, onClick: () -> Unit) {
 }
 
 @Composable
-private fun GhostIconButton2d(
+internal fun GhostIconButton2d(
     icon: ImageVector,
     size: androidx.compose.ui.unit.Dp,
     contentSize: androidx.compose.ui.unit.Dp,
@@ -1067,26 +1096,27 @@ private fun GhostIconButton2d(
     border: Color = Color.Transparent,
     modifier: Modifier = Modifier,
     tint: Color = QodexTokens.Foreground,
+    enabled: Boolean = true,
 ) {
     Box(
         modifier = modifier
             .size(size)
             .background(background, RoundedCornerShape(rounded))
             .border(1.dp, border, RoundedCornerShape(rounded))
-            .clickable(onClick = onClick),
+            .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = tint,
+            tint = tint.copy(alpha = if (enabled) 1f else 0.5f), // disabled:opacity-50
             modifier = Modifier.size(contentSize),
         )
     }
 }
 
 // Icons missing from QodexIcons, drawn with exact lucide geometry.
-internal object QodexIcons2d {
+object QodexIcons2d {
     private fun builder(name: String) = ImageVector.Builder(
         name = "Qodex2d.$name",
         defaultWidth = 24.dp,
@@ -1372,6 +1402,90 @@ internal object QodexIcons2d {
         stroke(b) {
             moveTo(19.07f, 4.93f)
             lineTo(17.66f, 6.34f)
+        }
+        b.build()
+    }
+
+    val Pencil: ImageVector by lazy {
+        val b = builder("pencil")
+        stroke(b) {
+            moveTo(21.174f, 6.812f)
+            lineTo(17.089f, 2.727f)
+            quadTo(16.5f, 2.135f, 16.921f, 2.556f)
+        }
+        stroke(b) {
+            moveTo(2.5f, 21.5f)
+            lineTo(3.392f, 17.539f)
+            quadTo(3.5f, 17.053f, 3.885f, 16.668f)
+            lineTo(15.879f, 4.674f)
+            quadTo(16.5f, 4.053f, 17.12f, 4.674f)
+            lineTo(19.326f, 6.879f)
+            quadTo(19.947f, 7.5f, 19.326f, 8.121f)
+            lineTo(7.332f, 20.115f)
+            quadTo(6.947f, 20.5f, 6.461f, 20.608f)
+            lineTo(2.5f, 21.5f)
+        }
+        stroke(b) {
+            moveTo(15f, 5f)
+            lineTo(19f, 9f)
+        }
+        b.build()
+    }
+
+    val Trash: ImageVector by lazy {
+        val b = builder("trash-2")
+        stroke(b) {
+            moveTo(3f, 6f)
+            lineTo(21f, 6f)
+        }
+        stroke(b) {
+            moveTo(19f, 6f)
+            quadTo(20f, 6.5f, 20f, 7f)
+            lineTo(20f, 19f)
+            quadTo(19f, 21.5f, 19f, 22f)
+            lineTo(5f, 22f)
+            quadTo(4f, 21.5f, 4f, 21f)
+            lineTo(4f, 7f)
+            quadTo(4f, 6.5f, 5f, 6f)
+        }
+        stroke(b) {
+            moveTo(8f, 6f)
+            lineTo(8f, 4f)
+            quadTo(9f, 2.5f, 9f, 2f)
+            lineTo(15f, 2f)
+            quadTo(16f, 2.5f, 16f, 3f)
+            lineTo(16f, 6f)
+        }
+        stroke(b) {
+            moveTo(10f, 11f)
+            lineTo(10f, 17f)
+        }
+        stroke(b) {
+            moveTo(14f, 11f)
+            lineTo(14f, 17f)
+        }
+        b.build()
+    }
+
+    val Check: ImageVector by lazy {
+        val b = builder("check")
+        stroke(b) {
+            moveTo(20f, 6f)
+            lineTo(9f, 17f)
+            lineTo(4f, 12f)
+        }
+        b.build()
+    }
+
+    val Close: ImageVector by lazy {
+        val b = builder("x")
+        stroke(b) {
+            moveTo(18f, 6f)
+            lineTo(6f, 18f)
+        }
+        stroke(b) {
+            moveTo(6f, 6f)
+            lineTo(18f, 18f)
         }
         b.build()
     }
