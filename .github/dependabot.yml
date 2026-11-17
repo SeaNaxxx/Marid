@@ -1,0 +1,43 @@
+# Dependabot targets the post-rebrand directory names only (apps/qodex-cli,
+# packages/qodex-server-cli); the retired apps/marid-cli paths stay closed.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      npm_and_yarn:
+        patterns:
+          - "*"
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: "npm"
+    directory: "/apps/qodex-cli"
+    schedule:
+      interval: "weekly"
+    groups:
+      npm_and_yarn:
+        patterns:
+          - "*"
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: "npm"
+    directory: "/apps/qodex-cli/tools/provider-regression"
+    schedule:
+      interval: "weekly"
+    groups:
+      npm_and_yarn:
+        patterns:
+          - "*"
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: "npm"
+    directory: "/packages/qodex-server-cli"
+    schedule:
+      interval: "weekly"
+    groups:
+      npm_and_yarn:
+        patterns:
+          - "*"
+    open-pull-requests-limit: 5
