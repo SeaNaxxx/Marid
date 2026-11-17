@@ -185,7 +185,7 @@ object Provisioner {
                 "process.platform + ' ' + process.arch)",
         )
         pb.redirectErrorStream(true)
-        BionicEnv.apply(pb.environment(), runtimeRoot(ctx), homeDir(ctx), bashBin(ctx), 0)
+        BionicEnv.apply(pb.environment(), runtimeRoot(ctx), homeDir(ctx), bashBin(ctx))
         val proc = pb.start()
         val out = proc.inputStream.bufferedReader().readText().trim()
         val code = proc.waitFor()
