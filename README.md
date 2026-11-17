@@ -104,7 +104,7 @@ Qodex/
 - **Android Studio:** Ladybug (2024.2.1+) or newer
 - **Android NDK:** r28+
 - **Node.js:** v24.14.0+ and `pnpm` v9+
-- **Device:** Android 14+ ARM64 device (tested on Snapdragon 8 Gen 2 / Gen 3 / 8 Elite)
+- **Device:** Android 14+ ARM64 device
 
 ### Building the Project
 
