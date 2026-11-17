@@ -63,7 +63,7 @@ export default defineConfig({
   onSuccess: async () => {
     await stageThirdPartyNotices(resolve(import.meta.dirname, "dist"));
   },
-  entry: { "entry-http": "src/entry-http.ts" },
+  entry: { "entry-http": "src/entry-http.ts", "entry-stdio": "src/entry-stdio.ts" },
   outDir: "dist",
   format: "esm",
   platform: "node",

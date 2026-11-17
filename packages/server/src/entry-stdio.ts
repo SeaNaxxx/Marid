@@ -1,154 +1,166 @@
-import { migrateApplicationStorage, createSettingService } from "@qodex/services/node";
-import { disposeServiceResourcesAndWait, getAppConfigDir } from "@qodex/services/node";
-import type { IChannel } from "@qodex/rpc";
+// Android engine entry: mounts the RPC ChannelServer directly over stdin/stdout.
+// No TCP port, no HTTP server, no WebSocket upgrade — the phone host speaks the
+// same 13-byte SocketProtocol framing it already ports in SocketFraming.kt.
+// Transport selection is driven by the launcher (entry-stdio.js); stdout is the
+// frame channel and every diagnostic goes to stderr (see stdio-log-guard).
+import "./stdio-log-guard.js";
+import { randomUUID } from "node:crypto";
 import {
-  QODEX_VERSION,
-  TOPIC_RESOURCE_RELAY_CHANNEL,
-  SERVICE_AUTHORITY_MODE_ENV,
-  formatLogPrefix,
-  formatZodError,
-  helloAckMessageSchema,
-} from "@qodex/shared";
-import type { HelloMessage, HelloAckMessage } from "@qodex/shared";
-import { prepareServerCredentialStorage } from "@qodex/shared/credential-security";
-import { join } from "node:path";
-import { createStdioServer } from "./stdio.js";
-import { registerStdioProcessLifecycle } from "./stdio-lifecycle.js";
-import { createStdioServices } from "./stdioServices.js";
-import { ensureRemoteServerDeviceMid } from "./stdioDeviceMid.js";
+  Emitter,
+  LoggingChannelServer,
+  ChannelServer,
+  SocketProtocol,
+  VSBuffer,
+  type ISocket,
+} from "@qodex/rpc";
+import { ServiceCollection, IQodexAgentService, createQodexAgentConnectionScope, IProviderProvisioningTargetService } from "@qodex/services";
+import {
+  SourceServerWorkspaceIdentityChannelServer,
+  createServerHostServices,
+  createTopicResourcePeers,
+  getAppConfigDir,
+  type SourceServerWorkspaceIdentityMapper,
+} from "@qodex/services/node";
 import {
   materializeBundledQodexBuiltinProviderConfig,
   readBundledQodexBuiltinProviderConfig,
 } from "./bundledQodexBuiltinProviderConfig.js";
+import { resolveHttpServerId } from "./http.js";
 
-// In stdio mode, all logging goes to stderr
 const log = (...args: unknown[]) =>
-  console.error(formatLogPrefix("qodex-server:stdio", process.pid), ...args);
-const stderrConsoleLog = (...args: unknown[]) => console.error(...args);
+  console.error(`[qodex-server:stdio] [${process.pid}]`, ...args);
 
-// stdio 模式下 stdout 只能承载 RPC 帧。
-// 之前 services 里的 info/debug 日志仍会走 console.log / console.info，
-// 一旦把普通文本写进 stdout，就会直接污染协议流，表现成远程调用一直 pending / loading。
-// 这里在 entry 层统一把普通 console 输出重定向到 stderr，确保所有服务日志都不会再打坏 RPC。
-console.log = stderrConsoleLog;
-console.info = stderrConsoleLog;
-console.warn = stderrConsoleLog;
-console.debug = stderrConsoleLog;
+/**
+ * Byte-stream ISocket over the process pipes. ChunkStream inside SocketProtocol
+ * reassembles partial reads, so framing is transport-agnostic — identical to
+ * wrapWebSocket in http.ts but for raw pipe bytes instead of WS messages.
+ */
+function wrapProcessStdio(): ISocket {
+  const onData = new Emitter<VSBuffer>();
+  const onClose = new Emitter<void>();
+  const onEnd = new Emitter<void>();
+  let finished = false;
 
-// --version flag: print version and exit (used by deploy version check)
-if (process.argv.includes("--version")) {
-  process.stdout.write(QODEX_VERSION + "\n");
-  process.exit(0);
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    onClose.fire();
+    onEnd.fire();
+  };
+
+  process.stdin.on("data", (chunk: Buffer) => {
+    onData.fire(VSBuffer.wrap(new Uint8Array(chunk)));
+  });
+  process.stdin.on("end", finish);
+  process.stdin.on("close", finish);
+  process.stdin.on("error", (error: Error) => {
+    log("stdin error", error.message);
+    finish();
+  });
+  // Writing to a pipe whose reader died raises EPIPE asynchronously; exit hard
+  // so the host never sees a half-alive engine.
+  process.stdout.on("error", (error: NodeJS.ErrnoException) => {
+    log("stdout error", error.code ?? error.message);
+    process.exit(error.code === "EPIPE" ? 0 : 1);
+  });
+
+  return {
+    onData: onData.event,
+    onClose: onClose.event,
+    onEnd: onEnd.event,
+    write(buffer: VSBuffer) {
+      if (finished) return;
+      process.stdout.write(Buffer.from(buffer.buffer));
+    },
+    end() {
+      finish();
+    },
+    drain() {
+      return Promise.resolve();
+    },
+    dispose() {
+      finish();
+    },
+  };
 }
 
-async function main() {
-  // Phase 1: Send hello message
-  const hello: HelloMessage = {
-    type: "qodex-hello",
-    version: QODEX_VERSION,
-    platform: process.platform,
-    arch: process.arch,
-    pid: process.pid,
-  };
-  process.stdout.write(JSON.stringify(hello) + "\n");
+function mountStdioChannelServer(
+  services: ServiceCollection,
+  workspaceIdentityMapper?: SourceServerWorkspaceIdentityMapper,
+): void {
+  const socket = wrapProcessStdio();
+  const protocol = new SocketProtocol(socket);
+  const rawServer = new ChannelServer(protocol, "server");
+  const loggedServer = new LoggingChannelServer(rawServer, log);
+  const server = workspaceIdentityMapper
+    ? new SourceServerWorkspaceIdentityChannelServer(loggedServer, workspaceIdentityMapper)
+    : loggedServer;
 
-  // Phase 2: Wait for hello-ack
-  const ack = await waitForAck();
-  log(`client connected: ${ack.clientId} (v${ack.version})`);
-
-  // 远端主机没有 Desktop main，没人写 telemetry-state.json，services 发往 Qodex endpoint
-  // 的请求缺 X-Device-Mid，Start Plan 的 billing/balance 被拒。远端 server 是本机设备身份的
-  // 生命周期所有者，必须在 services 创建前确保 deviceMid 存在（详见 stdioDeviceMid.ts）。
-  await ensureRemoteServerDeviceMid({ log });
-  if (process.argv.includes("--prepare-credentials")) {
-    await prepareServerCredentialStorage({ filePath: join(getAppConfigDir(), "credentials.json") });
+  const agentService = services.getOptional(IQodexAgentService);
+  // Parity with the /ws route: terminal-client scope, no host relay.
+  const connectionScope = agentService
+    ? createQodexAgentConnectionScope(agentService, {
+        connectionId: `server-stdio-${randomUUID()}`,
+        clientMode: "web-remote-replayable",
+        role: "terminal-client",
+      })
+    : undefined;
+  const overrides = new Map<string, unknown>();
+  if (connectionScope) {
+    overrides.set(IQodexAgentService.channelName, connectionScope.service);
   }
+  // Cross-environment credential provisioning stays desktop-host-only, same as HTTP.
+  if (services.getOptional(IProviderProvisioningTargetService)) {
+    overrides.set(IProviderProvisioningTargetService.channelName, {
+      apply: async () => {
+        throw new Error("Provider Provisioning 仅支持受信 Desktop Host");
+      },
+    });
+  }
+  services.exposeOnChannelServer(server, overrides);
 
-  // Phase 3: Initialize services and start stdio RPC server
-  let topicResourceChannel: IChannel | undefined;
+  const disposeAll = () => {
+    void connectionScope?.dispose();
+    rawServer.dispose();
+  };
+  socket.onEnd(disposeAll);
+  socket.onClose(disposeAll);
+}
+
+async function main(): Promise<void> {
   const qodexBuiltinProviderConfigFilePath = await materializeBundledQodexBuiltinProviderConfig({
     environmentConfigRoot: getAppConfigDir(),
     content: readBundledQodexBuiltinProviderConfig(),
   });
-  await migrateApplicationStorage(await createSettingService().get());
-  const { authorityModeParseResult, services } = await createStdioServices({
-    env: process.env,
-    qodexBuiltinProviderConfigFilePath,
-    topicResourceRelayChannel: () => {
-      if (!topicResourceChannel) throw new Error("Desktop topic resource channel is unavailable");
-      return topicResourceChannel;
-    },
-  });
-  if (authorityModeParseResult.invalidRawValue) {
-    log(
-      `${SERVICE_AUTHORITY_MODE_ENV}=${authorityModeParseResult.invalidRawValue} 非法，按默认本机 Environment 权威模式启动`,
-    );
+  const topicResourcePeers = createTopicResourcePeers();
+  const serverId = resolveHttpServerId();
+  const { services, workspaceIdentityMapper, migrationFailedPathCount } =
+    await createServerHostServices({
+      topicResourceRelayChannel: (request) => topicResourcePeers.getChannel(request),
+      sourceServerId: serverId,
+      qodexBuiltinProviderConfigFilePath,
+    });
+
+  mountStdioChannelServer(services, workspaceIdentityMapper);
+
+  if (migrationFailedPathCount > 0) {
+    log(`workspace migration skipped ${migrationFailedPathCount} unreadable path(s)`);
   }
-  const stdioServer = createStdioServer(
-    services,
-    authorityModeParseResult.mode === "desktop-attached-remote"
-      ? (client) => {
-          topicResourceChannel = client.getChannel(TOPIC_RESOURCE_RELAY_CHANNEL);
-        }
-      : undefined,
-  );
-  registerStdioProcessLifecycle({
-    stdin: process.stdin,
-    signalSource: process,
-    log,
-    stopRpc: () => stdioServer.stop(),
-    // Desktop Host 已经会等待 disposeServiceResourcesAndWait，远端 stdio
-    // entry 却仍直接 process.exit，导致其托管的 workspace Agent 来不及完成进程树清理。
-    // 远端 server 也是 ServiceCollection owner，退出前必须遵守同一异步回收契约。
-    dispose: () => disposeServiceResourcesAndWait(services),
-    exit: (code) => process.exit(code),
-  });
-  // ready 日志必须在退出监听注册之后；否则 SSH 恰好在 ready 后断开时，
-  // SIGHUP/SIGTERM 仍可能落入 Node 默认处理并绕过 Agent cleanup。
-  log("stdio mode ready");
+  log("RPC channel ready on stdio — waiting for host frames");
+  log(`qodex builtin provider config: ${qodexBuiltinProviderConfigFilePath}`);
+
+  // Host death closes the read pipe; exit immediately so no orphan node survives.
+  const exitWhenPipeCloses = () => {
+    log("stdin closed — exiting");
+    process.exit(0);
+  };
+  process.stdin.on("end", exitWhenPipeCloses);
+  process.stdin.on("close", exitWhenPipeCloses);
+  process.on("SIGTERM", exitWhenPipeCloses);
+  process.on("SIGINT", exitWhenPipeCloses);
 }
 
-function waitForAck(): Promise<HelloAckMessage> {
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      reject(new Error("Handshake timeout: no hello-ack received within 10s"));
-    }, 10_000);
-
-    let buffer = "";
-    const onData = (chunk: Buffer) => {
-      buffer += chunk.toString("utf-8");
-      const newlineIdx = buffer.indexOf("\n");
-      if (newlineIdx !== -1) {
-        const line = buffer.slice(0, newlineIdx).trim();
-        // Remove listener — remaining data in buffer will be consumed by RPC
-        process.stdin.removeListener("data", onData);
-        clearTimeout(timeout);
-
-        try {
-          const rawValue = JSON.parse(line);
-          const result = helloAckMessageSchema.safeParse(rawValue);
-          if (!result.success) {
-            reject(new Error(`Invalid hello-ack: ${formatZodError(result.error)}`));
-            return;
-          }
-          const msg = result.data as HelloAckMessage;
-          // If there's remaining data after the newline, push it back
-          const remaining = buffer.slice(newlineIdx + 1);
-          if (remaining.length > 0) {
-            process.stdin.unshift(Buffer.from(remaining, "utf-8"));
-          }
-          resolve(msg);
-        } catch (err) {
-          reject(new Error(`Failed to parse hello-ack: ${err}`));
-        }
-      }
-    };
-
-    process.stdin.on("data", onData);
-  });
-}
-
-main().catch((err) => {
-  log("fatal:", err);
-  process.exit(1);
+void main().catch((error: unknown) => {
+  console.error("[qodex-server:stdio] startup failed", error);
+  process.exitCode = 1;
 });

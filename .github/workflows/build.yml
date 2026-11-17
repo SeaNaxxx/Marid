@@ -30,6 +30,9 @@ jobs:
       - name: Build engine (@qodex/server + workspace deps)
         run: pnpm --filter "@qodex/server..." build
 
+      - name: Stdio transport smoke test (Initialize handshake + RPC round trip)
+        run: pnpm exec tsx scripts/qodex-android/stdio-smoke.mts
+
       - name: Pack engine runtime bundle (qodex-dist.tgz + sha256)
         run: |
           node scripts/qodex-android/pack-runtime-dist.mjs \
