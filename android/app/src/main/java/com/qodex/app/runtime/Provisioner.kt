@@ -126,6 +126,9 @@ object Provisioner {
             distTar.parentFile?.mkdirs()
             copyAsset(app, DIST_ASSET, distTar)
             verifySha256(distTar, distSha, "qodex-dist")
+            // Assert the archive layout BEFORE extraction — a nested or stale
+            // bundle must fail with its real root entries, not a post-hoc guess.
+            DistArchiveContract.requireValid(distTar)
             distDir(app).mkdirs()
             TarExtractor(distDir(app)).extract(
                 distTar.inputStream().let { GzipCompressorInputStream(it) },
@@ -133,7 +136,7 @@ object Provisioner {
             distTar.delete()
             if (!distEntry(app).isFile) {
                 throw IOException(
-                    "engine dist layout unexpected (dist/entry-http.js missing)",
+                    "engine dist layout unexpected (entry-stdio.js missing at archive root)",
                 )
             }
             FileLogger.append("Provisioner", "engine dist extracted (sha256 verified)")
