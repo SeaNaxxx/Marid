@@ -100,7 +100,7 @@ class DistArchiveContractTest {
     }
 
     @Test
-    fun `flat archive extracts entry-stdio.js to the destination root`() {
+    fun `flat archive extracts the engine entry to the destination root`() {
         withTgz(
             "package.json", "entry-stdio.js",
             "remote/", "remote/qodex-server.cjs",
