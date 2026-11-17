@@ -40,6 +40,20 @@ jobs:
             --node-modules node_modules \
             --out android/app/src/main/assets/runtime/qodex-dist.tgz
 
+      - name: Verify archive structure
+        run: |
+          set -e
+          tar -tzf android/app/src/main/assets/runtime/qodex-dist.tgz \
+            > /tmp/archive-list.txt
+          grep -qx 'entry-stdio.js' /tmp/archive-list.txt \
+            || { echo "FAIL: entry-stdio.js not at root"; head -20 /tmp/archive-list.txt; exit 1; }
+          grep -qx 'node_modules/' /tmp/archive-list.txt \
+            || { echo "FAIL: node_modules missing"; exit 1; }
+          grep -q '^node_modules/[^/]*/package\.json$' /tmp/archive-list.txt \
+            || { echo "FAIL: node_modules has no packaged dependencies"; exit 1; }
+          grep -q '^dist/' /tmp/archive-list.txt && { echo "FAIL: dist/ prefix in root"; exit 1; } || true
+          echo "OK: archive structure correct"
+
       - name: Setup JDK 21
         uses: actions/setup-java@v4
         with:
@@ -54,6 +68,10 @@ jobs:
         run: >-
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           "platforms;android-34" "build-tools;34.0.0" > /dev/null
+
+      - name: Run JVM unit tests
+        working-directory: android
+        run: ./gradlew :app:testDebugUnitTest --no-daemon
 
       - name: Build debug APK
         working-directory: android
