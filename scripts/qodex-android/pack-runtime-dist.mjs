@@ -127,7 +127,13 @@ async function main() {
   const stage = await mkdtemp(join(os.tmpdir(), "qodex-dist-"));
   const stageNodeModules = join(stage, "node_modules");
   await mkdir(stageNodeModules, { recursive: true });
-  await cp(distDir, join(stage, "dist"), { recursive: true });
+  // Archive-root contract: the CONTENTS of dist/ sit at the archive root so the
+  // Android provisioner unpacks entry-stdio.js to
+  // filesDir/runtime/dist/entry-stdio.js. Nesting dist/ inside the archive
+  // yields runtime/dist/dist/entry-stdio.js and the engine never boots.
+  for (const entry of await readdir(distDir, { withFileTypes: true })) {
+    await cp(join(distDir, entry.name), join(stage, entry.name), { recursive: true });
+  }
   await writeFile(
     join(stage, "package.json"),
     JSON.stringify({ name: "qodex-engine", type: "module" }, null, 2) + "\n",
@@ -184,7 +190,10 @@ async function main() {
   }
 
   await rm(outFile, { force: true });
-  const tar = spawnSync("tar", ["-czf", outFile, "-C", stage, "package.json", "dist", "node_modules"], {
+  // Tar the stage root by explicit entry names — archive listing lines match the
+  // CI gate exactly (root line `entry-stdio.js`, no `./` prefix, no `dist/` nest).
+  const stageEntries = (await readdir(stage, { withFileTypes: true })).map((e) => e.name);
+  const tar = spawnSync("tar", ["-czf", outFile, "-C", stage, ...stageEntries], {
     stdio: "inherit",
   });
   if (tar.error || tar.status !== 0) {
