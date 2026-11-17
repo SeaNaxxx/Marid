@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -70,6 +71,7 @@ private const val TAG_2D = "QodexModelSettings"
 enum class ProviderAuthKind2d { API_KEY, OAUTH }
 
 // Model rows come from the engine's ProviderSettingsProviderView.models; effectiveConfig feeds the editor defaults.
+// builtinConfig/personalConfig replicate desktop inherited-vs-personal resolution for the sparse overlay.
 data class ModelView2d(
     val modelId: String,
     val builtin: Boolean,
@@ -77,6 +79,8 @@ data class ModelView2d(
     val executable: Boolean,
     val useRecommendedConfig: Boolean,
     val effectiveConfig: JsonObject?,
+    val builtinConfig: JsonObject?,
+    val personalConfig: JsonObject?,
 )
 
 data class ProviderEntry2d(
@@ -213,54 +217,91 @@ suspend fun fetchProviders(rpc: QodexRpcClient?): ModelSettingsData2d {
     return ModelSettingsData2d(revision = revision, providers = providers, templates = templates)
 }
 
-suspend fun saveCredential(rpc: QodexRpcClient, providerId: String, apiKey: String): Boolean {
+// Provider detail save covers name / api format / base URL / API key in one overlay commit, mirroring
+// the desktop provider card fields. A blank API key input never overwrites the stored credential
+//（React 逐字段 idle-save，仅在用户输入后提交该字段）。
+suspend fun saveProviderDetails2e(
+    rpc: QodexRpcClient,
+    providerId: String,
+    apiKeyInput: String,
+    baseUrlInput: String,
+    apiType: String,
+    providerName: String?,
+    nameChanged: Boolean,
+): Boolean {
     val view = try {
         withTimeout(15_000) { rpc.call("provider-settings", "getView", null) }
     } catch (t: Throwable) {
-        Log.w(TAG_2D, "saveCredential getView failed: ${t.message}")
+        Log.w(TAG_2D, "saveProviderDetails getView failed: ${t.message}")
         return false
     }
     val obj = view.asObjectOrNull()
     if (obj == null) {
-        Log.w(TAG_2D, "saveCredential: unexpected view shape")
+        Log.w(TAG_2D, "saveProviderDetails: unexpected view shape")
         return false
     }
     val provider = (obj["providers"] as? JsonArray)?.toList()
         ?.firstNotNullOfOrNull { it.asObjectOrNull()?.takeIf { p -> p["providerId"].asStringOrNull() == providerId } }
     if (provider == null) {
-        Log.w(TAG_2D, "saveCredential: provider $providerId not in view")
+        Log.w(TAG_2D, "saveProviderDetails: provider $providerId not in view")
         return false
     }
-    val effectiveAccess = provider["effectiveConfig"].asObjectOrNull()?.get("access").asObjectOrNull()
+    val effective = provider["effectiveConfig"].asObjectOrNull()
+    val effectiveAccess = effective?.get("access").asObjectOrNull()
     val accessType = effectiveAccess?.get("type").asStringOrNull()
     if (!isApiKeyAccessType2d(accessType)) {
-        Log.w(TAG_2D, "saveCredential: provider $providerId is not an API-key provider")
+        Log.w(TAG_2D, "saveProviderDetails: provider $providerId is not an API-key provider")
         return false
     }
     val personal = provider["personalConfig"].asObjectOrNull() ?: JsonObject(emptyMap())
     val personalAccess = personal["access"].asObjectOrNull()
-    val accessPatch = buildJsonObject {
-        personalAccess?.forEach { (key, value) -> if (key != "type" && key != "apiKey") put(key, value) }
-        put("type", accessType!!)
-        put("apiKey", apiKey)
+    val accessPatch = LinkedHashMap<String, JsonElement>()
+    personalAccess?.forEach { (key, value) ->
+        if (key != "type" && key != "apiKey") accessPatch[key] = value
     }
-    val config = buildJsonObject {
-        personal.forEach { (key, value) -> if (key != "access") put(key, value) }
-        put("access", accessPatch)
+    // Only a typed (non-blank) key is written; clearing the field does not wipe the credential.
+    if (apiKeyInput.isNotBlank()) {
+        accessPatch["apiKey"] = JsonPrimitive(apiKeyInput)
+    }
+    accessPatch["type"] = JsonPrimitive(accessType!!)
+    val personalApi = personal["api"].asObjectOrNull()
+    val apiPatch = LinkedHashMap<String, JsonElement>()
+    personalApi?.forEach { (key, value) ->
+        if (key != "type" && key != "baseUrl") apiPatch[key] = value
+    }
+    apiPatch["type"] = JsonPrimitive(apiType)
+    val baseUrl = baseUrlInput.trim()
+    if (baseUrl.isNotEmpty()) apiPatch["baseUrl"] = JsonPrimitive(baseUrl)
+    val config = LinkedHashMap<String, JsonElement>(personal)
+    config["access"] = JsonObject(accessPatch)
+    config["api"] = JsonObject(apiPatch)
+    val args = mutableListOf<JsonElement>(JsonPrimitive(providerId), JsonObject(config))
+    // savePersonalProviderOverlay 的第三个可选参数是 metadata：providerName 只在改名时提交。
+    if (nameChanged && !providerName.isNullOrBlank()) {
+        args.add(buildJsonObject { put("providerName", providerName.trim()) })
     }
     return try {
         withTimeout(20_000) {
-            callPositional2d(
-                rpc,
-                "provider-settings",
-                "savePersonalProviderOverlay",
-                listOf(JsonPrimitive(providerId), config),
-            )
+            callPositional2d(rpc, "provider-settings", "savePersonalProviderOverlay", args)
         } != null
     } catch (t: Throwable) {
         Log.w(TAG_2D, "savePersonalProviderOverlay failed: ${t.message}")
         false
     }
+}
+
+suspend fun deletePersonalProvider2e(rpc: QodexRpcClient, providerId: String): Boolean = try {
+    withTimeout(20_000) {
+        callPositional2d(
+            rpc,
+            "provider-settings",
+            "deletePersonalProvider",
+            listOf(JsonPrimitive(providerId)),
+        )
+    } != null
+} catch (t: Throwable) {
+    Log.w(TAG_2D, "deletePersonalProvider failed: ${t.message}")
+    false
 }
 
 suspend fun createProviderFromTemplate2d(
@@ -311,6 +352,8 @@ private fun parseModels2d(raw: JsonElement?): List<ModelView2d> {
                 executable = m["executable"].asBoolOrNull() ?: false,
                 useRecommendedConfig = m["useRecommendedConfig"].asBoolOrNull() ?: true,
                 effectiveConfig = m["effectiveConfig"].asObjectOrNull(),
+                builtinConfig = m["effectiveBuiltinConfig"].asObjectOrNull(),
+                personalConfig = m["personalExactConfig"].asObjectOrNull(),
             ),
         )
     }
@@ -324,7 +367,11 @@ private sealed interface ModelSettingsUiState2d {
 }
 
 @Composable
-fun ModelSettingsScreen(rpc: com.qodex.app.rpc.QodexRpcClient?, onBack: () -> Unit) {
+fun ModelSettingsScreen(
+    rpc: com.qodex.app.rpc.QodexRpcClient?,
+    workspacePath: String,
+    onBack: () -> Unit,
+) {
     var uiState by remember { mutableStateOf<ModelSettingsUiState2d>(ModelSettingsUiState2d.Loading) }
     var selectedProviderId by rememberSaveable { mutableStateOf<String?>(null) }
     var creating by remember { mutableStateOf(false) }
@@ -381,6 +428,7 @@ fun ModelSettingsScreen(rpc: com.qodex.app.rpc.QodexRpcClient?, onBack: () -> Un
                     provider = selectedProvider,
                     savingLocked = creating,
                     revision = (state as ModelSettingsUiState2d.Ready).data.revision,
+                    workspacePath = workspacePath,
                     onBackToList = { selectedProviderId = null },
                     onSaved = { reload() },
                     onModelChanged = { reload() },
@@ -721,6 +769,7 @@ private fun ApiKeyFormScreen2d(
     provider: ProviderEntry2d,
     savingLocked: Boolean,
     revision: Long,
+    workspacePath: String,
     onBackToList: () -> Unit,
     onSaved: () -> Unit,
     onModelChanged: () -> Unit,
@@ -728,10 +777,14 @@ private fun ApiKeyFormScreen2d(
 ) {
     var apiKey by rememberSaveable(provider.providerId) { mutableStateOf<String?>(null) }
     var visible by rememberSaveable(provider.providerId) { mutableStateOf(false) }
+    var providerName by rememberSaveable(provider.providerId) { mutableStateOf(provider.name) }
+    var baseUrl by rememberSaveable(provider.providerId) { mutableStateOf(provider.baseUrl ?: "") }
+    var apiType by rememberSaveable(provider.providerId) { mutableStateOf(provider.apiType ?: "openai-chat-completions") }
     var saving by remember { mutableStateOf(false) }
     var saveFailed by remember { mutableStateOf(false) }
     var savedFlash by remember { mutableStateOf(false) }
     var modelEditorTarget by remember { mutableStateOf<ModelEditorTarget2d?>(null) }
+    var confirmingDelete by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(savedFlash) {
@@ -763,6 +816,18 @@ private fun ApiKeyFormScreen2d(
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+            GhostIconButton2d(
+                icon = QodexIcons2d.Trash,
+                size = 28.dp,
+                contentSize = 14.dp,
+                contentDescription = "Delete provider", // deleteProvider
+                background = Color.Transparent,
+                rounded = 6.dp,
+                tint = QodexTokens.Destructive,
+                enabled = rpc != null && !saving,
+                onClick = { confirmingDelete = true },
             )
         }
 
@@ -798,14 +863,49 @@ private fun ApiKeyFormScreen2d(
                 )
             }
 
-            ReadOnlyField2d(
+            EditableField2d(
+                label = "Provider name", // settings.modelProvider.name
+                value = providerName,
+                enabled = !saving && !savingLocked,
+                onValueChange = {
+                    providerName = it
+                    saveFailed = false
+                    savedFlash = false
+                },
+            )
+            EditableField2d(
                 label = "Base URL", // settings.modelProvider.baseUrl
-                value = provider.baseUrl ?: "",
+                value = baseUrl,
+                enabled = !saving && !savingLocked,
+                monospace = true,
+                onValueChange = {
+                    baseUrl = it
+                    saveFailed = false
+                    savedFlash = false
+                },
             )
-            ReadOnlyField2d(
-                label = "API format", // settings.modelProvider.apiFormat
-                value = provider.apiType ?: "-",
-            )
+            Column {
+                Text(
+                    text = "API format", // settings.modelProvider.apiFormat
+                    color = QodexTokens.ForegroundSubtle,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(bottom = 4.dp),
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    for (format in PROVIDER_API_FORMATS_2D) {
+                        BooleanOptionChip2e(
+                            label = format.second,
+                            selected = apiType == format.first,
+                            enabled = !saving && !savingLocked,
+                            onToggle = {
+                                apiType = format.first
+                                saveFailed = false
+                                savedFlash = false
+                            },
+                        )
+                    }
+                }
+            }
 
             Column {
                 Text(
@@ -840,7 +940,15 @@ private fun ApiKeyFormScreen2d(
                         scope.launch {
                             saving = true
                             saveFailed = false
-                            val ok = saveCredential(client, provider.providerId, currentValue)
+                            val ok = saveProviderDetails2e(
+                                client,
+                                provider.providerId,
+                                currentValue,
+                                baseUrl,
+                                apiType,
+                                providerName,
+                                providerName.trim() != provider.name,
+                            )
                             saving = false
                             if (ok) {
                                 savedFlash = true
@@ -870,8 +978,29 @@ private fun ApiKeyFormScreen2d(
             provider = provider,
             revision = revision,
             rpc = rpc,
+            workspacePath = workspacePath,
             onEditModel = { model -> modelEditorTarget = ModelEditorTarget2d.Edit(model) },
             onAddModel = { modelEditorTarget = ModelEditorTarget2d.Add },
+        )
+    }
+
+    if (confirmingDelete) {
+        DeleteProviderConfirm2d(
+            providerName = provider.name,
+            onDismiss = { confirmingDelete = false },
+            onConfirm = {
+                val client = rpc ?: return@DeleteProviderConfirm2d
+                scope.launch {
+                    confirmingDelete = false
+                    val ok = deletePersonalProvider2e(client, provider.providerId)
+                    if (ok) {
+                        onBackToList()
+                        onSaved()
+                    } else {
+                        saveFailed = true
+                    }
+                }
+            },
         )
     }
 
@@ -886,6 +1015,102 @@ private fun ApiKeyFormScreen2d(
                 modelEditorTarget = null
                 onModelChanged()
             },
+        )
+    }
+}
+
+// Desktop ProviderApiFormatSelect: exactly three wire formats, shown with their request paths.
+private val PROVIDER_API_FORMATS_2D = listOf(
+    "anthropic-messages" to "Anthropic messages (/v1/messages)",
+    "openai-chat-completions" to "Chat completions (/chat/completions)",
+    "openai-responses" to "Responses (/responses)",
+)
+
+@Composable
+private fun DeleteProviderConfirm2d(
+    providerName: String,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .border(1.dp, QodexTokens.Destructive, RoundedCornerShape(12.dp))
+            .background(QodexTokens.Surface),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = "Delete $providerName?", // deleteProviderConfirm
+                color = QodexTokens.Foreground,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                text = "Its models and API key will be removed from the engine config. This cannot be undone.",
+                color = QodexTokens.ForegroundSubtle,
+                fontSize = 13.sp,
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlineButton2d(label = "Cancel", onClick = onDismiss) // common.cancel
+                OutlineButton2d(label = "Delete", onClick = onConfirm) // common.delete
+            }
+        }
+    }
+}
+
+@Composable
+private fun EditableField2d(
+    label: String,
+    value: String,
+    enabled: Boolean,
+    onValueChange: (String) -> Unit,
+    monospace: Boolean = false,
+) {
+    Column {
+        Text(
+            text = label,
+            color = QodexTokens.ForegroundSubtle,
+            fontSize = 14.sp,
+            modifier = Modifier.padding(bottom = 4.dp), // mb-1
+        )
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            singleLine = true,
+            enabled = enabled,
+            textStyle = TextStyle(
+                color = QodexTokens.Foreground,
+                fontSize = 14.sp,
+                fontFamily = if (monospace) FontFamily.Monospace else FontFamily.Default,
+            ),
+            cursorBrush = SolidColor(QodexTokens.Foreground),
+            decorationBox = { inner ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 36.dp)
+                        .border(1.dp, QodexTokens.Border, RoundedCornerShape(8.dp))
+                        .background(QodexTokens.Input)
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    contentAlignment = Alignment.CenterStart,
+                ) {
+                    if (value.isEmpty()) {
+                        Text(
+                            label,
+                            color = QodexTokens.ForegroundSubtlest,
+                            fontSize = 14.sp,
+                        )
+                    }
+                    inner()
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -960,42 +1185,7 @@ private fun ApiKeyField2d(
 }
 
 @Composable
-private fun ReadOnlyField2d(label: String, value: String) {
-    Column {
-        Text(
-            text = label,
-            color = QodexTokens.ForegroundSubtle,
-            fontSize = 14.sp,
-            modifier = Modifier.padding(bottom = 4.dp), // mb-1
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 32.dp) // min-h-8
-                .border(1.dp, QodexTokens.Border, RoundedCornerShape(8.dp)) // rounded-lg border-input-border
-                .background(QodexTokens.Input) // bg-input
-                .padding(horizontal = 12.dp, vertical = 6.dp), // px-3 py-1.5
-            horizontalArrangement = Arrangement.spacedBy(8.dp), // gap-2
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = value.ifEmpty { "-" }, // {value || "-"}
-                color = QodexTokens.Foreground, // text-foreground
-                fontSize = 14.sp, // text-ui-base
-                modifier = Modifier.weight(1f),
-            )
-            Icon(
-                imageVector = QodexIcons2d.LockKeyhole,
-                contentDescription = null,
-                tint = QodexTokens.ForegroundSubtle, // text-foreground-subtle
-                modifier = Modifier.size(14.dp), // size-3.5
-            )
-        }
-    }
-}
-
-@Composable
-private fun FeedbackBanner2d(message: String, failure: Boolean) {
+internal fun FeedbackBanner2d(message: String, failure: Boolean) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

@@ -295,6 +295,26 @@ class QodexRpcClient(
     suspend fun providerSettingsView(): JsonElement? =
         call(ServiceChannels.PROVIDER_SETTINGS, "getView")
 
+    // QodexAgentService.testModelConnectivity takes one params object; the result is {success:true} or a thrown error.
+    suspend fun testModelConnectivity(
+        workspacePath: String,
+        providerId: String,
+        modelId: String,
+    ): JsonElement? = call(
+        ServiceChannels.QODEX_AGENT,
+        "testModelConnectivity",
+        buildJsonObject {
+            put("workspacePath", workspacePath)
+            put(
+                "selection",
+                buildJsonObject {
+                    put("providerId", providerId)
+                    put("modelId", modelId)
+                },
+            )
+        },
+    )
+
     suspend fun terminalCreate(cols: Int, rows: Int): JsonElement? = call(
         ServiceChannels.TERMINAL,
         "create",

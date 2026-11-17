@@ -30,6 +30,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import com.qodex.app.icons.QodexIcons
 import com.qodex.app.rpc.QodexRpcClient
 import com.qodex.app.rpc.ServiceChannels
+import com.qodex.app.rpc.asArrayOrNull
 import com.qodex.app.rpc.asBoolOrNull
 import com.qodex.app.rpc.asObjectOrNull
 import com.qodex.app.rpc.asStringOrNull
@@ -56,6 +58,8 @@ import kotlinx.serialization.json.put
 private const val TAG_MODEL_EDITOR = "QodexModelEditor"
 
 // Field set and validation mirror packages/ui/src/settings/model-provider-section/ProviderModelMetadata.ts.
+// Numeric inputs hold the Personal Overlay value only; inherited values are placeholders that the
+// engine re-resolves at commit, exactly like the desktop draft state machine.
 internal data class ModelDraftValues2e(
     val idValue: String,
     val contextWindowValue: String,
@@ -69,24 +73,53 @@ internal data class ModelDraftValues2e(
     val reasoningLevelValuesValue: List<String>,
     val reasoningLevelMapValue: String,
     val useRecommendedConfigValue: Boolean,
+    // Sparse overlay state: leaves pinned as personal overrides (seeded from a prior save, extended
+    // by in-session edits). Untouched leaves stay inherited — the engine resolves them at commit.
+    val builtinConfig: JsonObject? = null,
+    val personalConfig: JsonObject? = null,
+    val overriddenFields: Set<String> = emptySet(),
 )
 
-internal fun seedDraftFromModel2e(model: ModelView2d): ModelDraftValues2e {
-    val config = model.effectiveConfig
-    val properties = config?.get("properties").asObjectOrNull()
+// Leaf keys mirror React's overriddenFieldsValue naming so the commit rules stay comparable.
+internal fun personalDraftFieldKeys2e(personal: JsonObject?): Set<String> {
+    if (personal == null) return emptySet()
+    val result = mutableSetOf<String>()
+    val properties = personal["properties"].asObjectOrNull()
+    val optionSpecs = personal["optionSpecs"].asObjectOrNull()
+    for (key in listOf("supportsJsonSchemaOutput", "supportsNativeWebSearch", "supportsMidConversationSystem")) {
+        if (properties?.get(key) != null) result.add("${key}Value")
+    }
+    if (optionSpecs?.get("reasoningLevel").asObjectOrNull()?.get("values") != null) {
+        result.add("reasoningLevelValuesValue")
+    }
     val inputFormat = properties?.get("inputFormat").asObjectOrNull()
-    val optionSpecs = config?.get("optionSpecs").asObjectOrNull()
-    val maxOutput = optionSpecs?.get("maxOutputTokens").asObjectOrNull()
+    for (key in listOf("supportsImage", "supportsVideo", "supportsPdf")) {
+        if (inputFormat?.get(key) != null) result.add("inputFormatValue.$key")
+    }
+    return result
+}
+
+internal fun seedDraftFromModel2e(model: ModelView2d): ModelDraftValues2e {
+    val effective = model.effectiveConfig
+    val properties = effective?.get("properties").asObjectOrNull()
+    val inputFormat = properties?.get("inputFormat").asObjectOrNull()
+    val optionSpecs = effective?.get("optionSpecs").asObjectOrNull()
+    val personal = model.personalConfig
+    val personalProperties = personal?.get("properties").asObjectOrNull()
+    val personalOptionSpecs = personal?.get("optionSpecs").asObjectOrNull()
     val reasoning = optionSpecs?.get("reasoningLevel").asObjectOrNull()
+    // No hardcoded level fallback: the engine view (or a user-added level) is the only source,
+    // matching the desktop editor which renders whatever the config resolution reports.
     val reasoningValues = (reasoning?.get("values") as? kotlinx.serialization.json.JsonArray)
         ?.mapNotNull { (it as? JsonPrimitive)?.content }
-        ?: listOf("low", "medium", "high")
-    val contextWindow = properties?.get("contextWindow")?.let { (it as? JsonPrimitive)?.content }
-    val maxTokens = maxOutput?.get("max")?.let { (it as? JsonPrimitive)?.content }
+        ?: emptyList()
     return ModelDraftValues2e(
         idValue = model.modelId,
-        contextWindowValue = contextWindow ?: "",
-        maxOutputTokensValue = maxTokens ?: "",
+        contextWindowValue =
+            personalProperties?.get("contextWindow").asStringOrNull() ?: "",
+        maxOutputTokensValue =
+            personalOptionSpecs?.get("maxOutputTokens").asObjectOrNull()
+                ?.get("max").asStringOrNull() ?: "",
         supportsImage = inputFormat?.get("supportsImage").asBoolOrNull() ?: false,
         supportsVideo = inputFormat?.get("supportsVideo").asBoolOrNull() ?: false,
         supportsPdf = inputFormat?.get("supportsPdf").asBoolOrNull() ?: false,
@@ -95,8 +128,13 @@ internal fun seedDraftFromModel2e(model: ModelView2d): ModelDraftValues2e {
         supportsMidConversationSystemValue =
             properties?.get("supportsMidConversationSystem").asBoolOrNull() ?: false,
         reasoningLevelValuesValue = reasoningValues,
-        reasoningLevelMapValue = reasoning?.get("map")?.let { (it as? JsonPrimitive)?.content } ?: "",
+        reasoningLevelMapValue =
+            personalOptionSpecs?.get("reasoningLevel").asObjectOrNull()
+                ?.get("map").asStringOrNull() ?: "",
         useRecommendedConfigValue = model.useRecommendedConfig,
+        builtinConfig = model.builtinConfig,
+        personalConfig = model.personalConfig,
+        overriddenFields = personalDraftFieldKeys2e(personal),
     )
 }
 
@@ -123,20 +161,47 @@ internal sealed interface ModelDraftValidationError2e {
     data object ReasoningMap : ModelDraftValidationError2e
 }
 
-internal fun validateModelDraft2e(draft: ModelDraftValues2e): ModelDraftValidationError2e? {
+private fun positiveOrNull2e(raw: String): Long? =
+    raw.trim().toLongOrNull()?.takeIf { it > 0 }
+
+// 修复：智能模式下 Context window / Max output tokens 留空表示继承推荐配置（React 兜底
+// inherited?.properties?.contextWindow ?? null），此前「禁用 + 必填」导致 Add model 永远无法保存。
+internal fun validateModelDraft2e(
+    draft: ModelDraftValues2e,
+    inherited: JsonObject?,
+): ModelDraftValidationError2e? {
     if (draft.idValue.trim().isEmpty()) return ModelDraftValidationError2e.Id
-    if (draft.contextWindowValue.trim().toLongOrNull()?.let { it > 0 } != true) {
-        return ModelDraftValidationError2e.ContextWindow
+    val contextText = draft.contextWindowValue.trim()
+    if (contextText.isNotEmpty()) {
+        if (positiveOrNull2e(contextText) == null) return ModelDraftValidationError2e.ContextWindow
+    } else {
+        val inheritedContext = inherited?.get("properties").asObjectOrNull()
+            ?.get("contextWindow").asStringOrNull()?.toLongOrNull()
+        if (!draft.useRecommendedConfigValue || inheritedContext == null || inheritedContext <= 0) {
+            return ModelDraftValidationError2e.ContextWindow
+        }
     }
     // Manual mode owns the hard cap; smart mode lets the engine resolve it from the recommended config.
-    if (!draft.useRecommendedConfigValue && draft.maxOutputTokensValue.trim().toLongOrNull()?.let { it > 0 } != true) {
+    val maxText = draft.maxOutputTokensValue.trim()
+    if (maxText.isNotEmpty()) {
+        if (positiveOrNull2e(maxText) == null) return ModelDraftValidationError2e.MaxOutputTokens
+    } else if (!draft.useRecommendedConfigValue) {
         return ModelDraftValidationError2e.MaxOutputTokens
     }
     val levels = draft.reasoningLevelValuesValue.map { it.trim() }
     if (levels.isEmpty() || levels.any { it.isEmpty() } || levels.toSet().size != levels.size) {
         return ModelDraftValidationError2e.ReasoningLevels
     }
-    val map = parseReasoningMap2e(draft.reasoningLevelMapValue)
+    val mapText = draft.reasoningLevelMapValue.trim().ifEmpty {
+        if (draft.useRecommendedConfigValue) {
+            inherited?.get("optionSpecs").asObjectOrNull()
+                ?.get("reasoningLevel").asObjectOrNull()?.get("map").asStringOrNull().orEmpty()
+        } else {
+            ""
+        }
+    }
+    if (mapText.isEmpty()) return ModelDraftValidationError2e.ReasoningMap
+    val map = parseReasoningMap2e(mapText)
     if (map == null || !map.keys.containsAll(levels)) return ModelDraftValidationError2e.ReasoningMap
     return null
 }
@@ -153,44 +218,133 @@ private fun parseReasoningMap2e(raw: String): Map<String, String>? {
     }
 }
 
-internal fun buildPersonalModelConfig2e(draft: ModelDraftValues2e): JsonObject {
-    val properties = buildJsonObject {
-        put("contextWindow", draft.contextWindowValue.trim().toLong())
-        put(
-            "inputFormat",
-            buildJsonObject {
-                put("supportsText", true)
-                put("supportsImage", draft.supportsImage)
-                put("supportsVideo", draft.supportsVideo)
-                put("supportsPdf", draft.supportsPdf)
-            },
-        )
-        put("supportsJsonSchemaOutput", draft.supportsJsonSchemaOutputValue)
-        put("supportsNativeWebSearch", draft.supportsNativeWebSearchValue)
-        put("supportsMidConversationSystem", draft.supportsMidConversationSystemValue)
+// 对齐 React resolveProviderModelDraftCommit：智能模式只提交用户改动的叶子（稀疏 Overlay），
+// 未触碰的叶子保持继承；手动模式物化产品开放的完整可编辑叶子（extractManualModelConfig 等价）。
+internal fun buildPersonalModelConfig2e(
+    draft: ModelDraftValues2e,
+    inherited: JsonObject?,
+): JsonObject {
+    if (!draft.useRecommendedConfigValue) return buildManualModelConfig2e(draft)
+    val personal = draft.personalConfig ?: JsonObject(emptyMap())
+    val baseProperties = personal["properties"].asObjectOrNull() ?: JsonObject(emptyMap())
+    val baseOptionSpecs = personal["optionSpecs"].asObjectOrNull() ?: JsonObject(emptyMap())
+    val outProperties = LinkedHashMap(baseProperties)
+    val outInputFormat =
+        LinkedHashMap(baseProperties["inputFormat"].asObjectOrNull() ?: JsonObject(emptyMap()))
+    val outOptionSpecs = LinkedHashMap(baseOptionSpecs)
+    val outReasoning =
+        LinkedHashMap(baseOptionSpecs["reasoningLevel"].asObjectOrNull() ?: JsonObject(emptyMap()))
+    val outMaxSpec =
+        LinkedHashMap(baseOptionSpecs["maxOutputTokens"].asObjectOrNull() ?: JsonObject(emptyMap()))
+
+    val contextText = draft.contextWindowValue.trim()
+    if (contextText.isNotEmpty()) {
+        outProperties["contextWindow"] = JsonPrimitive(positiveOrNull2e(contextText))
+    } else {
+        // 数值清空即撤销覆盖，交还继承层（React: deleteMutable(personalProperties, "contextWindow")）。
+        outProperties.remove("contextWindow")
     }
-    val optionSpecs = buildJsonObject {
-        val maxOutput = draft.maxOutputTokensValue.trim().toLongOrNull()
-        if (maxOutput != null) {
-            put("maxOutputTokens", buildJsonObject { put("max", maxOutput) })
+
+    for (key in listOf("supportsJsonSchemaOutput", "supportsNativeWebSearch", "supportsMidConversationSystem")) {
+        val value = when (key) {
+            "supportsJsonSchemaOutput" -> draft.supportsJsonSchemaOutputValue
+            "supportsNativeWebSearch" -> draft.supportsNativeWebSearchValue
+            else -> draft.supportsMidConversationSystemValue
         }
-        put(
-            "reasoningLevel",
-            buildJsonObject {
-                put(
-                    "values",
-                    buildJsonArray {
-                        draft.reasoningLevelValuesValue.forEach { add(kotlinx.serialization.json.JsonPrimitive(it.trim())) }
-                    },
-                )
-                put("map", draft.reasoningLevelMapValue.trim())
-            },
-        )
+        if ("${key}Value" in draft.overriddenFields) {
+            outProperties[key] = JsonPrimitive(value)
+        } else {
+            outProperties.remove(key)
+        }
     }
-    return buildJsonObject {
-        put("properties", properties)
-        put("optionSpecs", optionSpecs)
+    for (key in listOf("supportsImage", "supportsVideo", "supportsPdf")) {
+        val value = when (key) {
+            "supportsImage" -> draft.supportsImage
+            "supportsVideo" -> draft.supportsVideo
+            else -> draft.supportsPdf
+        }
+        if ("inputFormatValue.$key" in draft.overriddenFields) {
+            outInputFormat[key] = JsonPrimitive(value)
+        } else {
+            outInputFormat.remove(key)
+        }
     }
+    if (outInputFormat.isEmpty()) {
+        outProperties.remove("inputFormat")
+    } else {
+        outProperties["inputFormat"] = JsonObject(outInputFormat)
+    }
+
+    if ("reasoningLevelValuesValue" in draft.overriddenFields) {
+        outReasoning["values"] = buildJsonArray {
+            draft.reasoningLevelValuesValue.forEach { add(kotlinx.serialization.json.JsonPrimitive(it.trim())) }
+        }
+    } else {
+        outReasoning.remove("values")
+    }
+    val mapText = draft.reasoningLevelMapValue.trim()
+    if (mapText.isNotEmpty()) outReasoning["map"] = JsonPrimitive(mapText)
+    if (outReasoning.isEmpty()) {
+        outOptionSpecs.remove("reasoningLevel")
+    } else {
+        outOptionSpecs["reasoningLevel"] = JsonObject(outReasoning)
+    }
+
+    val maxText = draft.maxOutputTokensValue.trim()
+    if (maxText.isNotEmpty()) {
+        outMaxSpec["max"] = JsonPrimitive(positiveOrNull2e(maxText))
+    } else {
+        outMaxSpec.remove("max")
+    }
+    if (outMaxSpec.isEmpty()) {
+        outOptionSpecs.remove("maxOutputTokens")
+    } else {
+        outOptionSpecs["maxOutputTokens"] = JsonObject(outMaxSpec)
+    }
+
+    val config = LinkedHashMap(personal)
+    if (outProperties.isEmpty()) config.remove("properties") else config["properties"] = JsonObject(outProperties)
+    if (outOptionSpecs.isEmpty()) config.remove("optionSpecs") else config["optionSpecs"] = JsonObject(outOptionSpecs)
+    return JsonObject(config)
+}
+
+private fun buildManualModelConfig2e(draft: ModelDraftValues2e): JsonObject = buildJsonObject {
+    put(
+        "properties",
+        buildJsonObject {
+            put("contextWindow", draft.contextWindowValue.trim().toLong())
+            put(
+                "inputFormat",
+                buildJsonObject {
+                    put("supportsText", true)
+                    put("supportsImage", draft.supportsImage)
+                    put("supportsVideo", draft.supportsVideo)
+                    put("supportsPdf", draft.supportsPdf)
+                },
+            )
+            put("supportsJsonSchemaOutput", draft.supportsJsonSchemaOutputValue)
+            put("supportsNativeWebSearch", draft.supportsNativeWebSearchValue)
+            put("supportsMidConversationSystem", draft.supportsMidConversationSystemValue)
+        },
+    )
+    put(
+        "optionSpecs",
+        buildJsonObject {
+            put("maxOutputTokens", buildJsonObject { put("max", draft.maxOutputTokensValue.trim().toLong()) })
+            put(
+                "reasoningLevel",
+                buildJsonObject {
+                    put(
+                        "values",
+                        buildJsonArray {
+                            draft.reasoningLevelValuesValue.forEach { add(kotlinx.serialization.json.JsonPrimitive(it.trim())) }
+                        },
+                    )
+                    put("map", draft.reasoningLevelMapValue.trim())
+                },
+            )
+        },
+    )
 }
 
 // Engine commands match IProviderSettingsService; add is positional, draft save takes a single input object.
@@ -266,6 +420,82 @@ internal suspend fun deletePersonalModel2e(
     false
 }
 
+// Facade surface for these mutations is positional: (providerId, modelId, enabled) / (providerId, modelIds).
+internal suspend fun setPersonalModelEnabled2e(
+    rpc: QodexRpcClient,
+    providerId: String,
+    modelId: String,
+    enabled: Boolean,
+): Boolean = try {
+    withTimeout(20_000) {
+        rpc.callPositional(
+            ServiceChannels.PROVIDER_SETTINGS,
+            "setPersonalModelEnabled",
+            listOf(JsonPrimitive(providerId), JsonPrimitive(modelId), JsonPrimitive(enabled)),
+        )
+    } != null
+} catch (t: Throwable) {
+    android.util.Log.w(TAG_MODEL_EDITOR, "setPersonalModelEnabled failed: ${t.message}")
+    false
+}
+
+internal suspend fun reorderPersonalModels2e(
+    rpc: QodexRpcClient,
+    providerId: String,
+    orderedModelIds: List<String>,
+): Boolean = try {
+    withTimeout(20_000) {
+        rpc.callPositional(
+            ServiceChannels.PROVIDER_SETTINGS,
+            "reorderPersonalModels",
+            listOf(
+                JsonPrimitive(providerId),
+                buildJsonArray { orderedModelIds.forEach { add(kotlinx.serialization.json.JsonPrimitive(it)) } },
+            ),
+        )
+    } != null
+} catch (t: Throwable) {
+    android.util.Log.w(TAG_MODEL_EDITOR, "reorderPersonalModels failed: ${t.message}")
+    false
+}
+
+internal suspend fun testModelConnectivity2e(
+    rpc: QodexRpcClient,
+    workspacePath: String,
+    providerId: String,
+    modelId: String,
+): Boolean = try {
+    withTimeout(30_000) {
+        rpc.testModelConnectivity(workspacePath, providerId, modelId)
+    } != null
+} catch (t: Throwable) {
+    android.util.Log.w(TAG_MODEL_EDITOR, "testModelConnectivity failed: ${t.message}")
+    false
+}
+
+// Smart-mode placeholder source: {inheritedConfig, effectiveConfig, issues} — only inheritedConfig is needed here.
+internal suspend fun resolveModelConfig2e(
+    rpc: QodexRpcClient,
+    providerId: String,
+    modelId: String,
+): JsonObject? = try {
+    withTimeout(15_000) {
+        rpc.callPositional(
+            ServiceChannels.PROVIDER_SETTINGS,
+            "resolveModelConfig",
+            listOf(
+                buildJsonObject {
+                    put("providerId", providerId)
+                    put("modelId", modelId)
+                },
+            ),
+        )
+    }?.asObjectOrNull()?.get("inheritedConfig").asObjectOrNull()
+} catch (t: Throwable) {
+    android.util.Log.w(TAG_MODEL_EDITOR, "resolveModelConfig failed: ${t.message}")
+    null
+}
+
 // ── Provider detail: model list ──────────────────────────────────────────────
 
 @Composable
@@ -273,6 +503,7 @@ internal fun ModelsSection2d(
     provider: ProviderEntry2d,
     revision: Long,
     rpc: QodexRpcClient?,
+    workspacePath: String,
     onEditModel: (ModelView2d) -> Unit,
     onAddModel: () -> Unit,
 ) {
@@ -299,12 +530,14 @@ internal fun ModelsSection2d(
             )
         }
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            for (model in provider.models) {
+            for ((index, model) in provider.models.withIndex()) {
                 ModelRow2e(
                     model = model,
                     provider = provider,
+                    modelIndex = index,
                     revision = revision,
                     rpc = rpc,
+                    workspacePath = workspacePath,
                     onEdit = { onEditModel(model) },
                 )
             }
@@ -316,71 +549,156 @@ internal fun ModelsSection2d(
 private fun ModelRow2e(
     model: ModelView2d,
     provider: ProviderEntry2d,
+    modelIndex: Int,
     revision: Long,
     rpc: QodexRpcClient?,
+    workspacePath: String,
     onEdit: () -> Unit,
 ) {
-    var deleting by remember { mutableStateOf(false) }
+    var busy by remember { mutableStateOf(false) }
+    var rowFailure by remember { mutableStateOf<String?>(null) }
+    var rowSuccess by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 32.dp)
-            .border(1.dp, QodexTokens.Border, RoundedCornerShape(8.dp))
-            .background(QodexTokens.Surface)
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = model.modelId,
-            color = QodexTokens.Foreground,
-            fontSize = 14.sp,
-            fontFamily = FontFamily.Monospace,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f),
-        )
-        Box(
+
+    // 修复：行内每个动作（启停/重排/连通性测试/删除）失败时给出真实反馈，不再静默吞错。
+    fun runAction(client: QodexRpcClient, label: String, successMessage: String, action: suspend (QodexRpcClient) -> Boolean) {
+        scope.launch {
+            busy = true
+            rowFailure = null
+            rowSuccess = null
+            val ok = try {
+                action(client)
+            } catch (t: Throwable) {
+                false
+            }
+            busy = false
+            if (ok) rowSuccess = successMessage else rowFailure = "$label failed"
+        }
+    }
+
+    Column {
+        Row(
             modifier = Modifier
-                .size(8.dp)
-                .background(
-                    when {
-                        !model.enabled -> QodexTokens.ForegroundSubtlest
-                        model.executable -> QodexTokens.Success
-                        else -> QodexTokens.Warning
-                    },
-                    RoundedCornerShape(50),
-                ),
-        )
-        GhostIconButton2d(
-            icon = QodexIcons2d.Pencil,
-            size = 28.dp,
-            contentSize = 14.dp,
-            contentDescription = "Edit model settings", // editModel
-            background = Color.Transparent,
-            rounded = 6.dp,
-            onClick = onEdit,
-        )
-        if (!model.builtin) {
+                .fillMaxWidth()
+                .heightIn(min = 36.dp)
+                .border(1.dp, QodexTokens.Border, RoundedCornerShape(8.dp))
+                .background(QodexTokens.Surface)
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = model.modelId,
+                color = QodexTokens.Foreground,
+                fontSize = 14.sp,
+                fontFamily = FontFamily.Monospace,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .background(
+                        when {
+                            !model.enabled -> QodexTokens.ForegroundSubtlest
+                            model.executable -> QodexTokens.Success
+                            else -> QodexTokens.Warning
+                        },
+                        RoundedCornerShape(50),
+                    ),
+            )
             GhostIconButton2d(
-                icon = QodexIcons2d.Trash,
+                icon = QodexIcons.Plug,
                 size = 28.dp,
                 contentSize = 14.dp,
-                contentDescription = "Delete model",
+                contentDescription = "Test model connectivity", // connectivityTest
                 background = Color.Transparent,
                 rounded = 6.dp,
-                tint = QodexTokens.Destructive,
-                enabled = !deleting,
+                enabled = !busy && rpc != null,
                 onClick = {
-                    val client = rpc ?: return@GhostIconButton2d
-                    scope.launch {
-                        deleting = true
-                        deletePersonalModel2e(client, provider.providerId, model.modelId)
-                        deleting = false
+                    runAction(rpc!!, "Connectivity test", "Connectivity test passed") {
+                        testModelConnectivity2e(it, workspacePath, provider.providerId, model.modelId)
                     }
                 },
             )
+            GhostIconButton2d(
+                icon = QodexIcons.ArrowUp,
+                size = 28.dp,
+                contentSize = 14.dp,
+                contentDescription = "Move model up", // reorder
+                background = Color.Transparent,
+                rounded = 6.dp,
+                enabled = !busy && modelIndex > 0 && rpc != null,
+                onClick = {
+                    val ids = provider.models.map { it.modelId }.toMutableList()
+                    val target = modelIndex - 1
+                    ids[modelIndex] = ids[target].also { ids[target] = ids[modelIndex] }
+                    runAction(rpc!!, "Reorder", "Model order saved") {
+                        reorderPersonalModels2e(it, provider.providerId, ids)
+                    }
+                },
+            )
+            GhostIconButton2d(
+                icon = QodexIcons.ChevronDown,
+                size = 28.dp,
+                contentSize = 14.dp,
+                contentDescription = "Move model down", // reorder
+                background = Color.Transparent,
+                rounded = 6.dp,
+                enabled = !busy && modelIndex < provider.models.size - 1 && rpc != null,
+                onClick = {
+                    val ids = provider.models.map { it.modelId }.toMutableList()
+                    val target = modelIndex + 1
+                    ids[modelIndex] = ids[target].also { ids[target] = ids[modelIndex] }
+                    runAction(rpc!!, "Reorder", "Model order saved") {
+                        reorderPersonalModels2e(it, provider.providerId, ids)
+                    }
+                },
+            )
+            GhostIconButton2d(
+                icon = QodexIcons2d.Pencil,
+                size = 28.dp,
+                contentSize = 14.dp,
+                contentDescription = "Edit model settings", // editModel
+                background = Color.Transparent,
+                rounded = 6.dp,
+                onClick = onEdit,
+            )
+            if (!model.builtin) {
+                GhostIconButton2d(
+                    icon = QodexIcons2d.Trash,
+                    size = 28.dp,
+                    contentSize = 14.dp,
+                    contentDescription = "Delete model",
+                    background = Color.Transparent,
+                    rounded = 6.dp,
+                    tint = QodexTokens.Destructive,
+                    enabled = !busy,
+                    onClick = {
+                        runAction(rpc!!, "Delete model", "Model deleted") {
+                            deletePersonalModel2e(it, provider.providerId, model.modelId)
+                        }
+                    },
+                )
+            }
+            Switch(
+                checked = model.enabled,
+                onCheckedChange = { next ->
+                    runAction(rpc!!, "Enable change", if (next) "Model enabled" else "Model disabled") {
+                        setPersonalModelEnabled2e(it, provider.providerId, model.modelId, next)
+                    }
+                },
+                enabled = !busy && rpc != null,
+                colors = SwitchDefaults.colors(
+                    checkedTrackColor = QodexTokens.Primary,
+                    uncheckedTrackColor = QodexTokens.Input,
+                ),
+            )
+        }
+        when {
+            rowFailure != null -> FeedbackBanner2d(message = rowFailure!!, failure = true)
+            rowSuccess != null -> FeedbackBanner2d(message = rowSuccess!!, failure = false)
         }
     }
 }
@@ -410,15 +728,50 @@ internal fun ModelEditorDialog2d(
     var saveFailedMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
+    // Inherited (recommended) config: Edit seeds from the engine view; Add resolves on Model ID commit.
+    var inheritedConfig by remember(target) {
+        mutableStateOf(
+            when (target) {
+                is ModelEditorTarget2d.Add -> null
+                is ModelEditorTarget2d.Edit -> target.model.builtinConfig ?: target.model.effectiveConfig
+            },
+        )
+    }
+
+    fun resolveInherited() {
+        val client = rpc ?: return
+        if (target !is ModelEditorTarget2d.Add) return
+        val modelId = draft.idValue.trim()
+        if (modelId.isEmpty()) return
+        scope.launch {
+            val resolved = resolveModelConfig2e(client, provider.providerId, modelId) ?: return@launch
+            inheritedConfig = resolved
+            // Fill only empty draft fields from the resolution; typed values stay user-owned
+            // (React renders them as placeholders, the commit treats blank leaves as inherited).
+            draft = draft.copy(
+                reasoningLevelValuesValue =
+                    if (draft.reasoningLevelValuesValue.isEmpty()) {
+                        resolved["optionSpecs"].asObjectOrNull()
+                            ?.get("reasoningLevel").asObjectOrNull()
+                            ?.get("values").asArrayOrNull()
+                            ?.mapNotNull { (it as? JsonPrimitive)?.content }
+                            ?: emptyList()
+                    } else {
+                        draft.reasoningLevelValuesValue
+                    },
+            )
+        }
+    }
+
     fun commit() {
         val client = rpc ?: return
-        val validation = validateModelDraft2e(draft)
+        val validation = validateModelDraft2e(draft, inheritedConfig)
         error = validation
         if (validation != null) return
         scope.launch {
             saving = true
             saveFailedMessage = null
-            val config = buildPersonalModelConfig2e(draft)
+            val config = buildPersonalModelConfig2e(draft, inheritedConfig)
             val modelId = draft.idValue.trim()
             val ok = when (target) {
                 is ModelEditorTarget2d.Add -> addPersonalModel2e(
@@ -444,14 +797,43 @@ internal fun ModelEditorDialog2d(
         }
     }
 
+    val inheritedContext = inheritedConfig?.get("properties").asObjectOrNull()
+        ?.get("contextWindow").asStringOrNull().orEmpty()
+    val inheritedMax = inheritedConfig?.get("optionSpecs").asObjectOrNull()
+        ?.get("maxOutputTokens").asObjectOrNull()
+        ?.get("max").asStringOrNull().orEmpty()
+    val inheritedMap = inheritedConfig?.get("optionSpecs").asObjectOrNull()
+        ?.get("reasoningLevel").asObjectOrNull()
+        ?.get("map").asStringOrNull().orEmpty()
+
     ModelEditorDialogShell2e(
         title = if (editing == null) "Add model" else "Edit model settings", // addModel | editModel
         smart = draft.useRecommendedConfigValue,
-        onSmartChange = { draft = draft.copy(useRecommendedConfigValue = it) },
+        // 从固定模式切回智能模式时清空已有 Overlay 基线（React clearPersonalConfigValue 语义）。
+        onSmartChange = { next ->
+            draft =
+                if (next && !draft.useRecommendedConfigValue) {
+                    draft.copy(
+                        useRecommendedConfigValue = true,
+                        personalConfig = null,
+                        overriddenFields = emptySet(),
+                        contextWindowValue = "",
+                        maxOutputTokensValue = "",
+                        reasoningLevelMapValue = "",
+                    )
+                } else {
+                    draft.copy(useRecommendedConfigValue = next)
+                }
+        },
         saving = saving,
         errorLabel = when (error) {
             ModelDraftValidationError2e.Id -> "Model ID is required"
-            ModelDraftValidationError2e.ContextWindow -> "Context window must be a positive integer"
+            ModelDraftValidationError2e.ContextWindow ->
+                if (draft.useRecommendedConfigValue) {
+                    "Context window is inherited but not resolvable — set a value or check the model ID"
+                } else {
+                    "Context window must be a positive integer"
+                }
             ModelDraftValidationError2e.MaxOutputTokens -> "Max output tokens must be a positive integer"
             ModelDraftValidationError2e.ReasoningLevels -> "Reasoning levels cannot be empty or duplicated"
             ModelDraftValidationError2e.ReasoningMap -> "Reasoning parameter mapping is invalid"
@@ -462,6 +844,10 @@ internal fun ModelEditorDialog2d(
             draft = when (target) {
                 is ModelEditorTarget2d.Add -> newBlankDraft2e()
                 is ModelEditorTarget2d.Edit -> seedDraftFromModel2e(target.model)
+            }
+            inheritedConfig = when (target) {
+                is ModelEditorTarget2d.Add -> null
+                is ModelEditorTarget2d.Edit -> target.model.builtinConfig ?: target.model.effectiveConfig
             }
             error = null
             saveFailedMessage = null
@@ -475,6 +861,7 @@ internal fun ModelEditorDialog2d(
                 monospace = true,
                 enabled = !saving,
                 placeholder = "Model ID",
+                onFocusLost = ::resolveInherited,
             )
         }
         EditorField2e(label = "Context window") { // contextWindow
@@ -482,9 +869,11 @@ internal fun ModelEditorDialog2d(
                 value = draft.contextWindowValue,
                 onValueChange = { draft = draft.copy(contextWindowValue = numericOnly2e(it)) },
                 numeric = true,
-                // Smart mode resolves the cap from the engine's recommended config; manual mode owns it.
-                enabled = !saving && !draft.useRecommendedConfigValue,
-                placeholder = "Context window",
+                // 智能模式下同样可编辑：留空 = 继承推荐值（placeholder 展示引擎解析结果）。
+                enabled = !saving,
+                placeholder =
+                    if (draft.useRecommendedConfigValue && inheritedContext.isNotEmpty()) inheritedContext
+                    else "Context window",
             )
         }
         EditorField2e(label = "Max output tokens") { // maxOutputTokens
@@ -492,8 +881,10 @@ internal fun ModelEditorDialog2d(
                 value = draft.maxOutputTokensValue,
                 onValueChange = { draft = draft.copy(maxOutputTokensValue = numericOnly2e(it)) },
                 numeric = true,
-                enabled = !saving && !draft.useRecommendedConfigValue,
-                placeholder = "Max output tokens",
+                enabled = !saving,
+                placeholder =
+                    if (draft.useRecommendedConfigValue && inheritedMax.isNotEmpty()) inheritedMax
+                    else "Max output tokens",
             )
         }
         EditorField2e(label = "Input types") { // inputModalities
@@ -503,19 +894,34 @@ internal fun ModelEditorDialog2d(
                     label = "Image",
                     selected = draft.supportsImage,
                     enabled = !saving,
-                    onToggle = { draft = draft.copy(supportsImage = !draft.supportsImage) },
+                    onToggle = {
+                        draft = draft.copy(
+                            supportsImage = !draft.supportsImage,
+                            overriddenFields = draft.overriddenFields + "inputFormatValue.supportsImage",
+                        )
+                    },
                 )
                 BooleanOptionChip2e(
                     label = "Video",
                     selected = draft.supportsVideo,
                     enabled = !saving,
-                    onToggle = { draft = draft.copy(supportsVideo = !draft.supportsVideo) },
+                    onToggle = {
+                        draft = draft.copy(
+                            supportsVideo = !draft.supportsVideo,
+                            overriddenFields = draft.overriddenFields + "inputFormatValue.supportsVideo",
+                        )
+                    },
                 )
                 BooleanOptionChip2e(
                     label = "PDF",
                     selected = draft.supportsPdf,
                     enabled = !saving,
-                    onToggle = { draft = draft.copy(supportsPdf = !draft.supportsPdf) },
+                    onToggle = {
+                        draft = draft.copy(
+                            supportsPdf = !draft.supportsPdf,
+                            overriddenFields = draft.overriddenFields + "inputFormatValue.supportsPdf",
+                        )
+                    },
                 )
             }
         }
@@ -526,7 +932,10 @@ internal fun ModelEditorDialog2d(
                     selected = draft.supportsJsonSchemaOutputValue,
                     enabled = !saving,
                     onToggle = {
-                        draft = draft.copy(supportsJsonSchemaOutputValue = !draft.supportsJsonSchemaOutputValue)
+                        draft = draft.copy(
+                            supportsJsonSchemaOutputValue = !draft.supportsJsonSchemaOutputValue,
+                            overriddenFields = draft.overriddenFields + "supportsJsonSchemaOutputValue",
+                        )
                     },
                 )
                 BooleanOptionChip2e(
@@ -534,7 +943,10 @@ internal fun ModelEditorDialog2d(
                     selected = draft.supportsNativeWebSearchValue,
                     enabled = !saving,
                     onToggle = {
-                        draft = draft.copy(supportsNativeWebSearchValue = !draft.supportsNativeWebSearchValue)
+                        draft = draft.copy(
+                            supportsNativeWebSearchValue = !draft.supportsNativeWebSearchValue,
+                            overriddenFields = draft.overriddenFields + "supportsNativeWebSearchValue",
+                        )
                     },
                 )
                 BooleanOptionChip2e(
@@ -544,6 +956,7 @@ internal fun ModelEditorDialog2d(
                     onToggle = {
                         draft = draft.copy(
                             supportsMidConversationSystemValue = !draft.supportsMidConversationSystemValue,
+                            overriddenFields = draft.overriddenFields + "supportsMidConversationSystemValue",
                         )
                     },
                 )
@@ -553,7 +966,12 @@ internal fun ModelEditorDialog2d(
             ReasoningLevelChips2e(
                 levels = draft.reasoningLevelValuesValue,
                 enabled = !saving,
-                onChange = { draft = draft.copy(reasoningLevelValuesValue = it) },
+                onChange = {
+                    draft = draft.copy(
+                        reasoningLevelValuesValue = it,
+                        overriddenFields = draft.overriddenFields + "reasoningLevelValuesValue",
+                    )
+                },
             )
         }
         EditorField2e(label = "Reasoning parameter mapping") { // reasoningLevelMapping
@@ -562,7 +980,9 @@ internal fun ModelEditorDialog2d(
                 onValueChange = { draft = draft.copy(reasoningLevelMapValue = it) },
                 monospace = true,
                 enabled = !saving,
-                placeholder = "{\"low\": \"reasoning_effort\"}",
+                placeholder =
+                    if (draft.useRecommendedConfigValue && inheritedMap.isNotEmpty()) inheritedMap
+                    else "{\"low\": \"reasoning_effort\"}",
                 minLines = 3,
             )
         }
@@ -670,7 +1090,9 @@ private fun EditorInput2e(
     monospace: Boolean = false,
     numeric: Boolean = false,
     minLines: Int = 1,
+    onFocusLost: (() -> Unit)? = null,
 ) {
+    var wasFocused by remember { mutableStateOf(false) }
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
@@ -703,12 +1125,19 @@ private fun EditorInput2e(
                 inner()
             }
         },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .onFocusChanged { state ->
+                // Commit-time engine resolution hook (React onBlur flush of model config resolution).
+                val now = state.isFocused
+                if (wasFocused && !now) onFocusLost?.invoke()
+                wasFocused = now
+            },
     )
 }
 
 @Composable
-private fun BooleanOptionChip2e(
+internal fun BooleanOptionChip2e(
     label: String,
     selected: Boolean,
     enabled: Boolean,
@@ -770,32 +1199,114 @@ private fun ReasoningLevelChips2e(
 ) {
     var adding by remember { mutableStateOf(false) }
     var addValue by remember { mutableStateOf("") }
+    // Tap-to-edit + explicit reordering mirror the desktop chip editor (drag/click-to-edit/add/delete).
+    var editingIndex by remember { mutableStateOf<Int?>(null) }
+    var editValue by remember { mutableStateOf("") }
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             for ((index, level) in levels.withIndex()) {
-                Row(
-                    modifier = Modifier
-                        .heightIn(min = 32.dp)
-                        .border(1.dp, QodexTokens.Border, RoundedCornerShape(8.dp))
-                        .background(QodexTokens.Input)
-                        .padding(horizontal = 10.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = level,
-                        color = QodexTokens.Foreground,
-                        fontSize = 13.sp,
-                    )
-                    if (enabled && levels.size > 1) {
-                        Icon(
-                            imageVector = QodexIcons2d.Close,
-                            contentDescription = "Delete reasoning level: $level",
-                            tint = QodexTokens.ForegroundSubtle,
-                            modifier = Modifier
-                                .size(12.dp)
-                                .clickable { onChange(levels.filterIndexed { i, _ -> i != index }) },
+                if (editingIndex == index) {
+                    Row(
+                        modifier = Modifier
+                            .heightIn(min = 32.dp)
+                            .border(1.dp, QodexTokens.Primary, RoundedCornerShape(8.dp))
+                            .background(QodexTokens.Input)
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Box(modifier = Modifier.width(120.dp)) {
+                            EditorInput2e(
+                                value = editValue,
+                                onValueChange = { editValue = it },
+                                enabled = true,
+                                placeholder = "e.g. high",
+                            )
+                        }
+                        GhostIconButton2d(
+                            icon = QodexIcons2d.Check,
+                            size = 28.dp,
+                            contentSize = 14.dp,
+                            contentDescription = "Confirm reasoning level edit",
+                            background = Color.Transparent,
+                            rounded = 6.dp,
+                            onClick = {
+                                val trimmed = editValue.trim()
+                                if (trimmed.isNotEmpty() && !levels.filterIndexed { i, _ -> i != index }.contains(trimmed)) {
+                                    onChange(levels.mapIndexed { i, value -> if (i == index) trimmed else value })
+                                }
+                                editingIndex = null
+                            },
                         )
+                        GhostIconButton2d(
+                            icon = QodexIcons2d.Close,
+                            size = 28.dp,
+                            contentSize = 14.dp,
+                            contentDescription = "Cancel reasoning level edit",
+                            background = Color.Transparent,
+                            rounded = 6.dp,
+                            onClick = { editingIndex = null },
+                        )
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier
+                            .heightIn(min = 32.dp)
+                            .border(1.dp, QodexTokens.Border, RoundedCornerShape(8.dp))
+                            .background(QodexTokens.Input)
+                            .clickable(enabled = enabled) {
+                                editingIndex = index
+                                editValue = level
+                            }
+                            .padding(horizontal = 10.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = level,
+                            color = QodexTokens.Foreground,
+                            fontSize = 13.sp,
+                        )
+                        if (enabled) {
+                            GhostIconButton2d(
+                                icon = QodexIcons.ArrowUp,
+                                size = 20.dp,
+                                contentSize = 11.dp,
+                                contentDescription = "Move reasoning level up: $level",
+                                background = Color.Transparent,
+                                rounded = 4.dp,
+                                enabled = index > 0,
+                                onClick = {
+                                    val next = levels.toMutableList()
+                                    next[index] = next[index - 1].also { next[index - 1] = next[index] }
+                                    onChange(next)
+                                },
+                            )
+                            GhostIconButton2d(
+                                icon = QodexIcons.ChevronDown,
+                                size = 20.dp,
+                                contentSize = 11.dp,
+                                contentDescription = "Move reasoning level down: $level",
+                                background = Color.Transparent,
+                                rounded = 4.dp,
+                                enabled = index < levels.size - 1,
+                                onClick = {
+                                    val next = levels.toMutableList()
+                                    next[index] = next[index + 1].also { next[index + 1] = next[index] }
+                                    onChange(next)
+                                },
+                            )
+                            if (levels.size > 1) {
+                                Icon(
+                                    imageVector = QodexIcons2d.Close,
+                                    contentDescription = "Delete reasoning level: $level",
+                                    tint = QodexTokens.ForegroundSubtle,
+                                    modifier = Modifier
+                                        .size(12.dp)
+                                        .clickable { onChange(levels.filterIndexed { i, _ -> i != index }) },
+                                )
+                            }
+                        }
                     }
                 }
             }

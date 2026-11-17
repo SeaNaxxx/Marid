@@ -103,6 +103,7 @@ fun QodexRootScreen(vm: QodexAppViewModel) {
                 )
                 RootScreen.MODEL_SETTINGS -> ModelSettingsScreen(
                     rpc = vm.rpcClient(),
+                    workspacePath = vm.workspacePath,
                     onBack = { screen = RootScreen.SETTINGS },
                 )
                 RootScreen.TASKS -> TaskListScreen(
