@@ -17,7 +17,7 @@ Qodex is an autonomous, on-device software engineering agent built natively for 
   - **NO WebViews** for the primary application interface.
   - **NO localhost HTTP/WebSocket servers** (e.g. `127.0.0.1:3030`). The `--web --port 3030` flags in upstream ZCode are for desktop browser debugging only.
   - **NO Electron or Desktop container emulation.**
-  - **Transport:** Communication between Kotlin (Host) and Node.js (Engine) runs strictly over **Standard I/O (stdio NDJSON)** or local abstract Unix Domain Sockets (UDS).
+  - **Transport:** Communication between Kotlin (Host) and Node.js (Engine) runs strictly over **Standard I/O pipes** carrying the upstream `SocketProtocol` binary framing (see §3.4). No TCP ports, no UDS files, no WebSocket.
 
 ---
 
@@ -31,7 +31,7 @@ Qodex is an autonomous, on-device software engineering agent built natively for 
 │  - Foreground Service (specialUse) + WakeLock          │
 │  - System APIs (SAF, PackageInstaller, Shizuku Bridge) │
 └──────────────────────────┬─────────────────────────────┘
-                           │ stdio NDJSON RPC
+                           │ stdio binary-frame RPC
                            ▼
 ┌────────────────────────────────────────────────────────┐
 │         JavaScript / TypeScript (Agent Brain)          │
@@ -64,7 +64,7 @@ Qodex is an autonomous, on-device software engineering agent built natively for 
 - **Runtime Environment:** Standalone Node.js 24.14.0 Bionic ARM64 binary executing inside the application sandbox UID (`/data/user/0/com.qodex.app/`).
 - **Core Loop:** LLM prompt formatting, streaming token processing, tool selection, error retries, and context window pruning.
 - **Workspace Execution:** Creating directories, modifying source code, computing git diffs, running Node scripts.
-- **RPC Client & Protocol:** Reuse message definitions from `packages/rpc`. Do not reinvent message structures; wrap them in line-delimited JSON (`NDJSON`) over stdio.
+- **RPC Client & Protocol:** Reuse message definitions from `packages/rpc`. Do not reinvent message structures; the stdio pipes carry `SocketProtocol` binary frames (13-byte headers), and all engine diagnostics go to `stderr`.
 
 ### C. Rust (Specialized High-Performance Tools)
 - **Strict Constraint:** Do **NOT** rewrite agent orchestration, networking, or Compose UI in Rust.
@@ -93,13 +93,11 @@ Modern Android devices (including REDMAGIC 10 Air / Snapdragon 8 Elite) run with
 - Declare `android:foregroundServiceType="specialUse"` with `FOREGROUND_SERVICE_SPECIAL_USE` permission.
 - Always prompt the user to grant "Unrestricted" battery optimization for seamless long-running background tasks.
 
-### 4. IPC Architecture (Stdio NDJSON)
-- Avoid local HTTP/WebSocket sockets to prevent Android 16 Local Network Permission (LNP) dialogs and attack surface from other apps.
-- Kotlin spawns `libnode.so` with ProcessBuilder and communicates via `stdin`/`stdout`.
-- Stdio messages are encoded as Newline-Delimited JSON (NDJSON):
-  ```json
-  {"jsonrpc":"2.0","method":"session/stream","params":{"token":"..."}}
-  ```
+### 4. IPC Architecture (stdio binary framing — IMPLEMENTED)
+- The host↔engine channel is the engine process's stdio pipes. There is no TCP listener, no UDS file, and no HTTP/WebSocket anywhere in the Android path — other apps cannot reach the engine.
+- Framing is the upstream `SocketProtocol` 13-byte header (`type(1) id(4) ack(4) length(4)`) reassembled by `ChunkStream` on both sides; Kotlin ports live in `android/app/src/main/java/com/qodex/app/rpc/SocketFraming.kt` and `ChannelClient.kt`, the engine entry is `packages/server/src/entry-stdio.ts`.
+- One `ChannelClient` per engine process: the server sends `Initialize` exactly once at process start. Any transport loss means a full engine respawn (never a mid-process client recreation, which would hang waiting for a second Initialize).
+- All engine diagnostics are redirected to `stderr`; `stdout` carries frames only.
 - If the Android UI process terminates, the OS automatically closes the stdio pipes, cleanly signaling the Node process to shut down and preventing orphaned zombie processes.
 
 ### 5. Memory & Process Quotas

@@ -17,7 +17,7 @@ Qodex is an on-device AI coding agent designed for Android ARM64 devices. It sep
 - **Engine Subprocess (`apps/qodex-cli/`):** Runs on a standalone Node.js 24 Bionic ARM64 binary within the application sandbox. Executes the agent loop, tool dispatch, Git commands, and file edits based on `zai-org/zcode`.
 - **Native Tools (`android/app/src/main/jniLibs/`):** Standalone ARM64 utilities (`ripgrep`, `fd-find`) compiled for Android Bionic and 16KB page alignment.
 
-Communication between the Android host and the Node engine runs strictly over standard I/O (stdio) using line-delimited JSON-RPC (NDJSON). The application does not spawn localhost HTTP/WebSocket servers or embed WebViews for its primary interface.
+Communication between the Android host and the Node engine runs exclusively over the engine process's stdio pipes using the upstream `SocketProtocol` binary framing (13-byte headers reassembled by `ChunkStream`). The application opens no network listener — no localhost HTTP/WebSocket servers, no Unix domain sockets — and embeds no WebViews for its primary interface.
 
 ---
 
@@ -31,7 +31,7 @@ Communication between the Android host and the Node engine runs strictly over st
 │  - Foreground Service (specialUse) + Partial WakeLock  │
 │  - System APIs (SAF, PackageInstaller, Shizuku IPC)   │
 └──────────────────────────┬─────────────────────────────┘
-                           │ Stdio NDJSON (JSON-RPC 2.0)
+                           │ stdio binary-frame RPC
                            ▼
 ┌────────────────────────────────────────────────────────┐
 │             Engine Subprocess (Node.js 24)             │
