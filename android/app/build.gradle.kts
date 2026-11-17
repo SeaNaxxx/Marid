@@ -47,6 +47,35 @@ android {
     }
 }
 
+// Phase 2 native module (crates/qodex-native): opt-in cargo-ndk build.
+// Skipped entirely unless -Pqodex.native=true AND cargo/cargo-ndk exist, so
+// CI and default local builds stay deterministic; the .so is packed only when
+// actually produced. See crates/qodex-native/README.md.
+tasks.register<Exec>("buildQodexNative") {
+    group = "qodex"
+    description = "Build libqodex_native.so (16KB-aligned) into jniLibs via cargo-ndk."
+    onlyIf {
+        project.hasProperty("qodex.native") &&
+            runCatching {
+                ProcessBuilder("cargo", "ndk", "--version").start().waitFor() == 0
+            }.getOrDefault(false)
+    }
+    workingDir = rootProject.projectDir.parentFile.resolve("crates/qodex-native")
+    commandLine(
+        "cargo",
+        "ndk",
+        "-t",
+        "arm64-v8a",
+        "-o",
+        rootProject.projectDir.parentFile.resolve("android/app/src/main/jniLibs").absolutePath,
+        "build",
+        "--release",
+    )
+}
+tasks.matching { it.name == "preBuild" }.configureEach {
+    dependsOn("buildQodexNative")
+}
+
 dependencies {
     val composeBom = platform("androidx.compose:compose-bom:2024.09.02")
     implementation(composeBom)

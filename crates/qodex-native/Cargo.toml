@@ -1,0 +1,24 @@
+[package]
+name = "qodex-native"
+version = "0.1.0"
+edition = "2021"
+description = "Qodex native performance module: JNI cdylib for fast workspace walk/regex search (Phase 2 baseline)"
+license = "Apache-2.0"
+
+[lib]
+name = "qodex_native"
+# cdylib (not a standalone CLI binary): loads via System.loadLibrary from
+# jniLibs/arm64-v8a across every Android version, sidestepping W^X exec rules.
+crate-type = ["cdylib"]
+
+[dependencies]
+jni = "0.21"
+# ignore = ripgrep's own walker: respects .gitignore/.ignore, skips hidden junk.
+ignore = "0.4"
+regex = "1"
+
+[profile.release]
+opt-level = "z"
+lto = true
+panic = "abort"
+strip = true

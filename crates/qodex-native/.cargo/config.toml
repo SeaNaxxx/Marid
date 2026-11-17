@@ -1,0 +1,5 @@
+# The linker flag below is mandatory for Android 15+/16KB-page kernels: ELF
+# LOAD segments must align to 16384 or the loader refuses to map the library
+# on modern devices (REDMAGIC 10 / Snapdragon 8 Elite class hardware).
+[target.aarch64-linux-android]
+rustflags = ["-C", "link-arg=-Wl,-z,max-page-size=16384"]
