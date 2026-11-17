@@ -17,6 +17,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,13 +31,35 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.qodex.app.icons.QodexIcons
+import com.qodex.app.rpc.QodexRpcClient
+import com.qodex.app.rpc.asArrayOrNull
+import com.qodex.app.rpc.asObjectOrNull
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-// Placeholders by design; no real OAuth flow.
+// Real engine facts only: whatever the connection reports renders here; OAuth login stays desktop-only by design.
 @Composable
 fun QodexConnectDialog(
+    rpc: QodexRpcClient?,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var providerCount by remember { mutableStateOf<Int?>(null) }
+    var engineOk by remember { mutableStateOf<Boolean?>(null) }
+
+    LaunchedEffect(rpc) {
+        if (rpc == null) {
+            engineOk = false
+            return@LaunchedEffect
+        }
+        val view = withContext(Dispatchers.IO) {
+            runCatching { rpc.providerSettingsView() }.getOrNull()
+        }
+        val obj = view.asObjectOrNull()
+        engineOk = obj != null
+        providerCount = obj?.get("providers").asArrayOrNull()?.size ?: 0
+    }
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false),
@@ -52,7 +79,7 @@ fun QodexConnectDialog(
                     .background(QodexTokens.Popover, RoundedCornerShape(12.dp))
                     .border(1.dp, QodexTokens.Border, RoundedCornerShape(12.dp))
                     .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -60,7 +87,7 @@ fun QodexConnectDialog(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "Connect",
+                        text = "Connection",
                         color = QodexTokens.Foreground,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
@@ -75,27 +102,27 @@ fun QodexConnectDialog(
                             .padding(6.dp),
                     )
                 }
-                Text(
-                    text = "OAuth providers are placeholders in this build.",
-                    color = QodexTokens.ForegroundSubtle,
-                    fontSize = 12.sp,
+                ConnectStatusRow(
+                    label = "Engine",
+                    value = when (engineOk) {
+                        true -> "Connected"
+                        false -> "Unreachable"
+                        null -> "Checking..."
+                    },
+                    ok = engineOk == true,
                 )
-                ConnectPlaceholderRow(
-                    icon = QodexIcons.GitBranch,
-                    label = "Connect to GitHub",
-                )
-                ConnectPlaceholderRow(
-                    icon = QodexIcons.User,
-                    label = "Connect to Google",
+                ConnectStatusRow(
+                    label = "Providers configured",
+                    value = providerCount?.toString() ?: "-",
+                    ok = (providerCount ?: 0) > 0,
                 )
             }
         }
     }
 }
 
-/** Disabled placeholder — the OAuth flow behind it does not exist yet. */
 @Composable
-private fun ConnectPlaceholderRow(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String) {
+private fun ConnectStatusRow(label: String, value: String, ok: Boolean) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -106,16 +133,24 @@ private fun ConnectPlaceholderRow(icon: androidx.compose.ui.graphics.vector.Imag
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = QodexTokens.ForegroundSubtlest,
-            modifier = Modifier.size(16.dp),
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .background(
+                    if (ok) QodexTokens.Success else QodexTokens.Warning,
+                    RoundedCornerShape(50),
+                ),
         )
         Text(
             text = label,
-            color = QodexTokens.ForegroundSubtlest,
+            color = QodexTokens.Foreground,
             fontSize = 14.sp,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = value,
+            color = QodexTokens.ForegroundSubtle,
+            fontSize = 12.sp,
         )
     }
 }

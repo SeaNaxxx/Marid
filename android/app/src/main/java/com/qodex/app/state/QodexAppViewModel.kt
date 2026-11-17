@@ -14,9 +14,12 @@ import com.qodex.app.runtime.EngineProcess
 import com.qodex.app.runtime.Provisioner
 import com.qodex.app.runtime.RuntimeBus
 import com.qodex.app.runtime.RuntimePhase
+import com.qodex.app.ui.AssistantBlock
 import com.qodex.app.ui.ChatTurn
 import com.qodex.app.ui.ModelEntry2c
+import com.qodex.app.ui.ToolCallStatus
 import com.qodex.app.ui.fetchModelEntries
+import com.qodex.app.utils.FileLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -38,6 +41,21 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
     private var rpc: QodexRpcClient? = null
 
     fun rpcClient(): QodexRpcClient? = rpc
+
+    // User-facing recovery for a dropped RPC socket; the engine keeps running on its port.
+    fun reconnectRpc() {
+        val client = rpc
+        if (client == null) {
+            if (EngineProcess.isRunning) {
+                connectRpc()
+            } else {
+                retry()
+            }
+            return
+        }
+        FileLogger.append("RPC", "reconnect requested after disconnect")
+        client.connect()
+    }
 
     fun boot(ctx: Context) {
         val current = RuntimeBus.phase.value
@@ -134,11 +152,13 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
             val entries = runCatching { fetchModelEntries(client) }
                 .getOrElse {
                     RuntimeBus.append("model list fetch failed: ${it.message}")
+                    FileLogger.append("RPC", "Error on model-selection.getView: ${it.message}")
                     emptyList()
                 }
             _models.value = entries
             if (_selectedModel.value == null) _selectedModel.value = entries.firstOrNull()
             RuntimeBus.append("model catalog: ${entries.size} entries")
+            FileLogger.append("RPC", "model catalog loaded: ${entries.size} entries")
         }
     }
 
@@ -182,6 +202,7 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
                 RuntimeBus.append("send ack received: ${ack != null}")
             } catch (t: Throwable) {
                 RuntimeBus.append("send failed: ${t.message}")
+                FileLogger.append("RPC", "Error on sendText: ${t.message}")
             } finally {
                 sending = false
             }
@@ -208,35 +229,72 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
                     kotlinx.serialization.json.buildJsonObject {
                         put("workspacePath", workspacePath)
                         put("sessionId", sessionId)
+                        // QodexAgentSessionSubscribeParams requires a deliveryKind; desktop-continuous
+                        // keeps live deltas flowing the way the desktop renderer consumes them.
+                        put("deliveryKind", "desktop-continuous")
                     },
                 ) { event ->
                     handleSessionEvent(event)
                 }
-            }.onFailure { RuntimeBus.append("session event subscribe failed: ${it.message}") }
+            }.onFailure {
+                RuntimeBus.append("session event subscribe failed: ${it.message}")
+                FileLogger.append("RPC", "Error on onDynamicSessionEvent subscribe: ${it.message}")
+            }
         }
     }
 
-    // Defensive mapping: unknown event shapes go to logcat (QodexRuntime) as the on-device contract evidence.
+    // Engine event contract: packages/shared/src/qodex-protocol/index.ts qodexSessionEventSchema —
+    // envelopes { type, payload } with model.streaming / part.delta / tool.updated / turn.* shapes.
     private fun handleSessionEvent(event: kotlinx.serialization.json.JsonElement?) {
         val obj = event.asObjectOrNull() ?: return
         val type = obj["type"].asStringOrNull() ?: obj["event"]?.asStringOrNull()
         val payload = obj["payload"].asObjectOrNull() ?: obj
         when (type) {
+            "model.streaming" -> handleModelStreaming(payload)
+            "part.delta" -> {
+                when (payload["field"].asStringOrNull()) {
+                    "text" -> appendToLastTextBlock(payload["delta"].asStringOrNull() ?: "")
+                    "reasoning" -> appendToLastReasoningBlock(payload["delta"].asStringOrNull() ?: "")
+                    else -> RuntimeBus.append("session event (unmapped field): $payload")
+                }
+            }
+            "part.upserted" -> {
+                val part = payload["part"].asObjectOrNull() ?: return
+                when (part["type"].asStringOrNull()) {
+                    "text" -> {
+                        val text = part["text"].asStringOrNull() ?: return
+                        if (streamingTextBuilder == null) appendAssistantBlock(AssistantBlock.MessageText(text))
+                    }
+                    "reasoning" -> {
+                        val text = part["text"].asStringOrNull() ?: return
+                        appendAssistantBlock(AssistantBlock.Reasoning(text = text, streaming = false))
+                    }
+                    else -> RuntimeBus.append("session event (unmapped part): ${part["type"]}")
+                }
+            }
+            "tool.updated" -> handleToolUpdated(payload)
+            "turn.failed" -> {
+                val error = payload["error"].asObjectOrNull()
+                val message = error?.get("message").asStringOrNull() ?: "turn failed"
+                appendAssistantBlock(AssistantBlock.MessageText("[error] $message"))
+                FileLogger.append("RPC", "turn.failed: $message")
+            }
             "assistantText", "assistant_text", "text" -> {
+                // Legacy shapes kept as fallback for older engine builds.
                 val text = payload["text"].asStringOrNull() ?: return
-                appendAssistantBlock(com.qodex.app.ui.AssistantBlock.MessageText(text))
+                appendAssistantBlock(AssistantBlock.MessageText(text))
             }
             "toolCall", "tool_call" -> {
                 val name = payload["name"].asStringOrNull()
                     ?: payload["toolName"].asStringOrNull() ?: "tool"
                 val statusRaw = payload["status"].asStringOrNull()
                 val status = when (statusRaw) {
-                    "completed", "success" -> com.qodex.app.ui.ToolCallStatus.COMPLETED
-                    "running", "in_progress" -> com.qodex.app.ui.ToolCallStatus.RUNNING
-                    else -> com.qodex.app.ui.ToolCallStatus.RUNNING
+                    "completed", "success" -> ToolCallStatus.COMPLETED
+                    "failed", "error" -> ToolCallStatus.FAILED
+                    else -> ToolCallStatus.RUNNING
                 }
                 appendAssistantBlock(
-                    com.qodex.app.ui.AssistantBlock.ToolCall(
+                    AssistantBlock.ToolCall(
                         name = name,
                         status = status,
                         summary = payload["summary"].asStringOrNull().orEmpty(),
@@ -247,15 +305,126 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
         }
     }
 
-    private fun appendAssistantBlock(block: com.qodex.app.ui.AssistantBlock) {
+    private var streamingTextBuilder: StringBuilder? = null
+
+    // model.streaming kinds from qodexModelStreamingKindSchema: text_start/delta/end, reasoning_*, tool_input_*, tool_call.
+    private fun handleModelStreaming(payload: kotlinx.serialization.json.JsonObject) {
+        when (payload["kind"].asStringOrNull()) {
+            "text_start" -> {
+                streamingTextBuilder = StringBuilder()
+                appendAssistantBlock(AssistantBlock.MessageText(""))
+            }
+            "text_delta" -> {
+                if (streamingTextBuilder == null) {
+                    streamingTextBuilder = StringBuilder()
+                    appendAssistantBlock(AssistantBlock.MessageText(""))
+                }
+                appendToLastTextBlock(payload["delta"].asStringOrNull() ?: "")
+            }
+            "text_end", "finish" -> streamingTextBuilder = null
+            "reasoning_delta" -> appendToLastReasoningBlock(payload["delta"].asStringOrNull() ?: "")
+            "tool_call" -> {
+                val name = payload["toolName"].asStringOrNull() ?: "tool"
+                appendAssistantBlock(AssistantBlock.ToolCall(name = name, status = ToolCallStatus.RUNNING, summary = ""))
+            }
+            else -> Unit
+        }
+    }
+
+    private fun handleToolUpdated(payload: kotlinx.serialization.json.JsonObject) {
+        val kind = payload["kind"].asStringOrNull() ?: return
+        val toolCallId = payload["toolCallId"].asStringOrNull()
+        val name = payload["toolName"].asStringOrNull() ?: "tool"
+        val status = when (kind) {
+            "scheduled", "started" -> ToolCallStatus.RUNNING
+            "result" -> ToolCallStatus.COMPLETED
+            "error" -> ToolCallStatus.FAILED
+            else -> return // progress/batch/raw don't change block state
+        }
+        val existingIndex = toolCallId?.let { toolCallBlocks[it] }
+        if (existingIndex != null) {
+            updateAssistantBlock(existingIndex) { block ->
+                (block as? AssistantBlock.ToolCall)?.copy(status = status) ?: block
+            }
+        } else {
+            val summary = payload["description"].asStringOrNull().orEmpty()
+            appendAssistantBlock(AssistantBlock.ToolCall(name = name, status = status, summary = summary))?.let { blockIndex ->
+                toolCallId?.let { toolCallBlocks[it] = blockIndex }
+            }
+        }
+    }
+
+    // toolCallId -> index of its ToolCall block inside the last assistant turn, so result/error events update in place.
+    private val toolCallBlocks = LinkedHashMap<String, Int>()
+
+    private fun appendToLastTextBlock(delta: String) {
+        if (delta.isEmpty()) return
+        _turns.value = _turns.value.toMutableList().also { list ->
+            for (i in list.indices.reversed()) {
+                val turn = list[i]
+                if (turn !is ChatTurn.AssistantTurn) continue
+                for (b in turn.blocks.indices.reversed()) {
+                    val block = turn.blocks[b]
+                    if (block is AssistantBlock.MessageText) {
+                        list[i] = turn.copy(blocks = turn.blocks.subList(0, b) +
+                            block.copy(text = block.text + delta) +
+                            turn.blocks.subList(b + 1, turn.blocks.size))
+                        return
+                    }
+                }
+            }
+        }
+    }
+
+    private fun appendToLastReasoningBlock(delta: String) {
+        if (delta.isEmpty()) return
+        _turns.value = _turns.value.toMutableList().also { list ->
+            for (i in list.indices.reversed()) {
+                val turn = list[i]
+                if (turn !is ChatTurn.AssistantTurn) continue
+                for (b in turn.blocks.indices.reversed()) {
+                    val block = turn.blocks[b]
+                    if (block is AssistantBlock.Reasoning) {
+                        list[i] = turn.copy(blocks = turn.blocks.subList(0, b) +
+                            block.copy(text = block.text + delta) +
+                            turn.blocks.subList(b + 1, turn.blocks.size))
+                        return
+                    }
+                    if (block is AssistantBlock.MessageText) return
+                }
+            }
+            list.add(ChatTurn.AssistantTurn(listOf(AssistantBlock.Reasoning(text = delta, streaming = true))))
+        }
+    }
+
+    private fun updateAssistantBlock(index: Int, transform: (AssistantBlock) -> AssistantBlock) {
+        _turns.value = _turns.value.toMutableList().also { list ->
+            val last = list.lastOrNull() as? ChatTurn.AssistantTurn ?: return
+            if (index < last.blocks.size) {
+                list[list.size - 1] = last.copy(blocks = last.blocks.subList(0, index) +
+                    transform(last.blocks[index]) +
+                    last.blocks.subList(index + 1, last.blocks.size))
+            }
+        }
+    }
+
+    // Returns the block's index inside the (new) last assistant turn for later in-place updates.
+    private fun appendAssistantBlock(block: AssistantBlock): Int? {
+        var insertedIndex: Int? = null
         _turns.value = _turns.value.toMutableList().also { list ->
             val last = list.lastOrNull()
             if (last is ChatTurn.AssistantTurn) {
                 list[list.size - 1] = last.copy(blocks = last.blocks + block)
+                insertedIndex = last.blocks.size
             } else {
                 list.add(ChatTurn.AssistantTurn(listOf(block)))
+                insertedIndex = 0
             }
         }
+        if (block is AssistantBlock.MessageText) {
+            streamingTextBuilder = streamingTextBuilder ?: StringBuilder()
+        }
+        return insertedIndex
     }
 
     class factory(private val app: Application) : ViewModelProvider.Factory {
