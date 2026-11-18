@@ -25,6 +25,7 @@ import com.qodex.app.utils.FileLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -57,10 +58,12 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
 
     fun boot(ctx: Context) {
         val current = RuntimeBus.phase.value
-        if (current is RuntimePhase.Failed || current is RuntimePhase.EngineReady) {
-            // Fall through only when idle; otherwise keep the owner-visible state untouched.
-            if (current is RuntimePhase.EngineReady) return
+        if (current is RuntimePhase.Provisioning || current is RuntimePhase.StartingEngine) {
+            // Single-flight boot: Activity recreation re-fires boot() while a
+            // provision/engine-start is already running; a duplicate would race it.
+            return
         }
+        if (current is RuntimePhase.EngineReady) return
         if (EngineProcess.isRunning) {
             RuntimeBus.setPhase(RuntimePhase.Provisioned)
             startEngine(ctx)
@@ -82,10 +85,24 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
                 EngineProcess.start(ctx)
                 AgentKeepAliveService.start(ctx)
                 connectRpc()
+                watchHandshakeTimeout()
             } catch (t: Throwable) {
                 RuntimeBus.append("engine start failed: ${t.message}")
                 RuntimeBus.setPhase(RuntimePhase.Failed("engine", "${t.message}"))
             }
+        }
+    }
+
+    // An alive-but-silent engine used to sit on the dots screen forever; the
+    // Initialize handshake must arrive within a bounded window or boot fails visibly.
+    private suspend fun watchHandshakeTimeout() {
+        delay(45_000L)
+        if (_rpcState.value != RpcConnectionState.CONNECTED && EngineProcess.isRunning) {
+            RuntimeBus.append("engine handshake timeout (45s) — RPC Initialize never arrived")
+            FileLogger.append("RPC", "engine handshake timeout (45s)")
+            RuntimeBus.setPhase(
+                RuntimePhase.Failed("rpc", "engine did not complete its RPC handshake (45s) — tap Retry"),
+            )
         }
     }
 
@@ -120,6 +137,8 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
         old?.shutdown()
         conversation?.dispose()
         conversation = null
+        v4HandshakeDone = false
+        _activeSessionId.value = null
         scope.launch {
             RuntimeBus.append("engine restart: $reason")
             EngineProcess.stop()
@@ -134,6 +153,8 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
         rpc = null
         conversation?.dispose()
         conversation = null
+        v4HandshakeDone = false
+        _activeSessionId.value = null
         RuntimeBus.setPhase(RuntimePhase.Idle)
         scope.launch {
             if (Provisioner.isProvisioned(app)) {
@@ -175,6 +196,17 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
     private var currentSessionId: String? = null
     private var currentSubscriptionId: String? = null
     private var sending = false
+
+    private val _activeSessionId = MutableStateFlow<String?>(null)
+    val activeSessionId: StateFlow<String?> = _activeSessionId.asStateFlow()
+
+    private val _sidebarLoading = MutableStateFlow(false)
+    val sidebarLoading: StateFlow<Boolean> = _sidebarLoading.asStateFlow()
+
+    // The V4 hello/clientHello handshake happens once per engine connection;
+    // re-running it for a later session attach would double-initialize.
+    @Volatile
+    private var v4HandshakeDone = false
 
     fun loadModels() {
         val client = rpc ?: return
@@ -242,6 +274,11 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
         val client = rpc ?: return
         scope.launch {
             try {
+                // Detach the previous stream first: frames from a stale session
+                // must never bleed into the new one.
+                conversation?.dispose()
+                conversation = null
+                _turns.value = emptyList()
                 val projectId = ensureWorkspaceProject(client)
                 val prepared = client.projectPrepareSession(projectId)?.asObjectOrNull()
                 val sessionWorkspacePath = prepared?.get("workspacePath").asStringOrNull() ?: workspacePath
@@ -255,35 +292,75 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
                     RuntimeBus.append("conversation boot failed: createSession returned no sessionId")
                     return@launch
                 }
-                currentSessionId = sessionId
-                currentSubscriptionId = null
-
-                ensureHandshake(client)
-
-                val subscribed = client.subscribeConversationV4(sessionWorkspacePath, sessionId)
-                val subscriptionId = subscribed?.asObjectOrNull()
-                    ?.get("ack")?.asObjectOrNull()?.get("subscriptionId").asStringOrNull()
-                    ?: subscribed?.asObjectOrNull()?.get("subscriptionId").asStringOrNull()
-                if (subscriptionId == null) {
-                    RuntimeBus.append("conversation boot failed: no subscriptionId in ack")
-                    return@launch
-                }
-                currentSubscriptionId = subscriptionId
-                RuntimeBus.append("conversation subscribed: session=$sessionId sub=$subscriptionId")
-
-                val assembler = WireFrameAssembler()
-                val projection = ConversationProjection()
-                val frames = client.conversationFrames(sessionWorkspacePath) { wire ->
-                    handleWireFrame(assembler, projection, wire)
-                }
-                conversation?.dispose()
-                conversation = Conversation(frames, assembler, projection)
+                attachConversation(client, sessionWorkspacePath, sessionId)
             } catch (t: Throwable) {
                 RuntimeBus.append("conversation boot failed: ${t.message}")
                 FileLogger.append("RPC", "conversation boot failed: ${t.message}")
                 surfaceConversationError(t, booting = true)
             }
         }
+    }
+
+    // New task: a fresh engine session with a clean transcript. The composer
+    // draft is preserved on purpose — starting a task is not a text deletion.
+    fun startNewConversation() {
+        _providerNotReady.value = false
+        startConversation()
+    }
+
+    // Open a task from the sidebar: subscribe to its existing session. The
+    // engine's subscribe path sends a full snapshot (persisted messages
+    // included), so history re-renders through the normal frame stream.
+    fun openTask(sessionId: String) {
+        val client = rpc ?: run {
+            RuntimeBus.append("open task: engine RPC not connected")
+            return
+        }
+        if (sessionId == _activeSessionId.value) return
+        _providerNotReady.value = false
+        scope.launch {
+            try {
+                conversation?.dispose()
+                conversation = null
+                _turns.value = emptyList()
+                attachConversation(client, workspacePath, sessionId)
+            } catch (t: Throwable) {
+                RuntimeBus.append("open task failed: ${t.message}")
+                FileLogger.append("RPC", "open task failed: ${t.message}")
+                surfaceConversationError(t, booting = true)
+            }
+        }
+    }
+
+    private suspend fun attachConversation(
+        client: QodexRpcClient,
+        sessionWorkspacePath: String,
+        sessionId: String,
+    ) {
+        currentSessionId = sessionId
+        currentSubscriptionId = null
+        _activeSessionId.value = sessionId
+
+        ensureHandshake(client)
+
+        val subscribed = client.subscribeConversationV4(sessionWorkspacePath, sessionId)
+        val subscriptionId = subscribed?.asObjectOrNull()
+            ?.get("ack")?.asObjectOrNull()?.get("subscriptionId").asStringOrNull()
+            ?: subscribed?.asObjectOrNull()?.get("subscriptionId").asStringOrNull()
+        if (subscriptionId == null) {
+            RuntimeBus.append("conversation attach failed: no subscriptionId in ack")
+            return
+        }
+        currentSubscriptionId = subscriptionId
+        RuntimeBus.append("conversation subscribed: session=$sessionId sub=$subscriptionId")
+
+        val assembler = WireFrameAssembler()
+        val projection = ConversationProjection()
+        val frames = client.conversationFrames(sessionWorkspacePath) { wire ->
+            handleWireFrame(assembler, projection, wire)
+        }
+        conversation = Conversation(frames, assembler, projection)
+        loadSidebarTasks()
     }
 
     // Standalone-server entries refuse project-less session creation
@@ -308,6 +385,7 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
     }
 
     private suspend fun ensureHandshake(client: QodexRpcClient) {
+        if (v4HandshakeDone) return
         val hello = client.helloConversationV4()?.asObjectOrNull()
         val protocolVersion = (hello?.get("protocolVersion") as? JsonPrimitive)?.content?.toIntOrNull() ?: 3
         val clientKind = if (hello?.get("clientMode").asStringOrNull() == "desktop-continuous") {
@@ -325,6 +403,7 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
                 put("capabilities", buildJsonObject { put("workspaceHookReviewUi", true) })
             },
         )
+        v4HandshakeDone = true
     }
 
     private fun handleWireFrame(
@@ -360,11 +439,19 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
         val trimmed = text.trim()
         if (trimmed.isEmpty() || sending) return
         val client = rpc ?: run {
-            RuntimeBus.append("send: engine RPC not connected")
+            // Silence was the defect: a dead send must be visible in the transcript.
+            surfaceConversationError(
+                IllegalStateException("engine RPC is not connected — reconnect and try again"),
+                booting = true,
+            )
             return
         }
         if (currentSessionId == null || currentSubscriptionId == null) {
             RuntimeBus.append("send: conversation not subscribed yet; retrying boot")
+            surfaceConversationError(
+                IllegalStateException("conversation is still connecting — try again in a moment"),
+                booting = true,
+            )
             startConversation()
             return
         }
@@ -386,7 +473,13 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
                     },
                 )?.asObjectOrNull()
                 val status = ack?.get("status").asStringOrNull()
-                if (status != null && status != "accepted") {
+                if (status == "accepted") {
+                    // The accepted ack means the engine owns this turn: clear
+                    // the composer and refresh the sidebar so the new task
+                    // title appears without a manual refresh.
+                    _composerText.value = ""
+                    loadSidebarTasks()
+                } else if (status != null) {
                     val reason = ack?.get("message").asStringOrNull()
                         ?: ack?.get("reasonCode").asStringOrNull()
                         ?: "command rejected"
@@ -434,6 +527,7 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
 
     fun loadSidebarTasks() {
         val client = rpc ?: return
+        _sidebarLoading.value = true
         scope.launch {
             val sessions = runCatching {
                 client.agentListSessions(workspacePath)
@@ -452,12 +546,14 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
                     key = id,
                     title = session.get("title").asStringOrNull()?.ifEmpty { null } ?: "Untitled task",
                     timeLabel = updatedAt?.let { formatRelativeTime(it) },
+                    updatedAtMs = updatedAt ?: 0L,
                     isRunning = status == "running" || status == "waiting",
                     isError = status == "error",
-                    isActive = false,
+                    isActive = id == _activeSessionId.value,
                 )
             }
             _sidebarTasks.value = tasks
+            _sidebarLoading.value = false
         }
     }
 

@@ -1,6 +1,7 @@
 package com.qodex.app.runtime
 
 import android.content.Context
+import android.os.SystemClock
 import com.qodex.app.utils.FileLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -31,27 +32,70 @@ object Provisioner {
     fun markerFile(ctx: Context): File =
         File(runtimeRoot(ctx), "provision-complete.json")
 
+    // Marker content is the source of truth: the dist sha it records must match
+    // the dist shipped in THIS apk, otherwise the runtime is stale and a
+    // re-provision is required (apk upgrade / corrupted tree paths).
     fun isProvisioned(ctx: Context): Boolean = runCatching {
-        markerFile(ctx).isFile &&
-            nodeBin(ctx).isFile &&
-            distEntry(ctx).isFile
+        val marker = markerFile(ctx)
+        if (!marker.isFile) return@runCatching false
+        if (!nodeBin(ctx).isFile || !distEntry(ctx).isFile) return@runCatching false
+        val recorded = Regex("\\"distSha256\\"\\s*:\\s*\\"([0-9a-fA-F]{64})\\"")
+            .find(marker.readText())?.groupValues?.get(1)
+        recorded != null && recorded.equals(expectedDistSha(ctx), ignoreCase = true)
     }.getOrDefault(false)
+
+    private fun expectedDistSha(ctx: Context): String = runCatching {
+        readAssetText(ctx, DIST_SHA_ASSET).trim()
+    }.getOrDefault("")
 
     // stdio entry: the RPC channel rides process pipes (no HTTP/WS listener).
     fun distEntry(ctx: Context): File = File(distDir(ctx), "entry-stdio.js")
 
+    // Single-flight: Activity recreation fires boot() again while a provision
+    // is running; a second concurrent provision() used to deleteRecursively()
+    // the tree under the first extraction, leaving no marker and forcing a full
+    // re-provision on every launch. A duplicate request is now ignored.
+    @Volatile
+    private var provisionInFlight = false
+    private val provisionLock = Any()
+
     suspend fun provision(ctx: Context): Unit = withContext(Dispatchers.IO) {
         val app = ctx.applicationContext
+        val started = synchronized(provisionLock) {
+            if (provisionInFlight) {
+                RuntimeBus.append("provision already in flight — duplicate request ignored")
+                false
+            } else {
+                provisionInFlight = true
+                true
+            }
+        }
+        if (!started) return@withContext
         try {
-            FileLogger.append("Provisioner", "provision started")
-            val rt = runtimeRoot(app)
+            provisionTransactional(app)
+        } finally {
+            provisionInFlight = false
+        }
+    }
+
+    // Transactional install: everything extracts into staging trees and is
+    // swapped in only after every gate passed; a kill mid-provision leaves the
+    // previous tree (or nothing) intact — never a partial usr/ or dist/.
+    private suspend fun provisionTransactional(app: Context): Unit = withContext(Dispatchers.IO) {
+        val rt = runtimeRoot(app)
+        val t0 = SystemClock.elapsedRealtime()
+        val usrStaging = File(rt, "usr.staging")
+        val distStaging = File(rt, "dist.staging")
+        try {
+            FileLogger.append("Provisioner", "provision started (transactional)")
             RuntimeBus.setPhase(RuntimePhase.Provisioning("preparing directories"))
-            usrDir(app).deleteRecursively()
-            distDir(app).deleteRecursively()
+            usrStaging.deleteRecursively()
+            distStaging.deleteRecursively()
             rt.mkdirs()
             File(homeDir(app), "tmp").mkdirs()
 
             RuntimeBus.setPhase(RuntimePhase.Provisioning("extracting Bionic runtime"))
+            val tDeb = SystemClock.elapsedRealtime()
             val manifest = readAssetText(app, "$DEB_DIR_ASSET/manifest.txt")
             val debNames = app.assets.list(DEB_DIR_ASSET)
                 ?: throw IOException("assets missing: $DEB_DIR_ASSET")
@@ -65,18 +109,23 @@ object Provisioner {
                 throw IOException("termux-debs manifest empty or unparsable")
             }
             val report = TarExtractor.ExtractReport()
+            val debList = debNames.sorted().filter { it.endsWith(".deb") }
             var debs = 0
-            for (name in debNames.sorted()) {
-                if (!name.endsWith(".deb")) continue
+            for (name in debList) {
                 val expected = shaByName[name.removeSuffix(".deb")]
                     ?: throw IOException("deb not in manifest: $name")
                 val staged = File(rt, "downloads/$name")
                 staged.parentFile?.mkdirs()
                 copyAsset(app, "$DEB_DIR_ASSET/$name", staged)
                 verifySha256(staged, expected, name)
-                DebExtractor.extract(staged, rt, report)
+                DebExtractor.extract(staged, usrStaging, report)
                 staged.delete()
                 debs++
+                if (debs % 10 == 0) {
+                    RuntimeBus.setPhase(
+                        RuntimePhase.Provisioning("extracting Bionic runtime ($debs/${debList.size})"),
+                    )
+                }
             }
             RuntimeBus.append(
                 "bionic extraction: $debs debs, ${report.regularFiles} files, " +
@@ -85,7 +134,9 @@ object Provisioner {
                     "${report.skippedEntries} skipped" +
                     (report.firstError?.let { " (first fs error: $it)" } ?: ""),
             )
-            if (!nodeBin(app).isFile || !bashBin(app).isFile) {
+            val stagedNode = File(usrStaging, "bin/node")
+            val stagedBash = File(usrStaging, "bin/bash")
+            if (!stagedNode.isFile || !stagedBash.isFile) {
                 throw IOException(
                     "bionic runtime incomplete (usr/bin/node or usr/bin/bash missing) " +
                         "— ${report.skippedEntries} entries skipped, first: ${report.firstError}",
@@ -94,14 +145,15 @@ object Provisioner {
             FileLogger.append(
                 "Provisioner",
                 "bionic extracted: $debs debs, ${report.regularFiles} files, " +
-                    "${report.symlinksCreated} symlinks, ${report.skippedEntries} skipped",
+                    "${report.symlinksCreated} symlinks, ${report.skippedEntries} skipped " +
+                    "in ${SystemClock.elapsedRealtime() - tDeb}ms",
             )
-            File(usrDir(app), "bin").listFiles()?.forEach { f ->
+            File(usrStaging, "bin").listFiles()?.forEach { f ->
                 if (f.isFile && !TarExtractor.DefaultLinkOps.isSymbolicLink(f)) {
                     f.setExecutable(true, false)
                 }
             }
-            File(usrDir(app), "lib").listFiles()?.forEach { f ->
+            File(usrStaging, "lib").listFiles()?.forEach { f ->
                 if (f.isFile) {
                     f.setReadable(true, false)
                     if (f.extension == "so" || f.name.contains(".so.")) {
@@ -121,6 +173,7 @@ object Provisioner {
             )
 
             RuntimeBus.setPhase(RuntimePhase.Provisioning("extracting engine"))
+            val tDist = SystemClock.elapsedRealtime()
             val distSha = readAssetText(app, DIST_SHA_ASSET).trim()
             val distTar = File(rt, "downloads/qodex-dist.tgz")
             distTar.parentFile?.mkdirs()
@@ -129,17 +182,20 @@ object Provisioner {
             // Assert the archive layout BEFORE extraction — a nested or stale
             // bundle must fail with its real root entries, not a post-hoc guess.
             DistArchiveContract.requireValid(distTar)
-            distDir(app).mkdirs()
-            TarExtractor(distDir(app)).extract(
+            distStaging.mkdirs()
+            TarExtractor(distStaging).extract(
                 distTar.inputStream().let { GzipCompressorInputStream(it) },
             )
             distTar.delete()
-            if (!distEntry(app).isFile) {
+            if (!File(distStaging, "entry-stdio.js").isFile) {
                 throw IOException(
                     "engine dist layout unexpected (entry-stdio.js missing at archive root)",
                 )
             }
-            FileLogger.append("Provisioner", "engine dist extracted (sha256 verified)")
+            FileLogger.append(
+                "Provisioner",
+                "engine dist extracted (sha256 verified) in ${SystemClock.elapsedRealtime() - tDist}ms",
+            )
 
             val secret = credentialSecret(app)
             if (!secret.isFile) {
@@ -155,20 +211,42 @@ object Provisioner {
                 FileLogger.append("Provisioner", "credential secret generated (48B, 0600)")
             }
 
+            // Activation: staged trees replace the live ones only here — after
+            // every extraction, hash and layout gate succeeded.
+            RuntimeBus.setPhase(RuntimePhase.Provisioning("activating runtime"))
+            val tSwap = SystemClock.elapsedRealtime()
+            swapTree(usrDir(app), File(usrStaging, "usr"), "usr")
+            swapTree(distDir(app), distStaging, "dist")
+            FileLogger.append(
+                "Provisioner",
+                "runtime activated in ${SystemClock.elapsedRealtime() - tSwap}ms",
+            )
+
             // ARM64/Bionic compatibility gate before provisioning is declared complete.
             RuntimeBus.setPhase(RuntimePhase.Provisioning("checking Node.js on this device"))
+            val tProbe = SystemClock.elapsedRealtime()
             val probe = runNodeProbe(app)
             RuntimeBus.append("device-side node probe: $probe")
-            FileLogger.append("Provisioner", "node probe passed: $probe")
+            FileLogger.append(
+                "Provisioner",
+                "node probe passed in ${SystemClock.elapsedRealtime() - tProbe}ms: $probe",
+            )
 
             markerFile(app).writeText(
                 """{"node":"$probe","debs":$debs,""" +
                     """"distSha256":"$distSha","provisionedAt":${System.currentTimeMillis()}}""",
             )
             File(rt, "downloads").deleteRecursively()
+            usrStaging.deleteRecursively()
             RuntimeBus.setPhase(RuntimePhase.Provisioned)
-            FileLogger.append("Provisioner", "provision complete")
+            FileLogger.append(
+                "Provisioner",
+                "provision complete in ${SystemClock.elapsedRealtime() - t0}ms",
+            )
         } catch (t: Throwable) {
+            // Staging trees are disposable; the live runtime is never touched on failure.
+            usrStaging.deleteRecursively()
+            distStaging.deleteRecursively()
             FileLogger.append("Provisioner", "provision failed: ${t.message ?: t.javaClass.simpleName}")
             RuntimeBus.append("provisioning failed: ${t.javaClass.simpleName}: ${t.message}")
             RuntimeBus.setPhase(
@@ -178,6 +256,29 @@ object Provisioner {
                 ),
             )
         }
+    }
+
+    // Same-volume rename swap with backup-restore rollback: the previous tree
+    // only disappears after the new tree is fully in place.
+    private fun swapTree(target: File, staged: File, label: String) {
+        if (!staged.isDirectory) throw IOException("$label swap: staged tree missing (${staged.absolutePath})")
+        val backup = File(target.parentFile, "$label.previous")
+        backup.deleteRecursively()
+        if (target.exists()) {
+            if (!target.renameTo(backup)) {
+                throw IOException("$label swap: could not move the previous tree aside")
+            }
+        }
+        if (!staged.renameTo(target)) {
+            if (backup.exists()) {
+                runCatching { backup.renameTo(target) }
+                    .onFailure {
+                        throw IOException("$label swap failed and backup restore failed: ${it.message}")
+                    }
+            }
+            throw IOException("$label swap: rename failed")
+        }
+        backup.deleteRecursively()
     }
 
     // Failure classification: CANNOT LINK = linker closure defect; OpenSSL configuration error = env defect; com.termux in output = env leak.

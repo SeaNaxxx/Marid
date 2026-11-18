@@ -93,12 +93,26 @@ object EngineProcess {
         runCatching { process?.destroyForcibly() }
         process = null
         streams = null
+        // Sweep fallback for detached engine children: kill only node processes
+        // whose /proc cmdline points INTO this app's runtime tree — never every
+        // node on the device (Termux or a debugger session must survive).
         runCatching {
             val p = ProcessBuilder("sh", "-c", "pidof node").start()
             val out = p.inputStream.bufferedReader().readText().trim()
             p.waitFor()
             out.split(Regex("\\s+")).mapNotNull { it.toIntOrNull() }.forEach { pid ->
-                runCatching { android.os.Process.killProcess(pid) }
+                runCatching {
+                    val cmdline = File("/proc/$pid/cmdline")
+                        .inputStream()
+                        .bufferedReader()
+                        .readText()
+                        .replace('\u0000', ' ')
+                    if (cmdline.contains("/runtime/usr/bin/node") ||
+                        cmdline.contains("/runtime/dist/entry-stdio.js")
+                    ) {
+                        android.os.Process.killProcess(pid)
+                    }
+                }
             }
         }
         RuntimeBus.append("engine stopped")

@@ -1,9 +1,12 @@
 package com.qodex.app.rpc
 
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.JsonObject
+import java.io.IOException
 
 // Server sends Initialize (200) right after socket open; requests queue until then (port of packages/rpc/src/channelClient.ts).
 object RpcRequestType {
@@ -43,6 +46,13 @@ class ChannelClient(
     // Fires when the engine's Initialize (200) arrives — the server-side handshake anchor for boot.log.
     private val onReady: () -> Unit = {},
 ) {
+    companion object {
+        // Generous ceiling for slow provider connectivity tests; only a wedged
+        // engine ever reaches it. A timed-out call must surface as an error,
+        // never as an eternal await.
+        private const val REQUEST_TIMEOUT_MS = 60_000L
+    }
+
     @Volatile
     private var initialized = false
 
@@ -147,7 +157,13 @@ class ChannelClient(
         )
         send(RpcSerialization.serializeMessage(header, arg))
         return try {
-            deferred.await()
+            // An engine that acks nothing used to hang the caller forever (the
+            // composer kept `sending` and every later send was silently dropped).
+            withTimeout(REQUEST_TIMEOUT_MS) { deferred.await() }
+        } catch (e: TimeoutCancellationException) {
+            throw IOException(
+                "engine call timed out after ${REQUEST_TIMEOUT_MS / 1000}s: $channelName.$command",
+            )
         } finally {
             synchronized(this) { pending.remove(id) }
         }
@@ -182,7 +198,17 @@ class ChannelClient(
 
         val subscription = EventSubscription(id)
         // Wait for the first event fire or EventError so callers know the subscription is registered server-side.
-        firstFire.await()
+        try {
+            withTimeout(REQUEST_TIMEOUT_MS) { firstFire.await() }
+        } catch (e: TimeoutCancellationException) {
+            synchronized(this) {
+                pending.remove(id)
+                firstFireWaiters.remove(id)
+            }
+            throw IOException(
+                "engine event subscription timed out after ${REQUEST_TIMEOUT_MS / 1000}s: $channelName.$event",
+            )
+        }
         synchronized(this) { establishedEvents[id] = subscription }
         return subscription
     }

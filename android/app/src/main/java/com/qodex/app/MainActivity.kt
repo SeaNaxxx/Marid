@@ -20,7 +20,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -47,7 +49,9 @@ import com.qodex.app.ui.QodexRootScreen
 import com.qodex.app.ui.QodexTokens
 import com.qodex.app.utils.FileLogger
 
-// Boot contract: provision -> engine subprocess on stdio pipes -> RPC handshake; buttons appear only on failure (no fake progress).
+// Boot contract: provision -> engine subprocess on stdio pipes -> RPC handshake.
+// The boot screen renders the REAL runtime phase — never a bare spinner: a
+// multi-minute provision must be distinguishable from a hang.
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,7 +86,7 @@ private fun QodexAppRootContent(
     }
     when (screen) {
         is BootScreen.Error -> ErrorScreen(screen.phase, vm)
-        BootScreen.Dots -> ProvisioningDotsScreen()
+        BootScreen.Dots -> BootProgressScreen(phase)
         BootScreen.Chat -> QodexRootScreen(vm)
     }
 }
@@ -99,6 +103,7 @@ private fun ErrorScreen(phase: RuntimePhase.Failed, vm: QodexAppViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .background(QodexTokens.Background)
+            .statusBarsPadding()
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -127,35 +132,64 @@ private fun ErrorScreen(phase: RuntimePhase.Failed, vm: QodexAppViewModel) {
 }
 
 @Composable
-private fun ProvisioningDotsScreen() {
+private fun BootProgressScreen(phase: RuntimePhase) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(QodexTokens.Background),
+            .background(QodexTokens.Background)
+            .statusBarsPadding(),
         contentAlignment = Alignment.Center,
     ) {
-        val transition = rememberInfiniteTransition(label = "boot-dots")
-        val dots = listOf(0, 1, 2).map { offset ->
-            transition.animateFloat(
-                initialValue = 0.25f,
-                targetValue = 1f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(900, delayMillis = offset * 180, easing = LinearEasing),
-                    repeatMode = RepeatMode.Reverse,
-                ),
-                label = "dot-$offset",
-            )
+        val stepLabel = when (phase) {
+            is RuntimePhase.Provisioning -> phase.step
+            is RuntimePhase.StartingEngine -> "Starting engine"
+            is RuntimePhase.Provisioned -> "Launching engine"
+            is RuntimePhase.EngineReady -> "Waiting for engine handshake"
+            else -> "Preparing"
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            dots.forEach { alpha ->
-                Box(
-                    modifier = Modifier
-                        .size(10.dp)
-                        .background(
-                            Color(0xFF9E9E9E).copy(alpha = alpha.value),
-                            RoundedCornerShape(5.dp),
-                        ),
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = "Qodex",
+                color = QodexTokens.Foreground,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Spacer(Modifier.height(10.dp))
+            Text(
+                text = stepLabel,
+                color = QodexTokens.ForegroundSubtle,
+                fontSize = 13.sp,
+            )
+            Spacer(Modifier.height(28.dp))
+            val transition = rememberInfiniteTransition(label = "boot-dots")
+            val dots = listOf(0, 1, 2).map { offset ->
+                transition.animateFloat(
+                    initialValue = 0.25f,
+                    targetValue = 1f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(900, delayMillis = offset * 180, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse,
+                    ),
+                    label = "dot-$offset",
                 )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                dots.forEach { alpha ->
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .background(
+                                Color(0xFF9E9E9E).copy(alpha = alpha.value),
+                                RoundedCornerShape(5.dp),
+                            ),
+                    )
+                }
             }
         }
     }
