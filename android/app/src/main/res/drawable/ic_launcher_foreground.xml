@@ -1,0 +1,44 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Qodex Terminal Hexagon / Command Glyph -->
+    <!-- Safe zone: 18,18 to 90,90 (72dp centered) -->
+    
+    <!-- Outer subtle shield glow -->
+    <path
+        android:fillColor="#1E293B"
+        android:pathData="M54,24 L78,38 L78,66 L54,80 L30,66 L30,38 Z" />
+
+    <!-- Sleek inner hexagon border -->
+    <path
+        android:strokeColor="#38BDF8"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M54,28 L74,40 L74,64 L54,76 L34,64 L34,40 Z" />
+
+    <!-- Terminal Command Angle '>' -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M43,44 L53,52 L43,60" />
+
+    <!-- Terminal Cursor '_' -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#38BDF8"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M58,60 L67,60" />
+
+    <!-- Quantum Core Dot -->
+    <path
+        android:fillColor="#38BDF8"
+        android:pathData="M54,34 A2,2 0 1,1 54,34.01" />
+</vector>
