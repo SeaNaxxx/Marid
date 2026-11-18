@@ -39,8 +39,9 @@ object Provisioner {
         val marker = markerFile(ctx)
         if (!marker.isFile) return@runCatching false
         if (!nodeBin(ctx).isFile || !distEntry(ctx).isFile) return@runCatching false
-        val recorded = Regex("\\"distSha256\\"\\s*:\\s*\\"([0-9a-fA-F]{64})\\"")
-            .find(marker.readText())?.groupValues?.get(1)
+        // The marker JSON contains exactly one 64-hex digest (distSha256); the
+        // probe text and timestamp never match a 64-hex pattern.
+        val recorded = Regex("[0-9a-fA-F]{64}").find(marker.readText())?.value
         recorded != null && recorded.equals(expectedDistSha(ctx), ignoreCase = true)
     }.getOrDefault(false)
 
