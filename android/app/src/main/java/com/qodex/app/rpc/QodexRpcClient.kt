@@ -34,6 +34,16 @@ object ServiceChannels {
     const val FILE = "file"
     const val GIT = "git"
     const val CLIENT_CONFIG = "client-config"
+    const val PROJECT = "project"
+    const val SKILLS = "skills"
+    const val SUBAGENTS = "subagents"
+    const val COMMANDS = "commands"
+    const val HOOKS = "hooks"
+    const val MEMORY = "memory"
+    const val PLUGINS = "plugins"
+    const val PLUGIN_MANAGEMENT = "plugin-management"
+    const val USAGE_STATS = "usage-stats"
+    const val MCP_SYNC = "mcp-sync"
 }
 
 enum class RpcConnectionState {
@@ -190,6 +200,12 @@ class QodexRpcClient(
         }
     }
 
+    // Desktop ProxyChannel.toService packs method args as a single-element array
+    // (channel.call(propKey, [params])) and ProxyChannel.fromService applies them
+    // (target.apply(handler, args)) — a bare object arg is spread as an array-like
+    // with no length, so every params-taking method would receive undefined and
+    // fail server-side while the UI shows nothing. Service methods therefore must
+    // be called with the params object wrapped in a one-element JSON array.
     suspend fun call(channel: String, command: String, arg: JsonObject? = null): JsonElement? {
         FileLogger.append("RPC", "Sending $channel.$command")
         val client = ensureClient()
@@ -197,7 +213,7 @@ class QodexRpcClient(
             client.request(
                 channel,
                 command,
-                arg?.let { RpcValue.Obj(it) } ?: RpcValue.Undefined,
+                RpcValue.Arr(arg?.let { listOf(RpcValue.Obj(it)) } ?: emptyList()),
             )
         } catch (t: Throwable) {
             FileLogger.append("RPC", "Error on $channel.$command: ${t.message}")
@@ -262,13 +278,122 @@ class QodexRpcClient(
         buildJsonObject { put("workspacePath", workspacePath) },
     )
 
-    suspend fun agentCreateSession(workspacePath: String, sessionId: String? = null): JsonElement? {
+    // Composer model switching applies to the live session; the engine persists
+    // the selection into the canonical intent on the next sendText.
+    suspend fun agentSetModel(
+        workspacePath: String,
+        sessionId: String,
+        providerId: String,
+        modelId: String,
+    ): JsonElement? = call(
+        ServiceChannels.QODEX_AGENT,
+        "setModel",
+        buildJsonObject {
+            put("workspacePath", workspacePath)
+            put("sessionId", sessionId)
+            put(
+                "model",
+                buildJsonObject {
+                    put("providerId", providerId)
+                    put("modelId", modelId)
+                },
+            )
+            put("persistAsWorkspaceLastUsed", true)
+        },
+    )
+
+    suspend fun agentCreateSession(
+        workspacePath: String,
+        sessionId: String? = null,
+        projectId: String? = null,
+    ): JsonElement? {
         val arg = buildJsonObject {
             put("workspacePath", workspacePath)
             sessionId?.let { put("sessionId", it) }
+            projectId?.let { put("projectId", it) }
+            // session_input carries a session foreign key; a deferred draft is
+            // promoted (master row persisted) by first-prompt admission. An
+            // immediate create without a persisted master row makes the very
+            // first sendText fail with FOREIGN KEY constraint failed.
+            put("persistence", "deferred")
         }
         return call(ServiceChannels.QODEX_AGENT, "createSession", arg)
     }
+
+    // V4 connection handshake: hello -> clientHello, once per connection before
+    // any conversation/sessions-index subscription.
+    suspend fun helloConversationV4(): JsonElement? =
+        call(ServiceChannels.QODEX_AGENT, "helloConversationV4")
+
+    suspend fun initializeConversationV4(clientHello: JsonObject): JsonElement? =
+        call(ServiceChannels.QODEX_AGENT, "initializeConversationV4", clientHello)
+
+    suspend fun subscribeConversationV4(
+        workspacePath: String,
+        sessionId: String,
+    ): JsonElement? = call(
+        ServiceChannels.QODEX_AGENT,
+        "subscribeConversationV4",
+        buildJsonObject {
+            put("workspacePath", workspacePath)
+            put("sessionId", sessionId)
+        },
+    )
+
+    suspend fun unsubscribeConversationV4(
+        workspacePath: String,
+        subscriptionId: String,
+    ): JsonElement? = call(
+        ServiceChannels.QODEX_AGENT,
+        "unsubscribeConversationV4",
+        buildJsonObject {
+            put("workspacePath", workspacePath)
+            put("subscriptionId", subscriptionId)
+        },
+    )
+
+    // Standalone-server entries route session creation through the project
+    // system: without a project the create fails with project.remote-project-required.
+    suspend fun projectReadProjects(): JsonElement? =
+        call(ServiceChannels.PROJECT, "readProjects")
+
+    suspend fun projectSaveProject(name: String, root: String): JsonElement? = call(
+        ServiceChannels.PROJECT,
+        "saveProject",
+        buildJsonObject {
+            put("name", name)
+            put("roots", JsonArray(listOf(JsonPrimitive(root))))
+        },
+    )
+
+    suspend fun projectPrepareSession(projectId: String): JsonElement? = call(
+        ServiceChannels.PROJECT,
+        "prepareSession",
+        buildJsonObject { put("projectId", projectId) },
+    )
+
+    // V4 conversation frames: wire envelopes (complete / fragment) carrying the
+    // logical topic frames; reassembly happens in WireFrameAssembler.
+    suspend fun conversationFrames(
+        workspacePath: String,
+        onWireFrame: (JsonElement) -> Unit,
+    ): ChannelClient.EventSubscription = listen(
+        ServiceChannels.QODEX_AGENT,
+        "onDynamicConversationFrame",
+        buildJsonObject { put("workspacePath", workspacePath) },
+        onWireFrame,
+    )
+
+    // sessions-index: workspace-level task list feed for the sidebar.
+    suspend fun sessionsIndexFrames(
+        workspacePath: String,
+        onWireFrame: (JsonElement) -> Unit,
+    ): ChannelClient.EventSubscription = listen(
+        ServiceChannels.QODEX_AGENT,
+        "onDynamicSessionsIndexFrame",
+        buildJsonObject { put("workspacePath", workspacePath) },
+        onWireFrame,
+    )
 
     suspend fun sendConversationCommandV4(params: JsonObject): JsonElement? =
         call(ServiceChannels.QODEX_AGENT, "sendConversationCommandV4", params)

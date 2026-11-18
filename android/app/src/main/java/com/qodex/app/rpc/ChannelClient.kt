@@ -26,6 +26,10 @@ object RpcResponseType {
 class RpcCallException(
     message: String,
     val name: String = "Error",
+    // Engine domain errors carry a code (e.g. QODEX_AGENT_PROVIDER_NOT_READY);
+    // the host matches on it instead of fragile message text.
+    val code: String? = null,
+    val reasonCode: String? = null,
 ) : Exception(message)
 
 private sealed class PendingReply {
@@ -216,7 +220,10 @@ class ChannelClient(
             val obj = data.json as? JsonObject
             val message = (obj?.get("message") as? kotlinx.serialization.json.JsonPrimitive)?.content ?: "RPC error"
             val name = (obj?.get("name") as? kotlinx.serialization.json.JsonPrimitive)?.content ?: "Error"
-            RpcCallException(message, name)
+            val code = (obj?.get("code") as? kotlinx.serialization.json.JsonPrimitive)?.takeIf { it !is kotlinx.serialization.json.JsonNull }?.content
+            val reason = (obj?.get("reasonCode") as? kotlinx.serialization.json.JsonPrimitive)?.takeIf { it !is kotlinx.serialization.json.JsonNull }?.content
+                ?: ((obj?.get("data") as? JsonObject)?.get("reason") as? kotlinx.serialization.json.JsonPrimitive)?.content
+            RpcCallException(message, name, code, reason)
         }
         else -> RpcCallException("RPC error")
     }
