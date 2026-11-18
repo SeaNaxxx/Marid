@@ -33,14 +33,24 @@ fun QodexRootScreen(vm: QodexAppViewModel) {
     val models by vm.models.collectAsState()
     val selectedModel by vm.selectedModel.collectAsState()
     val composerText by vm.composerText.collectAsState()
+    val providerNotReady by vm.providerNotReady.collectAsState()
+    val tasks by vm.sidebarTasks.collectAsState()
 
     var drawerOpen by rememberSaveable { mutableStateOf(false) }
     var screen by rememberSaveable { mutableStateOf(RootScreen.CHAT) }
     var terminalOpen by rememberSaveable { mutableStateOf(false) }
     var connectOpen by rememberSaveable { mutableStateOf(false) }
+    // Settings sub-screens are keyed by section name; a plain string survives
+    // rememberSaveable (a nullable enum would break Bundle serialization).
+    var sectionName by rememberSaveable { mutableStateOf<String?>(null) }
 
     LaunchedEffect(rpcState) {
         if (rpcState == RpcConnectionState.CONNECTED) vm.loadModels()
+    }
+    // Returning from Model Settings after configuring a provider re-boots the
+    // conversation so the engine's readiness gate clears instead of staying failed.
+    LaunchedEffect(screen) {
+        if (screen == RootScreen.CHAT && providerNotReady) vm.retryConversation()
     }
 
     QodexSidebarDrawerHost(
@@ -50,6 +60,8 @@ fun QodexRootScreen(vm: QodexAppViewModel) {
             QodexSidebarDrawer(
                 profileName = "SeaNaxxx",
                 profileInitial = "S",
+                looseTasks = tasks,
+                loading = tasks.isEmpty() && rpcState == RpcConnectionState.CONNECTED,
                 onNewTask = { drawerOpen = false },
                 onSelectTask = { drawerOpen = false },
                 onOpenSettings = { screen = RootScreen.SETTINGS; drawerOpen = false },
@@ -79,6 +91,9 @@ fun QodexRootScreen(vm: QodexAppViewModel) {
                         if (rpcState == RpcConnectionState.DISCONNECTED) {
                             EngineDisconnectedBanner(onReconnect = { vm.reconnectRpc() })
                         }
+                        if (providerNotReady) {
+                            ProviderNotReadyBanner(onOpenModelSettings = { screen = RootScreen.MODEL_SETTINGS })
+                        }
                         Box(modifier = Modifier.weight(1f)) {
                             if (turns.isEmpty()) {
                                 WelcomeScreen()
@@ -96,10 +111,28 @@ fun QodexRootScreen(vm: QodexAppViewModel) {
                         )
                     }
                 }
-                RootScreen.SETTINGS -> SettingsScreen(
+                RootScreen.SETTINGS -> SettingsHubScreen(
                     onOpenModelSettings = { screen = RootScreen.MODEL_SETTINGS },
+                    onOpenConnectors = { screen = RootScreen.CONNECTORS },
+                    onOpenSection = { sectionName = it.name; screen = RootScreen.SECTION },
                     onBack = { screen = RootScreen.CHAT },
+                    engineVersion = null,
+                )
+                RootScreen.SECTION -> {
+                    val current = EngineSectionId.entries.firstOrNull { it.name == sectionName }
+                        ?: EngineSectionId.GENERAL
+                    EngineSectionScreen(
+                        section = current,
+                        rpc = vm.rpcClient(),
+                        workspacePath = vm.workspacePath,
+                        onBack = { screen = RootScreen.SETTINGS },
+                    )
+                }
+                RootScreen.CONNECTORS -> ConnectorsScreen(
                     rpc = vm.rpcClient(),
+                    workspacePath = vm.workspacePath,
+                    onBack = { screen = RootScreen.SETTINGS },
+                    onOpenModelSettings = { screen = RootScreen.MODEL_SETTINGS },
                 )
                 RootScreen.MODEL_SETTINGS -> ModelSettingsScreen(
                     rpc = vm.rpcClient(),
@@ -123,7 +156,43 @@ fun QodexRootScreen(vm: QodexAppViewModel) {
     }
 }
 
-private enum class RootScreen { CHAT, SETTINGS, MODEL_SETTINGS, TASKS }
+private enum class RootScreen { CHAT, SETTINGS, MODEL_SETTINGS, CONNECTORS, SECTION, TASKS }
+
+// Provider gate: the engine refuses model execution until a provider + key is
+// configured; this banner routes the user to Model Settings instead of a dead composer.
+@Composable
+private fun ProviderNotReadyBanner(onOpenModelSettings: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .background(
+                QodexTokens.Warning.copy(alpha = 0.12f),
+                RoundedCornerShape(8.dp),
+            )
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = "No model provider configured",
+            color = QodexTokens.Foreground,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = "Open Model Settings",
+            color = QodexTokens.Foreground,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier
+                .background(QodexTokens.Surface, RoundedCornerShape(6.dp))
+                .clickable(onClick = onOpenModelSettings)
+                .padding(horizontal = 10.dp, vertical = 6.dp),
+        )
+    }
+}
 
 // ChatErrorBanner parity: a red state strip, never an infinite spinner, when the engine socket drops.
 @Composable
