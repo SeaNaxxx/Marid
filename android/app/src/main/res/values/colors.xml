@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Launcher background layer: the Qodex mark is dark bars on white. -->
-    <color name="ic_launcher_background">#FFFFFF</color>
+    <!-- Launcher background layer: sleek dark terminal aesthetic (#0E1117). -->
+    <color name="ic_launcher_background">#0E1117</color>
+    <color name="ic_launcher_accent">#38BDF8</color>
+    <color name="ic_launcher_surface">#1E293B</color>
 </resources>
