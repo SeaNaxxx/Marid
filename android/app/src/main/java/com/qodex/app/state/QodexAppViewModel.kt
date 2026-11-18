@@ -330,7 +330,7 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
     private fun handleWireFrame(
         assembler: WireFrameAssembler,
         projection: ConversationProjection,
-        wire: kotlinx.serialization.json.JsonElement,
+        wire: kotlinx.serialization.json.JsonElement?,
     ) {
         val wireObj = wire as? JsonObject ?: return
         when (val outcome = assembler.accept(wireObj)) {
@@ -450,7 +450,7 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
                     .let { (it as? JsonPrimitive)?.content?.toLongOrNull() }
                 com.qodex.app.ui.QodexSidebarTask(
                     key = id,
-                    title = session.get("title").asStringOrNull().ifEmpty { "Untitled task" },
+                    title = session.get("title").asStringOrNull()?.ifEmpty { null } ?: "Untitled task",
                     timeLabel = updatedAt?.let { formatRelativeTime(it) },
                     isRunning = status == "running" || status == "waiting",
                     isError = status == "error",

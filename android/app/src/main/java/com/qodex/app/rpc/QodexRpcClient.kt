@@ -376,7 +376,7 @@ class QodexRpcClient(
     // logical topic frames; reassembly happens in WireFrameAssembler.
     suspend fun conversationFrames(
         workspacePath: String,
-        onWireFrame: (JsonElement) -> Unit,
+        onWireFrame: (JsonElement?) -> Unit,
     ): ChannelClient.EventSubscription = listen(
         ServiceChannels.QODEX_AGENT,
         "onDynamicConversationFrame",
@@ -387,7 +387,7 @@ class QodexRpcClient(
     // sessions-index: workspace-level task list feed for the sidebar.
     suspend fun sessionsIndexFrames(
         workspacePath: String,
-        onWireFrame: (JsonElement) -> Unit,
+        onWireFrame: (JsonElement?) -> Unit,
     ): ChannelClient.EventSubscription = listen(
         ServiceChannels.QODEX_AGENT,
         "onDynamicSessionsIndexFrame",

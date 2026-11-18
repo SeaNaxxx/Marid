@@ -48,6 +48,8 @@ import com.qodex.app.runtime.RuntimeBus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.put
 
 /**
  * Settings hub mirroring the upstream engine's settings structure
@@ -302,7 +304,7 @@ private suspend fun loadMcpServers(rpc: QodexRpcClient, workspacePath: String): 
     val rows = mutableListOf<SectionItemRow>()
     for (entry in result.arr("servers").orEmpty()) {
         val server = entry.asObjectOrNull() ?: continue
-        val toolCount = server.int("toolCount")
+        val toolCount = server.intVal("toolCount")
         val status = when (server.str("status")) {
             "connected" -> RowStatus.OK
             "connecting" -> RowStatus.WARNING
