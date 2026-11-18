@@ -85,13 +85,13 @@ object Provisioner {
     private suspend fun provisionTransactional(app: Context): Unit = withContext(Dispatchers.IO) {
         val rt = runtimeRoot(app)
         val t0 = SystemClock.elapsedRealtime()
-        val usrStaging = File(rt, "usr.staging")
-        val distStaging = File(rt, "dist.staging")
+        val stagingRoot = File(rt, "staging")
+        val usrStaging = File(stagingRoot, "usr")
+        val distStaging = File(stagingRoot, "dist")
         try {
             FileLogger.append("Provisioner", "provision started (transactional)")
             RuntimeBus.setPhase(RuntimePhase.Provisioning("preparing directories"))
-            usrStaging.deleteRecursively()
-            distStaging.deleteRecursively()
+            stagingRoot.deleteRecursively()
             rt.mkdirs()
             File(homeDir(app), "tmp").mkdirs()
 
@@ -119,7 +119,7 @@ object Provisioner {
                 staged.parentFile?.mkdirs()
                 copyAsset(app, "$DEB_DIR_ASSET/$name", staged)
                 verifySha256(staged, expected, name)
-                DebExtractor.extract(staged, usrStaging, report)
+                DebExtractor.extract(staged, stagingRoot, report)
                 staged.delete()
                 debs++
                 if (debs % 10 == 0) {
@@ -216,7 +216,7 @@ object Provisioner {
             // every extraction, hash and layout gate succeeded.
             RuntimeBus.setPhase(RuntimePhase.Provisioning("activating runtime"))
             val tSwap = SystemClock.elapsedRealtime()
-            swapTree(usrDir(app), File(usrStaging, "usr"), "usr")
+            swapTree(usrDir(app), usrStaging, "usr")
             swapTree(distDir(app), distStaging, "dist")
             FileLogger.append(
                 "Provisioner",
@@ -246,8 +246,7 @@ object Provisioner {
             )
         } catch (t: Throwable) {
             // Staging trees are disposable; the live runtime is never touched on failure.
-            usrStaging.deleteRecursively()
-            distStaging.deleteRecursively()
+            stagingRoot.deleteRecursively()
             FileLogger.append("Provisioner", "provision failed: ${t.message ?: t.javaClass.simpleName}")
             RuntimeBus.append("provisioning failed: ${t.javaClass.simpleName}: ${t.message}")
             RuntimeBus.setPhase(
