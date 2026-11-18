@@ -30,8 +30,15 @@ jobs:
       - name: Build engine (@qodex/server + workspace deps)
         run: pnpm --filter "@qodex/server..." build
 
+      - name: Build agent CLI closure (conversation smoke dependency)
+        run: pnpm --filter "@qodex/cli..." --workspace-concurrency 1 build
+
       - name: Stdio transport smoke test (Initialize handshake + RPC round trip)
         run: pnpm exec tsx scripts/qodex-android/stdio-smoke.mts
+
+      - name: Conversation smoke test (V4 session + frame flow over stdio)
+        run: pnpm exec tsx scripts/qodex-android/conversation-smoke.mts
+        timeout-minutes: 5
 
       - name: Pack engine runtime bundle (qodex-dist.tgz + sha256)
         run: |
