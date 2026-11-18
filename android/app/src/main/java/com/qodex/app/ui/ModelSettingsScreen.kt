@@ -803,6 +803,9 @@ private fun ApiKeyFormScreen2d(
     var savedFlash by remember { mutableStateOf(false) }
     var modelEditorTarget by remember { mutableStateOf<ModelEditorTarget2d?>(null) }
     var confirmingDelete by remember { mutableStateOf(false) }
+    var testingConnection by remember { mutableStateOf(false) }
+    var testFeedback by remember { mutableStateOf<String?>(null) }
+    var testIsFailure by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(savedFlash) {
@@ -952,12 +955,13 @@ private fun ApiKeyFormScreen2d(
                 PrimaryButton2d(
                     label = if (saving) "Saving..." else "Save", // common.saving / common.save
                     icon = null,
-                    enabled = !saving && !savingLocked,
+                    enabled = !saving && !savingLocked && !testingConnection,
                     onClick = {
                         val client = rpc ?: return@PrimaryButton2d
                         scope.launch {
                             saving = true
                             saveFailed = false
+                            testFeedback = null
                             val ok = saveProviderDetails2e(
                                 client,
                                 provider.providerId,
@@ -977,6 +981,29 @@ private fun ApiKeyFormScreen2d(
                         }
                     },
                 )
+                if (provider.models.isNotEmpty()) {
+                    OutlineButton2d(
+                        label = if (testingConnection) "Testing..." else "Test connection",
+                        enabled = !saving && !savingLocked && !testingConnection && rpc != null,
+                        onClick = {
+                            val client = rpc ?: return@OutlineButton2d
+                            val targetModel = provider.models.firstOrNull { it.enabled } ?: provider.models.first()
+                            scope.launch {
+                                testingConnection = true
+                                testFeedback = null
+                                val ok = testModelConnectivity2e(client, workspacePath, provider.providerId, targetModel.modelId)
+                                testingConnection = false
+                                if (ok) {
+                                    testFeedback = "Connection to ${provider.name} verified successfully"
+                                    testIsFailure = false
+                                } else {
+                                    testFeedback = "Connection failed: check API key, Base URL, or network"
+                                    testIsFailure = true
+                                }
+                            }
+                        },
+                    )
+                }
             }
             if (savedFlash) {
                 FeedbackBanner2d(
@@ -988,6 +1015,12 @@ private fun ApiKeyFormScreen2d(
                 FeedbackBanner2d(
                     message = "Failed to save ${provider.name}", // providerSaveFailure (no error detail)
                     failure = true,
+                )
+            }
+            testFeedback?.let { msg ->
+                FeedbackBanner2d(
+                    message = msg,
+                    failure = testIsFailure,
                 )
             }
         }
