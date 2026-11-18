@@ -4,9 +4,12 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.qodex.app.rpc.ChannelClient
 import com.qodex.app.rpc.QodexRpcClient
-import com.qodex.app.rpc.RpcEvents
+import com.qodex.app.rpc.RpcCallException
 import com.qodex.app.rpc.RpcConnectionState
+import com.qodex.app.rpc.RpcEvents
+import com.qodex.app.rpc.WireFrameAssembler
 import com.qodex.app.rpc.asArrayOrNull
 import com.qodex.app.rpc.asObjectOrNull
 import com.qodex.app.rpc.asStringOrNull
@@ -15,10 +18,8 @@ import com.qodex.app.runtime.EngineProcess
 import com.qodex.app.runtime.Provisioner
 import com.qodex.app.runtime.RuntimeBus
 import com.qodex.app.runtime.RuntimePhase
-import com.qodex.app.ui.AssistantBlock
 import com.qodex.app.ui.ChatTurn
 import com.qodex.app.ui.ModelEntry2c
-import com.qodex.app.ui.ToolCallStatus
 import com.qodex.app.ui.fetchModelEntries
 import com.qodex.app.utils.FileLogger
 import kotlinx.coroutines.CoroutineScope
@@ -28,10 +29,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import java.util.UUID
 
-// Boot orchestration: provision -> engine spawn -> RPC connect; the UI renders RuntimeBus.phase.
+// Boot orchestration: provision -> engine spawn -> RPC connect -> V4 conversation
+// subscription. The UI renders RuntimeBus.phase plus the projection below.
 class QodexAppViewModel(private val app: Application) : ViewModel() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -97,6 +102,7 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
                 _rpcState.value = state
                 if (state == RpcConnectionState.CONNECTED) {
                     RuntimeBus.append("RPC connected via stdio handshake")
+                    onEngineConnected()
                 }
             }, { line -> RuntimeBus.append(line) }),
             onTransportDown = { reason -> restartEngine(reason) },
@@ -112,6 +118,8 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
         val old = rpc
         rpc = null
         old?.shutdown()
+        conversation?.dispose()
+        conversation = null
         scope.launch {
             RuntimeBus.append("engine restart: $reason")
             EngineProcess.stop()
@@ -124,6 +132,8 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
         EngineProcess.stop()
         _rpcState.value = RpcConnectionState.DISCONNECTED
         rpc = null
+        conversation?.dispose()
+        conversation = null
         RuntimeBus.setPhase(RuntimePhase.Idle)
         scope.launch {
             if (Provisioner.isProvisioned(app)) {
@@ -149,11 +159,21 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
     private val _composerText = MutableStateFlow("")
     val composerText: StateFlow<String> = _composerText.asStateFlow()
 
+    // True while the last turnHeader row reports a running turn; drives the composer busy state.
+    private val _turnRunning = MutableStateFlow(false)
+    val turnRunning: StateFlow<Boolean> = _turnRunning.asStateFlow()
+
+    // Set when the engine refuses model execution because no provider/model is
+    // configured; the UI routes the user to Model Settings instead of failing silently.
+    private val _providerNotReady = MutableStateFlow(false)
+    val providerNotReady: StateFlow<Boolean> = _providerNotReady.asStateFlow()
+
     fun onComposerTextChange(text: String) {
         _composerText.value = text
     }
 
     private var currentSessionId: String? = null
+    private var currentSubscriptionId: String? = null
     private var sending = false
 
     fun loadModels() {
@@ -173,10 +193,169 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
     }
 
     fun selectModel(entry: ModelEntry2c) {
+        val previous = _selectedModel.value
         _selectedModel.value = entry
+        val client = rpc ?: return
+        val sessionId = currentSessionId ?: return
+        scope.launch {
+            runCatching {
+                client.agentSetModel(workspacePath, sessionId, entry.providerId, entry.modelId)
+            }.onFailure {
+                // Roll the picker back so the UI never shows a selection the engine rejected.
+                _selectedModel.value = previous
+                RuntimeBus.append("model switch failed: ${it.message}")
+                FileLogger.append("RPC", "Error on setModel: ${it.message}")
+            }.onSuccess {
+                RuntimeBus.append("model switched: ${entry.providerId}/${entry.modelId}")
+            }
+        }
     }
 
-    // sendText envelope over the qodex-agent channel; unknown event shapes are logged, never crash the UI.
+    // ------------------------------------------------------------------
+    // V4 conversation wiring (validated end-to-end against entry-stdio.js
+    // by scripts/qodex-android/conversation-smoke.mts):
+    // project registration -> createSession(deferred) -> hello/clientHello
+    // handshake -> subscribeConversationV4 -> onDynamicConversationFrame.
+    // ------------------------------------------------------------------
+
+    private class Conversation(
+        val subscription: ChannelClient.EventSubscription,
+        val assembler: WireFrameAssembler,
+        val projection: ConversationProjection,
+    ) {
+        fun dispose() {
+            subscription.dispose()
+            assembler.reset()
+            projection.clear()
+        }
+    }
+
+    private var conversation: Conversation? = null
+
+    private fun onEngineConnected() {
+        loadModels()
+        loadSidebarTasks()
+        startConversation()
+    }
+
+    private fun startConversation() {
+        val client = rpc ?: return
+        scope.launch {
+            try {
+                val projectId = ensureWorkspaceProject(client)
+                val prepared = client.projectPrepareSession(projectId)?.asObjectOrNull()
+                val sessionWorkspacePath = prepared?.get("workspacePath").asStringOrNull() ?: workspacePath
+                val created = client.agentCreateSession(
+                    workspacePath = sessionWorkspacePath,
+                    projectId = projectId,
+                )?.asObjectOrNull()
+                val sessionId = created?.get("session")?.asObjectOrNull()?.get("sessionId").asStringOrNull()
+                    ?: created?.get("sessionId").asStringOrNull()
+                if (sessionId == null) {
+                    RuntimeBus.append("conversation boot failed: createSession returned no sessionId")
+                    return@launch
+                }
+                currentSessionId = sessionId
+                currentSubscriptionId = null
+
+                ensureHandshake(client)
+
+                val subscribed = client.subscribeConversationV4(sessionWorkspacePath, sessionId)
+                val subscriptionId = subscribed?.asObjectOrNull()
+                    ?.get("ack")?.asObjectOrNull()?.get("subscriptionId").asStringOrNull()
+                    ?: subscribed?.asObjectOrNull()?.get("subscriptionId").asStringOrNull()
+                if (subscriptionId == null) {
+                    RuntimeBus.append("conversation boot failed: no subscriptionId in ack")
+                    return@launch
+                }
+                currentSubscriptionId = subscriptionId
+                RuntimeBus.append("conversation subscribed: session=$sessionId sub=$subscriptionId")
+
+                val assembler = WireFrameAssembler()
+                val projection = ConversationProjection()
+                val frames = client.conversationFrames(sessionWorkspacePath) { wire ->
+                    handleWireFrame(assembler, projection, wire)
+                }
+                conversation?.dispose()
+                conversation = Conversation(frames, assembler, projection)
+            } catch (t: Throwable) {
+                RuntimeBus.append("conversation boot failed: ${t.message}")
+                FileLogger.append("RPC", "conversation boot failed: ${t.message}")
+                surfaceConversationError(t, booting = true)
+            }
+        }
+    }
+
+    // Standalone-server entries refuse project-less session creation
+    // (project.remote-project-required); reuse the project bound to the
+    // workspace root, creating it once on first boot.
+    private suspend fun ensureWorkspaceProject(client: QodexRpcClient): String {
+        val existing = client.projectReadProjects()?.asObjectOrNull()?.get("projects").asArrayOrNull()
+        val match = existing?.firstNotNullOfOrNull { entry ->
+            val project = entry.asObjectOrNull() ?: return@firstNotNullOfOrNull null
+            val roots = project.get("roots").asArrayOrNull().orEmpty()
+            val hasRoot = roots.any {
+                it.asObjectOrNull()?.get("rootPath").asStringOrNull() == workspacePath
+            }
+            if (hasRoot) project.get("id").asStringOrNull() else null
+        }
+        if (match != null) return match
+        val created = client.projectSaveProject("Qodex Workspace", workspacePath)?.asObjectOrNull()
+        val id = created?.get("id").asStringOrNull()
+            ?: throw IllegalStateException("saveProject returned no project id")
+        RuntimeBus.append("workspace project created: $id")
+        return id
+    }
+
+    private suspend fun ensureHandshake(client: QodexRpcClient) {
+        val hello = client.helloConversationV4()?.asObjectOrNull()
+        val protocolVersion = (hello?.get("protocolVersion") as? JsonPrimitive)?.content?.toIntOrNull() ?: 3
+        val clientKind = if (hello?.get("clientMode").asStringOrNull() == "desktop-continuous") {
+            "desktop"
+        } else {
+            "mobileApp"
+        }
+        client.initializeConversationV4(
+            buildJsonObject {
+                put("kind", "clientHello")
+                put("protocolVersion", protocolVersion)
+                put("clientId", "qodex-android")
+                put("clientKind", clientKind)
+                put("appVersion", "qodex-android")
+                put("capabilities", buildJsonObject { put("workspaceHookReviewUi", true) })
+            },
+        )
+    }
+
+    private fun handleWireFrame(
+        assembler: WireFrameAssembler,
+        projection: ConversationProjection,
+        wire: kotlinx.serialization.json.JsonElement,
+    ) {
+        val wireObj = wire as? JsonObject ?: return
+        when (val outcome = assembler.accept(wireObj)) {
+            is WireFrameAssembler.Outcome.Ready -> {
+                if (projection.applyLogicalFrame(outcome.logical)) {
+                    renderProjection(projection)
+                }
+            }
+            is WireFrameAssembler.Outcome.Rejected ->
+                RuntimeBus.append("conversation frame rejected: ${outcome.reasonCode}")
+            WireFrameAssembler.Outcome.Incomplete -> Unit
+        }
+    }
+
+    private fun renderProjection(projection: ConversationProjection) {
+        val view = projection.view()
+        val running = view.rows
+            .lastOrNull { it.string("kind") == "turnHeader" }
+            ?.string("state") == "running"
+        _turnRunning.value = running
+        _turns.value = mapRowsToTurns(view.rows)
+    }
+
+    // sendText envelope over the qodex-agent channel; the engine echoes the
+    // userInput row back through the frame stream, so no local bubble is appended.
     fun sendText(text: String) {
         val trimmed = text.trim()
         if (trimmed.isEmpty() || sending) return
@@ -184,257 +363,117 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
             RuntimeBus.append("send: engine RPC not connected")
             return
         }
+        if (currentSessionId == null || currentSubscriptionId == null) {
+            RuntimeBus.append("send: conversation not subscribed yet; retrying boot")
+            startConversation()
+            return
+        }
         sending = true
-        _turns.value = _turns.value + ChatTurn.UserTurn(trimmed)
         scope.launch {
             try {
-                ensureSession(client)
-                val envelope = kotlinx.serialization.json.buildJsonObject {
+                val envelope = buildJsonObject {
                     put("commandId", UUID.randomUUID().toString())
                     put("clientId", "qodex-android")
-                    currentSessionId?.let { put("sessionId", kotlinx.serialization.json.JsonPrimitive(it)) }
+                    put("sessionId", currentSessionId)
                     put("type", "sendText")
-                    put(
-                        "payload",
-                        kotlinx.serialization.json.buildJsonObject {
-                            put("text", trimmed)
-                        },
-                    )
+                    put("payload", buildJsonObject { put("text", trimmed) })
                     put("issuedAt", System.currentTimeMillis())
-                    put("inputOrigin", "mobile")
                 }
                 val ack = client.sendConversationCommandV4(
-                    kotlinx.serialization.json.buildJsonObject {
+                    buildJsonObject {
                         put("workspacePath", workspacePath)
                         put("envelope", envelope)
                     },
-                )
-                RuntimeBus.append("send ack received: ${ack != null}")
+                )?.asObjectOrNull()
+                val status = ack?.get("status").asStringOrNull()
+                if (status != null && status != "accepted") {
+                    val reason = ack?.get("message").asStringOrNull()
+                        ?: ack?.get("reasonCode").asStringOrNull()
+                        ?: "command rejected"
+                    surfaceConversationError(IllegalStateException(reason), booting = false)
+                }
+                RuntimeBus.append("send ack: ${status ?: "null"}")
             } catch (t: Throwable) {
                 RuntimeBus.append("send failed: ${t.message}")
                 FileLogger.append("RPC", "Error on sendText: ${t.message}")
+                surfaceConversationError(t, booting = false)
             } finally {
                 sending = false
             }
         }
     }
 
-    private suspend fun ensureSession(client: QodexRpcClient) {
-        if (currentSessionId != null) return
-        runCatching {
-            val created = client.agentCreateSession(workspacePath)
-            currentSessionId = created?.asObjectOrNull()
-                ?.get("sessionId").asStringOrNull()
-                ?: created?.asObjectOrNull()?.get("id").asStringOrNull()
-            RuntimeBus.append("session ready ${currentSessionId ?: "(inline)"}")
-            subscribeSessionEvents(client)
-        }.onFailure { RuntimeBus.append("createSession failed: ${it.message}") }
+    // Engine failures belong in the transcript — silence is the defect this
+    // replaces. Provider-not-ready additionally flips the settings gate so the
+    // composer can route the user to Model Settings.
+    private fun surfaceConversationError(t: Throwable, booting: Boolean) {
+        val notReady = (t as? RpcCallException)?.code == "QODEX_AGENT_PROVIDER_NOT_READY"
+        if (notReady) _providerNotReady.value = true
+        val prefix = if (booting) "[engine]" else "[turn error]"
+        val message = t.message?.take(300) ?: "unknown engine error"
+        appendSystemBlock("$prefix $message")
     }
 
-    private fun subscribeSessionEvents(client: QodexRpcClient) {
-        val sessionId = currentSessionId ?: return
+    // User-facing retry after configuring providers in Model Settings.
+    fun retryConversation() {
+        _providerNotReady.value = false
+        val client = rpc ?: return
+        if (_rpcState.value != RpcConnectionState.CONNECTED) return
         scope.launch {
-            runCatching {
-                client.subscribeSessionEvents(
-                    kotlinx.serialization.json.buildJsonObject {
-                        put("workspacePath", workspacePath)
-                        put("sessionId", sessionId)
-                        // QodexAgentSessionSubscribeParams requires a deliveryKind; desktop-continuous
-                        // keeps live deltas flowing the way the desktop renderer consumes them.
-                        put("deliveryKind", "desktop-continuous")
-                    },
-                ) { event ->
-                    handleSessionEvent(event)
-                }
-            }.onFailure {
-                RuntimeBus.append("session event subscribe failed: ${it.message}")
-                FileLogger.append("RPC", "Error on onDynamicSessionEvent subscribe: ${it.message}")
-            }
+            runCatching { loadModels() }
+            startConversation()
         }
     }
 
-    // Engine event contract: packages/shared/src/qodex-protocol/index.ts qodexSessionEventSchema —
-    // envelopes { type, payload } with model.streaming / part.delta / tool.updated / turn.* shapes.
-    private fun handleSessionEvent(event: kotlinx.serialization.json.JsonElement?) {
-        val obj = event.asObjectOrNull() ?: return
-        val type = obj["type"].asStringOrNull() ?: obj["event"]?.asStringOrNull()
-        val payload = obj["payload"].asObjectOrNull() ?: obj
-        when (type) {
-            "model.streaming" -> handleModelStreaming(payload)
-            "part.delta" -> {
-                when (payload["field"].asStringOrNull()) {
-                    "text" -> appendToLastTextBlock(payload["delta"].asStringOrNull() ?: "")
-                    "reasoning" -> appendToLastReasoningBlock(payload["delta"].asStringOrNull() ?: "")
-                    else -> RuntimeBus.append("session event (unmapped field): $payload")
-                }
+    // ------------------------------------------------------------------
+    // Sidebar task list: REAL engine sessions via qodex-agent.listSessions.
+    // ------------------------------------------------------------------
+
+    private val _sidebarTasks = MutableStateFlow<List<com.qodex.app.ui.QodexSidebarTask>>(emptyList())
+    val sidebarTasks: StateFlow<List<com.qodex.app.ui.QodexSidebarTask>> = _sidebarTasks.asStateFlow()
+
+    fun loadSidebarTasks() {
+        val client = rpc ?: return
+        scope.launch {
+            val sessions = runCatching {
+                client.agentListSessions(workspacePath)
+                    ?.asObjectOrNull()?.get("sessions").asArrayOrNull().orEmpty()
+            }.getOrElse {
+                RuntimeBus.append("sidebar sessions fetch failed: ${it.message}")
+                emptyList()
             }
-            "part.upserted" -> {
-                val part = payload["part"].asObjectOrNull() ?: return
-                when (part["type"].asStringOrNull()) {
-                    "text" -> {
-                        val text = part["text"].asStringOrNull() ?: return
-                        if (streamingTextBuilder == null) appendAssistantBlock(AssistantBlock.MessageText(text))
-                    }
-                    "reasoning" -> {
-                        val text = part["text"].asStringOrNull() ?: return
-                        appendAssistantBlock(AssistantBlock.Reasoning(text = text, streaming = false))
-                    }
-                    else -> RuntimeBus.append("session event (unmapped part): ${part["type"]}")
-                }
-            }
-            "tool.updated" -> handleToolUpdated(payload)
-            "turn.failed" -> {
-                val error = payload["error"].asObjectOrNull()
-                val message = error?.get("message").asStringOrNull() ?: "turn failed"
-                appendAssistantBlock(AssistantBlock.MessageText("[error] $message"))
-                FileLogger.append("RPC", "turn.failed: $message")
-            }
-            "assistantText", "assistant_text", "text" -> {
-                // Legacy shapes kept as fallback for older engine builds.
-                val text = payload["text"].asStringOrNull() ?: return
-                appendAssistantBlock(AssistantBlock.MessageText(text))
-            }
-            "toolCall", "tool_call" -> {
-                val name = payload["name"].asStringOrNull()
-                    ?: payload["toolName"].asStringOrNull() ?: "tool"
-                val statusRaw = payload["status"].asStringOrNull()
-                val status = when (statusRaw) {
-                    "completed", "success" -> ToolCallStatus.COMPLETED
-                    "failed", "error" -> ToolCallStatus.FAILED
-                    else -> ToolCallStatus.RUNNING
-                }
-                appendAssistantBlock(
-                    AssistantBlock.ToolCall(
-                        name = name,
-                        status = status,
-                        summary = payload["summary"].asStringOrNull().orEmpty(),
-                    ),
+            val tasks = sessions.mapNotNull { entry ->
+                val session = entry.asObjectOrNull() ?: return@mapNotNull null
+                val id = session.get("sessionId").asStringOrNull() ?: return@mapNotNull null
+                val status = session.get("status").asStringOrNull().orEmpty()
+                val updatedAt = session.get("updatedAt")
+                    .let { (it as? JsonPrimitive)?.content?.toLongOrNull() }
+                com.qodex.app.ui.QodexSidebarTask(
+                    key = id,
+                    title = session.get("title").asStringOrNull().ifEmpty { "Untitled task" },
+                    timeLabel = updatedAt?.let { formatRelativeTime(it) },
+                    isRunning = status == "running" || status == "waiting",
+                    isError = status == "error",
+                    isActive = false,
                 )
             }
-            else -> RuntimeBus.append("session event (unmapped): $type ${payload.toString().take(160)}")
+            _sidebarTasks.value = tasks
         }
     }
 
-    private var streamingTextBuilder: StringBuilder? = null
-
-    // model.streaming kinds from qodexModelStreamingKindSchema: text_start/delta/end, reasoning_*, tool_input_*, tool_call.
-    private fun handleModelStreaming(payload: kotlinx.serialization.json.JsonObject) {
-        when (payload["kind"].asStringOrNull()) {
-            "text_start" -> {
-                streamingTextBuilder = StringBuilder()
-                appendAssistantBlock(AssistantBlock.MessageText(""))
-            }
-            "text_delta" -> {
-                if (streamingTextBuilder == null) {
-                    streamingTextBuilder = StringBuilder()
-                    appendAssistantBlock(AssistantBlock.MessageText(""))
-                }
-                appendToLastTextBlock(payload["delta"].asStringOrNull() ?: "")
-            }
-            "text_end", "finish" -> streamingTextBuilder = null
-            "reasoning_delta" -> appendToLastReasoningBlock(payload["delta"].asStringOrNull() ?: "")
-            "tool_call" -> {
-                val name = payload["toolName"].asStringOrNull() ?: "tool"
-                appendAssistantBlock(AssistantBlock.ToolCall(name = name, status = ToolCallStatus.RUNNING, summary = ""))
-            }
-            else -> Unit
+    private fun formatRelativeTime(epochMs: Long): String {
+        val delta = System.currentTimeMillis() - epochMs
+        val minutes = delta / 60_000
+        return when {
+            minutes < 1 -> "now"
+            minutes < 60 -> "${minutes}m"
+            minutes < 60 * 24 -> "${minutes / 60}h"
+            else -> "${minutes / (60 * 24)}d"
         }
     }
 
-    private fun handleToolUpdated(payload: kotlinx.serialization.json.JsonObject) {
-        val kind = payload["kind"].asStringOrNull() ?: return
-        val toolCallId = payload["toolCallId"].asStringOrNull()
-        val name = payload["toolName"].asStringOrNull() ?: "tool"
-        val status = when (kind) {
-            "scheduled", "started" -> ToolCallStatus.RUNNING
-            "result" -> ToolCallStatus.COMPLETED
-            "error" -> ToolCallStatus.FAILED
-            else -> return // progress/batch/raw don't change block state
-        }
-        val existingIndex = toolCallId?.let { toolCallBlocks[it] }
-        if (existingIndex != null) {
-            updateAssistantBlock(existingIndex) { block ->
-                (block as? AssistantBlock.ToolCall)?.copy(status = status) ?: block
-            }
-        } else {
-            val summary = payload["description"].asStringOrNull().orEmpty()
-            appendAssistantBlock(AssistantBlock.ToolCall(name = name, status = status, summary = summary))?.let { blockIndex ->
-                toolCallId?.let { toolCallBlocks[it] = blockIndex }
-            }
-        }
-    }
-
-    // toolCallId -> index of its ToolCall block inside the last assistant turn, so result/error events update in place.
-    private val toolCallBlocks = LinkedHashMap<String, Int>()
-
-    private fun appendToLastTextBlock(delta: String) {
-        if (delta.isEmpty()) return
-        _turns.value = _turns.value.toMutableList().also { list ->
-            for (i in list.indices.reversed()) {
-                val turn = list[i]
-                if (turn !is ChatTurn.AssistantTurn) continue
-                for (b in turn.blocks.indices.reversed()) {
-                    val block = turn.blocks[b]
-                    if (block is AssistantBlock.MessageText) {
-                        list[i] = turn.copy(blocks = turn.blocks.subList(0, b) +
-                            block.copy(text = block.text + delta) +
-                            turn.blocks.subList(b + 1, turn.blocks.size))
-                        return
-                    }
-                }
-            }
-        }
-    }
-
-    private fun appendToLastReasoningBlock(delta: String) {
-        if (delta.isEmpty()) return
-        _turns.value = _turns.value.toMutableList().also { list ->
-            for (i in list.indices.reversed()) {
-                val turn = list[i]
-                if (turn !is ChatTurn.AssistantTurn) continue
-                for (b in turn.blocks.indices.reversed()) {
-                    val block = turn.blocks[b]
-                    if (block is AssistantBlock.Reasoning) {
-                        list[i] = turn.copy(blocks = turn.blocks.subList(0, b) +
-                            block.copy(text = block.text + delta) +
-                            turn.blocks.subList(b + 1, turn.blocks.size))
-                        return
-                    }
-                    if (block is AssistantBlock.MessageText) return
-                }
-            }
-            list.add(ChatTurn.AssistantTurn(listOf(AssistantBlock.Reasoning(text = delta, streaming = true))))
-        }
-    }
-
-    private fun updateAssistantBlock(index: Int, transform: (AssistantBlock) -> AssistantBlock) {
-        _turns.value = _turns.value.toMutableList().also { list ->
-            val last = list.lastOrNull() as? ChatTurn.AssistantTurn ?: return
-            if (index < last.blocks.size) {
-                list[list.size - 1] = last.copy(blocks = last.blocks.subList(0, index) +
-                    transform(last.blocks[index]) +
-                    last.blocks.subList(index + 1, last.blocks.size))
-            }
-        }
-    }
-
-    // Returns the block's index inside the (new) last assistant turn for later in-place updates.
-    private fun appendAssistantBlock(block: AssistantBlock): Int? {
-        var insertedIndex: Int? = null
-        _turns.value = _turns.value.toMutableList().also { list ->
-            val last = list.lastOrNull()
-            if (last is ChatTurn.AssistantTurn) {
-                list[list.size - 1] = last.copy(blocks = last.blocks + block)
-                insertedIndex = last.blocks.size
-            } else {
-                list.add(ChatTurn.AssistantTurn(listOf(block)))
-                insertedIndex = 0
-            }
-        }
-        if (block is AssistantBlock.MessageText) {
-            streamingTextBuilder = streamingTextBuilder ?: StringBuilder()
-        }
-        return insertedIndex
+    private fun appendSystemBlock(text: String) {
+        _turns.value = _turns.value + ChatTurn.AssistantTurn(listOf(com.qodex.app.ui.AssistantBlock.MessageText(text)))
     }
 
     class factory(private val app: Application) : ViewModelProvider.Factory {
