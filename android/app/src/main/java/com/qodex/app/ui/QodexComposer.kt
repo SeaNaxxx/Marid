@@ -218,11 +218,11 @@ fun QodexComposer(
             modifier = Modifier
                 .fillMaxWidth()
                 .hoverable(shellInteraction)
-                .clip(RoundedCornerShape(16.dp)) // rounded-2xl
-                .border(0.5.dp, borderColor, RoundedCornerShape(16.dp)) // border-[0.5px]
+                .clip(RoundedCornerShape(24.dp)) // pill-like shell when single-line
+                .border(0.5.dp, borderColor, RoundedCornerShape(24.dp))
                 .background(shellColor) // bg-input / focus-within:bg-input-focused
                 .padding(12.dp), // p-3
-            verticalArrangement = Arrangement.spacedBy(12.dp), // gap-3
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             ComposerPromptField2c(
                 text = text,
@@ -244,7 +244,9 @@ fun QodexComposer(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp), // gap-1
                     ) {
-                        ActionMenuButton2c()
+                        // Attachment/mention menu removed: no attachment backend or
+                        // desktop mention providers exist on this host — a permanent
+                        // no-op button is a false affordance.
                         ModeSwitchControl2c(
                             mode = mode,
                             open = modeMenuOpen,
@@ -324,7 +326,7 @@ private fun ComposerPromptField2c(
     Box(modifier = Modifier.fillMaxWidth()) {
         if (text.isEmpty()) {
             Text(
-                text = "Ask Qodex anything, @ to add context, / for commands or capabilities",
+                text = "Message Qodex",
                 style = TextStyle(
                     fontSize = 14.sp,
                     lineHeight = 20.sp,
@@ -339,7 +341,7 @@ private fun ComposerPromptField2c(
                 onValueChange = onTextChange,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 40.dp, max = 160.dp),
+                    .heightIn(min = 44.dp, max = 160.dp),
                 textStyle = TextStyle(
                     fontSize = 14.sp,
                     lineHeight = 20.sp,
@@ -384,22 +386,6 @@ private fun GhostTrigger2c(
 
 /** Minimal replacement for Material LocalContentColor — no Material theme here. */
 private val LocalContentColor2c = compositionLocalOf { QodexTokens.Foreground }
-
-@Composable
-private fun ActionMenuButton2c() {
-    GhostTrigger2c(
-        onClick = { /* MentionPanel requires desktop mention providers — deviation 2. */ },
-        modifier = Modifier.size(28.dp), // icon-md size-7
-        contentColor = LocalContentColor2c.current,
-    ) {
-        Icon(
-            imageVector = QodexIcons.Plus,
-            contentDescription = "Add context", // chat.composer.actionMenu
-            modifier = Modifier.size(16.dp),
-            tint = LocalContentColor2c.current,
-        )
-    }
-}
 
 private data class ModeOption2c(
     val id: String,
@@ -1314,7 +1300,7 @@ private fun SendButton2c(enabled: Boolean, onClick: () -> Unit) {
     val hovered by interaction.collectIsHoveredAsState()
     Box(
         modifier = Modifier
-            .size(28.dp) // icon-md size-7
+            .size(32.dp) // chat-composer send target: 32dp visual, 48dp touch via M3 minimums
             .alpha(if (enabled) 1f else 0.5f) // disabled:opacity-50
             .hoverable(interaction)
             .background(
@@ -1335,7 +1321,7 @@ private fun SendButton2c(enabled: Boolean, onClick: () -> Unit) {
         Icon(
             imageVector = QodexIcons.ArrowUp,
             contentDescription = "Send",
-            modifier = Modifier.size(16.dp), // ArrowUpIcon size-4
+            modifier = Modifier.size(18.dp),
             tint = QodexTokens.ForegroundInverse, // text-foreground-inverse
         )
     }

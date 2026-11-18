@@ -24,7 +24,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.verticalScroll
+import androidx.activity.compose.BackHandler
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -376,16 +378,31 @@ fun ModelSettingsScreen(
     var selectedProviderId by rememberSaveable { mutableStateOf<String?>(null) }
     var creating by remember { mutableStateOf(false) }
     var pickerOpen by remember { mutableStateOf(false) }
+    var loadedOnce by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    fun reload() {
+    // System back mirrors the visible affordance: close the provider detail
+    // first, otherwise leave this screen. Default activity back (app exit)
+    // from a nested settings screen read as "no back button".
+    BackHandler {
+        if (selectedProviderId != null) {
+            selectedProviderId = null
+        } else {
+            onBack()
+        }
+    }
+
+    fun reload(reset: Boolean = false) {
         scope.launch {
-            uiState = ModelSettingsUiState2d.Loading
+            // In-place refresh by default: the full-screen Loading flash after a
+            // save kicked the user back to the provider list mid-edit.
+            if (reset || !loadedOnce) uiState = ModelSettingsUiState2d.Loading
             uiState = try {
                 ModelSettingsUiState2d.Ready(fetchProviders(rpc))
             } catch (t: Throwable) {
                 ModelSettingsUiState2d.Error(t.message ?: "RPC error")
             }
+            loadedOnce = true
         }
     }
 
@@ -411,6 +428,7 @@ fun ModelSettingsScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(QodexTokens.Background)
+            .statusBarsPadding()
             .verticalScroll(rememberScrollState()),
     ) {
         Column(
@@ -989,7 +1007,11 @@ private fun ApiKeyFormScreen2d(
             providerName = provider.name,
             onDismiss = { confirmingDelete = false },
             onConfirm = {
-                val client = rpc ?: return@DeleteProviderConfirm2d
+                val client = rpc ?: run {
+                    saveFailed = true
+                    confirmingDelete = false
+                    return@DeleteProviderConfirm2d
+                }
                 scope.launch {
                     confirmingDelete = false
                     val ok = deletePersonalProvider2e(client, provider.providerId)
@@ -1032,19 +1054,19 @@ private fun DeleteProviderConfirm2d(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .border(1.dp, QodexTokens.Destructive, RoundedCornerShape(12.dp))
-            .background(QodexTokens.Surface),
-    ) {
-        Column(
+    ModalPanel2e(onDismiss = onDismiss) {
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .border(1.dp, QodexTokens.Destructive, RoundedCornerShape(12.dp))
+                .background(QodexTokens.Surface),
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
             Text(
                 text = "Delete $providerName?", // deleteProviderConfirm
                 color = QodexTokens.Foreground,
@@ -1059,6 +1081,7 @@ private fun DeleteProviderConfirm2d(
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlineButton2d(label = "Cancel", onClick = onDismiss) // common.cancel
                 OutlineButton2d(label = "Delete", onClick = onConfirm) // common.delete
+            }
             }
         }
     }

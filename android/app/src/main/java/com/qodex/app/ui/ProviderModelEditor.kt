@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -39,6 +40,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.qodex.app.icons.QodexIcons
 import com.qodex.app.rpc.QodexRpcClient
 import com.qodex.app.rpc.ServiceChannels
@@ -174,12 +177,11 @@ internal fun validateModelDraft2e(
     val contextText = draft.contextWindowValue.trim()
     if (contextText.isNotEmpty()) {
         if (positiveOrNull2e(contextText) == null) return ModelDraftValidationError2e.ContextWindow
-    } else {
-        val inheritedContext = inherited?.get("properties").asObjectOrNull()
-            ?.get("contextWindow").asStringOrNull()?.toLongOrNull()
-        if (!draft.useRecommendedConfigValue || inheritedContext == null || inheritedContext <= 0) {
-            return ModelDraftValidationError2e.ContextWindow
-        }
+    } else if (!draft.useRecommendedConfigValue) {
+        // Manual mode owns the hard cap; smart mode may commit a sparse overlay
+        // when no recommendation exists to inherit (unknown ids such as
+        // openrouter free-agent model ids must still be saveable).
+        return ModelDraftValidationError2e.ContextWindow
     }
     // Manual mode owns the hard cap; smart mode lets the engine resolve it from the recommended config.
     val maxText = draft.maxOutputTokensValue.trim()
@@ -189,10 +191,7 @@ internal fun validateModelDraft2e(
         return ModelDraftValidationError2e.MaxOutputTokens
     }
     val levels = draft.reasoningLevelValuesValue.map { it.trim() }
-    if (levels.isEmpty() || levels.any { it.isEmpty() } || levels.toSet().size != levels.size) {
-        return ModelDraftValidationError2e.ReasoningLevels
-    }
-    val mapText = draft.reasoningLevelMapValue.trim().ifEmpty {
+    val resolvedMapText = draft.reasoningLevelMapValue.trim().ifEmpty {
         if (draft.useRecommendedConfigValue) {
             inherited?.get("optionSpecs").asObjectOrNull()
                 ?.get("reasoningLevel").asObjectOrNull()?.get("map").asStringOrNull().orEmpty()
@@ -200,8 +199,17 @@ internal fun validateModelDraft2e(
             ""
         }
     }
-    if (mapText.isEmpty()) return ModelDraftValidationError2e.ReasoningMap
-    val map = parseReasoningMap2e(mapText)
+    if (draft.useRecommendedConfigValue && levels.isEmpty() && resolvedMapText.isEmpty()) {
+        // Sparse overlay: no user-entered reasoning contract and no engine
+        // recommendation — the engine applies its defaults instead of the
+        // editor inventing levels for a model it knows nothing about.
+        return null
+    }
+    if (levels.isEmpty() || levels.any { it.isEmpty() } || levels.toSet().size != levels.size) {
+        return ModelDraftValidationError2e.ReasoningLevels
+    }
+    if (resolvedMapText.isEmpty()) return ModelDraftValidationError2e.ReasoningMap
+    val map = parseReasoningMap2e(resolvedMapText)
     if (map == null || !map.keys.containsAll(levels)) return ModelDraftValidationError2e.ReasoningMap
     return null
 }
@@ -764,36 +772,78 @@ internal fun ModelEditorDialog2d(
     }
 
     fun commit() {
-        val client = rpc ?: return
-        val validation = validateModelDraft2e(draft, inheritedConfig)
-        error = validation
-        if (validation != null) return
+        val client = rpc
+        if (client == null) {
+            // A silent `rpc ?: return` used to make Save do literally nothing.
+            saveFailedMessage = "Not connected to the engine — cannot save right now"
+            return
+        }
+        if (saving) return
+        saving = true
+        saveFailedMessage = null
+        error = null
         scope.launch {
-            saving = true
-            saveFailedMessage = null
-            val config = buildPersonalModelConfig2e(draft, inheritedConfig)
-            val modelId = draft.idValue.trim()
-            val ok = when (target) {
-                is ModelEditorTarget2d.Add -> addPersonalModel2e(
-                    client,
-                    provider.providerId,
-                    modelId,
-                    config,
-                    draft.useRecommendedConfigValue,
-                )
-                is ModelEditorTarget2d.Edit -> savePersonalModelDraft2e(
-                    client,
-                    provider.providerId,
-                    target.model.modelId,
-                    modelId,
-                    config,
-                    draft.useRecommendedConfigValue,
-                    revision,
-                )
+            try {
+                // Add + smart mode: resolve the engine recommendation at commit
+                // time. Resolution used to run only on Model ID focus loss, and
+                // Compose does not clear focus when a non-focusable Save row is
+                // tapped — so a freshly typed model id always validated against
+                // an empty inherited config and the first save silently failed.
+                if (target is ModelEditorTarget2d.Add &&
+                    draft.useRecommendedConfigValue &&
+                    inheritedConfig == null &&
+                    draft.idValue.trim().isNotEmpty()
+                ) {
+                    val resolved = resolveModelConfig2e(client, provider.providerId, draft.idValue.trim())
+                    if (resolved != null) {
+                        inheritedConfig = resolved
+                        if (draft.reasoningLevelValuesValue.isEmpty()) {
+                            draft = draft.copy(
+                                reasoningLevelValuesValue = resolved["optionSpecs"]
+                                    .asObjectOrNull()
+                                    ?.get("reasoningLevel").asObjectOrNull()
+                                    ?.get("values").asArrayOrNull()
+                                    ?.mapNotNull { (it as? JsonPrimitive)?.content }
+                                    ?: emptyList(),
+                            )
+                        }
+                    }
+                }
+                val validation = validateModelDraft2e(draft, inheritedConfig)
+                error = validation
+                if (validation != null) return@launch
+                val config = buildPersonalModelConfig2e(draft, inheritedConfig)
+                val modelId = draft.idValue.trim()
+                val ok = when (target) {
+                    is ModelEditorTarget2d.Add -> addPersonalModel2e(
+                        client,
+                        provider.providerId,
+                        modelId,
+                        config,
+                        draft.useRecommendedConfigValue,
+                    )
+                    is ModelEditorTarget2d.Edit -> savePersonalModelDraft2e(
+                        client,
+                        provider.providerId,
+                        target.model.modelId,
+                        modelId,
+                        config,
+                        draft.useRecommendedConfigValue,
+                        revision,
+                    )
+                }
+                if (ok) {
+                    onSaved()
+                } else {
+                    saveFailedMessage = "Failed to save ${provider.name} / $modelId"
+                }
+            } catch (t: Throwable) {
+                // Surface the engine's actual rejection (duplicate id, invalid
+                // config, ...) instead of a generic failure line.
+                saveFailedMessage = t.message?.take(200) ?: "Failed to save model"
+            } finally {
+                saving = false
             }
-            saving = false
-            if (ok) onSaved()
-            else saveFailedMessage = "Failed to save ${provider.name} / $modelId"
         }
     }
 
@@ -829,11 +879,7 @@ internal fun ModelEditorDialog2d(
         errorLabel = when (error) {
             ModelDraftValidationError2e.Id -> "Model ID is required"
             ModelDraftValidationError2e.ContextWindow ->
-                if (draft.useRecommendedConfigValue) {
-                    "Context window is inherited but not resolvable — set a value or check the model ID"
-                } else {
-                    "Context window must be a positive integer"
-                }
+                "Context window must be a positive integer (leave blank in smart mode to inherit)"
             ModelDraftValidationError2e.MaxOutputTokens -> "Max output tokens must be a positive integer"
             ModelDraftValidationError2e.ReasoningLevels -> "Reasoning levels cannot be empty or duplicated"
             ModelDraftValidationError2e.ReasoningMap -> "Reasoning parameter mapping is invalid"
@@ -991,6 +1037,37 @@ internal fun ModelEditorDialog2d(
 
 private fun numericOnly2e(raw: String): String = raw.filter { it.isDigit() }
 
+// Real modal panel: scrim + tap-outside dismiss + system-back dismiss (Compose
+// Dialog routes back to onDismissRequest). The inline shells used to append
+// below the scroll flow, which read as "tapped Add and nothing happened".
+@Composable
+internal fun ModalPanel2e(
+    onDismiss: () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.55f))
+                .clickable(interactionSource = null, indication = null) { onDismiss() },
+            contentAlignment = Alignment.Center,
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 24.dp)
+                    .clickable(interactionSource = null, indication = null) { /* swallow taps */ },
+            ) {
+                content()
+            }
+        }
+    }
+}
+
 @Composable
 private fun ModelEditorDialogShell2e(
     title: String,
@@ -1003,19 +1080,21 @@ private fun ModelEditorDialogShell2e(
     onSave: () -> Unit,
     content: @Composable () -> Unit,
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .border(1.dp, QodexTokens.Border, RoundedCornerShape(12.dp))
-            .background(QodexTokens.Surface),
-    ) {
-        Column(
+    ModalPanel2e(onDismiss = onDismiss) {
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .border(1.dp, QodexTokens.Border, RoundedCornerShape(12.dp))
+                .background(QodexTokens.Surface),
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 560.dp)
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = title,
@@ -1063,6 +1142,7 @@ private fun ModelEditorDialogShell2e(
                     enabled = !saving,
                     onClick = onSave,
                 )
+            }
             }
         }
     }
@@ -1364,21 +1444,21 @@ internal fun TemplatePickerDialog2d(
     onDismiss: () -> Unit,
     onPick: (templateId: String?, providerName: String?) -> Unit,
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .border(1.dp, QodexTokens.Border, RoundedCornerShape(12.dp))
-            .background(QodexTokens.Surface),
-    ) {
-        Column(
+    ModalPanel2e(onDismiss = onDismiss) {
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
-                .heightIn(max = 420.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .border(1.dp, QodexTokens.Border, RoundedCornerShape(12.dp))
+                .background(QodexTokens.Surface),
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .heightIn(max = 480.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "Add provider", // templatePickerTitle
@@ -1415,6 +1495,7 @@ internal fun TemplatePickerDialog2d(
             )
             for (template in templates.filter { it.category == "other" }) {
                 TemplatePickRow2e(template.name, enabled) { onPick(template.templateId, null) }
+            }
             }
         }
     }

@@ -2,6 +2,7 @@ package com.qodex.app.ui
 
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
@@ -175,6 +176,7 @@ fun QodexChatArea(
     turns: List<ChatTurn>,
     modifier: Modifier = Modifier,
     onRetryLast: (() -> Unit)? = null,
+    turnRunning: Boolean = false,
 ) {
     // Product UI renders no retry entry; callback retained for host API symmetry.
     onRetryLast?.let { /* intentionally unused; see header deviation note 2 */ }
@@ -247,6 +249,42 @@ fun QodexChatArea(
                     contentDescription = "Scroll to bottom", // chat.scrollToBottom
                     modifier = Modifier.size(16.dp), // ArrowDownIcon size-4
                     tint = QodexTokens.Foreground, // variant outline text-foreground
+                )
+            }
+        }
+
+        // Live turn indicator: a running turn must never look like a silent hang.
+        if (turnRunning) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = 20.dp, bottom = 10.dp)
+                    .clip(Radius12)
+                    .background(QodexTokens.Card)
+                    .border(1.dp, QodexTokens.Border, Radius12)
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                val pulse = rememberInfiniteTransition(label = "working-pulse")
+                val dotAlpha = pulse.animateFloat(
+                    initialValue = 0.3f,
+                    targetValue = 1f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(700, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse,
+                    ),
+                    label = "working-dot",
+                )
+                Box(
+                    modifier = Modifier
+                        .size(7.dp)
+                        .background(QodexTokens.ForegroundSubtle.copy(alpha = dotAlpha.value), CircleShape),
+                )
+                Text(
+                    text = "Working",
+                    color = QodexTokens.ForegroundSubtle,
+                    fontSize = 12.sp,
                 )
             }
         }
@@ -413,14 +451,19 @@ private fun AssistantBlockItem(block: AssistantBlock) {
 }
 
 // Markdown rendering simplified: plain text + fenced code blocks only.
+// Engine status lines ([turn error]/[engine]) render in destructive red: a
+// failure typed as plain prose reads as assistant content, which hides it.
 @Composable
 private fun MessageTextBlock(text: String) {
+    val isErrorLine = text.startsWith("[turn error]") || text.startsWith("[engine]")
     Column(modifier = Modifier.fillMaxWidth()) {
         splitFencedCode(text).forEach { piece ->
             when (piece) {
                 is TextPiece.Prose -> Text(
                     text = piece.text,
-                    style = UiBaseMarkdown.copy(color = QodexTokens.Foreground),
+                    style = UiBaseMarkdown.copy(
+                        color = if (isErrorLine) QodexTokens.Destructive else QodexTokens.Foreground,
+                    ),
                     softWrap = true,
                 )
                 is TextPiece.Code -> CodeFrame(piece)

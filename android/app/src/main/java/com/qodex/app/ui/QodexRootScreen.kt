@@ -35,6 +35,9 @@ fun QodexRootScreen(vm: QodexAppViewModel) {
     val composerText by vm.composerText.collectAsState()
     val providerNotReady by vm.providerNotReady.collectAsState()
     val tasks by vm.sidebarTasks.collectAsState()
+    val sidebarLoading by vm.sidebarLoading.collectAsState()
+    val activeSessionId by vm.activeSessionId.collectAsState()
+    val turnRunning by vm.turnRunning.collectAsState()
 
     var drawerOpen by rememberSaveable { mutableStateOf(false) }
     var screen by rememberSaveable { mutableStateOf(RootScreen.CHAT) }
@@ -58,12 +61,29 @@ fun QodexRootScreen(vm: QodexAppViewModel) {
         onOpenChange = { drawerOpen = it },
         drawerContent = {
             QodexSidebarDrawer(
-                profileName = "SeaNaxxx",
-                profileInitial = "S",
+                profileName = "Qodex",
+                profileInitial = "Q",
                 looseTasks = tasks,
-                loading = tasks.isEmpty() && rpcState == RpcConnectionState.CONNECTED,
-                onNewTask = { drawerOpen = false },
-                onSelectTask = { drawerOpen = false },
+                loading = sidebarLoading,
+                onNewTask = {
+                    vm.startNewConversation()
+                    screen = RootScreen.CHAT
+                    drawerOpen = false
+                },
+                onSelectTask = { task ->
+                    vm.openTask(task.key)
+                    screen = RootScreen.CHAT
+                    drawerOpen = false
+                },
+                onCreateTask = {
+                    vm.startNewConversation()
+                    screen = RootScreen.CHAT
+                    drawerOpen = false
+                },
+                onOpenSearch = {
+                    screen = RootScreen.TASKS
+                    drawerOpen = false
+                },
                 onOpenSettings = { screen = RootScreen.SETTINGS; drawerOpen = false },
                 onProfileClick = {
                     drawerOpen = false
@@ -80,9 +100,9 @@ fun QodexRootScreen(vm: QodexAppViewModel) {
                             .background(QodexTokens.Background),
                     ) {
                         QodexHeaderBar(
-                            title = if (turns.isEmpty()) null else "Qodex",
+                            title = tasks.firstOrNull { it.key == activeSessionId }?.title
+                                ?: if (turns.isEmpty()) null else "Qodex",
                             onMenu = { drawerOpen = true },
-                            onOpenHelp = {},
                             isDraft = turns.isEmpty(),
                             onToggleTerminal = { terminalOpen = !terminalOpen },
                             terminalOpen = terminalOpen,
@@ -98,7 +118,7 @@ fun QodexRootScreen(vm: QodexAppViewModel) {
                             if (turns.isEmpty()) {
                                 WelcomeScreen()
                             } else {
-                                QodexChatArea(turns = turns)
+                                QodexChatArea(turns = turns, turnRunning = turnRunning)
                             }
                         }
                         QodexComposer(
@@ -140,9 +160,27 @@ fun QodexRootScreen(vm: QodexAppViewModel) {
                     onBack = { screen = RootScreen.SETTINGS },
                 )
                 RootScreen.TASKS -> TaskListScreen(
-                    tasks = emptyList(),
-                    onOpenTask = { screen = RootScreen.CHAT },
-                    onNewTask = { screen = RootScreen.CHAT },
+                    tasks = tasks.map { task ->
+                        TaskRow2e(
+                            id = task.key,
+                            title = task.title,
+                            status = when {
+                                task.isRunning -> TaskRowStatus2e.RUNNING
+                                task.isError -> TaskRowStatus2e.ERROR
+                                else -> TaskRowStatus2e.COMPLETED
+                            },
+                            updatedAt = task.updatedAtMs,
+                            isActive = task.isActive,
+                        )
+                    },
+                    onOpenTask = { row ->
+                        vm.openTask(row.id)
+                        screen = RootScreen.CHAT
+                    },
+                    onNewTask = {
+                        vm.startNewConversation()
+                        screen = RootScreen.CHAT
+                    },
                 )
             }
             if (terminalOpen && screen == RootScreen.CHAT) {

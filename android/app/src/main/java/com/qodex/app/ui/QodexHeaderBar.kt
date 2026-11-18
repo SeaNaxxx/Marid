@@ -45,7 +45,9 @@ import com.qodex.app.icons.QodexIcons
 fun QodexHeaderBar(
     title: String?,
     onMenu: () -> Unit,
-    onOpenHelp: () -> Unit,
+    // A dead help button is worse than none: the entry renders only when a
+    // handler exists.
+    onOpenHelp: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     isDraft: Boolean = false,
     workspaceDeviceName: String? = null,
@@ -150,11 +152,13 @@ fun QodexHeaderBar(
                         enabled = !readOnly,
                     )
                 }
-                QodexHeaderGhostIconButton(
-                    icon = QodexIcons.CircleHelp,
-                    contentDescription = "Help",
-                    onClick = onOpenHelp,
-                )
+                if (onOpenHelp != null) {
+                    QodexHeaderGhostIconButton(
+                        icon = QodexIcons.CircleHelp,
+                        contentDescription = "Help",
+                        onClick = onOpenHelp,
+                    )
+                }
                 if (onToggleSidePane != null) {
                     QodexHeaderGhostIconButton(
                         icon = if (sidePaneOpen) QodexIcons.PanelRightClose else QodexIcons.PanelRightOpen,

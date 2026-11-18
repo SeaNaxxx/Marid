@@ -69,6 +69,8 @@ data class QodexSidebarTask(
     val key: String,
     val title: String,
     val timeLabel: String? = null,
+    // Epoch millis the timeLabel was derived from; TaskListScreen re-formats it.
+    val updatedAtMs: Long = 0L,
     val isActive: Boolean = false,
     val isUnread: Boolean = false,
     val isError: Boolean = false,
@@ -568,6 +570,12 @@ fun QodexSidebarDrawerHost(
     LaunchedEffect(isOpen) {
         if (isOpen) drawerState.open() else drawerState.close()
     }
+    // Bidirectional sync: a gesture-opened drawer must lift its state up too,
+    // otherwise a state-level close (New task) is a no-op while the sheet
+    // visually stays open.
+    LaunchedEffect(drawerState.isOpen) {
+        if (drawerState.isOpen != isOpen) onOpenChange(drawerState.isOpen)
+    }
     LaunchedEffect(drawerState.targetValue) {
         if (drawerState.targetValue == DrawerValue.Closed && isOpen) onOpenChange(false)
     }
@@ -708,12 +716,8 @@ fun QodexSidebarDrawer(
                     onClick = onOpenSearch,
                     iconSize = 14.dp, // Search size-3.5
                 )
-                QodexRowGhostIconButton(
-                    icon = QodexIcons.ListFilter,
-                    contentDescription = strings.filterView,
-                    onClick = onOpenViewFilter,
-                    iconSize = 14.dp, // ListFilter size-3.5
-                )
+                // ListFilter removed: no filter backend exists on this host and
+                // a control that does nothing is a false affordance.
             }
             Column(
                 modifier = Modifier
@@ -875,6 +879,16 @@ fun QodexSidebarDrawer(
                     Text(
                         text = strings.loading,
                         color = QodexTokens.ForegroundSubtle,
+                        fontSize = 12.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                    )
+                }
+                if (!loading && looseTasks.isEmpty() && pinnedTasks.isEmpty() && homeOnlyWorkspaces == null) {
+                    Text(
+                        text = "No tasks yet",
+                        color = QodexTokens.ForegroundSubtlest,
                         fontSize = 12.sp,
                         modifier = Modifier
                             .fillMaxWidth()
