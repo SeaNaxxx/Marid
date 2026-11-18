@@ -1,9 +1,11 @@
 package com.qodex.app.rpc
 
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.JsonObject
 import java.io.IOException
@@ -159,7 +161,12 @@ class ChannelClient(
         return try {
             // An engine that acks nothing used to hang the caller forever (the
             // composer kept `sending` and every later send was silently dropped).
-            withTimeout(REQUEST_TIMEOUT_MS) { deferred.await() }
+            // The timeout runs on Dispatchers.Default's real clock: under a
+            // virtual-time TestScope the scheduler would fast-forward this
+            // await past the deadline before any real reply could arrive.
+            withContext(Dispatchers.Default) {
+                withTimeout(REQUEST_TIMEOUT_MS) { deferred.await() }
+            }
         } catch (e: TimeoutCancellationException) {
             throw IOException(
                 "engine call timed out after ${REQUEST_TIMEOUT_MS / 1000}s: $channelName.$command",
@@ -198,8 +205,12 @@ class ChannelClient(
 
         val subscription = EventSubscription(id)
         // Wait for the first event fire or EventError so callers know the subscription is registered server-side.
+        // Real-clock timeout — see the note in request(): a virtual-time
+        // TestScope would fast-forward this await before the first event lands.
         try {
-            withTimeout(REQUEST_TIMEOUT_MS) { firstFire.await() }
+            withContext(Dispatchers.Default) {
+                withTimeout(REQUEST_TIMEOUT_MS) { firstFire.await() }
+            }
         } catch (e: TimeoutCancellationException) {
             synchronized(this) {
                 pending.remove(id)
