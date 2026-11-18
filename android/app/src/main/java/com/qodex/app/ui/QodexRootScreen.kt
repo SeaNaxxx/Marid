@@ -116,7 +116,14 @@ fun QodexRootScreen(vm: QodexAppViewModel) {
                         }
                         Box(modifier = Modifier.weight(1f)) {
                             if (turns.isEmpty()) {
-                                WelcomeScreen()
+                                WelcomeScreen(
+                                    onNewChat = { vm.startNewConversation() },
+                                    onQuickPrompt = { prompt ->
+                                        vm.onComposerTextChange(prompt)
+                                    },
+                                    workspacePath = vm.workspacePath,
+                                    selectedModel = selectedModel?.let { "${it.providerLabel} • ${it.modelId}" },
+                                )
                             } else {
                                 QodexChatArea(turns = turns, turnRunning = turnRunning)
                             }
