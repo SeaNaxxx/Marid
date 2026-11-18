@@ -62,7 +62,7 @@ class RuntimeLayoutVerificationTest {
         try {
             val report = TarExtractor.ExtractReport()
             GZIPInputStream(archive.inputStream()).use { gz ->
-                TarExtractor(stagingRoot).extract(gz, report)
+                TarExtractor(stagingRoot, report).extract(gz)
             }
 
             val usrStaging = File(stagingRoot, "usr")
@@ -100,7 +100,7 @@ class RuntimeLayoutVerificationTest {
         try {
             val report = TarExtractor.ExtractReport()
             GZIPInputStream(archive.inputStream()).use { gz ->
-                TarExtractor(stagingRoot).extract(gz, report)
+                TarExtractor(stagingRoot, report).extract(gz)
             }
 
             val usrStaging = File(stagingRoot, "usr")
