@@ -490,7 +490,7 @@ describe("file tool handlers", () => {
     expect(fs.files.get(projectFilePath)).toBe("new value");
   });
 
-  it("allows file tool paths outside the workspace root in the current release", async () => {
+  it("rejects file tool paths outside the workspace root (audit C-01)", async () => {
     const siblingPath = join(workspaceRoot, "outside.txt");
     const fs = createMemoryFileSystem({
       [outsidePath]: "external value",
@@ -500,32 +500,30 @@ describe("file tool handlers", () => {
       workspaceRoot: projectRoot,
     });
 
-    const writeOutput = await writeHandler(
-      {
-        file_path: "../outside.txt",
-        content: "allowed",
-      },
-      context,
-    );
-    const readOutput = await readHandler(
-      {
-        file_path: outsidePath,
-      },
-      context,
-    );
+    // Security boundary: relative traversal out of the workspace must fail
+    // without writing anything, and absolute paths outside must be rejected.
+    await expect(
+      writeHandler(
+        {
+          file_path: "../outside.txt",
+          content: "allowed",
+        },
+        context,
+      ),
+    ).rejects.toThrow(/escapes the authorized workspace/);
+    expect(fs.files.get(siblingPath)).toBeUndefined();
 
-    expect(writeOutput).toMatchObject({
-      filePath: "../outside.txt",
-      type: "create",
-    });
-    expect(fs.files.get(siblingPath)).toBe("allowed");
-    expect(readOutput).toMatchObject({
-      filePath: outsidePath,
-      content: "external value",
-    });
+    await expect(
+      readHandler(
+        {
+          file_path: outsidePath,
+        },
+        context,
+      ),
+    ).rejects.toThrow(/escapes the authorized workspace/);
   });
 
-  it("allows search tool paths outside the workspace root in the current release", async () => {
+  it("rejects search tool paths outside the workspace root (audit C-01)", async () => {
     const externalRoot = join(resolve("/tmp"), "external-project");
     const externalFile = join(externalRoot, "src", "index.ts");
     const fs = createMemoryFileSystem({
@@ -536,32 +534,26 @@ describe("file tool handlers", () => {
       workspaceRoot: projectRoot,
     });
 
-    const globOutput = await globHandler(
-      {
-        pattern: "**/*.ts",
-        path: externalRoot,
-      },
-      context,
-    );
-    const grepOutput = await grepHandler(
-      {
-        pattern: "answer",
-        path: externalRoot,
-      },
-      context,
-    );
-
-    expect(globOutput).toMatchObject({
-      filenames: [externalFile],
-      numFiles: 1,
-    });
-    expect(grepOutput).toMatchObject({
-      filenames: [externalFile],
-      numFiles: 1,
-      numMatches: 1,
-    });
-    expect(fs.lastSearchFiles?.path).toBe(externalRoot);
-    expect(fs.lastSearchText?.path).toBe(externalRoot);
+    await expect(
+      globHandler(
+        {
+          pattern: "**/*.ts",
+          path: externalRoot,
+        },
+        context,
+      ),
+    ).rejects.toThrow(/escapes the authorized workspace/);
+    await expect(
+      grepHandler(
+        {
+          pattern: "answer",
+          path: externalRoot,
+        },
+        context,
+      ),
+    ).rejects.toThrow(/escapes the authorized workspace/);
+    expect(fs.lastSearchFiles).toBeUndefined();
+    expect(fs.lastSearchText).toBeUndefined();
   });
 
   it("finds files through FileSystemPort searchFiles", async () => {

@@ -35,7 +35,7 @@ import {
   normalizeReplacementForMatch,
   preserveQuoteStyle,
 } from "../edit-matchers.js";
-import { resolveWorkspacePath } from "../path-policy.js";
+import { contextAuthorizedRoots, resolveWorkspacePath } from "../path-policy.js";
 import {
   findLatestReadFileState,
   normalizeReadFileStateMtimeMs,
@@ -120,6 +120,7 @@ export const editHandler: ToolHandler = async (input, context) => {
     operation: "write",
     workingDirectory: context.workingDirectory,
     workspaceRoot: context.workspaceRoot,
+    authorizedRoots: contextAuthorizedRoots(context),
   });
 
   const stat = await statEditableFile(filePath, context);

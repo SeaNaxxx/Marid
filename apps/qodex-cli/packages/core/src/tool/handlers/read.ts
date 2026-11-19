@@ -33,7 +33,7 @@ import {
   type FileSystemStatResult,
   type TraceContext,
 } from "@qodex/contracts";
-import { resolveWorkspacePath } from "../path-policy.js";
+import { contextAuthorizedRoots, resolveWorkspacePath } from "../path-policy.js";
 import {
   findLatestReadFileState,
   normalizeReadFileStateMtimeMs,
@@ -179,6 +179,7 @@ export const readHandler: ToolHandler = async (input, context) => {
     operation: "read",
     workingDirectory: context.workingDirectory,
     workspaceRoot: context.workspaceRoot,
+    authorizedRoots: contextAuthorizedRoots(context),
   });
 
   try {

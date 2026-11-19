@@ -17,7 +17,7 @@ import {
 import { createStructuredPatch } from "../diff.js";
 import { derivePatchedContent } from "../patch-apply.js";
 import { parseStructuredPatch, type ParsedPatch } from "../patch-parser.js";
-import { resolveWorkspacePath } from "../path-policy.js";
+import { contextAuthorizedRoots, resolveWorkspacePath } from "../path-policy.js";
 
 const APPLY_PATCH_MODEL_INSTRUCTIONS = [
   "Use ApplyPatch for structured, reviewable edits that are easier to express as local diff hunks than exact old_string replacements.",
@@ -292,6 +292,7 @@ function resolvePatchPath(
     operation: "write",
     workingDirectory: context.workingDirectory,
     workspaceRoot: context.workspaceRoot,
+    authorizedRoots: contextAuthorizedRoots(context),
   });
 }
 

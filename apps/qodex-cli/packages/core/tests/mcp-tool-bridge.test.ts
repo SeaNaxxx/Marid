@@ -269,6 +269,41 @@ describe("MCP tool bridge", () => {
     });
   });
 
+  it("forces user approval on node_repl js even in permissive modes", () => {
+    const registry = createToolRegistry();
+    registerMcpTools(registry, createMockMcpPort(), [
+      {
+        description: "Run JavaScript",
+        inputSchema: { type: "object" },
+        serverName: "node_repl",
+        toolName: "js",
+      },
+    ]);
+    const entry = registry.get("mcp__node_repl__js");
+    // Audit C-03 / Node REPL bypass: the js tool runs unsandboxed with agent
+    // privileges and its contract states it skips Bash approval. alwaysAsk
+    // must survive yolo/guarded, and only a session-scoped re-allow is offered.
+    expect(entry?.permission).toMatchObject({
+      alwaysAsk: true,
+      askOptions: { allowAlways: "session" },
+      riskLevel: "high",
+      sideEffectScope: "system",
+    });
+  });
+
+  it("ordinary MCP tools do not inherit the node_repl approval boundary", () => {
+    const registry = createToolRegistry();
+    registerMcpTools(registry, createMockMcpPort(), [
+      {
+        description: "Some other tool",
+        inputSchema: { type: "object" },
+        serverName: "some-server",
+        toolName: "widget",
+      },
+    ]);
+    expect(registry.get("mcp__some-server__widget")?.permission).not.toHaveProperty("alwaysAsk");
+  });
+
   it("accepts the underscore server spelling only for an authority-verified official CUA tool", async () => {
     const registry = createToolRegistry();
     const calls: Array<{ serverName: string; toolName: string }> = [];

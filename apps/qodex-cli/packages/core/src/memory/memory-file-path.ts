@@ -31,12 +31,24 @@ export function resolveContainedMemoryFilePath(input: {
   workingDirectory: string;
   workspaceRoot: string;
 }): string | undefined {
-  const resolvedPath = resolveWorkspacePath({
-    inputPath: input.filePath,
-    operation: "write",
-    workingDirectory: input.workingDirectory,
-    workspaceRoot: input.workspaceRoot,
-  });
+  // Paths that escape the workspace (or the memory root) resolve to
+  // `undefined` here instead of throwing: the memory permission layer then
+  // falls through to the ordinary tool permission flow, and a handler that
+  // still executes the path hits the hard containment error itself.
+  let resolvedPath: string;
+  try {
+    resolvedPath = resolveWorkspacePath({
+      inputPath: input.filePath,
+      operation: "write",
+      workingDirectory: input.workingDirectory,
+      workspaceRoot: input.workspaceRoot,
+      // The memory root lives in the engine data directory, outside the
+      // workspace; the containment check below still confines writes to it.
+      authorizedRoots: [input.rootDir],
+    });
+  } catch {
+    return undefined;
+  }
   const relativePath = relative(input.rootDir, resolvedPath);
   return isContainedRelativePath(relativePath) ? resolvedPath : undefined;
 }

@@ -14,7 +14,11 @@ import {
   type GlobOutput,
   type TraceContext,
 } from "@qodex/contracts";
-import { resolveToolWorkingDirectory, resolveWorkspacePath } from "../path-policy.js";
+import {
+  contextAuthorizedRoots,
+  resolveToolWorkingDirectory,
+  resolveWorkspacePath,
+} from "../path-policy.js";
 import type { ToolEntry, ToolHandler } from "../types.js";
 
 const MAX_GLOB_RESULTS = 100;
@@ -46,6 +50,7 @@ export const globHandler: ToolHandler = async (input, context) => {
         operation: "read",
         workingDirectory: context.workingDirectory,
         workspaceRoot: context.workspaceRoot,
+        authorizedRoots: contextAuthorizedRoots(context),
       })
     : resolveToolWorkingDirectory(undefined, {
         operation: "read",

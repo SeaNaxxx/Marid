@@ -5,7 +5,7 @@ import type {
   TraceContext,
 } from "@qodex/contracts";
 import { relative } from "node:path";
-import { resolveWorkspacePath } from "../path-policy.js";
+import { contextAuthorizedRoots, resolveWorkspacePath } from "../path-policy.js";
 import {
   findLatestReadFileState,
   normalizeReadFileStateMtimeMs,
@@ -114,6 +114,7 @@ async function backfillReadFileStateFromBash(input: BashReadFileStateEffectsInpu
         operation: "read",
         workingDirectory: input.context.workingDirectory,
         workspaceRoot: input.context.workspaceRoot,
+        authorizedRoots: contextAuthorizedRoots(input.context),
       });
       if (findLatestReadFileState(readFileState, resolvedPath)) return;
 

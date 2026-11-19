@@ -222,6 +222,17 @@ export function createMcpToolEntry(
       riskLevel,
       sideEffectScope,
       needsApproval,
+      // Security boundary (audit: Node REPL approval bypass): the host
+      // node_repl `js` tool runs unsandboxed with the agent's privileges and
+      // its own contract states it skips Bash's dangerous-command approval.
+      // A prompt-injected model could otherwise use it as an unrestricted
+      // shell in yolo/guarded modes. alwaysAsk survives every permissive
+      // mode's pass-through, so each session's first js call needs explicit
+      // user approval; `allowAlways: "session"` keeps legitimate Browser Use
+      // / Computer Use workflows usable without per-call prompts.
+      ...(isHostNodeReplExecution
+        ? { alwaysAsk: true as const, askOptions: { allowAlways: "session" as const } }
+        : {}),
       patternSources: ["toolName", "input", "network"],
       denyPriority: "beforeAsk",
     },

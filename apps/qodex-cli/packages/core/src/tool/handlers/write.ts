@@ -18,7 +18,7 @@ import {
 } from "@qodex/contracts";
 import { createStructuredPatch } from "../diff.js";
 import { stampMemoryOriginSessionId } from "../../memory/origin-session.js";
-import { resolveWorkspacePath } from "../path-policy.js";
+import { contextAuthorizedRoots, resolveWorkspacePath } from "../path-policy.js";
 import {
   findLatestReadFileState,
   normalizeReadFileStateMtimeMs,
@@ -87,6 +87,7 @@ export const writeHandler: ToolHandler = async (input, context) => {
     operation: "write",
     workingDirectory: context.workingDirectory,
     workspaceRoot: context.workspaceRoot,
+    authorizedRoots: contextAuthorizedRoots(context),
   });
 
   let originalFile: string | null = null;
