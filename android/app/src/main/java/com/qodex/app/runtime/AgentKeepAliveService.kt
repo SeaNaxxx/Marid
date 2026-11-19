@@ -75,7 +75,15 @@ class AgentKeepAliveService : Service() {
         private const val WAKELOCK_TIMEOUT_MS = 6 * 60 * 60 * 1000L
 
         fun start(ctx: Context) {
-            ctx.startService(Intent(ctx, AgentKeepAliveService::class.java))
+            val intent = Intent(ctx, AgentKeepAliveService::class.java)
+            // startService throws IllegalStateException when the app is in the
+            // background on API 26+ (boot() runs before the activity resumes);
+            // startForegroundService + the onCreate promote covers that path.
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                ctx.startForegroundService(intent)
+            } else {
+                ctx.startService(intent)
+            }
         }
     }
 }

@@ -53,11 +53,29 @@ class DistArchiveContractTest {
     @Test
     fun `flat archive root passes the contract`() {
         withTgz(
-            "package.json", "entry-stdio.js", "entry-http.js",
+            "package.json", "entry-stdio.js", "qodex.cjs", "entry-http.js",
             "remote/", "remote/qodex-server.cjs",
             "node_modules/", "node_modules/package.json",
         ) { tgz ->
             DistArchiveContract.requireValid(tgz) // must not throw
+        }
+    }
+
+    @Test
+    fun `archive without the agent CLI bundle is rejected`() {
+        withTgz(
+            "package.json", "entry-stdio.js",
+            "node_modules/", "node_modules/a/index.js",
+        ) { tgz ->
+            try {
+                DistArchiveContract.requireValid(tgz)
+                throw AssertionError("archive without qodex.cjs must be rejected")
+            } catch (e: IOException) {
+                assertTrue(
+                    "message names the missing agent CLI bundle: ${e.message}",
+                    e.message!!.contains("qodex.cjs missing at archive root"),
+                )
+            }
         }
     }
 

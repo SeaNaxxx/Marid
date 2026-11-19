@@ -3,6 +3,8 @@ package com.qodex.app.runtime
 import android.content.Context
 import com.qodex.app.utils.FileLogger
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
@@ -20,6 +22,11 @@ object EngineProcess {
         val stderr: InputStream,
     )
 
+    // Serializes start attempts: concurrent startEngine launches used to both
+    // pass the isRunning check and double-spawn node, orphaning the first
+    // process because process/streams fields were overwritten.
+    private val startMutex = Mutex()
+
     @Volatile private var process: Process? = null
     @Volatile private var streams: Streams? = null
 
@@ -27,75 +34,84 @@ object EngineProcess {
 
     fun streamsOrNull(): Streams? = streams?.takeIf { isRunning }
 
-    suspend fun start(ctx: Context): Unit = withContext(Dispatchers.IO) {
-        if (isRunning) return@withContext
-        RuntimeBus.setPhase(RuntimePhase.StartingEngine)
+    suspend fun start(ctx: Context): Unit = startMutex.withLock {
+        withContext(Dispatchers.IO) {
+            // Re-check under the lock: the first caller may have finished
+            // spawning while the second was waiting on the mutex.
+            if (isRunning) return@withContext
+            RuntimeBus.setPhase(RuntimePhase.StartingEngine)
 
-        val app = ctx.applicationContext
-        val command = listOf(
-            Provisioner.nodeBin(app).absolutePath,
-            Provisioner.distEntry(app).absolutePath,
-        )
-        RuntimeBus.append("spawning engine (stdio) — ${command.joinToString(" ")}")
-        val pb = ProcessBuilder(command)
-        // redirectErrorStream stays false: mixing stderr into stdout would corrupt the frame stream.
-        pb.redirectErrorStream(false)
-        val env = pb.environment()
-        BionicEnv.apply(
-            env,
-            Provisioner.runtimeRoot(app),
-            Provisioner.homeDir(app),
-            Provisioner.bashBin(app),
-        )
-        val proc = pb.start()
-        process = proc
-        streams = Streams(proc.inputStream, proc.outputStream, proc.errorStream)
-        FileLogger.append("EngineProcess", "engine spawn (stdio): node ${command[1]}")
+            val app = ctx.applicationContext
+            val command = listOf(
+                Provisioner.nodeBin(app).absolutePath,
+                Provisioner.distEntry(app).absolutePath,
+            )
+            RuntimeBus.append("spawning engine (stdio) — ${command.joinToString(" ")}")
+            val pb = ProcessBuilder(command)
+            // redirectErrorStream stays false: mixing stderr into stdout would corrupt the frame stream.
+            pb.redirectErrorStream(false)
+            val env = pb.environment()
+            BionicEnv.apply(
+                env,
+                Provisioner.runtimeRoot(app),
+                Provisioner.homeDir(app),
+                Provisioner.bashBin(app),
+            )
+            val proc = pb.start()
+            process = proc
+            streams = Streams(proc.inputStream, proc.outputStream, proc.errorStream)
+            FileLogger.append("EngineProcess", "engine spawn (stdio): node ${command[1]}")
 
-        Thread {
-            try {
-                proc.errorStream.bufferedReader().forEachLine { line ->
-                    RuntimeBus.append("engine| $line")
+            Thread {
+                try {
+                    proc.errorStream.bufferedReader().forEachLine { line ->
+                        RuntimeBus.append("engine| $line")
+                    }
+                } catch (_: Exception) {
                 }
-            } catch (_: Exception) {
-            }
-        }.apply { isDaemon = true }.start()
+            }.apply { isDaemon = true }.start()
 
-        Thread {
-            val code = runCatching { proc.waitFor() }.getOrDefault(-1)
-            FileLogger.append("EngineProcess", "engine process exited (code=$code)")
-            RuntimeBus.append("engine process exited (code=$code)")
-            if (proc === process) {
-                streams = null
-                process = null
-            }
-        }.apply { isDaemon = true }.start()
+            Thread {
+                val code = runCatching { proc.waitFor() }.getOrDefault(-1)
+                FileLogger.append("EngineProcess", "engine process exited (code=$code)")
+                RuntimeBus.append("engine process exited (code=$code)")
+                if (proc === process) {
+                    streams = null
+                    process = null
+                }
+            }.apply { isDaemon = true }.start()
 
-        // Early-death gate only: real readiness is the RPC Initialize handshake,
-        // which the RPC client surfaces as CONNECTED and the boot UI gates on.
-        val deadline = System.currentTimeMillis() + 15_000L
-        while (System.currentTimeMillis() < deadline) {
-            if (!proc.isAlive) {
-                val msg = "engine exited during startup (exit=${runCatching { proc.exitValue() }.getOrDefault(-1)}) — see QodexRuntime log"
-                FileLogger.append("EngineProcess", "engine start failed: $msg")
-                RuntimeBus.setPhase(RuntimePhase.Failed("engine", msg))
-                throw IOException(msg)
+            // Early-death gate only: real readiness is the RPC Initialize handshake,
+            // which the RPC client surfaces as CONNECTED and the boot UI gates on.
+            val deadline = System.currentTimeMillis() + 15_000L
+            while (System.currentTimeMillis() < deadline) {
+                if (!proc.isAlive) {
+                    val msg = "engine exited during startup (exit=${runCatching { proc.exitValue() }.getOrDefault(-1)}) — see QodexRuntime log"
+                    FileLogger.append("EngineProcess", "engine start failed: $msg")
+                    RuntimeBus.setPhase(RuntimePhase.Failed("engine", msg))
+                    throw IOException(msg)
+                }
+                Thread.sleep(500)
             }
-            Thread.sleep(500)
+            RuntimeBus.append("engine alive on stdio — waiting for RPC handshake")
+            RuntimeBus.setPhase(RuntimePhase.EngineReady)
         }
-        RuntimeBus.append("engine alive on stdio — waiting for RPC handshake")
-        RuntimeBus.setPhase(RuntimePhase.EngineReady)
     }
 
-    fun stop() {
+    // Suspend + IO: stop() destroys, sleeps (150ms), and sweeps /proc — all
+    // blocking work that must never run on the UI thread (the Retry button
+    // used to call this directly and jank the frame).
+    suspend fun stop(): Unit = withContext(Dispatchers.IO) {
         runCatching { process?.destroy() }
         Thread.sleep(150)
         runCatching { process?.destroyForcibly() }
         process = null
         streams = null
         // Sweep fallback for detached engine children: kill only node processes
-        // whose /proc cmdline points INTO this app's runtime tree — never every
-        // node on the device (Termux or a debugger session must survive).
+        // whose /proc cmdline is the engine entry (runtime/dist/entry-stdio.js)
+        // or the bundled agent CLI (runtime/dist/qodex.cjs). A plain binary-path
+        // match would also kill node processes the user deliberately started in
+        // the app's terminal; device-wide kills never happen (Termux survives).
         runCatching {
             val p = ProcessBuilder("sh", "-c", "pidof node").start()
             val out = p.inputStream.bufferedReader().readText().trim()
@@ -107,8 +123,8 @@ object EngineProcess {
                         .bufferedReader()
                         .readText()
                         .replace('\u0000', ' ')
-                    if (cmdline.contains("/runtime/usr/bin/node") ||
-                        cmdline.contains("/runtime/dist/entry-stdio.js")
+                    if (cmdline.contains("/runtime/dist/entry-stdio.js") ||
+                        cmdline.contains("/runtime/dist/qodex.cjs")
                     ) {
                         android.os.Process.killProcess(pid)
                     }

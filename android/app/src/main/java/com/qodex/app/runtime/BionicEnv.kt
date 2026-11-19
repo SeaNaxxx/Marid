@@ -1,5 +1,8 @@
 package com.qodex.app.runtime
 
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.buildJsonArray
 import java.io.File
 
 // Termux's compiled-in OPENSSLDIR is EACCES under this app, so every TLS path must live inside the runtime; TLS verification is never weakened.
@@ -37,6 +40,10 @@ object BionicEnv {
         bashBin: File,
     ) {
         val usr = File(runtimeRoot, "usr")
+        // TMPDIR must exist before node/bash run: it is only guaranteed by
+        // provisioning, and a wiped runtime/home would otherwise leave node
+        // pointing at a dangling tmp directory.
+        File(home, "tmp").mkdirs()
         env["PREFIX"] = usr.absolutePath
         env["HOME"] = home.absolutePath
         env["TMPDIR"] = File(home, "tmp").absolutePath
@@ -76,5 +83,36 @@ object BionicEnv {
         env["QODEX_CREDENTIAL_SECRET_FILE"] =
             File(runtimeRoot, "credential-secret").absolutePath
         // Verification deliberately stays enabled: no NODE_TLS_REJECT_UNAUTHORIZED, no emptied CA paths.
+
+        // Agent CLI child-process wiring. The engine spawns its agent client as
+        // a separate node process; QodexAgentProcessManager's default resolver
+        // checks QODEX_AGENT_SERVER_COMMAND FIRST (packages/services/src/qodex-agent/
+        // qodexAgentProcessManager.ts). Without these vars the fallback chain
+        // (monorepo dev → Electron → deployed native binary) has no Android
+        // match and the first agent spawn fails with "Qodex agent server
+        // command is not configured. Set QODEX_AGENT_SERVER_COMMAND before
+        // integration." Same shape as the desktop release wiring
+        // (packages/qodex-server-cli/src/runtime/agentWiring.ts).
+        val nodeBin = File(usr, "bin/node")
+        val agentCli = File(runtimeRoot, "dist/qodex.cjs")
+        if (nodeBin.isFile && agentCli.isFile) {
+            env["QODEX_AGENT_SERVER_COMMAND"] = nodeBin.absolutePath
+            env["QODEX_AGENT_SERVER_ARGS_JSON"] = buildJsonArray {
+                add(JsonPrimitive(agentCli.absolutePath))
+                add(JsonPrimitive("app-server"))
+                add(JsonPrimitive("--stdio"))
+            }.toString()
+            RuntimeBus.append(
+                "agent CLI wiring: QODEX_AGENT_SERVER_COMMAND=${nodeBin.absolutePath} " +
+                    "args=[${agentCli.absolutePath}, app-server, --stdio]",
+            )
+        } else {
+            // Explicit failure signal instead of a mid-session "not configured"
+            // surprise: provisioning verified both files, so a miss here means
+            // the runtime tree was tampered with after provisioning.
+            RuntimeBus.append(
+                "agent CLI wiring unavailable (node=${nodeBin.isFile}, qodex.cjs=${agentCli.isFile})",
+            )
+        }
     }
 }

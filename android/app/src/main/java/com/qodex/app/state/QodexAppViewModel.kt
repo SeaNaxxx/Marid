@@ -148,7 +148,6 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
 
     fun retry() {
         val app = this.app
-        EngineProcess.stop()
         _rpcState.value = RpcConnectionState.DISCONNECTED
         rpc = null
         conversation?.dispose()
@@ -157,6 +156,8 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
         _activeSessionId.value = null
         RuntimeBus.setPhase(RuntimePhase.Idle)
         scope.launch {
+            // stop() destroys, sleeps and sweeps /proc — keep it off the main thread.
+            EngineProcess.stop()
             if (Provisioner.isProvisioned(app)) {
                 RuntimeBus.setPhase(RuntimePhase.Provisioned)
                 startEngine(app)

@@ -6,7 +6,7 @@ import { createHash } from "node:crypto";
 import { cp, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { isBuiltin } from "node:module";
 import os from "node:os";
-import { join, relative, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 
 function argValue(argv, flag, index) {
   if (argv[index] === flag) {
@@ -24,6 +24,7 @@ const argv = process.argv.slice(2);
 let distDir = null;
 let nodeModulesRoot = null;
 let outFile = null;
+let agentCli = null;
 for (let i = 0; i < argv.length; i += 1) {
   const d = argValue(argv, "--dist", i);
   if (d) { distDir = resolve(d.value); i = d.nextIndex; continue; }
@@ -31,10 +32,12 @@ for (let i = 0; i < argv.length; i += 1) {
   if (n) { nodeModulesRoot = resolve(n.value); i = n.nextIndex; continue; }
   const o = argValue(argv, "--out", i);
   if (o) { outFile = resolve(o.value); i = o.nextIndex; continue; }
+  const a = argValue(argv, "--agent-cli", i);
+  if (a) { agentCli = resolve(a.value); i = a.nextIndex; continue; }
   throw new Error(`Unknown argument "${argv[i]}"`);
 }
 if (!distDir || !nodeModulesRoot || !outFile) {
-  throw new Error("Usage: pack-runtime-dist.mjs --dist <dir> --node-modules <dir> --out <file.tgz>");
+  throw new Error("Usage: pack-runtime-dist.mjs --dist <dir> --node-modules <dir> --out <file.tgz> [--agent-cli <qodex.cjs>]");
 }
 
 const BARE_SPECIFIER = [
@@ -138,6 +141,21 @@ async function main() {
     join(stage, "package.json"),
     JSON.stringify({ name: "qodex-engine", type: "module" }, null, 2) + "\n",
   );
+
+  // Bundled agent CLI (apps/qodex-cli/packages/cli/dist/qodex.cjs): the engine
+  // spawns its agent client as a separate node process from this bundle via
+  // QODEX_AGENT_SERVER_COMMAND/ARGS_JSON (BionicEnv wires them; agentWiring.ts
+  // is the desktop counterpart). All static imports are esbuild-inlined — the
+  // only externals (@qodex/tui, playwright-core, koffi, @napi-rs/keyring) are
+  // lazy/dynamic and out of the app-server --stdio path, so no extra
+  // node_modules entries are needed for it.
+  if (agentCli) {
+    if (!(await isDirectory(dirname(agentCli))) || !(await stat(agentCli)).isFile()) {
+      throw new Error(`--agent-cli not a file: ${agentCli} (build @qodex/cli first)`);
+    }
+    await cp(agentCli, join(stage, "qodex.cjs"));
+    console.log("[pack-runtime] bundled agent CLI qodex.cjs at archive root");
+  }
 
   const copied = new Map(); // relPath -> srcDir
   const queue = [...roots].map((name) => ({ name, fromDir: nodeModulesRoot }));
