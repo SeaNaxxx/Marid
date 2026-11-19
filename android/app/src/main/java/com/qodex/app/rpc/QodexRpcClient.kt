@@ -455,6 +455,24 @@ class QodexRpcClient(
         },
     )
 
+    suspend fun terminalResize(terminalId: String, cols: Int, rows: Int): JsonElement? = call(
+        ServiceChannels.TERMINAL,
+        "resize",
+        buildJsonObject {
+            put("id", terminalId)
+            put("cols", cols)
+            put("rows", rows)
+        },
+    )
+
+    suspend fun terminalExit(terminalId: String, onEvent: (JsonElement?) -> Unit): ChannelClient.EventSubscription =
+        listen(
+            ServiceChannels.TERMINAL,
+            "onDynamicExit",
+            buildJsonObject { put("id", terminalId) },
+            onEvent,
+        )
+
     suspend fun terminalDispose(terminalId: String): JsonElement? = call(
         ServiceChannels.TERMINAL,
         "dispose",

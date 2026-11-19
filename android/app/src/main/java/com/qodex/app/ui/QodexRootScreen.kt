@@ -191,7 +191,7 @@ fun QodexRootScreen(vm: QodexAppViewModel) {
                 )
             }
             if (terminalOpen && screen == RootScreen.CHAT) {
-                QodexTerminalSheet(onClose = { terminalOpen = false })
+                QodexTerminalSheet(rpc = vm.rpcClient(), onClose = { terminalOpen = false })
             }
         },
     )
