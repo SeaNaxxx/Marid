@@ -42,8 +42,17 @@ android {
     androidResources {
         // AAPT2 otherwise decompresses/re-compresses these at build time and
         // AssetManager.open() then yields re-compressed bytes; runtime
-        // extraction streams raw tar/deb bytes and must not pay that cost.
-        noCompress += listOf("tgz", "gz", "deb", "xz")
+        // extraction streams raw tar bytes and must not pay that cost.
+        noCompress += listOf("tgz", "gz", "xz")
+    }
+
+    packaging {
+        // AGENTS.md W^X packaging rule: legacy extraction unpacks jniLibs as
+        // physical files under nativeLibraryDir (which has execute bits)
+        // instead of loading them straight from the APK.
+        jniLibs {
+            useLegacyPackaging = true
+        }
     }
 }
 
@@ -88,13 +97,11 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
 
-    // Runtime provisioning: .deb extraction (ar + tar.xz|zst) for the Termux
-    // Bionic closure and .tgz for the engine dist — both at runtime.
+    // Runtime provisioning: streaming tar/gzip extraction for the consolidated
+    // Bionic usr archive (qodex-usr.tgz) and the engine dist (qodex-dist.tgz).
     implementation("org.apache.commons:commons-compress:1.27.1")
-    // commons-compress's XZCompressorInputStream resolves org.tukaani.xz classes at runtime; without this jar data.tar.xz throws NoClassDefFoundError.
-    implementation("org.tukaani:xz:1.9")
-    // commons-compress's zstd support requires the zstd-jni native AAR.
-    implementation("com.github.luben:zstd-jni:1.5.5-11@aar")
+    // xz/zstd support was dropped with the per-deb pipeline: the consolidated
+    // usr archive and the engine dist are plain tar.gz (one streaming pass).
 
     // JVM unit tests: golden vectors from the real TypeScript serializer +
     // a full in-process ChannelClient <-> fake-ChannelServer round trip.
