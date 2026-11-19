@@ -14,7 +14,10 @@ import java.security.MessageDigest
 // Fully offline provision from APK assets — must succeed in airplane mode; usr/ + dist/ land under filesDir/runtime.
 object Provisioner {
 
-    const val DEB_DIR_ASSET = "runtime/termux-debs"
+    // Single consolidated Bionic archive (packed by scripts/qodex-android/pack-runtime-usr.mjs
+    // from the Termux .deb set) replaces 53 per-deb ar/tar extraction passes.
+    const val USR_ARCHIVE_ASSET = "runtime/qodex-usr.tgz"
+    const val USR_SHA_ASSET = "runtime/qodex-usr.sha256"
     const val DIST_ASSET = "runtime/qodex-dist.tgz"
     const val DIST_SHA_ASSET = "runtime/qodex-dist.sha256"
 
@@ -38,7 +41,11 @@ object Provisioner {
     fun isProvisioned(ctx: Context): Boolean = runCatching {
         val marker = markerFile(ctx)
         if (!marker.isFile) return@runCatching false
-        if (!nodeBin(ctx).isFile || !distEntry(ctx).isFile) return@runCatching false
+        // bash and the agent CLI bundle gate too: SHELL points at bash and the
+        // engine's agent spawn needs dist/qodex.cjs — a corrupted tree must
+        // re-provision instead of booting half a runtime.
+        if (!nodeBin(ctx).isFile || !bashBin(ctx).isFile) return@runCatching false
+        if (!distEntry(ctx).isFile || !File(distDir(ctx), "qodex.cjs").isFile) return@runCatching false
         // The marker JSON contains exactly one 64-hex digest (distSha256); the
         // probe text and timestamp never match a 64-hex pattern.
         val recorded = Regex("[0-9a-fA-F]{64}").find(marker.readText())?.value
@@ -96,58 +103,29 @@ object Provisioner {
             File(homeDir(app), "tmp").mkdirs()
 
             RuntimeBus.setPhase(RuntimePhase.Provisioning("extracting Bionic runtime"))
-            val tDeb = SystemClock.elapsedRealtime()
-            val manifest = readAssetText(app, "$DEB_DIR_ASSET/manifest.txt")
-            val debNames = app.assets.list(DEB_DIR_ASSET)
-                ?: throw IOException("assets missing: $DEB_DIR_ASSET")
-            val shaByName = manifest.lineSequence()
-                .filter { it.isNotBlank() }
-                .associate {
-                    val parts = it.split("\t")
-                    parts[0] to parts.getOrElse(2) { "" }
-                }
-            if (shaByName.isEmpty()) {
-                throw IOException("termux-debs manifest empty or unparsable")
-            }
+            val tUsr = SystemClock.elapsedRealtime()
             val report = TarExtractor.ExtractReport()
-            val debList = debNames.sorted().filter { it.endsWith(".deb") }
-            var debs = 0
-            for (name in debList) {
-                val expected = shaByName[name.removeSuffix(".deb")]
-                    ?: throw IOException("deb not in manifest: $name")
-                val staged = File(rt, "downloads/$name")
-                staged.parentFile?.mkdirs()
-                copyAsset(app, "$DEB_DIR_ASSET/$name", staged)
-                verifySha256(staged, expected, name)
-                DebExtractor.extract(staged, stagingRoot, report)
-                staged.delete()
-                debs++
-                if (debs % 10 == 0) {
-                    RuntimeBus.setPhase(
-                        RuntimePhase.Provisioning("extracting Bionic runtime ($debs/${debList.size})"),
-                    )
-                }
-            }
+            val usrSha = readAssetText(app, USR_SHA_ASSET).trim()
+            val usrTar = File(rt, "downloads/qodex-usr.tgz")
+            usrTar.parentFile?.mkdirs()
+            copyAsset(app, USR_ARCHIVE_ASSET, usrTar)
+            verifySha256(usrTar, usrSha, "qodex-usr")
+            // One sequential streaming pass instead of 53 ar + tar round trips.
+            TarExtractor(stagingRoot).extract(usrTar.inputStream().let { GzipCompressorInputStream(it) })
+            usrTar.delete()
             RuntimeBus.append(
-                "bionic extraction: $debs debs, ${report.regularFiles} files, " +
+                "bionic extraction: consolidated archive, ${report.regularFiles} files, " +
                     "${report.symlinksCreated} symlinks, ${report.symlinkCopies} " +
                     "symlink copies, ${report.hardlinksCreated} hardlinks, " +
                     "${report.skippedEntries} skipped" +
                     (report.firstError?.let { " (first fs error: $it)" } ?: ""),
             )
-            val stagedNode = File(usrStaging, "bin/node")
-            val stagedBash = File(usrStaging, "bin/bash")
-            if (!stagedNode.isFile || !stagedBash.isFile) {
-                throw IOException(
-                    "bionic runtime incomplete (usr/bin/node or usr/bin/bash missing) " +
-                        "— ${report.skippedEntries} entries skipped, first: ${report.firstError}",
-                )
-            }
+            requireUsrBinaries(usrStaging)
             FileLogger.append(
                 "Provisioner",
-                "bionic extracted: $debs debs, ${report.regularFiles} files, " +
+                "bionic extracted: ${report.regularFiles} files, " +
                     "${report.symlinksCreated} symlinks, ${report.skippedEntries} skipped " +
-                    "in ${SystemClock.elapsedRealtime() - tDeb}ms",
+                    "in ${SystemClock.elapsedRealtime() - tUsr}ms",
             )
             File(usrStaging, "bin").listFiles()?.forEach { f ->
                 if (f.isFile && !TarExtractor.DefaultLinkOps.isSymbolicLink(f)) {
@@ -234,7 +212,7 @@ object Provisioner {
             )
 
             markerFile(app).writeText(
-                """{"node":"$probe","debs":$debs,""" +
+                """{"node":"${probe.replace("\\", "\\\\").replace("\"", "\\\"")}","files":${report.regularFiles},""" +
                     """"distSha256":"$distSha","provisionedAt":${System.currentTimeMillis()}}""",
             )
             File(rt, "downloads").deleteRecursively()
@@ -254,6 +232,19 @@ object Provisioner {
                     "provision",
                     "${t.message ?: t.javaClass.simpleName}",
                 ),
+            )
+        }
+    }
+
+    // Post-extraction gate, extracted for JVM regression coverage: provisioning
+    // must abort before any live tree is touched when node/bash did not land.
+    fun requireUsrBinaries(stagingUsr: File) {
+        val stagedNode = File(stagingUsr, "bin/node")
+        val stagedBash = File(stagingUsr, "bin/bash")
+        if (!stagedNode.isFile || !stagedBash.isFile) {
+            throw IOException(
+                "bionic runtime incomplete " +
+                    "(usr/bin/node=${stagedNode.isFile}, usr/bin/bash=${stagedBash.isFile} missing)",
             )
         }
     }
@@ -291,24 +282,38 @@ object Provisioner {
         pb.redirectErrorStream(true)
         BionicEnv.apply(pb.environment(), runtimeRoot(ctx), homeDir(ctx), bashBin(ctx))
         val proc = pb.start()
-        val out = proc.inputStream.bufferedReader().readText().trim()
-        val code = proc.waitFor()
+        // Bounded wait: a hung node must fail provisioning with a clear message
+        // instead of blocking the boot path forever.
+        val out = StringBuilder()
+        val reader = proc.inputStream.bufferedReader()
+        val finished = java.util.concurrent.CompletableFuture.supplyAsync {
+            reader.use { it.forEachLine { line -> out.append(line).append('\n') } }
+        }
+        val exited = proc.waitFor(30, java.util.concurrent.TimeUnit.SECONDS)
+        if (!exited) {
+            proc.destroyForcibly()
+            finished.complete(Unit)
+            throw IOException("embedded node probe timed out after 30s (no exit) — " + out.take(300))
+        }
+        finished.get(2, java.util.concurrent.TimeUnit.SECONDS)
+        val code = proc.exitValue()
+        val text = out.toString().trim()
         if (code != 0) {
-            val detail = out.take(300)
+            val detail = text.take(300)
             val cls = when {
-                out.contains("CANNOT LINK") ->
+                text.contains("CANNOT LINK") ->
                     " [classification: linker closure defect — a bundled library " +
                         "is missing or was not extracted]"
-                out.contains("OpenSSL configuration error") ->
+                text.contains("OpenSSL configuration error") ->
                     " [classification: env defect — OPENSSL_CONF/OPENSSL_MODULES " +
                         "must point inside the app runtime]"
-                out.contains("com.termux") ->
+                text.contains("com.termux") ->
                     " [classification: env defect — runtime leaked a Termux path]"
                 else -> ""
             }
             throw IOException("embedded node failed on this device (exit $code): $detail$cls")
         }
-        return out.take(200)
+        return text.take(200)
     }
 
     // ------------------------------------------------------------------ util

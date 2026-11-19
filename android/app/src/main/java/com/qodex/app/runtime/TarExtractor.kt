@@ -87,7 +87,9 @@ class TarExtractor(
         }
     }
 
-    // Re-roots ./data/data/com.termux/files/usr/... under dest; entries without the marker (DEBIAN control files) are skipped; traversal refused.
+    // Re-roots ./data/data/com.termux/files/usr/... under dest (Termux deb payloads);
+    // entries WITHOUT the marker (e.g. the flat engine dist root, or the consolidated
+    // usr archive) extract at dest root verbatim; empty names are skipped; traversal refused.
     private fun relabeled(entry: TarArchiveEntry): File? {
         val name = entry.name.removePrefix("./")
         val marker = "files/"
