@@ -27,8 +27,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +48,7 @@ import com.qodex.app.rpc.asObjectOrNull
 import com.qodex.app.rpc.asStringOrNull
 import com.qodex.app.runtime.RuntimeBus
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.booleanOrNull
@@ -67,7 +70,24 @@ data class SectionItemRow(
     val badge: String? = null,
     val status: RowStatus? = null,
     val enabled: Boolean? = null,
+    // Real engine mutation behind the row switch. Null = read-only row: the
+    // switch renders disabled instead of pretending to work.
+    val toggle: SectionToggle? = null,
 )
+
+// Toggle targets are limited to mutations the engine actually exposes:
+// - SETTING   → setting.update(Partial<AppSettings>) (boolean AppSettings keys)
+// - PLUGIN    → plugin-management.setPluginEnabled({pluginId, enabled})
+// - SKILL     → skills.setEnabled({workspacePath, skillId, enabled})
+// - SUBAGENT  → subagents.setEnabled({agentId, enabled})
+// - COMMAND   → commands.setCommandEnabled({commandId, filePath, enabled})
+data class SectionToggle(
+    val kind: Kind,
+    val id: String,
+    val filePath: String? = null,
+) {
+    enum class Kind { SETTING, PLUGIN, SKILL, SUBAGENT, COMMAND }
+}
 
 data class SectionState(
     val rows: List<SectionItemRow> = emptyList(),
@@ -132,6 +152,8 @@ private suspend fun loadGeneral(rpc: QodexRpcClient, workspacePath: String): Lis
             "keepAwake",
             "Keep awake while running",
             subtitle = if (settings.bool("keepAwakeWhileRunning") == true) "on" else "off",
+            enabled = settings.bool("keepAwakeWhileRunning") == true,
+            toggle = SectionToggle(SectionToggle.Kind.SETTING, "keepAwakeWhileRunning"),
         ),
         SectionItemRow(
             "instructions",
@@ -153,29 +175,21 @@ private suspend fun loadAppearance(rpc: QodexRpcClient, workspacePath: String): 
             "reasoning",
             "Show reasoning in stream",
             subtitle = if (settings.bool("messageStreamShowReasoning") == true) "on" else "off",
+            enabled = settings.bool("messageStreamShowReasoning") == true,
+            toggle = SectionToggle(SectionToggle.Kind.SETTING, "messageStreamShowReasoning"),
         ),
         SectionItemRow(
             "todos",
             "Show todos in stream",
             subtitle = if (settings.bool("messageStreamShowTodos") == true) "on" else "off",
+            enabled = settings.bool("messageStreamShowTodos") == true,
+            toggle = SectionToggle(SectionToggle.Kind.SETTING, "messageStreamShowTodos"),
         ),
-        SectionItemRow(
-            "hardware",
-            "Hardware acceleration",
-            subtitle = if (settings.bool("desktopChromiumHardwareAccelerationEnabled") == true) "on" else "off",
-        ),
+        // desktopChromiumHardwareAccelerationEnabled is a desktop-only AppSettings
+        // key (desktop Chromium rendering) with no effect on the Android host —
+        // hidden instead of rendering a ghost switch that changes nothing.
     )
 }
-
-private suspend fun loadBrowserUse(rpc: QodexRpcClient, workspacePath: String): List<SectionItemRow> =
-    listOf(
-        SectionItemRow(
-            "browser",
-            "Browser automation runtime",
-            subtitle = "Requires a desktop Chromium runtime; not provisioned on the Android host",
-            status = RowStatus.NEUTRAL,
-        ),
-    )
 
 private suspend fun loadBehavior(rpc: QodexRpcClient, workspacePath: String): List<SectionItemRow> {
     val settings = callParams(rpc, ServiceChannels.SETTING, "get")
@@ -195,11 +209,15 @@ private suspend fun loadBehavior(rpc: QodexRpcClient, workspacePath: String): Li
             "nativeSearch",
             "Native search enhancements",
             subtitle = if (settings.bool("nativeSearchEnhancementsEnabled") == true) "on" else "off",
+            enabled = settings.bool("nativeSearchEnhancementsEnabled") == true,
+            toggle = SectionToggle(SectionToggle.Kind.SETTING, "nativeSearchEnhancementsEnabled"),
         ),
         SectionItemRow(
             "askResolution",
             "Auto-resolve ask-user questions",
             subtitle = if (settings.bool("askUserQuestionAutoResolutionEnabled") == true) "on" else "off",
+            enabled = settings.bool("askUserQuestionAutoResolutionEnabled") == true,
+            toggle = SectionToggle(SectionToggle.Kind.SETTING, "askUserQuestionAutoResolutionEnabled"),
         ),
     )
 }
@@ -214,6 +232,8 @@ private suspend fun loadMemory(rpc: QodexRpcClient, workspacePath: String): List
             "Memory tool",
             subtitle = if (settings?.bool("memoryEnabled") == true) "enabled" else "disabled",
             status = if (settings?.bool("memoryEnabled") == true) RowStatus.OK else RowStatus.NEUTRAL,
+            enabled = settings?.bool("memoryEnabled") == true,
+            toggle = SectionToggle(SectionToggle.Kind.SETTING, "memoryEnabled"),
         ),
     )
     for (entry in memories?.arr("workspaces").orEmpty()) {
@@ -253,6 +273,10 @@ private suspend fun loadSubagents(rpc: QodexRpcClient, workspacePath: String): L
                     subtitle = agent.str("description").ifEmpty { group },
                     enabled = agent.bool("enabled"),
                     status = if (agent.bool("enabled") == true) RowStatus.OK else RowStatus.NEUTRAL,
+                    // Engine writes disabledAgentIds to the agent state file, so
+                    // every discovered agent (builtin/user/plugin) is togglable.
+                    toggle = agent.str("id").takeIf { it.isNotEmpty() }
+                        ?.let { SectionToggle(SectionToggle.Kind.SUBAGENT, it) },
                 ),
             )
         }
@@ -282,6 +306,8 @@ private suspend fun loadPlugins(rpc: QodexRpcClient, workspacePath: String): Lis
                 },
                 enabled = plugin.bool("enabled"),
                 status = if (plugin.bool("enabled") == true) RowStatus.OK else RowStatus.NEUTRAL,
+                toggle = plugin.str("id").takeIf { it.isNotEmpty() }
+                    ?.let { SectionToggle(SectionToggle.Kind.PLUGIN, it) },
             ),
         )
     }
@@ -348,6 +374,8 @@ private suspend fun loadSkills(rpc: QodexRpcClient, workspacePath: String): List
                 subtitle = skill.str("description").ifEmpty { skill.str("scope") },
                 enabled = skill.bool("enabled"),
                 status = if (skill.bool("enabled") == true) RowStatus.OK else RowStatus.NEUTRAL,
+                toggle = skill.str("id").takeIf { it.isNotEmpty() }
+                    ?.let { SectionToggle(SectionToggle.Kind.SKILL, it) },
             ),
         )
     }
@@ -374,6 +402,19 @@ private suspend fun loadCommands(rpc: QodexRpcClient, workspacePath: String): Li
                 subtitle = command.str("description"),
                 enabled = command.bool("enabled"),
                 status = if (command.bool("enabled") == true) RowStatus.OK else RowStatus.NEUTRAL,
+                // setCommandEnabled needs the command file path; plugin-sourced
+                // commands have none, so only user commands get a live switch.
+                toggle = if (command.str("source") == "user") {
+                    command.str("filePath").takeIf { it.isNotEmpty() }?.let { path ->
+                        SectionToggle(
+                            SectionToggle.Kind.COMMAND,
+                            command.str("id").ifEmpty { command.str("name") },
+                            filePath = path,
+                        )
+                    }
+                } else {
+                    null
+                },
             ),
         )
     }
@@ -473,6 +514,8 @@ private suspend fun loadArchive(rpc: QodexRpcClient, workspacePath: String): Lis
             "Auto-archive inactive tasks",
             subtitle = if (settings.bool("taskAutoArchiveEnabled") == true) "on" else "off",
             status = if (settings.bool("taskAutoArchiveEnabled") == true) RowStatus.OK else RowStatus.NEUTRAL,
+            enabled = settings.bool("taskAutoArchiveEnabled") == true,
+            toggle = SectionToggle(SectionToggle.Kind.SETTING, "taskAutoArchiveEnabled"),
         ),
         SectionItemRow(
             "olderThan",
@@ -489,7 +532,6 @@ enum class EngineSectionId(
 ) {
     GENERAL("General", "Engine and workspace preferences", ::loadGeneral),
     APPEARANCE("Appearance", "Stream rendering preferences", ::loadAppearance),
-    BROWSER_USE("Browser Use", "Browser automation capability", ::loadBrowserUse),
     BEHAVIOR("Behavior and tools", "Interaction and tool behavior", ::loadBehavior),
     MEMORY("Memory", "Project memory tool", ::loadMemory),
     SUBAGENTS("Subagents", "Builtin, user and plugin agents", ::loadSubagents),
@@ -521,7 +563,8 @@ fun SettingsHubScreen(
         SettingsNavRow("General", "Engine and workspace preferences") { onOpenSection(EngineSectionId.GENERAL) }
         SettingsNavRow("Appearance", "Stream rendering preferences") { onOpenSection(EngineSectionId.APPEARANCE) }
         SettingsNavRow("Model Settings", "Providers, API keys and models") { onOpenModelSettings() }
-        SettingsNavRow("Browser Use", "Browser automation capability") { onOpenSection(EngineSectionId.BROWSER_USE) }
+        // Browser Use removed: it requires a desktop Chromium runtime that is
+        // never provisioned on the Android host — a permanent dead-end entry.
 
         SettingsGroupLabel("Agent capabilities")
         SettingsNavRow("Behavior and tools", "Interaction and tool behavior") { onOpenSection(EngineSectionId.BEHAVIOR) }
@@ -660,8 +703,13 @@ fun EngineSectionScreen(
 ) {
     var state by remember(section.name) { mutableStateOf(SectionState()) }
     var loading by remember(section.name) { mutableStateOf(rpc != null) }
+    // Bump to reload authoritative rows from the engine after a toggle commit.
+    var refreshKey by remember(section.name) { mutableIntStateOf(0) }
+    var togglingKey by remember(section.name) { mutableStateOf<String?>(null) }
+    var toggleError by remember(section.name) { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
 
-    LaunchedEffect(section.name, rpc) {
+    LaunchedEffect(section.name, rpc, refreshKey) {
         val client = rpc
         if (client == null) {
             state = SectionState(error = "Engine not connected")
@@ -680,6 +728,51 @@ fun EngineSectionScreen(
         loading = false
     }
 
+    val onToggleRow: (SectionItemRow) -> Unit = { row ->
+        val toggle = row.toggle
+        val client = rpc
+        if (toggle != null && client != null && togglingKey == null) {
+            scope.launch {
+                togglingKey = row.key
+                toggleError = null
+                val newValue = !(row.enabled == true)
+                // Optimistic flip; reverted below if the engine rejects the call.
+                state = state.copy(
+                    rows = state.rows.map {
+                        if (it.key == row.key) {
+                            it.copy(
+                                enabled = newValue,
+                                subtitle = if (toggle.kind == SectionToggle.Kind.SETTING) {
+                                    if (newValue) "on" else "off"
+                                } else {
+                                    it.subtitle
+                                },
+                            )
+                        } else {
+                            it
+                        }
+                    },
+                )
+                val applied = withContext(Dispatchers.IO) {
+                    runCatching { applySectionToggle(client, workspacePath, toggle, newValue) }
+                        .onFailure {
+                            RuntimeBus.append("settings toggle ${row.title} failed: ${it.message}")
+                        }
+                        .isSuccess
+                }
+                if (applied) {
+                    refreshKey += 1
+                } else {
+                    state = state.copy(
+                        rows = state.rows.map { if (it.key == row.key) row else it },
+                    )
+                    toggleError = "Could not update \"${row.title}\". The engine rejected the change."
+                }
+                togglingKey = null
+            }
+        }
+    }
+
     SettingsScaffold(title = section.title, onBack = onBack) {
         Text(
             section.subtitle,
@@ -687,6 +780,11 @@ fun EngineSectionScreen(
             fontSize = 12.sp,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         )
+        toggleError?.let { message ->
+            Column(Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+                SectionErrorState(message)
+            }
+        }
         when {
             loading -> SectionLoadingCard("Loading ${section.title}...")
             state.error != null -> Column(Modifier.padding(horizontal = 16.dp)) {
@@ -700,10 +798,91 @@ fun EngineSectionScreen(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 for (row in state.rows) {
-                    SectionDataRowRow(row)
+                    SectionDataRowRow(
+                        row,
+                        onToggle = if (row.toggle != null) {
+                            { onToggleRow(row) }
+                        } else {
+                            null
+                        },
+                        busy = togglingKey == row.key,
+                    )
                 }
             }
         }
+    }
+}
+
+// Route one switch flip to the engine mutation declared on the row. Only the
+// methods below are called — every one exists on the engine's service channel
+// and was cross-checked against packages/services/src interfaces.
+private suspend fun applySectionToggle(
+    rpc: QodexRpcClient,
+    workspacePath: String,
+    toggle: SectionToggle,
+    enabled: Boolean,
+) {
+    when (toggle.kind) {
+        SectionToggle.Kind.SETTING ->
+            // setting.update(Partial<AppSettings>): one-element params array
+            // spreads back to (patch) on the engine facade.
+            callParams(
+                rpc,
+                ServiceChannels.SETTING,
+                "update",
+                kotlinx.serialization.json.buildJsonObject { put(toggle.id, enabled) },
+            ) ?: error("setting.update returned no result")
+
+        SectionToggle.Kind.PLUGIN ->
+            callParams(
+                rpc,
+                ServiceChannels.PLUGIN_MANAGEMENT,
+                "setPluginEnabled",
+                kotlinx.serialization.json.buildJsonObject {
+                    put("pluginId", toggle.id)
+                    put("enabled", enabled)
+                    put("workspacePath", workspacePath)
+                },
+            ) ?: error("setPluginEnabled returned no result")
+
+        SectionToggle.Kind.SKILL ->
+            callParams(
+                rpc,
+                ServiceChannels.SKILLS,
+                "setEnabled",
+                kotlinx.serialization.json.buildJsonObject {
+                    put("workspacePath", workspacePath)
+                    put("skillId", toggle.id)
+                    put("enabled", enabled)
+                },
+            ) ?: error("skills.setEnabled returned no result")
+
+        SectionToggle.Kind.SUBAGENT ->
+            positional(
+                rpc,
+                ServiceChannels.SUBAGENTS,
+                "setEnabled",
+                listOf(
+                    kotlinx.serialization.json.buildJsonObject {
+                        put("agentId", toggle.id)
+                        put("enabled", enabled)
+                    },
+                ),
+            ) ?: error("subagents.setEnabled returned no result")
+
+        SectionToggle.Kind.COMMAND ->
+            positional(
+                rpc,
+                ServiceChannels.COMMANDS,
+                "setCommandEnabled",
+                listOf(
+                    kotlinx.serialization.json.buildJsonObject {
+                        put("commandId", toggle.id)
+                        put("filePath", requireNotNull(toggle.filePath) { "command file path missing" })
+                        put("enabled", enabled)
+                    },
+                ),
+            ) ?: error("setCommandEnabled returned no result")
     }
 }
 
@@ -734,7 +913,11 @@ internal fun SectionErrorState(message: String) {
 }
 
 @Composable
-private fun SectionDataRowRow(row: SectionItemRow) {
+private fun SectionDataRowRow(
+    row: SectionItemRow,
+    onToggle: (() -> Unit)?,
+    busy: Boolean,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -770,7 +953,13 @@ private fun SectionDataRowRow(row: SectionItemRow) {
         row.enabled?.let { enabled ->
             Switch(
                 checked = enabled,
-                onCheckedChange = null, // engine toggle op per row lands with the edit flows
+                // Live only when an engine-backed mutation is wired; rows without
+                // one stay non-interactive instead of pretending to save.
+                onCheckedChange = if (onToggle != null && !busy) {
+                    { onToggle() }
+                } else {
+                    null
+                },
                 colors = SwitchDefaults.colors(
                     checkedTrackColor = QodexTokens.Success,
                     uncheckedTrackColor = QodexTokens.Border,

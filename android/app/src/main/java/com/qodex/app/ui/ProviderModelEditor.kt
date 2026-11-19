@@ -1,10 +1,13 @@
 package com.qodex.app.ui
 
+import android.os.Build
+import android.view.WindowManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +15,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,6 +29,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
 import com.qodex.app.icons.QodexIcons
 import com.qodex.app.rpc.QodexRpcClient
 import com.qodex.app.rpc.ServiceChannels
@@ -209,21 +217,416 @@ internal fun validateModelDraft2e(
         return ModelDraftValidationError2e.ReasoningLevels
     }
     if (resolvedMapText.isEmpty()) return ModelDraftValidationError2e.ReasoningMap
-    val map = parseReasoningMap2e(resolvedMapText)
-    if (map == null || !map.keys.containsAll(levels)) return ModelDraftValidationError2e.ReasoningMap
+    when (val map = parseReasoningMap2e(resolvedMapText)) {
+        null -> return ModelDraftValidationError2e.ReasoningMap
+        is ReasoningMapProgram2e.LevelKeys ->
+            if (!map.keys.containsAll(levels)) return ModelDraftValidationError2e.ReasoningMap
+        ReasoningMapProgram2e.Expression -> {
+            // Conditional CEL map: the engine compiles it once and evaluates it
+            // per level at request time; produced object keys are request
+            // parameters (enable_thinking, reasoning_effort, ...), not level
+            // names, so the level-coverage check does not apply here.
+        }
+    }
     return null
 }
 
-private fun parseReasoningMap2e(raw: String): Map<String, String>? {
+internal sealed interface ReasoningMapProgram2e {
+    // Plain JSON object map: keys are reasoning level names (legacy shape kept
+    // for the level-coverage UX check).
+    data class LevelKeys(val keys: Set<String>) : ReasoningMapProgram2e
+
+    // Restricted-CEL program (conditional expression compiled cleanly).
+    data object Expression : ReasoningMapProgram2e
+}
+
+internal fun parseReasoningMap2e(raw: String): ReasoningMapProgram2e? {
     val trimmed = raw.trim()
     if (trimmed.isEmpty()) return null
+    // The CEL compiler is the engine's ONLY validation for option maps
+    // (packages/shared/src/model-config.ts superRefine → compileModelOptionMap),
+    // so it runs first here too — plain JSON object literals are a subset of the
+    // CEL grammar and the CEL parser rejects what JSON parsers accept (duplicate
+    // object keys), matching the engine exactly.
     return try {
-        val obj = kotlinx.serialization.json.Json.parseToJsonElement(trimmed).asObjectOrNull()
-            ?: return null
-        obj.entries.associate { Pair(it.key, (it.value as? JsonPrimitive)?.content ?: "") }
-    } catch (t: Throwable) {
+        val expression = compileReasoningMapCel2e(trimmed)
+        when {
+            // Pure object map with no input reference (legacy {level: param} shape):
+            // expose its keys for the level-coverage UX check.
+            expression is CelExpr2e.ObjectExpr && !celReferencesInput2e(expression) ->
+                ReasoningMapProgram2e.LevelKeys(expression.entries.map { it.key }.toSet())
+            else -> ReasoningMapProgram2e.Expression
+        }
+    } catch (_: RestrictedCelException2e) {
         null
     }
+}
+
+private fun celReferencesInput2e(expression: CelExpr2e): Boolean = when (expression) {
+    is CelExpr2e.Input -> true
+    is CelExpr2e.ArrayExpr -> expression.elements.any { celReferencesInput2e(it) }
+    is CelExpr2e.ObjectExpr -> expression.entries.any { celReferencesInput2e(it.value) }
+    is CelExpr2e.UnaryExpr -> celReferencesInput2e(expression.operand)
+    is CelExpr2e.BinaryExpr -> celReferencesInput2e(expression.left) || celReferencesInput2e(expression.right)
+    is CelExpr2e.ConditionalExpr -> celReferencesInput2e(expression.condition) ||
+        celReferencesInput2e(expression.whenTrue) ||
+        celReferencesInput2e(expression.whenFalse)
+    else -> false
+}
+
+// ── Restricted CEL: faithful mirror of packages/model-option-map ──────────────
+// The engine compiles reasoning/max-output option maps as restricted Common
+// Expression Language: a plain JSON object literal OR a conditional expression
+// such as:
+//   reasoningLevel == "disabled" ? {"enable_thinking": false}
+//                                : {"enable_thinking": true, "reasoning_effort": reasoningLevel}
+// The editor previously parsed maps as strict JSON, which rejected every
+// conditional map the engine accepts (config/provider/qodex-builtin.json uses
+// them throughout) and blocked model saves with "Reasoning parameter mapping
+// is invalid". This port validates exactly the grammar compiled by
+// packages/model-option-map/src/{tokenizer,parser,compiler}.ts so the editor
+// accepts what the engine accepts and rejects what it rejects.
+
+private class RestrictedCelException2e(message: String, val offset: Int) :
+    Exception("$message at offset $offset")
+
+private const val REASONING_MAP_VARIABLE_2E = "reasoningLevel"
+
+private data class CelToken2e(val kind: String, val value: String, val offset: Int, val end: Int)
+
+private sealed interface CelExpr2e {
+    val offset: Int
+
+    data class Literal(val value: Any?, override val offset: Int) : CelExpr2e
+    data class Input(override val offset: Int) : CelExpr2e
+    data class ArrayExpr(val elements: List<CelExpr2e>, override val offset: Int) : CelExpr2e
+    data class ObjectExpr(val entries: List<CelEntry2e>, override val offset: Int) : CelExpr2e
+    data class UnaryExpr(val operator: String, val operand: CelExpr2e, override val offset: Int) : CelExpr2e
+    data class BinaryExpr(
+        val operator: String,
+        val left: CelExpr2e,
+        val right: CelExpr2e,
+        override val offset: Int,
+    ) : CelExpr2e
+
+    data class ConditionalExpr(
+        val condition: CelExpr2e,
+        val whenTrue: CelExpr2e,
+        val whenFalse: CelExpr2e,
+        override val offset: Int,
+    ) : CelExpr2e
+}
+
+private data class CelEntry2e(val key: String, val value: CelExpr2e, val offset: Int)
+
+private val CEL_DOUBLE_OPERATORS_2E = setOf("&&", "||", "==", "!=", "<=", ">=")
+private val CEL_SINGLE_OPERATORS_2E = setOf("+", "-", "*", "/", "%", "!", "<", ">")
+private val CEL_PUNCTUATION_2E = setOf("{", "}", "[", "]", "(", ")", ",", ":", "?", ".")
+private val CEL_SIMPLE_ESCAPES_2E = mapOf(
+    "'" to "'",
+    "\"" to "\"",
+    "\\" to "\\",
+    "b" to "\b",
+    "f" to "\u000C",
+    "n" to "\n",
+    "r" to "\r",
+    "t" to "\t",
+)
+
+private fun isCelIdentStart2e(character: Char): Boolean =
+    character in 'a'..'z' || character in 'A'..'Z' || character == '_'
+
+private fun isCelIdentPart2e(character: Char): Boolean =
+    isCelIdentStart2e(character) || character in '0'..'9'
+
+private fun tokenizeRestrictedCel2e(source: String): List<CelToken2e> {
+    val tokens = ArrayList<CelToken2e>()
+    var offset = 0
+    while (offset < source.length) {
+        val character = source[offset]
+        if (character.isWhitespace()) {
+            offset += 1
+            continue
+        }
+        if (character == '\'' || character == '"') {
+            val token = readCelString2e(source, offset, character)
+            tokens.add(token)
+            offset = token.end
+            continue
+        }
+        if (character in '0'..'9') {
+            val token = readCelNumber2e(source, offset)
+            tokens.add(token)
+            offset = token.end
+            continue
+        }
+        if (isCelIdentStart2e(character)) {
+            var end = offset + 1
+            while (end < source.length && isCelIdentPart2e(source[end])) end += 1
+            tokens.add(CelToken2e("identifier", source.substring(offset, end), offset, end))
+            offset = end
+            continue
+        }
+        val pair = source.substring(offset, minOf(offset + 2, source.length))
+        if (pair in CEL_DOUBLE_OPERATORS_2E) {
+            tokens.add(CelToken2e("operator", pair, offset, offset + 2))
+            offset += 2
+            continue
+        }
+        if (character.toString() in CEL_SINGLE_OPERATORS_2E) {
+            tokens.add(CelToken2e("operator", character.toString(), offset, offset + 1))
+            offset += 1
+            continue
+        }
+        if (character.toString() in CEL_PUNCTUATION_2E) {
+            tokens.add(CelToken2e("punctuation", character.toString(), offset, offset + 1))
+            offset += 1
+            continue
+        }
+        throw RestrictedCelException2e("unsupported token \"$character\"", offset)
+    }
+    tokens.add(CelToken2e("eof", "", source.length, source.length))
+    return tokens
+}
+
+private fun readCelNumber2e(source: String, offset: Int): CelToken2e {
+    // (?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)? — same shape as the engine tokenizer.
+    var end = offset
+    if (source[end] == '0') {
+        end += 1
+    } else {
+        while (end < source.length && source[end] in '0'..'9') end += 1
+    }
+    if (end < source.length && source[end] == '.' &&
+        end + 1 < source.length && source[end + 1] in '0'..'9'
+    ) {
+        end += 2
+        while (end < source.length && source[end] in '0'..'9') end += 1
+    }
+    if (end < source.length && (source[end] == 'e' || source[end] == 'E')) {
+        var probe = end + 1
+        if (probe < source.length && (source[probe] == '+' || source[probe] == '-')) probe += 1
+        if (probe < source.length && source[probe] in '0'..'9') {
+            end = probe
+            while (end < source.length && source[end] in '0'..'9') end += 1
+        }
+    }
+    if (end == offset) throw RestrictedCelException2e("invalid number literal", offset)
+    return CelToken2e("number", source.substring(offset, end), offset, end)
+}
+
+private fun readCelString2e(source: String, offset: Int, quote: Char): CelToken2e {
+    var cursor = offset + 1
+    val value = StringBuilder()
+    while (cursor < source.length) {
+        val character = source[cursor]
+        if (character == quote) {
+            return CelToken2e("string", value.toString(), offset, cursor + 1)
+        }
+        if (character == '\n' || character == '\r') {
+            throw RestrictedCelException2e("unterminated string literal", offset)
+        }
+        if (character != '\\') {
+            value.append(character)
+            cursor += 1
+            continue
+        }
+        val escapeOffset = cursor
+        cursor += 1
+        if (cursor >= source.length) {
+            throw RestrictedCelException2e("unterminated string escape", escapeOffset)
+        }
+        val escaped = source[cursor].toString()
+        val simpleEscape = CEL_SIMPLE_ESCAPES_2E[escaped]
+        if (simpleEscape != null) {
+            value.append(simpleEscape)
+            cursor += 1
+            continue
+        }
+        if (escaped == "u") {
+            val digits = source.substring(cursor + 1, minOf(cursor + 5, source.length))
+            if (digits.length != 4 || digits.any { it.digitToIntOrNull(16) == null }) {
+                throw RestrictedCelException2e("invalid unicode escape", escapeOffset)
+            }
+            value.append(digits.toInt(16).toChar())
+            cursor += 5
+            continue
+        }
+        throw RestrictedCelException2e("unsupported string escape \\$escaped", escapeOffset)
+    }
+    throw RestrictedCelException2e("unterminated string literal", offset)
+}
+
+private class CelParser2e(
+    private val tokens: List<CelToken2e>,
+    private val variableName: String,
+) {
+    private var index = 0
+
+    fun parse(): CelExpr2e {
+        val expression = parseConditional()
+        val trailing = current()
+        if (trailing.kind != "eof") {
+            if (trailing.value == ".") {
+                throw RestrictedCelException2e("member access is not supported", trailing.offset)
+            }
+            if (trailing.value == "(") {
+                throw RestrictedCelException2e("function calls are not supported", trailing.offset)
+            }
+            throw RestrictedCelException2e("unexpected token \"${trailing.value}\"", trailing.offset)
+        }
+        return expression
+    }
+
+    private fun parseConditional(): CelExpr2e {
+        val condition = parseLogicalOr()
+        if (!consume("?")) return condition
+        val whenTrue = parseConditional()
+        expect(":")
+        val whenFalse = parseConditional()
+        return CelExpr2e.ConditionalExpr(condition, whenTrue, whenFalse, condition.offset)
+    }
+
+    private fun parseLogicalOr(): CelExpr2e = parseBinary({ parseLogicalAnd() }, setOf("||"))
+
+    private fun parseLogicalAnd(): CelExpr2e = parseBinary({ parseEquality() }, setOf("&&"))
+
+    private fun parseEquality(): CelExpr2e = parseBinary({ parseRelational() }, setOf("==", "!="))
+
+    private fun parseRelational(): CelExpr2e =
+        parseBinary({ parseAdditive() }, setOf("<", "<=", ">", ">="))
+
+    private fun parseAdditive(): CelExpr2e = parseBinary({ parseMultiplicative() }, setOf("+", "-"))
+
+    private fun parseMultiplicative(): CelExpr2e =
+        parseBinary({ parseUnary() }, setOf("*", "/", "%"))
+
+    private fun parseBinary(parseOperand: () -> CelExpr2e, operators: Set<String>): CelExpr2e {
+        var expression = parseOperand()
+        while (current().kind == "operator" && current().value in operators) {
+            val operator = advance()
+            expression = CelExpr2e.BinaryExpr(operator.value, expression, parseOperand(), operator.offset)
+        }
+        return expression
+    }
+
+    private fun parseUnary(): CelExpr2e {
+        val token = current()
+        if (token.kind == "operator" && (token.value == "!" || token.value == "-" || token.value == "+")) {
+            advance()
+            return CelExpr2e.UnaryExpr(token.value, parseUnary(), token.offset)
+        }
+        return parsePrimary()
+    }
+
+    private fun parsePrimary(): CelExpr2e {
+        val token = advance()
+        if (token.kind == "number") {
+            val parsed = token.value.toDoubleOrNull()
+                ?: throw RestrictedCelException2e("number literal is not JSON-safe", token.offset)
+            if (!parsed.isFinite() ||
+                (parsed == kotlin.math.floor(parsed) && kotlin.math.abs(parsed) > 9007199254740991.0)
+            ) {
+                throw RestrictedCelException2e("number literal is not JSON-safe", token.offset)
+            }
+            return CelExpr2e.Literal(parsed, token.offset)
+        }
+        if (token.kind == "string") return CelExpr2e.Literal(token.value, token.offset)
+        if (token.kind == "identifier") {
+            if (current().value == "(") {
+                throw RestrictedCelException2e("function calls are not supported", current().offset)
+            }
+            if (token.value == variableName) return CelExpr2e.Input(token.offset)
+            if (token.value == "true") return CelExpr2e.Literal(true, token.offset)
+            if (token.value == "false") return CelExpr2e.Literal(false, token.offset)
+            if (token.value == "null") return CelExpr2e.Literal(null, token.offset)
+            throw RestrictedCelException2e("unknown identifier \"${token.value}\"", token.offset)
+        }
+        if (token.value == "(") {
+            val expression = parseConditional()
+            expect(")")
+            return expression
+        }
+        if (token.value == "[") return parseArray(token.offset)
+        if (token.value == "{") return parseObject(token.offset)
+        throw RestrictedCelException2e("unexpected token \"${token.value}\"", token.offset)
+    }
+
+    private fun parseArray(offset: Int): CelExpr2e {
+        val elements = ArrayList<CelExpr2e>()
+        if (!consume("]")) {
+            do {
+                elements.add(parseConditional())
+            } while (consume(","))
+            expect("]")
+        }
+        return CelExpr2e.ArrayExpr(elements, offset)
+    }
+
+    private fun parseObject(offset: Int): CelExpr2e {
+        val entries = ArrayList<CelEntry2e>()
+        val keys = HashSet<String>()
+        if (!consume("}")) {
+            do {
+                val key = advance()
+                if (key.kind != "string") {
+                    throw RestrictedCelException2e("object keys must be string literals", key.offset)
+                }
+                if (!keys.add(key.value)) {
+                    throw RestrictedCelException2e("duplicate object key \"${key.value}\"", key.offset)
+                }
+                expect(":")
+                entries.add(CelEntry2e(key.value, parseConditional(), key.offset))
+            } while (consume(","))
+            expect("}")
+        }
+        return CelExpr2e.ObjectExpr(entries, offset)
+    }
+
+    private fun consume(value: String): Boolean {
+        if (current().value != value) return false
+        index += 1
+        return true
+    }
+
+    private fun expect(value: String): CelToken2e {
+        val token = current()
+        if (token.value != value) {
+            throw RestrictedCelException2e("expected \"$value\"", token.offset)
+        }
+        index += 1
+        return token
+    }
+
+    private fun advance(): CelToken2e {
+        val token = current()
+        if (token.kind != "eof") index += 1
+        return token
+    }
+
+    private fun current(): CelToken2e = tokens[index.coerceAtMost(tokens.size - 1)]
+}
+
+private fun assertObjectResultExpression2e(expression: CelExpr2e) {
+    when (expression) {
+        is CelExpr2e.ObjectExpr -> return
+        is CelExpr2e.ConditionalExpr -> {
+            assertObjectResultExpression2e(expression.whenTrue)
+            assertObjectResultExpression2e(expression.whenFalse)
+        }
+        else -> throw RestrictedCelException2e(
+            "model option map must return a JSON object",
+            expression.offset,
+        )
+    }
+}
+
+private fun compileReasoningMapCel2e(source: String): CelExpr2e {
+    val trimmed = source.trim()
+    if (trimmed.isEmpty()) throw RestrictedCelException2e("expression must not be empty", 0)
+    val expression = CelParser2e(tokenizeRestrictedCel2e(trimmed), REASONING_MAP_VARIABLE_2E).parse()
+    assertObjectResultExpression2e(expression)
+    return expression
 }
 
 // 对齐 React resolveProviderModelDraftCommit：智能模式只提交用户改动的叶子（稀疏 Overlay），
@@ -1047,22 +1450,41 @@ internal fun ModalPanel2e(
 ) {
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            // Edge-to-edge dialog window so IME/navigation insets are dispatched
+            // to the content and the panel can pad itself above the keyboard.
+            decorFitsSystemWindows = false,
+        ),
     ) {
+        val dialogWindow = (LocalView.current.parent as? DialogWindowProvider)?.window
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            // API < 30: resize the dialog window for the keyboard (no IME insets).
+            SideEffect {
+                dialogWindow?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+            }
+        }
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = 0.55f))
-                .clickable(interactionSource = null, indication = null) { onDismiss() },
+                .clickable(interactionSource = null, indication = null) { onDismiss() }
+                .navigationBarsPadding()
+                .imePadding(),
             contentAlignment = Alignment.Center,
         ) {
-            Box(
+            BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 24.dp)
                     .clickable(interactionSource = null, indication = null) { /* swallow taps */ },
             ) {
-                content()
+                // Never exceed the space left above the keyboard: tall panels
+                // scroll inside the cap instead of clipping off-screen.
+                val panelCap = if (maxHeight < 560.dp) maxHeight else 560.dp
+                Box(modifier = Modifier.fillMaxWidth().heightIn(max = panelCap)) {
+                    content()
+                }
             }
         }
     }
@@ -1087,62 +1509,68 @@ private fun ModelEditorDialogShell2e(
                 .border(1.dp, QodexTokens.Border, RoundedCornerShape(12.dp))
                 .background(QodexTokens.Surface),
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 560.dp)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = title,
-                    color = QodexTokens.Foreground,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.weight(1f),
-                )
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "Smart configuration", // followRecommendedConfig
-                    color = QodexTokens.Foreground,
-                    fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
-                )
-                Switch(
-                    checked = smart,
-                    onCheckedChange = onSmartChange,
-                    enabled = !saving,
-                    colors = SwitchDefaults.colors(
-                        checkedTrackColor = QodexTokens.Primary,
-                        uncheckedTrackColor = QodexTokens.Input,
-                    ),
-                )
-            }
-            content()
-            errorLabel?.let {
-                Text(
-                    text = it,
-                    color = QodexTokens.Destructive,
-                    fontSize = 12.sp, // text-ui-sm
-                )
-            }
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                OutlineButton2d(label = "Reset form", onClick = onReset, enabled = !saving) // resetForm
-                Spacer(Modifier.weight(1f))
-                OutlineButton2d(label = "Cancel", onClick = onDismiss, enabled = !saving) // common.cancel
-                PrimaryButton2d(
-                    label = if (saving) "Saving..." else "Save", // common.saving | common.save
-                    icon = null,
-                    enabled = !saving,
-                    onClick = onSave,
-                )
-            }
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = title,
+                            color = QodexTokens.Foreground,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "Smart configuration", // followRecommendedConfig
+                            color = QodexTokens.Foreground,
+                            fontSize = 14.sp,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Switch(
+                            checked = smart,
+                            onCheckedChange = onSmartChange,
+                            enabled = !saving,
+                            colors = SwitchDefaults.colors(
+                                checkedTrackColor = QodexTokens.Primary,
+                                uncheckedTrackColor = QodexTokens.Input,
+                            ),
+                        )
+                    }
+                    content()
+                    errorLabel?.let {
+                        Text(
+                            text = it,
+                            color = QodexTokens.Destructive,
+                            fontSize = 12.sp, // text-ui-sm
+                        )
+                    }
+                }
+                // Pinned action bar: stays reachable above the soft keyboard
+                // instead of scrolling out of view with the form body.
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    OutlineButton2d(label = "Reset form", onClick = onReset, enabled = !saving) // resetForm
+                    Spacer(Modifier.weight(1f))
+                    OutlineButton2d(label = "Cancel", onClick = onDismiss, enabled = !saving) // common.cancel
+                    PrimaryButton2d(
+                        label = if (saving) "Saving..." else "Save", // common.saving | common.save
+                        icon = null,
+                        enabled = !saving,
+                        onClick = onSave,
+                    )
+                }
             }
         }
     }
