@@ -29,11 +29,16 @@ object RuntimeBus {
     }
 
     fun append(line: String) {
-        Log.i(TAG, line)
+        // Audit M-01: engine stderr/stdout lines and phase messages pass the
+        // central redactor before logcat/disk — engine stderr may carry
+        // request or credential context and must never land verbatim in a
+        // persistent diagnostic log.
+        val safe = com.qodex.app.utils.LogRedactor.redact(line)
+        Log.i(TAG, safe)
         // Mirrored to boot.log so engine stdout/stderr and phase transitions survive without ADB.
-        FileLogger.append("Runtime", line)
+        FileLogger.append("Runtime", safe)
         val ts = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.US)
             .format(java.util.Date())
-        log.update { (it + "[$ts] $line").takeLast(LOG_LINES) }
+        log.update { (it + "[$ts] $safe").takeLast(LOG_LINES) }
     }
 }

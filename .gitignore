@@ -21,9 +21,13 @@ packages/desktop/.e2e-network-capture/
 *.tsbuildinfo
 .DS_Store
 coverage/
-.env.local
-.env.*.local
+# Audit M-05: environment files are ignored by default so developer-local
+# secrets can never be committed; only reviewed example templates are tracked
+# via explicit negation below.
 .env
+.env.*
+!.env.example
+!.env.*.example
 .VSCodeCounter
 .idea/
 .zed/
