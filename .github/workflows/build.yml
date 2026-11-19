@@ -10,7 +10,7 @@ concurrency:
 jobs:
   build-apk:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,15 +36,37 @@ jobs:
       - name: Stdio transport smoke test (Initialize handshake + RPC round trip)
         run: pnpm exec tsx scripts/qodex-android/stdio-smoke.mts
 
-      - name: Conversation smoke test (V4 session + frame flow over stdio)
+      # Sets the SAME agent-spawn wiring the Android host injects (BionicEnv):
+      # the engine's default resolver checks QODEX_AGENT_SERVER_COMMAND first,
+      # so this proves the bundled qodex.cjs spawns as `app-server --stdio` —
+      # the exact mechanism that replaces the "Qodex agent server command is
+      # not configured" failure on device.
+      - name: Conversation smoke test (V4 session + agent spawn via env wiring)
         run: pnpm exec tsx scripts/qodex-android/conversation-smoke.mts
         timeout-minutes: 5
+        env:
+          QODEX_AGENT_SERVER_COMMAND: node
+          QODEX_AGENT_SERVER_ARGS_JSON: '[ "${{ github.workspace }}/apps/qodex-cli/packages/cli/dist/qodex.cjs", "app-server", "--stdio" ]'
 
-      - name: Pack engine runtime bundle (qodex-dist.tgz + sha256)
+      - name: Pack consolidated Bionic usr archive (qodex-usr.tgz + sha256)
+        run: node scripts/qodex-android/pack-runtime-usr.mjs --debs third-party/termux-debs --out android/app/src/main/assets/runtime/qodex-usr.tgz
+
+      - name: Verify usr archive structure
+        run: |
+          set -e
+          tar -tzf android/app/src/main/assets/runtime/qodex-usr.tgz > /tmp/usr-list.txt
+          grep -qx 'usr/bin/node' /tmp/usr-list.txt \
+            || { echo "FAIL: usr/bin/node missing from consolidated archive"; exit 1; }
+          grep -qx 'usr/bin/bash' /tmp/usr-list.txt \
+            || { echo "FAIL: usr/bin/bash missing from consolidated archive"; exit 1; }
+          echo "OK: usr archive structure correct ($(wc -l < /tmp/usr-list.txt) entries)"
+
+      - name: Pack engine runtime bundle (qodex-dist.tgz + agent CLI + sha256)
         run: |
           node scripts/qodex-android/pack-runtime-dist.mjs \
             --dist packages/server/dist \
             --node-modules node_modules \
+            --agent-cli apps/qodex-cli/packages/cli/dist/qodex.cjs \
             --out android/app/src/main/assets/runtime/qodex-dist.tgz
 
       - name: Verify archive structure
@@ -54,12 +76,30 @@ jobs:
             > /tmp/archive-list.txt
           grep -qx 'entry-stdio.js' /tmp/archive-list.txt \
             || { echo "FAIL: entry-stdio.js not at root"; head -20 /tmp/archive-list.txt; exit 1; }
+          grep -qx 'qodex.cjs' /tmp/archive-list.txt \
+            || { echo "FAIL: qodex.cjs (agent CLI bundle) not at root"; exit 1; }
           grep -qx 'node_modules/' /tmp/archive-list.txt \
             || { echo "FAIL: node_modules missing"; exit 1; }
           grep -q '^node_modules/[^/]*/package\.json$' /tmp/archive-list.txt \
             || { echo "FAIL: node_modules has no packaged dependencies"; exit 1; }
           grep -q '^dist/' /tmp/archive-list.txt && { echo "FAIL: dist/ prefix in root"; exit 1; } || true
           echo "OK: archive structure correct"
+
+      - name: Setup Rust toolchain (aarch64-linux-android)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk --locked
+
+      - name: Locate Android NDK (cargo-ndk + alignment check)
+        run: |
+          set -e
+          ndk_root="$ANDROID_HOME/ndk"
+          version="$(ls "$ndk_root" | sort -V | tail -1)"
+          echo "QODEX_NDK_DIR=$ndk_root/$version" >> "$GITHUB_ENV"
+          echo "Using NDK $version at $ndk_root/$version"
 
       - name: Setup JDK 21
         uses: actions/setup-java@v4
@@ -80,9 +120,25 @@ jobs:
         working-directory: android
         run: ./gradlew :app:testDebugUnitTest --no-daemon
 
-      - name: Build debug APK
+      # buildQodexNative (crates/qodex-native) runs as a preBuild dependency;
+      # .cargo/config.toml enforces -Wl,-z,max-page-size=16384 (16KB pages).
+      - name: Build debug APK (with libqodex_native.so via cargo-ndk)
         working-directory: android
-        run: ./gradlew :app:assembleDebug --no-daemon
+        run: ./gradlew :app:assembleDebug -Pqodex.native=true --no-daemon
+
+      - name: Verify native library (presence + 16KB page alignment + APK inclusion)
+        run: |
+          set -e
+          so="android/app/src/main/jniLibs/arm64-v8a/libqodex_native.so"
+          [ -f "$so" ] || { echo "FAIL: libqodex_native.so was not produced"; exit 1; }
+          readelf="$QODEX_NDK_DIR/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf"
+          aligns="$("$readelf" -l "$so" | awk '/LOAD/{getline; print $NF}' | sort -u)"
+          echo "LOAD segment alignments: $aligns"
+          echo "$aligns" | awk '{ if (strtonum($0) < 16384) exit 1 }' \
+            || { echo "FAIL: LOAD alignment below 16KB (0x4000)"; exit 1; }
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep -q 'lib/arm64-v8a/libqodex_native.so' \
+            || { echo "FAIL: libqodex_native.so missing from the APK"; exit 1; }
+          echo "OK: libqodex_native.so 16KB-aligned and packaged in the APK"
 
       - name: Upload APK artifact (Qodex-APK)
         uses: actions/upload-artifact@v4
