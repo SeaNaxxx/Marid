@@ -100,6 +100,11 @@ describe("resolveRuntimeDisallowedTools", () => {
       RESUME_WORKFLOW_RUN_TOOL_NAME,
       RESOLVE_WORKFLOW_QUESTION_TOOL_NAME,
       FILL_WORKFLOW_HOLE_TOOL_NAME,
+      // 内置 node REPL 与它的 MCP 变体：child 继承父 runtimeFeatures.nodeRepl 时照常注册，
+      // 而 child 的 yolo 压不过 alwaysAsk（无人可见的确认挂到超时），MCP 变体则可能被 yolo
+      // 直接放行——两条路都是无沙箱本机执行，结构性禁用（tool-allowlist.ts）。
+      "js",
+      "mcp__node_repl__js",
       LIST_WORKFLOW_RUNS_TOOL_NAME,
       GET_WORKFLOW_RUN_TOOL_NAME,
     ]);
@@ -118,6 +123,8 @@ describe("resolveRuntimeDisallowedTools", () => {
       RESUME_WORKFLOW_RUN_TOOL_NAME,
       RESOLVE_WORKFLOW_QUESTION_TOOL_NAME,
       FILL_WORKFLOW_HOLE_TOOL_NAME,
+      "js",
+      "mcp__node_repl__js",
       LIST_WORKFLOW_RUNS_TOOL_NAME,
       GET_WORKFLOW_RUN_TOOL_NAME,
     ]);
@@ -135,6 +142,8 @@ describe("resolveRuntimeDisallowedTools", () => {
       RESUME_WORKFLOW_RUN_TOOL_NAME,
       RESOLVE_WORKFLOW_QUESTION_TOOL_NAME,
       FILL_WORKFLOW_HOLE_TOOL_NAME,
+      "js",
+      "mcp__node_repl__js",
       LIST_WORKFLOW_RUNS_TOOL_NAME,
       GET_WORKFLOW_RUN_TOOL_NAME,
     ]);
@@ -224,6 +233,24 @@ describe("resolveRuntimeDisallowedTools", () => {
     });
     expect(mainRegistry.has(CREATE_WORKFLOW_TOOL_NAME)).toBe(true);
     expect(mainRegistry.has(RESUME_WORKFLOW_RUN_TOOL_NAME)).toBe(true);
+  });
+
+  // node REPL 的两条路在 child 里都必须结构性消失：内置 `js`（includeNodeRepl 开着时照常
+  // 走注册面）与 MCP 变体 `mcp__node_repl__js`（MCP 注册面按同一份解析名单过滤）。
+  it("never registers the node REPL js tool in a workflow child", () => {
+    const childRegistry = createToolRegistry();
+    registerBuiltInTools(childRegistry, {
+      includeNodeRepl: true,
+      disallowedTools: resolveRuntimeDisallowedTools(config({ taskType: "workflow_child" })),
+    });
+    expect(childRegistry.has("js")).toBe(false);
+
+    const mainRegistry = createToolRegistry();
+    registerBuiltInTools(mainRegistry, {
+      includeNodeRepl: true,
+      disallowedTools: resolveRuntimeDisallowedTools(config({})),
+    });
+    expect(mainRegistry.has("js")).toBe(true);
   });
 });
 

@@ -15,6 +15,7 @@ import path from "node:path";
 import type { SavedWorkflowMeta } from "@qodex/contracts";
 import { SAVED_WORKFLOW_SENTINEL, parseSavedWorkflow } from "./saved-workflows/index.js";
 import { describeWorkflowScriptPath } from "./workflow-script-path.js";
+import { resolveWorkspacePath } from "../path-policy.js";
 
 /** 读成功的脚本文件。 */
 export interface WorkflowScriptFile {
@@ -32,20 +33,69 @@ export interface WorkflowScriptFile {
   bodyLineOffset: number;
 }
 
+/**
+ * 失败的判别键。调用方按它挑各自的命名前缀：`outside_workspace` 的 message 已自带
+ * `workflow_script_file_outside_workspace` 名字，调用方不得再包一层
+ * `workflow_script_file_unreadable`（那会把「路径越界」误报成「文件读不出来」）。
+ */
+export type WorkflowScriptFileFailureCode = "outside_workspace";
+
 export type WorkflowScriptFileResult =
   | { ok: true; file: WorkflowScriptFile }
-  | { ok: false; message: string };
+  | { ok: false; message: string; code?: WorkflowScriptFileFailureCode };
 
 /**
  * 相对路径按会话工作目录解析，绝对路径原样归一——与 `Read` 收下一个路径的规则同一条
  * （core/src/tool/path-policy.ts 的 `resolveWorkspacePath`）。
  *
- * 这里没有走那个 helper：它要求一个 `workspaceRoot`，而 `resolveInput` 的上下文
- * （`ToolInputResolutionContext`）刻意窄到只有 `workingDirectory`。两者在 `operation: "read"`
- * 上的行为本就相同——那个函数当前不硬拦工作区之外的路径，只做同一条 resolve/normalize。
+ * 这里没有直接走那个 helper：纯解析（无根可依）与带根 containment 是两个姿态，见
+ * {@link workflowScriptPathContainment}。
  */
 export function resolveWorkflowScriptFilePath(cwd: string, inputPath: string): string {
   return path.isAbsolute(inputPath) ? path.normalize(inputPath) : path.resolve(cwd, inputPath);
+}
+
+/**
+ * 模型给的 `path` 在**读盘之前**过工作区边界：四个共用本模块的工具
+ * （`CreateWorkflow.path`、`AmendWorkflow.path`、`SaveWorkflow.script_path`、`EvalWorkflowSnippet.path`、
+ * 以及 `FillWorkflowHole.path`）此前只做 resolve/normalize——一个绝对路径或 `../` 可以把
+ * 工作区外的任意文件读成「将要执行的脚本」，绕开 Read/Write/Edit 走的
+ * `resolveWorkspacePath` 边界。`workspaceRoot` 在场时与文件系统工具同一条边界
+ * （真实路径按最深的已存在祖先解析，workspace 内的符号链接也 smuggle 不出去）。
+ *
+ * 拒绝是**命名的结构化失败**（`workflow_script_file_outside_workspace`），不是抛异常：
+ * 调用方要把它原样回给模型，模型才知道该把脚本挪进工作区而不是去修「读不出来」。
+ *
+ * `workspaceRoot` 缺席 = 裸 context（单元测试直造的 resolution context、未接线的宿主）：
+ * 维持旧的纯 resolve/normalize——不发明一个根，也不假装拦过。
+ */
+export function workflowScriptPathContainment(options: {
+  cwd: string;
+  inputPath: string;
+  workspaceRoot?: string;
+}): { ok: true; absolute: string } | { ok: false; message: string } {
+  const absolute = resolveWorkflowScriptFilePath(options.cwd, options.inputPath);
+  if (options.workspaceRoot === undefined || options.workspaceRoot === "") {
+    return { ok: true, absolute };
+  }
+  try {
+    resolveWorkspacePath({
+      inputPath: options.inputPath,
+      workingDirectory: options.cwd,
+      workspaceRoot: options.workspaceRoot,
+      operation: "read",
+    });
+  } catch {
+    const described = describeWorkflowScriptPath(absolute, options.cwd);
+    return {
+      ok: false,
+      message:
+        `workflow_script_file_outside_workspace: ${described} is outside the session workspace, ` +
+        "so it cannot be read as a workflow script. Move the script inside the workspace and " +
+        "pass its workspace path, or submit the script inline.",
+    };
+  }
+  return { ok: true, absolute };
 }
 
 /**
@@ -59,8 +109,14 @@ export async function readWorkflowScriptFile(options: {
   cwd: string;
   inputPath: string;
   parseFrontmatter?: boolean;
+  /** 会话工作区根；在场时模型给的 `path` 必须落在里面（见 {@link workflowScriptPathContainment}）。 */
+  workspaceRoot?: string;
 }): Promise<WorkflowScriptFileResult> {
-  const absolute = resolveWorkflowScriptFilePath(options.cwd, options.inputPath);
+  const containment = workflowScriptPathContainment(options);
+  if (!containment.ok) {
+    return { ok: false, code: "outside_workspace", message: containment.message };
+  }
+  const absolute = containment.absolute;
   const described = describeWorkflowScriptPath(absolute, options.cwd);
 
   let source: string;

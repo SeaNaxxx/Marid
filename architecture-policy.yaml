@@ -2357,3 +2357,9 @@ exceptions:
     paths:
       - packages/ui/src/root/GlobalDatabaseStartupLoading.tsx
     reason: 启动失败页在现有复制诊断/重试/退出旁增加导出日志按钮（docs/desktop/database-migration-startup-gate-plan.md）。只扩展既有失败页交互，不新增文件、不改变启动状态 owner 或模块边界；接管 packages/ui/src/root 不在本次范围内。
+  - id: workflow-path-containment-gate-edit
+    rule: unmanaged-new-file
+    paths:
+      - apps/qodex-cli/packages/core/src/tool/executor/permission-input-adjustments.ts
+      - apps/qodex-cli/packages/core/src/tool/handlers/workflow-path-source.ts
+    reason: 已准入的 workflow `path` 读者补工作区 containment 门（docs/security/ANDROID-AGENT-THREAT-MODEL.md M-08）：permission-input-adjustments 只在 buildToolInputResolutionContext 追加 workspaceRoot 透传，workflow-path-source 新增 workflowScriptPathContainment 并让 readWorkflowScriptFile 在读盘前走与文件系统工具同一条 resolveWorkspacePath 边界（拒绝 = 命名的 workflow_script_file_outside_workspace 结构化失败）；五个工具 resolver 的调用形不变，裸 context（无根）保持旧解析。接管整个 core/src/tool 不在本次范围内。

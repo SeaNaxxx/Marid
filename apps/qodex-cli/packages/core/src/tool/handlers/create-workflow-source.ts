@@ -122,6 +122,8 @@ export async function resolveCreateWorkflowInput(
   input: unknown,
   cwd: string,
   catalog?: ModelCatalogPort,
+  /** 会话工作区根：`path` 来源的文件读盘前过工作区边界（handlers/workflow-path-source.ts）。 */
+  workspaceRoot?: string,
 ): Promise<ToolInputResolutionResult> {
   const parsed = CreateWorkflowInputSchema.safeParse(input);
   if (!parsed.success) return { result: true, input };
@@ -137,7 +139,7 @@ export async function resolveCreateWorkflowInput(
     requested === undefined ? {} : { max_concurrency: normalizeWorkflowMaxConcurrency(requested) };
 
   if (model.path !== undefined) {
-    return resolvePathSource(model, model.path, cwd, {
+    return resolvePathSource(model, model.path, cwd, workspaceRoot, {
       ...boundField,
       ...subagentModelField,
     });
@@ -227,9 +229,11 @@ async function resolvePathSource(
   model: CreateWorkflowInput,
   inputPath: string,
   cwd: string,
+  /** 会话工作区根：模型给的文件读盘前过工作区边界（handlers/workflow-path-source.ts）。 */
+  workspaceRoot: string | undefined,
   extraFields: { max_concurrency?: number; subagent_model?: string },
 ): Promise<ToolInputResolutionResult> {
-  const read = await readWorkflowScriptFile({ cwd, inputPath });
+  const read = await readWorkflowScriptFile({ cwd, inputPath, workspaceRoot });
   if (!read.ok) return failure(read.message);
   const file = read.file;
 

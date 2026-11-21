@@ -399,6 +399,7 @@ export const createWorkflowToolEntry: ToolEntry = {
       input,
       context.workingDirectory ?? ".",
       context.modelCatalogPort,
+      context.workspaceRoot,
     );
     // 脚本点名的模型在脚本归一化之后解析（三条来源此刻都有 `script`），确认窗画的就是将要生效的绑定。
     const resolution = withScriptModelBindingsResolved(resolved, context.modelCatalogPort);

@@ -124,6 +124,8 @@ function validateSaveWorkflowInput(input: unknown): ToolInputValidationResult {
 async function resolveSaveWorkflowInput(
   input: unknown,
   cwd: string,
+  /** 会话工作区根：模型给的 `script_path` 读盘前过工作区边界（handlers/workflow-path-source.ts）。 */
+  workspaceRoot?: string,
 ): Promise<ToolInputResolutionResult> {
   const parsed = SaveWorkflowInputSchema.safeParse(input);
   if (!parsed.success) return { result: true, input };
@@ -132,7 +134,11 @@ async function resolveSaveWorkflowInput(
   // 块被丢掉（只留正文）——元数据由本次调用的字段说了算，那才是用户批准的东西。
   let script = parsed.data.script;
   if (parsed.data.script_path !== undefined) {
-    const read = await readWorkflowScriptFile({ cwd, inputPath: parsed.data.script_path });
+    const read = await readWorkflowScriptFile({
+      cwd,
+      inputPath: parsed.data.script_path,
+      workspaceRoot,
+    });
     if (!read.ok) {
       return { result: false, errorCode: SAVE_WORKFLOW_FAILURE_CODE, message: read.message };
     }
@@ -268,7 +274,11 @@ export const saveWorkflowToolEntry: ToolEntry = {
   resolveInput: (input, context) =>
     // 技能门先于落点解析（handlers/workflow-skill-gate.ts）：保存的也是一段脚本。
     requireDynamicWorkflowSkill(context, SAVE_WORKFLOW_TOOL_NAME) ??
-    resolveSaveWorkflowInput(input, context.workingDirectory ?? "."),
+    resolveSaveWorkflowInput(
+      input,
+      context.workingDirectory ?? ".",
+      context.workspaceRoot,
+    ),
   prepareApproval: prepareSaveWorkflowApproval,
   inputSchema: SaveWorkflowInputJsonSchema,
   outputSchema: SaveWorkflowOutputJsonSchema,

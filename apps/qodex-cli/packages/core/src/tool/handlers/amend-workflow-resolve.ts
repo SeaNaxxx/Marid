@@ -105,6 +105,7 @@ export async function resolveAmendWorkflowInput(
       cwd,
       port,
       predecessorScriptPath: undefined,
+      workspaceRoot: context.workspaceRoot,
     });
     if (!script.result) return script;
     return {
@@ -149,6 +150,7 @@ export async function resolveAmendWorkflowInput(
     cwd,
     port,
     predecessorScriptPath: snapshot.scriptPath,
+    workspaceRoot: context.workspaceRoot,
   });
   if (!script.result) return script;
   const unchanged = await refuseUnchangedScript({

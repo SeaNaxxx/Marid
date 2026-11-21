@@ -33,8 +33,12 @@ export function buildToolInputResolutionContext(
   deps: ToolExecutorDeps,
 ): ToolInputResolutionContext {
   const workingDirectory = deps.getWorkingDirectory?.();
+  const workspaceRoot = deps.getWorkspaceRoot?.();
   return {
     ...(workingDirectory === undefined ? {} : { workingDirectory }),
+    // workflow 脚本 `path` 读者（handlers/workflow-path-source.ts）按它拦住工作区之外的读取；
+    // 缺席时那些读者维持旧的纯 resolve/normalize（裸 context 不发明根）。
+    ...(workspaceRoot === undefined ? {} : { workspaceRoot }),
     runtimeTaskRegistry: deps.runtimeTaskRegistry,
     ...(deps.dynamicWorkflowRunPort === undefined
       ? {}

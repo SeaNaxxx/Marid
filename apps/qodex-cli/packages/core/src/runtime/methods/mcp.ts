@@ -7,6 +7,7 @@ import {
 import { registerMcpTools, traceContextToLogContext } from "../deps.js";
 import type { McpConnectionSnapshot, McpServerConfig, TraceContext } from "../deps.js";
 import type { AgentRuntimeInternal } from "../internal.js";
+import { resolveRuntimeDisallowedTools } from "../helpers/tool-allowlist.js";
 import type { McpToolDescriptor, PluginReferenceCatalog } from "@qodex/contracts";
 
 const MCP_SESSION_OAUTH_AUTHORIZATION_TIMEOUT_MS = 15_000;
@@ -158,7 +159,10 @@ export async function initializeMcp(
     this.shutdownSignal.throwIfAborted();
     const registered = registerMcpTools(this.registry, mcpPort, snapshot.tools, {
       allowedTools: this.config.toolAllowlist,
-      disallowedTools: this.config.toolDisallowlist,
+      // MCP 注册面与内置注册面（helpers/runtime-tools.ts）用同一份解析后的名单：workflow
+      // child 的结构性禁用（tool-allowlist.ts）也必须拦住 MCP 同步来的工具——否则
+      // mcp__node_repl__js（无沙箱的本机 Node）在 child 的 yolo 下绕过整个名单。
+      disallowedTools: resolveRuntimeDisallowedTools(this.config),
       officialCuaServerNames: computeOfficialCuaServerNames(
         this.config.mcp?.servers ?? {},
         new Set(this.config.mcp?.trustedOfficialCuaServerNames ?? []),
@@ -241,7 +245,8 @@ export async function refreshMcpToolsIfChanged(
   for (const name of previous) this.registry.unregister(name);
   const registered = registerMcpTools(this.registry, mcpPort, descriptors, {
     allowedTools: this.config.toolAllowlist,
-    disallowedTools: this.config.toolDisallowlist,
+    // 与 startup 注册点同一条理由：结构性禁用名单对 MCP 工具同样生效。
+    disallowedTools: resolveRuntimeDisallowedTools(this.config),
     officialCuaServerNames: computeOfficialCuaServerNames(
       this.config.mcp?.servers ?? {},
       new Set(this.config.mcp?.trustedOfficialCuaServerNames ?? []),

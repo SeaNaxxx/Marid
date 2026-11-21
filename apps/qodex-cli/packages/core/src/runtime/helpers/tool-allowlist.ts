@@ -51,6 +51,16 @@ const WORKFLOW_CHILD_DISALLOWED_TOOLS = [
   // FillWorkflowHole 与 AmendWorkflow 同一个根因（alwaysAsk 在 child 里无窗可弹）加同一条不变式
   // （留白是脚本向**主代理**要代码，子代理不得替它写）：一并进列。
   FILL_WORKFLOW_HOLE_TOOL_NAME,
+  // 内置 `js`（node REPL）与 MCP 变体 `mcp__node_repl__js` 同源同因：二者都能跑无沙箱的本机
+  // Node 代码。child 继承父 runtimeConfig（含 runtimeFeatures.nodeRepl），父开着 nodeRepl 时
+  // 内置 `js` 照常注册进 child；node_repl MCP server 同步来的 `mcp__node_repl__js` 走的是 MCP
+  // 注册面（methods/mcp.ts），同样在 child 里活着。内置条目 alwaysAsk —— child 的 yolo 被
+  // ask 压过，发出一个父界面看不到的确认请求挂到权限超时（与 CreateWorkflow 同一个根因）；
+  // MCP 变体若不带 alwaysAsk 元数据，则在 yolo 下**直接放行**——无沙箱执行连一次确认都省了。
+  // 两条路都必须在 child 里结构性消失（注册面 + MCP 注册面 + permission 名单同源，见
+  // resolveRuntimeDisallowedTools 的两个消费点）。
+  "js",
+  "mcp__node_repl__js",
 ] as const;
 
 /**

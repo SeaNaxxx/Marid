@@ -307,6 +307,13 @@ export interface ToolInputResolutionContext {
    * 否。缺席 = 本会话没有 Skill 工具或调用方不参与（单元测试直接造的 context），门不生效。
    */
   hasLoadedSkill?: (skillName: string) => boolean;
+  /**
+   * 会话工作区根（executor deps 的 `getWorkspaceRoot`）。workflow 脚本 `path` 读者
+   * （handlers/workflow-path-source.ts）用它把模型给的路径拦在工作区之内——与 Read/Write/Edit
+   * 走的 `resolveWorkspacePath` 是同一个边界。缺席 = 裸 context（单元测试直造、未接线的宿主）：
+   * 维持旧的纯 resolve/normalize 行为，不发明一个根去拦无辜路径。
+   */
+  workspaceRoot?: string;
 }
 
 export type ToolInputResolutionResult = { result: true; input: unknown } | ToolHandlerFailure;

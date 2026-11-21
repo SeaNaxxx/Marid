@@ -24,7 +24,7 @@ import type {
   ToolInputResolutionResult,
 } from "../types.js";
 import { spliceHoleBodyPreview } from "./fill-workflow-hole-splice.js";
-import { resolveWorkflowScriptFilePath } from "./workflow-path-source.js";
+import { workflowScriptPathContainment } from "./workflow-path-source.js";
 import { workflowRunNotFoundFailure } from "./workflow-run-introspection.js";
 import { describeWorkflowScriptPath } from "./workflow-script-path.js";
 
@@ -143,7 +143,7 @@ export async function resolveFillWorkflowHoleInput(
   void _forged;
   const port = context.dynamicWorkflowRunPort;
   if (port === undefined) {
-    const body = await resolveFillBody(model, cwd);
+    const body = await resolveFillBody(model, cwd, context.workspaceRoot);
     if (!body.result) return body;
     return { result: true, input: { ...model, ...body.fields } satisfies FillWorkflowHoleInput };
   }
@@ -153,7 +153,7 @@ export async function resolveFillWorkflowHoleInput(
   const waiting = findWaitingHole(snapshot, model.run_id, model.hole_id);
   if (waiting !== undefined && "result" in waiting) return waiting;
 
-  const body = await resolveFillBody(model, cwd);
+  const body = await resolveFillBody(model, cwd, context.workspaceRoot);
   if (!body.result) return body;
   if (model.path !== undefined) {
     const rejected = rejectedFills.get(
@@ -284,9 +284,26 @@ type FillBodyResolution =
 async function resolveFillBody(
   model: FillWorkflowHoleInput,
   cwd: string,
+  /** 会话工作区根：模型给的 `path` 读盘前过工作区边界（handlers/workflow-path-source.ts）。 */
+  workspaceRoot?: string,
 ): Promise<FillBodyResolution> {
   if (model.path !== undefined) {
-    const absolute = resolveWorkflowScriptFilePath(cwd, model.path);
+    // 与其余四个 `path` 读者同一道边界：工作区之外的文件不进确认窗，也不被拼进 run。
+    const containment = workflowScriptPathContainment({
+      cwd,
+      inputPath: model.path,
+      workspaceRoot,
+    });
+    if (!containment.ok) {
+      // containment 的 message 已自带命名前缀（workflow_script_file_outside_workspace）——
+      // 不得再包一层 fill_file_unreadable，那会把「路径越界」误报成「文件读不出来」。
+      return {
+        result: false,
+        errorCode: FILL_WORKFLOW_HOLE_ERROR_CODE.FILL_FILE,
+        message: containment.message,
+      };
+    }
+    const absolute = containment.absolute;
     const described = describeWorkflowScriptPath(absolute, cwd);
     try {
       const script = await readFile(absolute, "utf8");

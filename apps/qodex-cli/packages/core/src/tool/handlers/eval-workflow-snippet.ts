@@ -91,6 +91,8 @@ function validateEvalWorkflowSnippetInput(input: unknown): ToolInputValidationRe
 async function resolveEvalWorkflowSnippetInput(
   input: unknown,
   cwd: string,
+  /** 会话工作区根：模型给的 `path` 读盘前过工作区边界（handlers/workflow-path-source.ts）。 */
+  workspaceRoot?: string,
 ): Promise<ToolInputResolutionResult> {
   const parsed = EvalWorkflowSnippetInputSchema.safeParse(input);
   if (!parsed.success) return { result: true, input };
@@ -107,6 +109,7 @@ async function resolveEvalWorkflowSnippetInput(
     cwd,
     inputPath: parsed.data.path,
     parseFrontmatter: false,
+    workspaceRoot,
   });
   if (!read.ok) {
     return { result: false, errorCode: EVAL_WORKFLOW_SNIPPET_FAILURE_CODE, message: read.message };
@@ -283,7 +286,11 @@ export const evalWorkflowSnippetToolEntry: ToolEntry = {
   resolveInput: (input, context) =>
     // 技能门先于 path 归一化（handlers/workflow-skill-gate.ts）：片段的语言规则也在技能里。
     requireDynamicWorkflowSkill(context, EVAL_WORKFLOW_SNIPPET_TOOL_NAME) ??
-    resolveEvalWorkflowSnippetInput(input, context.workingDirectory ?? "."),
+    resolveEvalWorkflowSnippetInput(
+      input,
+      context.workingDirectory ?? ".",
+      context.workspaceRoot,
+    ),
   inputSchema: EvalWorkflowSnippetInputJsonSchema,
   outputSchema: EvalWorkflowSnippetOutputJsonSchema,
   runtimeInputSchema: EvalWorkflowSnippetInputSchema,

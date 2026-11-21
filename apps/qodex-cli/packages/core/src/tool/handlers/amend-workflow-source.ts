@@ -158,15 +158,29 @@ export async function resolveAmendScript(options: {
   port: DynamicWorkflowRunPort | undefined;
   /** 前驱快照上的脚本文件（绝对路径）；沿用脚本时用来认家。 */
   predecessorScriptPath: string | undefined;
+  /**
+   * 会话工作区根：模型给的 `path` 在读盘之前过工作区边界（handlers/workflow-path-source.ts）。
+   * 缺席 = 裸 context，维持旧的纯 resolve/normalize。
+   */
+  workspaceRoot?: string;
 }): Promise<AmendScriptResolution> {
   const { model, cwd, port } = options;
   if (model.path !== undefined) {
-    const read = await readWorkflowScriptFile({ cwd, inputPath: model.path });
+    const read = await readWorkflowScriptFile({
+      cwd,
+      inputPath: model.path,
+      workspaceRoot: options.workspaceRoot,
+    });
     if (!read.ok) {
       return {
         result: false,
         errorCode: AMEND_WORKFLOW_ERROR_CODE.SCRIPT_FILE,
-        message: `workflow_script_file_unreadable: ${read.message} Nothing was stopped or created.`,
+        // `outside_workspace` 的 message 已自带命名前缀（workflow_script_file_outside_workspace）；
+        // 其余失败才包 `workflow_script_file_unreadable`——两种失败不该共用一个名字。
+        message:
+          read.code === undefined
+            ? `workflow_script_file_unreadable: ${read.message} Nothing was stopped or created.`
+            : `${read.message} Nothing was stopped or created.`,
       };
     }
     return {
