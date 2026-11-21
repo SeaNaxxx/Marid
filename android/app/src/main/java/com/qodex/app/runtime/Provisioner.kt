@@ -111,7 +111,10 @@ object Provisioner {
             copyAsset(app, USR_ARCHIVE_ASSET, usrTar)
             verifySha256(usrTar, usrSha, "qodex-usr")
             // One sequential streaming pass instead of 53 ar + tar round trips.
-            TarExtractor(stagingRoot).extract(usrTar.inputStream().let { GzipCompressorInputStream(it) })
+            // The report instance is THE consumer's: threading it in is what makes
+            // the counts below real (a default-constructed report used to stay at
+            // zero while the log line claimed "0 files, 0 symlinks").
+            TarExtractor(stagingRoot, report).extract(usrTar.inputStream().let { GzipCompressorInputStream(it) })
             usrTar.delete()
             RuntimeBus.append(
                 "bionic extraction: consolidated archive, ${report.regularFiles} files, " +
@@ -153,6 +156,7 @@ object Provisioner {
 
             RuntimeBus.setPhase(RuntimePhase.Provisioning("extracting engine"))
             val tDist = SystemClock.elapsedRealtime()
+            val distReport = TarExtractor.ExtractReport()
             val distSha = readAssetText(app, DIST_SHA_ASSET).trim()
             val distTar = File(rt, "downloads/qodex-dist.tgz")
             distTar.parentFile?.mkdirs()
@@ -162,7 +166,7 @@ object Provisioner {
             // bundle must fail with its real root entries, not a post-hoc guess.
             DistArchiveContract.requireValid(distTar)
             distStaging.mkdirs()
-            TarExtractor(distStaging).extract(
+            TarExtractor(distStaging, distReport).extract(
                 distTar.inputStream().let { GzipCompressorInputStream(it) },
             )
             distTar.delete()
@@ -173,7 +177,10 @@ object Provisioner {
             }
             FileLogger.append(
                 "Provisioner",
-                "engine dist extracted (sha256 verified) in ${SystemClock.elapsedRealtime() - tDist}ms",
+                "engine dist extracted (sha256 verified, ${distReport.regularFiles} files, " +
+                    "${distReport.directories} dirs, ${distReport.skippedEntries} skipped" +
+                    (distReport.firstError?.let { ", first fs error: $it" } ?: "") +
+                    ") in ${SystemClock.elapsedRealtime() - tDist}ms",
             )
 
             val secret = credentialSecret(app)

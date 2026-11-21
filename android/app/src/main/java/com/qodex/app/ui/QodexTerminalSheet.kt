@@ -52,6 +52,10 @@ import com.qodex.app.icons.QodexIcons
 import com.qodex.app.rpc.QodexRpcClient
 import com.qodex.app.rpc.asObjectOrNull
 import com.qodex.app.rpc.asStringOrNull
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 // Real engine PTY attempt: terminal.create → onDynamicData stream + write/resize.
@@ -122,10 +126,19 @@ public fun QodexTerminalSheet(
         }
         // onDispose must be the block's final expression (DisposableEffectResult).
         onDispose {
-            dataSub?.dispose()
-            exitSub?.dispose()
+            runCatching { dataSub?.dispose() }
+            runCatching { exitSub?.dispose() }
             createdId.get()?.let { id ->
-                scope.launch { runCatching { client?.terminalDispose(id) } }
+                // rememberCoroutineScope() is already cancelled by the time
+                // onDispose runs: launching terminalDispose into it was a silent
+                // no-op, so the engine-side shell leaked on every sheet close.
+                // A dedicated scope outlives the composition just long enough to
+                // deliver terminal.dispose, then cancels itself.
+                val outlivesScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+                outlivesScope.launch {
+                    runCatching { client?.terminalDispose(id) }
+                    outlivesScope.cancel()
+                }
             }
         }
     }

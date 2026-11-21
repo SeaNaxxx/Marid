@@ -30,6 +30,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -65,6 +67,14 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
         }
         if (current is RuntimePhase.EngineReady) return
         if (EngineProcess.isRunning) {
+            // A live client over these stdio streams already exists: creating a
+            // second one would split the stdout bytes between two read loops and
+            // the new client would wait forever for an Initialize that the first
+            // one consumed (the Failed-phase-with-live-engine path).
+            if (rpc != null && _rpcState.value == RpcConnectionState.CONNECTED) {
+                RuntimeBus.setPhase(RuntimePhase.EngineReady)
+                return
+            }
             RuntimeBus.setPhase(RuntimePhase.Provisioned)
             startEngine(ctx)
             return
@@ -112,6 +122,12 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
             startEngine(app)
             return
         }
+        // Pre-shutdown: a client left over from a Failed boot still holds a read
+        // loop on these same stdio streams; two loops would race for frames and
+        // the handshake could be consumed by the stale one.
+        val old = rpc
+        rpc = null
+        old?.shutdown()
         val client = QodexRpcClient(
             streams.stdout,
             streams.stdin,
@@ -128,35 +144,79 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
         client.connect()
     }
 
+    // One restart at a time: transport death fires several signals in quick
+    // succession (stdout EOF, read-loop error, the reconnect timer's
+    // "reconnect requested"), and overlapping restarts used to stop() the
+    // engine a previous restart had just spawned.
+    @Volatile
+    private var restartInFlight = false
+
     // One ChannelClient per engine process: Initialize is sent once at process
     // start, so any transport loss ends in a full engine respawn, never a
     // mid-process client recreation that would hang waiting for a second Initialize.
     private fun restartEngine(reason: String) {
+        if (restartInFlight) {
+            RuntimeBus.append("engine restart already in flight — deduped: $reason")
+            return
+        }
+        restartInFlight = true
         val old = rpc
         rpc = null
-        old?.shutdown()
-        conversation?.dispose()
+        // The engine may already be dead: disposing the conversation sends an
+        // EventDispose frame into a closed pipe (EPIPE) on the caller's thread —
+        // the RPC read loop — which used to abort the restart before it started,
+        // leaving the boot dots on screen forever. Cleanup must never throw.
+        runCatching { old?.shutdown() }
+        runCatching { conversation?.dispose() }
         conversation = null
         v4HandshakeDone = false
         _activeSessionId.value = null
         scope.launch {
-            RuntimeBus.append("engine restart: $reason")
-            EngineProcess.stop()
-            startEngine(app)
+            try {
+                RuntimeBus.append("engine restart: $reason")
+                // The keepalive service guards the engine; the engine is going
+                // away, so its 6h wakelock must go with it (re-armed below).
+                AgentKeepAliveService.stop(app)
+                EngineProcess.stop()
+                if (Provisioner.isProvisioned(app)) {
+                    RuntimeBus.setPhase(RuntimePhase.Provisioned)
+                    EngineProcess.start(app)
+                    AgentKeepAliveService.start(app)
+                    connectRpc()
+                    // The handshake watchdog runs on its own coroutine: the
+                    // restart flag releases now, not 45s later.
+                    scope.launch { watchHandshakeTimeout() }
+                } else {
+                    Provisioner.provision(app)
+                }
+            } catch (t: Throwable) {
+                // A restart failure must surface as Failed — never as eternal dots.
+                RuntimeBus.append("engine restart failed: ${t.message}")
+                FileLogger.append("RPC", "engine restart failed: ${t.message}")
+                RuntimeBus.setPhase(RuntimePhase.Failed("engine", "${t.message} — tap Retry"))
+            } finally {
+                restartInFlight = false
+            }
         }
     }
 
     fun retry() {
         val app = this.app
         _rpcState.value = RpcConnectionState.DISCONNECTED
+        // shutdown (not just null): a leaked client's read loop would hit EOF on
+        // the stopped engine and its reconnect timer would fire a full engine
+        // restart on its own, fighting this retry.
+        val old = rpc
         rpc = null
-        conversation?.dispose()
+        old?.shutdown()
+        runCatching { conversation?.dispose() }
         conversation = null
         v4HandshakeDone = false
         _activeSessionId.value = null
         RuntimeBus.setPhase(RuntimePhase.Idle)
         scope.launch {
             // stop() destroys, sleeps and sweeps /proc — keep it off the main thread.
+            AgentKeepAliveService.stop(app)
             EngineProcess.stop()
             if (Provisioner.isProvisioned(app)) {
                 RuntimeBus.setPhase(RuntimePhase.Provisioned)
@@ -265,6 +325,11 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
 
     private var conversation: Conversation? = null
 
+    // One attach at a time: overlapping attaches (opening a task while the boot
+    // attach is still in flight, double-tap on a task) used to interleave two
+    // sessions' frames into one transcript.
+    private val attachMutex = Mutex()
+
     private fun onEngineConnected() {
         loadModels()
         loadSidebarTasks()
@@ -338,30 +403,36 @@ class QodexAppViewModel(private val app: Application) : ViewModel() {
         sessionWorkspacePath: String,
         sessionId: String,
     ) {
-        currentSessionId = sessionId
-        currentSubscriptionId = null
-        _activeSessionId.value = sessionId
+        attachMutex.withLock {
+            currentSessionId = sessionId
+            currentSubscriptionId = null
+            _activeSessionId.value = sessionId
 
-        ensureHandshake(client)
+            ensureHandshake(client)
 
-        val subscribed = client.subscribeConversationV4(sessionWorkspacePath, sessionId)
-        val subscriptionId = subscribed?.asObjectOrNull()
-            ?.get("ack")?.asObjectOrNull()?.get("subscriptionId").asStringOrNull()
-            ?: subscribed?.asObjectOrNull()?.get("subscriptionId").asStringOrNull()
-        if (subscriptionId == null) {
-            RuntimeBus.append("conversation attach failed: no subscriptionId in ack")
-            return
+            val subscribed = client.subscribeConversationV4(sessionWorkspacePath, sessionId)
+            val subscriptionId = subscribed?.asObjectOrNull()
+                ?.get("ack")?.asObjectOrNull()?.get("subscriptionId").asStringOrNull()
+                ?: subscribed?.asObjectOrNull()?.get("subscriptionId").asStringOrNull()
+            if (subscriptionId == null) {
+                RuntimeBus.append("conversation attach failed: no subscriptionId in ack")
+                return
+            }
+            currentSubscriptionId = subscriptionId
+            RuntimeBus.append("conversation subscribed: session=$sessionId sub=$subscriptionId")
+
+            val assembler = WireFrameAssembler()
+            val projection = ConversationProjection()
+            val frames = client.conversationFrames(sessionWorkspacePath) { wire ->
+                handleWireFrame(assembler, projection, wire)
+            }
+            // Publish-after-dispose inside the lock: the previous conversation
+            // (if any) is torn down before the new one becomes current, so a
+            // racing attach can never leave two live frame handlers writing turns.
+            conversation?.dispose()
+            conversation = Conversation(frames, assembler, projection)
+            loadSidebarTasks()
         }
-        currentSubscriptionId = subscriptionId
-        RuntimeBus.append("conversation subscribed: session=$sessionId sub=$subscriptionId")
-
-        val assembler = WireFrameAssembler()
-        val projection = ConversationProjection()
-        val frames = client.conversationFrames(sessionWorkspacePath) { wire ->
-            handleWireFrame(assembler, projection, wire)
-        }
-        conversation = Conversation(frames, assembler, projection)
-        loadSidebarTasks()
     }
 
     // Standalone-server entries refuse project-less session creation

@@ -85,5 +85,13 @@ class AgentKeepAliveService : Service() {
                 ctx.startService(intent)
             }
         }
+
+        fun stop(ctx: Context) {
+            // The service guards the ENGINE; whoever stops the engine stops it
+            // too, or the partial wakelock runs out its full 6h budget for
+            // nothing (battery drain with no engine behind it). Not running is
+            // fine: stopService is a no-op then.
+            runCatching { ctx.stopService(Intent(ctx, AgentKeepAliveService::class.java)) }
+        }
     }
 }

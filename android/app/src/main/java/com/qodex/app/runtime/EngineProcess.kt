@@ -102,11 +102,17 @@ object EngineProcess {
     // blocking work that must never run on the UI thread (the Retry button
     // used to call this directly and jank the frame).
     suspend fun stop(): Unit = withContext(Dispatchers.IO) {
-        runCatching { process?.destroy() }
+        // Capture ONCE: a concurrent start() can assign a fresh engine between
+        // the destroy() and the destroyForcibly() — stale volatile reads used
+        // to kill and null the NEWLY spawned engine instead of the victim.
+        val victim = process
+        runCatching { victim?.destroy() }
         Thread.sleep(150)
-        runCatching { process?.destroyForcibly() }
-        process = null
-        streams = null
+        runCatching { victim?.destroyForcibly() }
+        if (process === victim) {
+            process = null
+            streams = null
+        }
         // Sweep fallback for detached engine children: kill only node processes
         // whose /proc cmdline is the engine entry (runtime/dist/entry-stdio.js)
         // or the bundled agent CLI (runtime/dist/qodex.cjs). A plain binary-path
